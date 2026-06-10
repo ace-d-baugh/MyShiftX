@@ -76,8 +76,8 @@ CREATE TABLE IF NOT EXISTS shifts (
   is_overtime_approved BOOLEAN DEFAULT FALSE,
   comments TEXT,
   is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  expires_at TIMESTAMPTZ GENERATED ALWAYS AS (start_time - INTERVAL '30 minutes') STORED
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Requests table
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS requests (
   comments TEXT,
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  expires_at TIMESTAMPTZ GENERATED ALWAYS AS ((requested_date + INTERVAL '1 day' - INTERVAL '1 second')::TIMESTAMPTZ) STORED
+  expires_at TIMESTAMPTZ
 );
 
 -- Flags table
@@ -129,6 +129,34 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role_active ON users(role, is_active);
 CREATE INDEX IF NOT EXISTS idx_user_proficiencies_user ON user_proficiencies(user_id, location_id, role_id);
 CREATE INDEX IF NOT EXISTS idx_black_listed_email ON black_listed(email);
+
+-- Function to set expires_at for shifts
+CREATE OR REPLACE FUNCTION set_shift_expires_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.expires_at = NEW.start_time - INTERVAL '30 minutes';
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to set expires_at for requests
+CREATE OR REPLACE FUNCTION set_request_expires_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.expires_at = (NEW.requested_date + INTERVAL '1 day' - INTERVAL '1 second')::TIMESTAMPTZ;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for shifts
+CREATE TRIGGER set_shifts_expires_at
+  BEFORE INSERT ON shifts
+  FOR EACH ROW EXECUTE FUNCTION set_shift_expires_at();
+
+-- Trigger for requests
+CREATE TRIGGER set_requests_expires_at
+  BEFORE INSERT ON requests
+  FOR EACH ROW EXECUTE FUNCTION set_request_expires_at();
 
 -- Auto-update updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
