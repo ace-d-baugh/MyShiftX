@@ -79,7 +79,7 @@ export default function LoginPage() {
             name="email"
             type="email"
             autoComplete="email"
-            className={`input ${errors.email ? 'border-warning' : ''}`}
+            className={`input placeholder:text-text/50 ${errors.email ? 'border-warning' : ''}`}
             placeholder="your@email.com"
             value={form.email}
             onChange={handleChange}
@@ -107,7 +107,7 @@ export default function LoginPage() {
               name="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
-              className={`input pr-10 ${errors.password ? 'border-warning' : ''}`}
+              className={`input pr-10 placeholder:text-text/40 ${errors.password ? 'border-warning' : ''}`}
               placeholder="••••••••"
               value={form.password}
               onChange={handleChange}
