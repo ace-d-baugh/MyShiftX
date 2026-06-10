@@ -114,7 +114,7 @@ export default function ResetPasswordPage() {
               name="confirm_password"
               type={showConfirm ? 'text' : 'password'}
               autoComplete="new-password"
-              className={`input pr-10 ${errors.confirm_password ? 'border-warning' : ''}`}
+              className={`input pr-10 placeholder:text-text/50 ${errors.confirm_password ? 'border-warning' : ''}`}
               placeholder="Repeat your password"
               value={form.confirm_password}
               onChange={handleChange}
