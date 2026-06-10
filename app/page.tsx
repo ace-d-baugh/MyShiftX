@@ -12,7 +12,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between">
           <div className="flex flex-row items-center gap-0 align-baseline">
               <h1 className="font-accent text-5xl md:text-5xl font-bold text-black leading-tight align-middle">WDW</h1>
             <Image
@@ -84,7 +84,7 @@ export default function HomePage() {
               A complete shift management solution designed specifically for Cast Members.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {/* Feature: Shift Board */}
             <div className="card border-l-4 border-l-primary hover:shadow-md transition-shadow">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
@@ -157,7 +157,7 @@ export default function HomePage() {
 
       {/* Properties */}
       <section className="py-16 px-4 bg-primary-light">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-2xl mx-auto text-center">
           <h2 className="font-accent text-2xl md:text-3xl font-bold text-text mb-3">
             All Properties Covered
           </h2>
@@ -182,7 +182,7 @@ export default function HomePage() {
             Ready to Simplify Your Schedule?
           </h2>
           <p className="text-white/80 text-lg mb-8">
-            Join the WDWShiftX community today. Free for all Cast Members.
+            Join the WDWShiftX community today.
           </p>
           <Link
             href="/register"
