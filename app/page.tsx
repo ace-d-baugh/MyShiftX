@@ -13,8 +13,8 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            WDW
+          <div className="flex flex-row items-center gap-0 align-baseline">
+              <h1 className="font-accent text-5xl md:text-5xl font-bold text-black leading-tight align-middle">WDW</h1>
             <Image
               src="/logos/ShiftX-new.svg"
               alt="WDWShiftX Logo"
@@ -197,14 +197,16 @@ export default function HomePage() {
       <footer className="bg-text text-white/60 py-8 px-4 mt-auto">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            WDW
-            <Image
-              src="/logos/ShiftX-new.svg"
-              alt="WDWShiftX"
-              width={100}
-              height={32}
-              className="h-8 w-auto brightness-0 invert opacity-60"
-            />
+            <div className='flex flex-row items-center gap-0 align-baseline'>
+              <h1 className="font-accent text-5xl md:text-5xl font-bold text-white/60 leading-tight align-middle">WDW</h1>
+              <Image
+                src="/logos/ShiftX-new.svg"
+                alt="WDWShiftX"
+                width={100}
+                height={32}
+                className="h-8 w-auto brightness-0 invert opacity-60"
+              />
+            </div>
             <div className="flex gap-6 text-sm">
               <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
               <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
