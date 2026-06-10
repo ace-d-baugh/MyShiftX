@@ -52,8 +52,11 @@ export default function RegisterPage() {
 
     if (!hubValid || !pernerValid) {
       setHubWarning(true)
-      if (!hubValid) setErrors(prev => ({ ...prev, hub_id: 'Invalid HubID format (e.g., BAUGM007)' }))
-      if (!pernerValid) setErrors(prev => ({ ...prev, perner: 'Invalid PERNER format (8 digits)' }))
+      setErrors(prev => ({
+        ...prev,
+        hub_id: 'Invalid HubID or PERNER',
+        perner: 'Invalid HubID or PERNER',
+      }))
       return
     }
 
@@ -124,6 +127,50 @@ export default function RegisterPage() {
       )}
 
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
+        {/* HubID */}
+        <div>
+          <label htmlFor="hub_id" className="block text-sm font-medium text-text mb-1">
+            HubID <span className="text-warning">*</span>
+          </label>
+          <input
+            id="hub_id"
+            name="hub_id"
+            type="text"
+            autoComplete="off"
+            className={`input placeholder:text-text/50 ${errors.hub_id ? 'border-warning' : ''}`}
+            placeholder="HubID"
+            value={form.hub_id}
+            onChange={handleChange}
+          />
+          <p className="mt-1 text-xs text-text/40">Used for verification only — never stored.</p>
+          {errors.hub_id && (
+            <p className="mt-1 text-xs text-warning">{errors.hub_id}</p>
+          )}
+        </div>
+
+        {/* PERNER */}
+        <div>
+          <label htmlFor="perner" className="block text-sm font-medium text-text mb-1">
+            PERNER <span className="text-warning">*</span>
+          </label>
+          <input
+            id="perner"
+            name="perner"
+            type="text"
+            autoComplete="off"
+            inputMode="numeric"
+            className={`input placeholder:text-text/50 ${errors.perner ? 'border-warning' : ''}`}
+            placeholder="Full PERNER"
+            value={form.perner}
+            onChange={handleChange}
+            maxLength={8}
+          />
+          <p className="mt-1 text-xs text-text/40">Used for verification only — never stored.</p>
+          {errors.perner && (
+            <p className="mt-1 text-xs text-warning">{errors.perner}</p>
+          )}
+        </div>
+
         {/* Display Name */}
         <div>
           <label htmlFor="display_name" className="block text-sm font-medium text-text mb-1">
@@ -134,12 +181,12 @@ export default function RegisterPage() {
             name="display_name"
             type="text"
             autoComplete="name"
-            className={`input ${errors.display_name ? 'border-warning' : ''}`}
-            placeholder="Matthew B."
+            className={`input placeholder:text-text/50 ${errors.display_name ? 'border-warning' : ''}`}
+            placeholder="Mickey M."
             value={form.display_name}
             onChange={handleChange}
           />
-          <p className="mt-1 text-xs text-text/40">Format: FirstName LastInitial. (e.g., &ldquo;Matthew B.&rdquo;)</p>
+          <p className="mt-1 text-xs text-text/40">For clarification, please format: First Name Last Initial. (e.g., &ldquo;Mickey M.&rdquo;)</p>
           {errors.display_name && (
             <p className="mt-1 text-xs text-warning">{errors.display_name}</p>
           )}
@@ -155,7 +202,7 @@ export default function RegisterPage() {
             name="email"
             type="email"
             autoComplete="email"
-            className={`input ${errors.email ? 'border-warning' : ''}`}
+            className={`input placeholder:text-text/50 ${errors.email ? 'border-warning' : ''}`}
             placeholder="your@email.com"
             value={form.email}
             onChange={handleChange}
@@ -176,7 +223,7 @@ export default function RegisterPage() {
               name="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
-              className={`input pr-10 ${errors.password ? 'border-warning' : ''}`}
+              className={`input pr-10 placeholder:text-text/50 ${errors.password ? 'border-warning' : ''}`}
               placeholder="Min. 8 characters"
               value={form.password}
               onChange={handleChange}
@@ -195,57 +242,13 @@ export default function RegisterPage() {
           )}
         </div>
 
-        {/* HubID */}
-        <div>
-          <label htmlFor="hub_id" className="block text-sm font-medium text-text mb-1">
-            HubID <span className="text-warning">*</span>
-          </label>
-          <input
-            id="hub_id"
-            name="hub_id"
-            type="text"
-            autoComplete="off"
-            className={`input ${errors.hub_id ? 'border-warning' : ''}`}
-            placeholder="BAUGM007"
-            value={form.hub_id}
-            onChange={handleChange}
-          />
-          <p className="mt-1 text-xs text-text/40">5 letters + 3 digits. Used for verification only — never stored.</p>
-          {errors.hub_id && (
-            <p className="mt-1 text-xs text-warning">{errors.hub_id}</p>
-          )}
-        </div>
-
-        {/* PERNER */}
-        <div>
-          <label htmlFor="perner" className="block text-sm font-medium text-text mb-1">
-            PERNER <span className="text-warning">*</span>
-          </label>
-          <input
-            id="perner"
-            name="perner"
-            type="text"
-            autoComplete="off"
-            inputMode="numeric"
-            className={`input ${errors.perner ? 'border-warning' : ''}`}
-            placeholder="12345678"
-            value={form.perner}
-            onChange={handleChange}
-            maxLength={8}
-          />
-          <p className="mt-1 text-xs text-text/40">8-digit employee number. Used for verification only — never stored.</p>
-          {errors.perner && (
-            <p className="mt-1 text-xs text-warning">{errors.perner}</p>
-          )}
-        </div>
-
         {/* Terms */}
         <div className="flex items-start gap-3">
           <input
             id="terms_accepted"
             name="terms_accepted"
             type="checkbox"
-            className="mt-1 h-4 w-4 rounded border-border text-primary min-h-0 min-w-0"
+            className="mt-1 rounded border-border text-primary h-5 w-5"
             checked={form.terms_accepted}
             onChange={handleChange}
           />
