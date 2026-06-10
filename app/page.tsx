@@ -14,6 +14,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
+            WDW
             <Image
               src="/logos/ShiftX-new.svg"
               alt="WDWShiftX Logo"
@@ -53,7 +54,7 @@ export default function HomePage() {
           </h1>
           <p className="text-lg md:text-xl text-text/70 max-w-2xl mx-auto mb-10">
             WDWShiftX is the fast, safe, and CM-verified platform for trading, giving away,
-            and requesting shifts at Walt Disney World. No more group chat chaos.
+            and requesting shifts at Walt Disney World. Ditch the chaos.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -77,7 +78,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="font-accent text-3xl md:text-4xl font-bold text-text mb-4">
-              Everything You Need
+              Shift Happens. We Handle It.
             </h2>
             <p className="text-text/60 text-lg max-w-xl mx-auto">
               A complete shift management solution designed specifically for Cast Members.
@@ -135,7 +136,7 @@ export default function HomePage() {
               </div>
               <h3 className="font-accent text-xl font-bold text-text mb-2">CM Verification</h3>
               <p className="text-text/60 text-sm leading-relaxed">
-                HubID and PERNER verified at registration — never stored. Only real
+                Cast Member Credentials verified at registration — never stored. Only real
                 Cast Members can access the platform.
               </p>
             </div>
@@ -158,11 +159,11 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-primary-light">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-accent text-2xl md:text-3xl font-bold text-text mb-3">
-            All Six Properties Covered
+            All Properties Covered
           </h2>
           <p className="text-text/60 mb-8">Find shifts across every park and resort area.</p>
           <div className="flex flex-wrap justify-center gap-3">
-            {['Magic Kingdom', 'EPCOT', 'Hollywood Studios', 'Animal Kingdom', 'Disney Springs', 'Resorts'].map((p) => (
+            {['Magic Kingdom', 'EPCOT', 'Hollywood Studios', 'Animal Kingdom', 'Disney Springs', 'Resorts', 'WaterParks'].map((p) => (
               <span
                 key={p}
                 className="bg-white border border-primary/20 text-text rounded-full px-5 py-2 text-sm font-medium shadow-sm"
@@ -196,6 +197,7 @@ export default function HomePage() {
       <footer className="bg-text text-white/60 py-8 px-4 mt-auto">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            WDW
             <Image
               src="/logos/ShiftX-new.svg"
               alt="WDWShiftX"
