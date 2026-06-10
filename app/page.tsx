@@ -14,9 +14,9 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between">
           <div className="flex flex-row items-center gap-0 align-baseline">
-              <h1 className="font-accent text-5xl md:text-5xl font-bold text-black leading-tight align-middle">WDW</h1>
+              <h1 className="font-accent text-5xl md:text-5xl font-bold text-primary leading-tight align-middle">WDW</h1>
             <Image
-              src="/logos/ShiftX-new.svg"
+              src="/logos/ShiftX-logo.svg"
               alt="WDWShiftX Logo"
               width={120}
               height={40}
