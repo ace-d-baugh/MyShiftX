@@ -13,8 +13,8 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between">
-          <div className="flex flex-row items-center gap-0 align-baseline">
-              <h1 className="font-accent text-5xl md:text-5xl font-bold text-primary leading-tight align-middle">WDW</h1>
+          <Link href="/board"className="flex flex-row items-center gap-0 align-baseline">
+            <h1 className="font-accent text-5xl md:text-5xl font-bold text-primary leading-tight align-middle">WDW</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="WDWShiftX Logo"
@@ -23,7 +23,7 @@ export default function HomePage() {
               priority
               className="h-10 w-auto"
             />
-          </div>
+          </Link>
           <nav className="flex items-center gap-3">
             <Link
               href="/login"

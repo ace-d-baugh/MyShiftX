@@ -57,16 +57,17 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
       <header className="hidden md:flex sticky top-0 z-50 bg-white border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/board" className="flex items-center min-h-0 min-w-0">
+<Link href="/board"className="flex flex-row items-center gap-0 align-baseline">
+            <h1 className="font-accent text-5xl md:text-5xl font-bold text-primary leading-tight align-middle">WDW</h1>
             <Image
-              src="/logos/ShiftX-new.svg"
-              alt="WDWShiftX"
+              src="/logos/ShiftX-logo.svg"
+              alt="WDWShiftX Logo"
               width={120}
               height={40}
-              className="h-9 w-auto"
+              priority
+              className="h-10 w-auto"
             />
           </Link>
-
           {/* Nav Links */}
           <nav className="flex items-center gap-1">
             {visibleItems.map(({ href, label, icon: Icon }) => (
@@ -104,16 +105,17 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
       {/* Mobile top bar */}
       <header className="md:hidden sticky top-0 z-50 bg-white border-b border-border shadow-sm">
         <div className="px-4 flex items-center justify-between h-14">
-          <Link href="/board" className="min-h-0 min-w-0">
+          <Link href="/board"className="flex flex-row items-center gap-0 align-baseline">
+            <h1 className="font-accent text-4xl md:text-4xl font-bold text-primary leading-tight align-middle">WDW</h1>
             <Image
-              src="/logos/ShiftX-new.svg"
-              alt="WDWShiftX"
+              src="/logos/ShiftX-logo.svg"
+              alt="WDWShiftX Logo"
               width={100}
               height={32}
-              className="h-8 w-auto"
+              priority
+              className="h-7 w-auto"
             />
-          </Link>
-          <button
+          </Link>          <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
             aria-label="Toggle menu"
