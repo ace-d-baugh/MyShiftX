@@ -95,6 +95,22 @@ export default function RegisterPage() {
         return
       }
 
+      if (data.user) {
+        // Insert user profile into public.users table
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert({
+            email: form.email,
+            display_name: form.display_name,
+            role_id: null,
+          } as any)
+
+        if (insertError) {
+          setServerError('Failed to create user profile: ' + insertError.message)
+          return
+        }
+      }
+
       if (data.user && !data.session) {
         router.push('/verify-email')
       } else {
