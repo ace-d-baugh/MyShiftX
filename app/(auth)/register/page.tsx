@@ -1,4 +1,3 @@
-disabled={loading}
   'use client'
 
 import { useState } from 'react'
