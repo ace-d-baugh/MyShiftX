@@ -5,10 +5,6 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export const metadata = {
-  title: 'Verify Email – WDWShiftX',
-}
-
 export default function VerifyEmailPage() {
     const router = useRouter()
     const supabase = createClient()
@@ -19,7 +15,6 @@ export default function VerifyEmailPage() {
 
                   if (authError || !user?.email_confirmed_at) return
 
-                  // User is verified, get the Cast role
                   const { data: castRole, error: roleError } = await supabase
                     .from('roles')
                     .select('id')
@@ -28,10 +23,9 @@ export default function VerifyEmailPage() {
 
                   if (roleError || !castRole) return
 
-                  // Update user role to Cast
                   const { error: updateError } = await supabase
                     .from('users')
-                    .update({ role_id: castRole.id })
+                    .update({ role_id: (castRole as { id: string }).id })
                     .eq('id', user.id)
 
                   if (!updateError) {

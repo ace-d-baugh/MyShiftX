@@ -14,11 +14,10 @@ export interface Database {
           display_name: string
           email: string
           email_verified: boolean
-          password_hash: string
           phone_number: string | null
           notify_via_email: boolean
           notify_via_sms: boolean
-          role: UserRole
+          role_id: string
           is_active: boolean
           last_login_at: string | null
           created_at: string
@@ -29,11 +28,10 @@ export interface Database {
           display_name: string
           email: string
           email_verified?: boolean
-          password_hash: string
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          role?: UserRole
+          role_id: string
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -44,17 +42,24 @@ export interface Database {
           display_name?: string
           email?: string
           email_verified?: boolean
-          password_hash?: string
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          role?: UserRole
+          role_id?: string
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "users_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       properties: {
         Row: { id: string; name: string; created_at: string }
