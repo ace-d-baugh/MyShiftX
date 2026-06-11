@@ -106,15 +106,18 @@ export default function RegisterPage() {
                   .single()
 
                 if (roleError || !guestRole) {
-                            setServerError('Failed to assign Guest role')
-                            return
+                  setServerError('Failed to assign Guest role')
+                  return
                 }
+
+        const guestRoleId = (guestRole as { id: string }).id
+
         const { error: insertError } = await supabase
           .from('users')
           .insert({
             email: form.email,
             display_name: form.display_name,
-            role_id: guestRole.id,
+            role_id: guestRoleId,
           } as any)
 
         if (insertError) {
