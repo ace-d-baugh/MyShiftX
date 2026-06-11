@@ -1,11 +1,47 @@
-import Link from 'next/link'
+'use client'
+  import Link from 'next/link'
 import { Mail } from 'lucide-react'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export const metadata = {
   title: 'Verify Email – WDWShiftX',
 }
 
 export default function VerifyEmailPage() {
+    const router = useRouter()
+    const supabase = createClient()
+
+    useEffect(() => {
+          const handleEmailVerification = async () => {
+                  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+                  if (authError || !user?.email_confirmed_at) return
+
+                  // User is verified, get the Cast role
+                  const { data: castRole, error: roleError } = await supabase
+                    .from('roles')
+                    .select('id')
+                    .eq('name', 'Cast')
+                    .single()
+
+                  if (roleError || !castRole) return
+
+                  // Update user role to Cast
+                  const { error: updateError } = await supabase
+                    .from('users')
+                    .update({ role_id: castRole.id })
+                    .eq('id', user.id)
+
+                  if (!updateError) {
+                            router.push('/board')
+                            router.refresh()
+                  }
+          }
+
+          handleEmailVerification()
+    }, [])
   return (
     <div className="card shadow-lg text-center">
       <div className="w-14 h-14 bg-info/20 rounded-full flex items-center justify-center mx-auto mb-4">
