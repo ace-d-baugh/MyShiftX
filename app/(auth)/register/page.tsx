@@ -1,4 +1,5 @@
-'use client'
+disabled={loading}
+  'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -300,8 +301,8 @@ export default function RegisterPage() {
 
         <button
           type="submit"
-          disabled={loading}
-          className="btn btn-primary w-full gap-2"
+          disabled={loading || !form.terms_accepted}
+          className={`btn btn-primary w-full gap-2 ${!form.terms_accepted ? 'opacity-40 cursor-not-allowed' : ''}`}
         >
           {loading ? (
             <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
