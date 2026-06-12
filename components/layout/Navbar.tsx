@@ -46,7 +46,6 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/login')
-    router.refresh()
   }
 
   const isActive = (href: string) => pathname.startsWith(href)
@@ -54,11 +53,11 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
   return (
     <>
       {/* Desktop top navbar */}
-      <header className="hidden md:flex sticky top-0 z-50 bg-white border-b border-border shadow-sm">
+      <header className="hidden md:block sticky top-0 z-50 bg-white border-b border-border shadow-sm">
+        {/* Top bar: Logo + User/Logout */}
         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
-          {/* Logo */}
-<Link href="/board"className="flex flex-row items-center gap-0 align-baseline">
-            <h1 className="font-accent text-5xl md:text-5xl font-bold text-primary leading-tight align-middle">WDW</h1>
+          <Link href="/board" className="flex flex-row items-center gap-0 align-baseline">
+            <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">WDW</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="WDWShiftX Logo"
@@ -68,26 +67,7 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
               className="h-10 w-auto"
             />
           </Link>
-          {/* Nav Links */}
-          <nav className="flex items-center gap-1">
-            {visibleItems.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors min-h-0 min-w-0',
-                  isActive(href)
-                    ? 'bg-primary-light text-primary'
-                    : 'text-text/60 hover:text-text hover:bg-primary-light/50'
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                {label}
-              </Link>
-            ))}
-          </nav>
 
-          {/* User + Logout */}
           <div className="flex items-center gap-3">
             <span className="text-sm text-text/60 font-medium">{displayName}</span>
             <button
@@ -98,6 +78,29 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
               <LogOut className="w-4 h-4" />
               Log Out
             </button>
+          </div>
+        </div>
+
+        {/* Sub-nav bar: Nav Links */}
+        <div className="border-t border-border bg-white">
+          <div className="max-w-7xl mx-auto px-4">
+            <nav className="flex items-center justify-center gap-1 h-10">
+              {visibleItems.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-0 min-w-0',
+                    isActive(href)
+                      ? 'bg-primary-light text-primary'
+                      : 'text-text/60 hover:text-text hover:bg-primary-light/50'
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </Link>
+              ))}
+            </nav>
           </div>
         </div>
       </header>

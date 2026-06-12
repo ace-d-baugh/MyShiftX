@@ -1,44 +1,35 @@
 'use client'
-  import Link from 'next/link'
+import Link from 'next/link'
 import { Mail } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function VerifyEmailPage() {
-    const router = useRouter()
-    const supabase = createClient()
+  const router = useRouter()
+  const supabase = useMemo(() => createClient(), [])
+  const hasNavigated = useRef(false)
 
-    useEffect(() => {
-          const handleEmailVerification = async () => {
-                  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  useEffect(() => {
+    const handleEmailVerification = async () => {
+      if (hasNavigated.current) return
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user?.email_confirmed_at) return
 
-                  if (authError || !user?.email_confirmed_at) return
+      hasNavigated.current = true
+      await supabase
+        .from('users')
+        .update({ email_verified: true })
+        .eq('id', user.id)
 
-                  const { data: castRole, error: roleError } = await supabase
-                    .from('roles')
-                    .select('id')
-                    .eq('name', 'Cast')
-                    .single()
+      router.push('/board')
+    }
 
-                  if (roleError || !castRole) return
-
-                  const { error: updateError } = await supabase
-                    .from('users')
-                    .update({ role_id: (castRole as { id: string }).id })
-                    .eq('id', user.id)
-
-                  if (!updateError) {
-                            router.push('/board')
-                            router.refresh()
-                  }
-          }
-
-          handleEmailVerification()
-    }, [])
+    handleEmailVerification()
+  }, [])
   return (
-    <div className="card shadow-lg text-center">
-      <div className="w-14 h-14 bg-info/20 rounded-full flex items-center justify-center mx-auto mb-4">
+    <div className="card shadow-lg text-center animate-auth-card-in">
+      <div className="w-14 h-14 bg-info/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pop-in" style={{ animationDelay: '200ms' }}>
         <Mail className="w-7 h-7 text-info" />
       </div>
       <h1 className="font-accent text-2xl font-bold text-text mb-2">Check Your Email</h1>

@@ -11,11 +11,11 @@ type ProfileRow = { role: UserRole } | null
 
 export default async function FlagsPage() {
   const supabase = createServerClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: userProfile } = await supabase
-    .from('users').select('role').eq('id', session.user.id).single() as unknown as { data: ProfileRow }
+    .from('users').select('role').eq('id', user.id).single() as unknown as { data: ProfileRow }
 
   if (!userProfile || !['leader', 'admin'].includes(userProfile.role)) {
     redirect('/board')
@@ -29,6 +29,6 @@ export default async function FlagsPage() {
 
   return <FlagsClient
     flags={(flags ?? []) as { id: string; target_type: string; target_id: string; reason: string; status: string; created_at: string; users: { display_name: string } | null }[]}
-    resolverId={session.user.id}
+    resolverId={user.id}
   />
 }

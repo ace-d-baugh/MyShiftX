@@ -11,11 +11,11 @@ type ProfileRow = { role: UserRole } | null
 
 export default async function AdminPage() {
   const supabase = createServerClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: userProfile } = await supabase
-    .from('users').select('role').eq('id', session.user.id).single() as unknown as { data: ProfileRow }
+    .from('users').select('role').eq('id', user.id).single() as unknown as { data: ProfileRow }
 
   if (!userProfile || userProfile.role !== 'admin') {
     redirect('/board')
@@ -34,7 +34,7 @@ export default async function AdminPage() {
       locations={(locationsRes.data ?? []) as { id: string; name: string; property_id: string; is_approved: boolean; created_at: string; properties: { name: string } | null }[]}
       roles={(rolesRes.data ?? []) as { id: string; name: string; is_approved: boolean; created_at: string }[]}
       users={(usersRes.data ?? []) as { id: string; display_name: string; email: string; role: UserRole; is_active: boolean; created_at: string }[]}
-      adminId={session.user.id}
+      adminId={user.id}
     />
   )
 }

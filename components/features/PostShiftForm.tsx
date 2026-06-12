@@ -117,7 +117,6 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
       if (error) throw error
       onSuccess?.()
       router.push('/board')
-      router.refresh()
     } catch (err: unknown) {
       setServerError(err instanceof Error ? err.message : 'Failed to post shift.')
     } finally {

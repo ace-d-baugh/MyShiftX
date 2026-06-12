@@ -50,7 +50,6 @@ export default function LoginPage() {
         return
       }
       router.push('/board')
-      router.refresh()
     } catch {
       setServerError('An unexpected error occurred. Please try again.')
     } finally {
@@ -59,12 +58,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="card shadow-lg">
+    <div className="card shadow-lg animate-auth-card-in">
       <h1 className="font-accent text-2xl font-bold text-text mb-1">Welcome Back</h1>
       <p className="text-text/60 text-sm mb-6">Log in to access the shift board.</p>
 
       {serverError && (
-        <div className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm">
+        <div key={serverError} className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm animate-shake">
           {serverError}
         </div>
       )}

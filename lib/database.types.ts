@@ -17,7 +17,7 @@ export interface Database {
           phone_number: string | null
           notify_via_email: boolean
           notify_via_sms: boolean
-          role_id: string
+          role: UserRole
           is_active: boolean
           last_login_at: string | null
           created_at: string
@@ -31,7 +31,7 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          role_id: string
+          role?: UserRole
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -45,21 +45,13 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          role_id?: string
+          role?: UserRole
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "users_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       properties: {
         Row: { id: string; name: string; created_at: string }

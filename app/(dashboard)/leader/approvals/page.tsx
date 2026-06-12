@@ -11,11 +11,11 @@ type ProfileRow = { role: UserRole } | null
 
 export default async function ApprovalsPage() {
   const supabase = createServerClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: userProfile } = await supabase
-    .from('users').select('role').eq('id', session.user.id).single() as unknown as { data: ProfileRow }
+    .from('users').select('role').eq('id', user.id).single() as unknown as { data: ProfileRow }
 
   if (!userProfile || !['leader', 'admin'].includes(userProfile.role)) {
     redirect('/board')
@@ -37,7 +37,7 @@ export default async function ApprovalsPage() {
     <ApprovalsClient
       pendingLocations={(pendingLocations ?? []) as { id: string; name: string; property_id: string; created_at: string; properties: { name: string } | null; users: { display_name: string } | null }[]}
       pendingRoles={(pendingRoles ?? []) as { id: string; name: string; created_at: string; users: { display_name: string } | null }[]}
-      approverId={session.user.id}
+      approverId={user.id}
     />
   )
 }

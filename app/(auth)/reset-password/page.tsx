@@ -56,8 +56,8 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="card shadow-lg text-center">
-        <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="card shadow-lg text-center animate-auth-card-in">
+        <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pop-in" style={{ animationDelay: '200ms' }}>
           <CheckCircle className="w-6 h-6 text-success" />
         </div>
         <h1 className="font-accent text-2xl font-bold text-text mb-2">Password Updated!</h1>
@@ -67,12 +67,12 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="card shadow-lg">
+    <div className="card shadow-lg animate-auth-card-in">
       <h1 className="font-accent text-2xl font-bold text-text mb-1">Set New Password</h1>
       <p className="text-text/60 text-sm mb-6">Choose a strong new password for your account.</p>
 
       {serverError && (
-        <div className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm">
+        <div key={serverError} className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm animate-shake">
           {serverError}
         </div>
       )}

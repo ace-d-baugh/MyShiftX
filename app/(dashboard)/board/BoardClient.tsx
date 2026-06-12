@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { Plus, RefreshCw, Inbox } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -26,7 +26,7 @@ interface BoardClientProps {
 type Tab = 'offers' | 'requests'
 
 export function BoardClient({ userId, displayName, userRole, properties, locations, roles }: BoardClientProps) {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [tab, setTab] = useState<Tab>('offers')
   const [shifts, setShifts] = useState<ShiftData[]>([])
   const [requests, setRequests] = useState<RequestData[]>([])

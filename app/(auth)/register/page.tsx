@@ -78,14 +78,13 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      // NOTE: HubID and PERNER are validated above but NEVER sent to the server
+      // NOTE: HubID and PERNER are validated above but NEVER sent to the server.
+      // The public.users profile row is created automatically by a DB trigger on auth.users.
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
         options: {
-          data: {
-            display_name: form.display_name,
-          },
+          data: { display_name: form.display_name },
           emailRedirectTo: `${window.location.origin}/verify-email`,
         },
       })
@@ -95,44 +94,12 @@ export default function RegisterPage() {
         return
       }
 
-      if (data.user) {
-        // Insert user profile into public.users table
-
-                // Get the Guest role
-                const { data: guestRole, error: roleError } = await supabase
-                  .from('roles')
-                  .select('id')
-                  .eq('name', 'Guest')
-                  .single()
-
-                if (roleError || !guestRole) {
-                  setServerError('Failed to assign Guest role')
-                  return
-                }
-
-        const guestRoleId = (guestRole as { id: string }).id
-
-        const { error: insertError } = await supabase
-          .from('users')
-          .insert({
-            email: form.email,
-            display_name: form.display_name,
-            role_id: guestRoleId,
-          } as any)
-
-        if (insertError) {
-          setServerError('Failed to create user profile: ' + insertError.message)
-          return
-        }
-      }
-
       if (data.user && !data.session) {
         router.push('/verify-email')
       } else {
         router.push('/board')
-        router.refresh()
       }
-    } catch (err) {
+    } catch {
       setServerError('An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -140,19 +107,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="card shadow-lg">
+    <div className="card shadow-lg animate-auth-card-in">
       <h1 className="font-accent text-2xl font-bold text-text mb-1">Create Account</h1>
       <p className="text-text/60 text-sm mb-6">Join the WDWShiftX Cast Member community.</p>
 
       {hubWarning && (
-        <div className="mb-4 p-3 rounded-md bg-accent/20 border border-accent text-text text-sm flex gap-2">
+        <div className="mb-4 p-3 rounded-md bg-accent/20 border border-accent text-text text-sm flex gap-2 animate-shake">
           <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
           <span>HubID or PERNER verification failed. Please check your credentials. These are never stored.</span>
         </div>
       )}
 
       {serverError && (
-        <div className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm">
+        <div key={serverError} className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm animate-shake">
           {serverError}
         </div>
       )}

@@ -4,6 +4,8 @@ import { ArrowLeft } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { PostRequestForm } from '@/components/features/PostRequestForm'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Post a Request – WDWShiftX',
 }
@@ -12,13 +14,13 @@ type ProfileRow = { id: string; display_name: string } | null
 
 export default async function NewRequestPage() {
   const supabase = createServerClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: userProfile } = await supabase
     .from('users')
     .select('id, display_name')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single() as unknown as { data: ProfileRow }
 
   return (
@@ -32,7 +34,7 @@ export default async function NewRequestPage() {
       </div>
       <div className="card shadow-sm">
         <PostRequestForm
-          userId={session.user.id}
+          userId={user.id}
           displayName={userProfile?.display_name ?? 'Cast Member'}
         />
       </div>

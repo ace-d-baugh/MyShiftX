@@ -42,8 +42,8 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="card shadow-lg text-center">
-        <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="card shadow-lg text-center animate-auth-card-in">
+        <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pop-in" style={{ animationDelay: '200ms' }}>
           <CheckCircle className="w-6 h-6 text-success" />
         </div>
         <h1 className="font-accent text-2xl font-bold text-text mb-2">Check Your Email</h1>
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="card shadow-lg">
+    <div className="card shadow-lg animate-auth-card-in">
       <Link href="/login" className="inline-flex items-center gap-1 text-sm text-text/60 hover:text-text mb-4 min-h-0 min-w-0">
         <ArrowLeft className="w-4 h-4" /> Back to Login
       </Link>
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
       </p>
 
       {error && (
-        <div className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm">
+        <div key={error} className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm animate-shake">
           {error}
         </div>
       )}
