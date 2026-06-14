@@ -1,6 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export type UserRole = 'guest' | 'cast' | 'copro' | 'leader' | 'admin'
+export type UserType = 'Guest' | 'Cast' | 'CoPro' | 'Leader' | 'Admin'
 export type FlagStatus = 'pending' | 'resolved' | 'dismissed'
 export type FlagTargetType = 'post' | 'user'
 export type PreferredTime = 'morning' | 'afternoon' | 'evening' | 'late'
@@ -8,6 +8,12 @@ export type PreferredTime = 'morning' | 'afternoon' | 'evening' | 'late'
 export interface Database {
   public: {
     Tables: {
+      user_types: {
+        Row: { id: string; name: UserType; created_at: string }
+        Insert: { id?: string; name: UserType; created_at?: string }
+        Update: { id?: string; name?: UserType; created_at?: string }
+        Relationships: []
+      }
       users: {
         Row: {
           id: string
@@ -17,7 +23,7 @@ export interface Database {
           phone_number: string | null
           notify_via_email: boolean
           notify_via_sms: boolean
-          role: UserRole
+          user_type: UserType
           is_active: boolean
           last_login_at: string | null
           created_at: string
@@ -31,7 +37,7 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          role?: UserRole
+          user_type?: UserType
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -45,7 +51,7 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          role?: UserRole
+          user_type?: UserType
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string

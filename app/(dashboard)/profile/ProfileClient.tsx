@@ -8,7 +8,7 @@ import { ProficiencySelector } from '@/components/features/ProficiencySelector'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { displayNameRegex } from '@/lib/validations/auth'
-import type { UserRole } from '@/lib/database.types'
+import type { UserType } from '@/lib/database.types'
 
 interface UserProfile {
   id: string
@@ -17,7 +17,7 @@ interface UserProfile {
   phone_number: string | null
   notify_via_email: boolean
   notify_via_sms: boolean
-  role: UserRole
+  user_type: UserType
   is_active: boolean
   created_at: string
 }
@@ -94,8 +94,8 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
     )
   }
 
-  const roleVariant: Record<UserRole, 'cast' | 'copro' | 'leader' | 'admin'> = {
-    cast: 'cast', copro: 'copro', leader: 'leader', admin: 'admin'
+  const userTypeVariant: Record<UserType, 'guest' | 'cast' | 'copro' | 'leader' | 'admin'> = {
+    Guest: 'guest', Cast: 'cast', CoPro: 'copro', Leader: 'leader', Admin: 'admin',
   }
 
   return (
@@ -115,8 +115,8 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
             <h2 className="font-accent font-bold text-text">Account Info</h2>
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-xs text-text/50">{user.email}</span>
-              <Badge variant={roleVariant[user.role]} className="text-xs py-0">
-                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              <Badge variant={userTypeVariant[user.user_type]} className="text-xs py-0">
+                {user.user_type}
               </Badge>
             </div>
           </div>

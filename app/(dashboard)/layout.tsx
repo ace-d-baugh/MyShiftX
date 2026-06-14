@@ -3,9 +3,9 @@ import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
-import type { UserRole } from '@/lib/database.types'
+import type { UserType } from '@/lib/database.types'
 
-type UserProfileRow = { id: string; display_name: string; role: UserRole; is_active: boolean } | null
+type UserProfileRow = { id: string; display_name: string; user_type: UserType; is_active: boolean } | null
 
 export default async function DashboardLayout({
   children,
@@ -30,7 +30,7 @@ export default async function DashboardLayout({
 
   const { data: userProfile } = await supabase
     .from('users')
-    .select('id, display_name, role, is_active')
+    .select('id, display_name, user_type, is_active')
     .eq('id', user.id)
     .single() as unknown as { data: UserProfileRow }
 
@@ -38,11 +38,11 @@ export default async function DashboardLayout({
     redirect('/login?reason=deactivated')
   }
 
-  if (!userProfile || userProfile.role === 'guest') {
+  if (!userProfile || userProfile.user_type === 'Guest') {
     redirect('/verify-email')
   }
 
-  const userRole = userProfile?.role ?? 'cast'
+  const userRole = userProfile?.user_type ?? 'Cast'
   const displayName = userProfile?.display_name ?? user.email ?? 'Cast Member'
 
   return (

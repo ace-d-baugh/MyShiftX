@@ -8,39 +8,83 @@ import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
 import { RequestCard, type RequestData } from '@/components/features/RequestCard'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { cn } from '@/lib/utils'
-import type { UserRole } from '@/lib/database.types'
+import type { UserType } from '@/lib/database.types'
 
-interface Property { id: string; name: string }
-interface Location { id: string; name: string; property_id: string }
-interface Role { id: string; name: string }
+interface UniqueItem { id: string; name: string }
+interface UniqueLocation { id: string; name: string; property_id: string }
+interface ProficiencyEntry { role_id: string; location_id: string; property_id: string }
 
 interface BoardClientProps {
   userId: string
   displayName: string
-  userRole: UserRole
-  properties: Property[]
-  locations: Location[]
-  roles: Role[]
+  userRole: UserType
+  uniqueRoles: UniqueItem[]
+  uniqueProperties: UniqueItem[]
+  uniqueLocations: UniqueLocation[]
+  proficiencyEntries: ProficiencyEntry[] // reserved for future use (e.g. RLS validation)
+  hasProficiencies: boolean
 }
 
 type Tab = 'offers' | 'requests'
 
-export function BoardClient({ userId, displayName, userRole, properties, locations, roles }: BoardClientProps) {
+export function BoardClient({
+  userId,
+  displayName,
+  userRole: _userRole,
+  uniqueRoles,
+  uniqueProperties,
+  uniqueLocations,
+  proficiencyEntries: _proficiencyEntries,
+  hasProficiencies,
+}: BoardClientProps) {
   const supabase = useMemo(() => createClient(), [])
   const [tab, setTab] = useState<Tab>('offers')
   const [shifts, setShifts] = useState<ShiftData[]>([])
   const [requests, setRequests] = useState<RequestData[]>([])
   const [loading, setLoading] = useState(true)
-  const [filterProperty, setFilterProperty] = useState('')
-  const [filterLocation, setFilterLocation] = useState('')
-  const [filterRole, setFilterRole] = useState('')
 
-  const filteredLocations = locations.filter(l => !filterProperty || l.property_id === filterProperty)
+  // Filter state — default: all proficiency IDs checked
+  const [selectedRoleIds, setSelectedRoleIds] = useState<Set<string>>(
+    () => new Set(uniqueRoles.map(r => r.id))
+  )
+  const [scopePropertyId, setScopePropertyId] = useState('')
+  const [selectedLocationIds, setSelectedLocationIds] = useState<Set<string>>(
+    () => new Set(uniqueLocations.map(l => l.id))
+  )
+
+  // Locations visible in the filter panel (scoped by selected property)
+  const visibleFilterLocations = scopePropertyId
+    ? uniqueLocations.filter(l => l.property_id === scopePropertyId)
+    : uniqueLocations
+
+  const toggleRole = (id: string) => {
+    setSelectedRoleIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  const toggleLocation = (id: string) => {
+    setSelectedLocationIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
 
   const loadShifts = useCallback(async () => {
+    if (!hasProficiencies) { setLoading(false); return }
     setLoading(true)
     try {
-      let query = supabase
+      const roleIds = [...selectedRoleIds]
+      const locationIds = [...selectedLocationIds]
+      if (roleIds.length === 0 || locationIds.length === 0) {
+        setShifts([])
+        return
+      }
+
+      const { data, error } = await supabase
         .from('shifts')
         .select(`
           id, shift_title, created_by, user_id, start_time, end_time,
@@ -49,13 +93,10 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
         `)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
+        .in('role_id', roleIds)
+        .in('location_id', locationIds)
         .order('start_time', { ascending: true })
 
-      if (filterProperty) query = query.eq('property_id', filterProperty)
-      if (filterLocation) query = query.eq('location_id', filterLocation)
-      if (filterRole) query = query.eq('role_id', filterRole)
-
-      const { data, error } = await query
       if (error) throw error
 
       setShifts(
@@ -81,12 +122,20 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
     } finally {
       setLoading(false)
     }
-  }, [filterProperty, filterLocation, filterRole])
+  }, [hasProficiencies, selectedRoleIds, selectedLocationIds])
 
   const loadRequests = useCallback(async () => {
+    if (!hasProficiencies) { setLoading(false); return }
     setLoading(true)
     try {
-      let query = supabase
+      const roleIds = [...selectedRoleIds]
+      const locationIds = [...selectedLocationIds]
+      if (roleIds.length === 0 || locationIds.length === 0) {
+        setRequests([])
+        return
+      }
+
+      const { data, error } = await supabase
         .from('requests')
         .select(`
           id, created_by, user_id, preferred_times, requested_date,
@@ -95,13 +144,10 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
         `)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
+        .in('role_id', roleIds)
+        .in('location_id', locationIds)
         .order('requested_date', { ascending: true })
 
-      if (filterProperty) query = query.eq('property_id', filterProperty)
-      if (filterLocation) query = query.eq('location_id', filterLocation)
-      if (filterRole) query = query.eq('role_id', filterRole)
-
-      const { data, error } = await query
       if (error) throw error
 
       setRequests(
@@ -123,7 +169,7 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
     } finally {
       setLoading(false)
     }
-  }, [filterProperty, filterLocation, filterRole])
+  }, [hasProficiencies, selectedRoleIds, selectedLocationIds])
 
   useEffect(() => {
     if (tab === 'offers') loadShifts()
@@ -161,13 +207,15 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
           >
             <RefreshCw className="w-4 h-4" />
           </button>
-          <Link
-            href={tab === 'offers' ? '/board/new-shift' : '/board/new-request'}
-            className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10"
-          >
-            <Plus className="w-4 h-4" />
-            {tab === 'offers' ? 'Post Shift' : 'Post Request'}
-          </Link>
+          {hasProficiencies && (
+            <Link
+              href={tab === 'offers' ? '/board/new-shift' : '/board/new-request'}
+              className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10"
+            >
+              <Plus className="w-4 h-4" />
+              {tab === 'offers' ? 'Post Shift' : 'Post Request'}
+            </Link>
+          )}
         </div>
       </div>
 
@@ -189,43 +237,65 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 p-4 bg-primary-light/40 rounded-lg">
-        <div>
-          <label className="block text-xs font-medium text-text/60 mb-1">Property</label>
-          <select
-            className="input text-sm h-9"
-            value={filterProperty}
-            onChange={e => { setFilterProperty(e.target.value); setFilterLocation('') }}
-          >
-            <option value="">All Properties</option>
-            {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+      {/* Filters — only shown when user has proficiencies */}
+      {hasProficiencies && (
+        <div className="mb-6 p-4 bg-primary-light/40 rounded-lg space-y-4">
+          {/* Role checkboxes */}
+          {uniqueRoles.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-text/60 mb-2">Role</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                {uniqueRoles.map(r => (
+                  <label key={r.id} className="flex items-center gap-1.5 cursor-pointer min-h-0">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
+                      checked={selectedRoleIds.has(r.id)}
+                      onChange={() => toggleRole(r.id)}
+                    />
+                    <span className="text-sm text-text">{r.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Property scope selector */}
+          {uniqueProperties.length > 0 && (
+            <div>
+              <label className="block text-xs font-medium text-text/60 mb-1">Property</label>
+              <select
+                className="input text-sm h-9"
+                value={scopePropertyId}
+                onChange={e => setScopePropertyId(e.target.value)}
+              >
+                <option value="">All Properties</option>
+                {uniqueProperties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* Location checkboxes */}
+          {visibleFilterLocations.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-text/60 mb-2">Location</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                {visibleFilterLocations.map(l => (
+                  <label key={l.id} className="flex items-center gap-1.5 cursor-pointer min-h-0">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
+                      checked={selectedLocationIds.has(l.id)}
+                      onChange={() => toggleLocation(l.id)}
+                    />
+                    <span className="text-sm text-text">{l.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        <div>
-          <label className="block text-xs font-medium text-text/60 mb-1">Location</label>
-          <select
-            className="input text-sm h-9"
-            value={filterLocation}
-            onChange={e => setFilterLocation(e.target.value)}
-            disabled={!filterProperty}
-          >
-            <option value="">All Locations</option>
-            {filteredLocations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-text/60 mb-1">Role</label>
-          <select
-            className="input text-sm h-9"
-            value={filterRole}
-            onChange={e => setFilterRole(e.target.value)}
-          >
-            <option value="">All Roles</option>
-            {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-          </select>
-        </div>
-      </div>
+      )}
 
       {/* Content */}
       {loading ? (
@@ -236,9 +306,13 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
         shifts.length === 0 ? (
           <EmptyState
             message="No shift offers found"
-            subtext={filterProperty || filterLocation || filterRole ? 'Try adjusting your proficiencies.' : 'Be the first to post a shift!'}
-            href="/board/new-shift"
-            btnLabel="Post a Shift"
+            subtext={
+              !hasProficiencies
+                ? 'Try adjusting your proficiencies.'
+                : 'Be the first to post a shift!'
+            }
+            href={hasProficiencies ? '/board/new-shift' : '/profile'}
+            btnLabel={hasProficiencies ? 'Post a Shift' : 'Add Proficiencies'}
           />
         ) : (
           <div className="space-y-4">
@@ -257,9 +331,13 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
         requests.length === 0 ? (
           <EmptyState
             message="No shift requests found"
-            subtext={filterProperty || filterLocation || filterRole ? 'Try adjusting your proficiencies.' : 'Need a shift? Post a request!'}
-            href="/board/new-request"
-            btnLabel="Post a Request"
+            subtext={
+              !hasProficiencies
+                ? 'Try adjusting your proficiencies.'
+                : 'Need a shift? Post a request!'
+            }
+            href={hasProficiencies ? '/board/new-request' : '/profile'}
+            btnLabel={hasProficiencies ? 'Post a Request' : 'Add Proficiencies'}
           />
         ) : (
           <div className="space-y-4">

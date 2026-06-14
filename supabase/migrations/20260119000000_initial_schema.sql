@@ -1,6 +1,21 @@
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- User types lookup table
+CREATE TABLE IF NOT EXISTS user_types (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO user_types (name) VALUES
+  ('Guest'),
+  ('Cast'),
+  ('CoPro'),
+  ('Leader'),
+  ('Admin')
+ON CONFLICT (name) DO NOTHING;
+
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -11,7 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone_number TEXT,
   notify_via_email BOOLEAN DEFAULT FALSE,
   notify_via_sms BOOLEAN DEFAULT FALSE,
-  role TEXT CHECK (role IN ('cast', 'copro', 'leader', 'admin')) DEFAULT 'cast',
+  user_type TEXT CHECK (user_type IN ('Guest', 'Cast', 'CoPro', 'Leader', 'Admin')) DEFAULT 'Guest',
   is_active BOOLEAN DEFAULT TRUE,
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -126,7 +141,7 @@ CREATE INDEX IF NOT EXISTS idx_shifts_active_time ON shifts(is_active, start_tim
 CREATE INDEX IF NOT EXISTS idx_requests_active_date ON requests(is_active, requested_date);
 CREATE INDEX IF NOT EXISTS idx_flags_status_time ON flags(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_role_active ON users(role, is_active);
+CREATE INDEX IF NOT EXISTS idx_users_user_type_active ON users(user_type, is_active);
 CREATE INDEX IF NOT EXISTS idx_user_proficiencies_user ON user_proficiencies(user_id, location_id, role_id);
 CREATE INDEX IF NOT EXISTS idx_black_listed_email ON black_listed(email);
 

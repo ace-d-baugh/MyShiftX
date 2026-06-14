@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { ApprovalsClient } from './ApprovalsClient'
-import type { UserRole } from '@/lib/database.types'
+import type { UserType } from '@/lib/database.types'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata = { title: 'Approvals – WDWShiftX' }
 
-type ProfileRow = { role: UserRole } | null
+type ProfileRow = { user_type: UserType } | null
 
 export default async function ApprovalsPage() {
   const supabase = createServerClient()
@@ -15,9 +15,9 @@ export default async function ApprovalsPage() {
   if (!user) redirect('/login')
 
   const { data: userProfile } = await supabase
-    .from('users').select('role').eq('id', user.id).single() as unknown as { data: ProfileRow }
+    .from('users').select('user_type').eq('id', user.id).single() as unknown as { data: ProfileRow }
 
-  if (!userProfile || !['leader', 'admin'].includes(userProfile.role)) {
+  if (!userProfile || !(['Leader', 'Admin'] as UserType[]).includes(userProfile.user_type)) {
     redirect('/board')
   }
 

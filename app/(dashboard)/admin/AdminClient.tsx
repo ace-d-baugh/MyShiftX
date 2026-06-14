@@ -6,14 +6,14 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
-import type { UserRole } from '@/lib/database.types'
+import type { UserType } from '@/lib/database.types'
 
 type AdminTab = 'properties' | 'locations' | 'roles' | 'users'
 
 interface Property { id: string; name: string; created_at: string }
 interface Location { id: string; name: string; property_id: string; is_approved: boolean; created_at: string; properties: { name: string } | null }
 interface Role { id: string; name: string; is_approved: boolean; created_at: string }
-interface UserRow { id: string; display_name: string; email: string; role: UserRole; is_active: boolean; created_at: string }
+interface UserRow { id: string; display_name: string; email: string; user_type: UserType; is_active: boolean; created_at: string }
 
 interface AdminClientProps {
   properties: Property[]
@@ -23,10 +23,7 @@ interface AdminClientProps {
   adminId: string
 }
 
-const roleOptions: UserRole[] = ['cast', 'copro', 'leader', 'admin']
-const roleVariant: Record<UserRole, 'cast' | 'copro' | 'leader' | 'admin'> = {
-  cast: 'cast', copro: 'copro', leader: 'leader', admin: 'admin'
-}
+const userTypeOptions: UserType[] = ['Guest', 'Cast', 'CoPro', 'Leader', 'Admin']
 
 export function AdminClient({ properties: initProps, locations: initLocs, roles: initRoles, users: initUsers, adminId }: AdminClientProps) {
   const supabase = createClient()
@@ -92,13 +89,13 @@ export function AdminClient({ properties: initProps, locations: initLocs, roles:
     setProcessing(null)
   }
 
-  const changeUserRole = async (id: string, newRole: UserRole) => {
+  const changeUserType = async (id: string, newType: UserType) => {
     if (id === adminId) return
     setProcessing(id)
-    await (supabase as any).from('users').update({ role: newRole } as any).eq('id', id)
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, role: newRole } : u))
+    await (supabase as any).from('users').update({ user_type: newType } as any).eq('id', id)
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, user_type: newType } : u))
     setProcessing(null)
-    showSuccess('User role updated!')
+    showSuccess('User type updated!')
   }
 
   const toggleUserActive = async (id: string, current: boolean) => {
@@ -229,11 +226,11 @@ export function AdminClient({ properties: initProps, locations: initLocs, roles:
               <div className="flex items-center gap-2 shrink-0">
                 <select
                   className="text-xs border border-border rounded px-2 py-1 h-8 bg-white text-text"
-                  value={u.role}
-                  onChange={e => changeUserRole(u.id, e.target.value as UserRole)}
+                  value={u.user_type}
+                  onChange={e => changeUserType(u.id, e.target.value as UserType)}
                   disabled={u.id === adminId || processing === u.id}
                 >
-                  {roleOptions.map(r => <option key={r} value={r}>{r}</option>)}
+                  {userTypeOptions.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
                 <button
                   onClick={() => toggleUserActive(u.id, u.is_active)}

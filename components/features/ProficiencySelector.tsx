@@ -33,9 +33,9 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [selectedProperty, setSelectedProperty] = useState('')
-  const [selectedLocation, setSelectedLocation] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
+  const [selectedProperty, setSelectedProperty] = useState('')
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([])
 
   const filteredLocations = locations.filter(l => l.property_id === selectedProperty)
 
@@ -76,39 +76,56 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
           role_name: (p.roles as { name: string } | null)?.name ?? '',
         }))
       )
-    } catch (err) {
+    } catch {
       setError('Failed to load proficiency data.')
     } finally {
       setLoading(false)
     }
   }
 
+  const toggleLocation = (locId: string) => {
+    setSelectedLocations(prev =>
+      prev.includes(locId) ? prev.filter(id => id !== locId) : [...prev, locId]
+    )
+  }
+
   const handleAdd = async () => {
-    if (!selectedProperty || !selectedLocation || !selectedRole) {
-      setError('Please select property, location, and role.')
+    if (!selectedRole || !selectedProperty || selectedLocations.length === 0) {
+      setError('Please select a role, property, and at least one location.')
       return
     }
     setSaving(true)
     setError(null)
-    try {
-      const { error: insertError } = await (supabase as any).from('user_proficiencies').insert({
+
+    // Collect only locations not already in proficiencies for this role
+    const existing = new Set(
+      proficiencies
+        .filter(p => p.role_id === selectedRole)
+        .map(p => p.location_id)
+    )
+    const toInsert = selectedLocations
+      .filter(locId => !existing.has(locId))
+      .map(locId => ({
         user_id: userId,
         property_id: selectedProperty,
-        location_id: selectedLocation,
+        location_id: locId,
         role_id: selectedRole,
-      } as any)
-      if (insertError) throw insertError
-      setSelectedProperty('')
-      setSelectedLocation('')
+      }))
+
+    try {
+      if (toInsert.length > 0) {
+        const { error: insertError } = await (supabase as any)
+          .from('user_proficiencies')
+          .insert(toInsert as any)
+        if (insertError) throw insertError
+      }
       setSelectedRole('')
+      setSelectedProperty('')
+      setSelectedLocations([])
       await loadData()
       onUpdate?.()
     } catch (err: unknown) {
-      if (err instanceof Error && err.message.includes('duplicate')) {
-        setError('This proficiency already exists.')
-      } else {
-        setError(err instanceof Error ? err.message : 'Failed to add proficiency.')
-      }
+      setError(err instanceof Error ? err.message : 'Failed to add proficiency.')
     } finally {
       setSaving(false)
     }
@@ -140,7 +157,7 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
     <div className="space-y-4">
       <div>
         <h3 className="font-medium text-text mb-1">My Proficiencies</h3>
-        <p className="text-xs text-text/50">Add the locations and roles you can work to filter the board.</p>
+        <p className="text-xs text-text/50">Add the roles and locations you can work to filter the board.</p>
       </div>
 
       {/* Existing proficiencies */}
@@ -151,11 +168,11 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
           {proficiencies.map(p => (
             <div key={p.id} className="flex items-center justify-between gap-2 bg-primary-light/50 rounded-md px-3 py-2">
               <div className="text-sm min-w-0">
-                <span className="font-medium text-text truncate">{p.property_name}</span>
+                <span className="font-medium text-text truncate">{p.role_name}</span>
+                <span className="text-text/50 mx-1">&bull;</span>
+                <span className="text-text/70 truncate">{p.property_name}</span>
                 <span className="text-text/50 mx-1">&rsaquo;</span>
                 <span className="text-text/70 truncate">{p.location_name}</span>
-                <span className="text-text/50 mx-1">&bull;</span>
-                <span className="text-text/70">{p.role_name}</span>
               </div>
               <button
                 onClick={() => handleRemove(p.id)}
@@ -174,39 +191,17 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
       <div className="border border-border rounded-lg p-4 space-y-3">
         <p className="text-sm font-medium text-text">Add Proficiency</p>
         <div className="grid grid-cols-1 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-text/60 mb-1">Property</label>
-            <select
-              className="input text-sm"
-              value={selectedProperty}
-              onChange={e => { setSelectedProperty(e.target.value); setSelectedLocation('') }}
-            >
-              <option value="">Select property...</option>
-              {properties.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-text/60 mb-1">Location</label>
-            <select
-              className="input text-sm"
-              value={selectedLocation}
-              onChange={e => setSelectedLocation(e.target.value)}
-              disabled={!selectedProperty}
-            >
-              <option value="">Select location...</option>
-              {filteredLocations.map(l => (
-                <option key={l.id} value={l.id}>{l.name}</option>
-              ))}
-            </select>
-          </div>
+          {/* Role — first */}
           <div>
             <label className="block text-xs font-medium text-text/60 mb-1">Role</label>
             <select
               className="input text-sm"
               value={selectedRole}
-              onChange={e => setSelectedRole(e.target.value)}
+              onChange={e => {
+                setSelectedRole(e.target.value)
+                setSelectedProperty('')
+                setSelectedLocations([])
+              }}
             >
               <option value="">Select role...</option>
               {roles.map(r => (
@@ -214,15 +209,61 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
               ))}
             </select>
           </div>
+
+          {/* Property — second */}
+          <div>
+            <label className="block text-xs font-medium text-text/60 mb-1">Property</label>
+            <select
+              className="input text-sm"
+              value={selectedProperty}
+              onChange={e => {
+                setSelectedProperty(e.target.value)
+                setSelectedLocations([])
+              }}
+              disabled={!selectedRole}
+            >
+              <option value="">Select property...</option>
+              {properties.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Locations — multi-select checkboxes */}
+          {selectedProperty && filteredLocations.length > 0 && (
+            <div>
+              <label className="block text-xs font-medium text-text/60 mb-2">Locations</label>
+              <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                {filteredLocations.map(l => (
+                  <label key={l.id} className="flex items-center gap-2 cursor-pointer min-h-0 py-0.5">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
+                      checked={selectedLocations.includes(l.id)}
+                      onChange={() => toggleLocation(l.id)}
+                    />
+                    <span className="text-sm text-text">{l.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+          {selectedProperty && filteredLocations.length === 0 && (
+            <p className="text-xs text-text/50 italic">No approved locations for this property.</p>
+          )}
         </div>
+
         {error && <p className="text-xs text-warning">{error}</p>}
+
         <Button
           onClick={handleAdd}
           loading={saving}
           size="sm"
           className="gap-1 w-full"
+          disabled={!selectedRole || !selectedProperty || selectedLocations.length === 0}
         >
-          <Plus className="w-4 h-4" /> Add Proficiency
+          <Plus className="w-4 h-4" />
+          Add {selectedLocations.length > 1 ? `${selectedLocations.length} Proficiencies` : 'Proficiency'}
         </Button>
       </div>
     </div>

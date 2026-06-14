@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { requestSchema } from '@/lib/validations/shifts'
@@ -15,9 +15,17 @@ const TIME_OPTIONS: { value: PreferredTime; label: string; desc: string }[] = [
   { value: 'late', label: 'Late Night', desc: '12am–6am' },
 ]
 
-interface Property { id: string; name: string }
-interface Location { id: string; name: string; property_id: string }
-interface Role { id: string; name: string }
+interface ProficiencyRow {
+  role_id: string
+  location_id: string
+  property_id: string
+  roles: { id: string; name: string } | null
+  locations: { id: string; name: string; property_id: string } | null
+  properties: { id: string; name: string } | null
+}
+
+interface UniqueItem { id: string; name: string }
+interface UniqueLocation { id: string; name: string; property_id: string }
 
 interface PostRequestFormProps {
   userId: string
@@ -28,45 +36,75 @@ interface PostRequestFormProps {
 export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestFormProps) {
   const router = useRouter()
   const supabase = createClient()
-  const [properties, setProperties] = useState<Property[]>([])
-  const [locations, setLocations] = useState<Location[]>([])
-  const [roles, setRoles] = useState<Role[]>([])
+
+  const [proficiencies, setProficiencies] = useState<ProficiencyRow[]>([])
+  const [uniqueRoles, setUniqueRoles] = useState<UniqueItem[]>([])
   const [loading, setLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [serverError, setServerError] = useState<string | null>(null)
 
   const [form, setForm] = useState({
+    role_id: '',
     property_id: '',
     location_id: '',
-    role_id: '',
     requested_date: '',
     preferred_times: [] as PreferredTime[],
     comments: '',
   })
 
-  const filteredLocations = locations.filter(l => l.property_id === form.property_id)
+  // Properties available for the selected role
+  const availableProperties = useMemo(() => {
+    if (!form.role_id) return []
+    const propMap = new Map<string, UniqueItem>()
+    proficiencies
+      .filter(p => p.role_id === form.role_id && p.properties)
+      .forEach(p => propMap.set(p.properties!.id, p.properties!))
+    return [...propMap.values()].sort((a, b) => a.name.localeCompare(b.name))
+  }, [proficiencies, form.role_id])
+
+  // Locations available for the selected role + property
+  const availableLocations = useMemo((): UniqueLocation[] => {
+    if (!form.role_id || !form.property_id) return []
+    const locMap = new Map<string, UniqueLocation>()
+    proficiencies
+      .filter(p => p.role_id === form.role_id && p.property_id === form.property_id && p.locations)
+      .forEach(p => locMap.set(p.locations!.id, { ...p.locations!, property_id: p.property_id }))
+    return [...locMap.values()].sort((a, b) => a.name.localeCompare(b.name))
+  }, [proficiencies, form.role_id, form.property_id])
 
   useEffect(() => {
     const load = async () => {
-      const [propsRes, locsRes, rolesRes] = await Promise.all([
-        (supabase as any).from('properties').select('id, name').order('name'),
-        (supabase as any).from('locations').select('id, name, property_id').eq('is_approved', true).order('name'),
-        (supabase as any).from('roles').select('id, name').eq('is_approved', true).order('name'),
-      ])
-      setProperties(propsRes.data ?? [])
-      setLocations(locsRes.data ?? [])
-      setRoles(rolesRes.data ?? [])
+      const { data } = await (supabase as any)
+        .from('user_proficiencies')
+        .select(`
+          role_id,
+          location_id,
+          property_id,
+          roles(id, name),
+          locations(id, name, property_id),
+          properties(id, name)
+        `)
+        .eq('user_id', userId) as { data: ProficiencyRow[] | null }
+
+      const rows = data ?? []
+      setProficiencies(rows)
+
+      const roleMap = new Map<string, UniqueItem>()
+      rows.forEach(r => { if (r.roles) roleMap.set(r.roles.id, r.roles) })
+      setUniqueRoles([...roleMap.values()].sort((a, b) => a.name.localeCompare(b.name)))
+
       setDataLoading(false)
     }
     load()
-  }, [])
+  }, [userId])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setForm(prev => ({
       ...prev,
       [name]: value,
+      ...(name === 'role_id' ? { property_id: '', location_id: '' } : {}),
       ...(name === 'property_id' ? { location_id: '' } : {}),
     }))
     setErrors(prev => ({ ...prev, [name]: '' }))
@@ -97,19 +135,24 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
       return
     }
 
+    // Derive property_id from the selected proficiency
+    const prof = proficiencies.find(
+      p => p.role_id === form.role_id && p.location_id === form.location_id
+    )
+
     setLoading(true)
     try {
       const { error } = await (supabase as any).from('requests').insert({
         created_by: displayName,
         user_id: userId,
-        property_id: form.property_id,
+        property_id: prof?.property_id ?? form.property_id,
         location_id: form.location_id,
         role_id: form.role_id,
         requested_date: form.requested_date,
         preferred_times: form.preferred_times,
         comments: form.comments || null,
         is_active: true,
-      } as any as any)
+      } as any)
       if (error) throw error
       onSuccess?.()
       router.push('/board')
@@ -124,6 +167,14 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
     return <div className="flex items-center justify-center py-12 text-text/50">Loading form...</div>
   }
 
+  if (uniqueRoles.length === 0) {
+    return (
+      <div className="py-8 text-center text-sm text-text/60">
+        You have no proficiencies yet. <a href="/profile" className="text-primary underline">Add proficiencies</a> before posting a request.
+      </div>
+    )
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
       {serverError && (
@@ -132,14 +183,26 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
         </div>
       )}
 
+      {/* Role — first */}
+      <div>
+        <label className="block text-sm font-medium text-text mb-1">
+          Role <span className="text-warning">*</span>
+        </label>
+        <select name="role_id" className={`input ${errors.role_id ? 'border-warning' : ''}`} value={form.role_id} onChange={handleChange}>
+          <option value="">Select role...</option>
+          {uniqueRoles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+        </select>
+        {errors.role_id && <p className="mt-1 text-xs text-warning">{errors.role_id}</p>}
+      </div>
+
       {/* Property */}
       <div>
         <label className="block text-sm font-medium text-text mb-1">
           Property <span className="text-warning">*</span>
         </label>
-        <select name="property_id" className={`input ${errors.property_id ? 'border-warning' : ''}`} value={form.property_id} onChange={handleChange}>
+        <select name="property_id" className={`input ${errors.property_id ? 'border-warning' : ''}`} value={form.property_id} onChange={handleChange} disabled={!form.role_id}>
           <option value="">Select property...</option>
-          {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          {availableProperties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         {errors.property_id && <p className="mt-1 text-xs text-warning">{errors.property_id}</p>}
       </div>
@@ -151,21 +214,9 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
         </label>
         <select name="location_id" className={`input ${errors.location_id ? 'border-warning' : ''}`} value={form.location_id} onChange={handleChange} disabled={!form.property_id}>
           <option value="">Select location...</option>
-          {filteredLocations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+          {availableLocations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
         {errors.location_id && <p className="mt-1 text-xs text-warning">{errors.location_id}</p>}
-      </div>
-
-      {/* Role */}
-      <div>
-        <label className="block text-sm font-medium text-text mb-1">
-          Role <span className="text-warning">*</span>
-        </label>
-        <select name="role_id" className={`input ${errors.role_id ? 'border-warning' : ''}`} value={form.role_id} onChange={handleChange}>
-          <option value="">Select role...</option>
-          {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-        </select>
-        {errors.role_id && <p className="mt-1 text-xs text-warning">{errors.role_id}</p>}
       </div>
 
       {/* Requested Date */}

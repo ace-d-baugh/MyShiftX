@@ -17,20 +17,20 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import type { UserRole } from '@/lib/database.types'
+import type { UserType } from '@/lib/database.types'
 
 interface NavbarProps {
-  userRole: UserRole
+  userRole: UserType
   displayName: string
 }
 
 const navItems = [
-  { href: '/board', label: 'Board', icon: LayoutGrid, roles: ['cast', 'copro', 'leader', 'admin'] },
-  { href: '/profile', label: 'Profile', icon: User, roles: ['cast', 'copro', 'leader', 'admin'] },
-  { href: '/leader/approvals', label: 'Approvals', icon: ShieldCheck, roles: ['leader', 'admin'] },
-  { href: '/leader/flags', label: 'Flags', icon: Flag, roles: ['leader', 'admin'] },
-  { href: '/leader/archive', label: 'Archive', icon: Archive, roles: ['leader', 'admin'] },
-  { href: '/admin', label: 'Admin', icon: Settings, roles: ['admin'] },
+  { href: '/board', label: 'Board', icon: LayoutGrid, roles: ['Cast', 'CoPro', 'Leader', 'Admin'] },
+  { href: '/profile', label: 'Profile', icon: User, roles: ['Cast', 'CoPro', 'Leader', 'Admin'] },
+  { href: '/leader/approvals', label: 'Approvals', icon: ShieldCheck, roles: ['Leader', 'Admin'] },
+  { href: '/leader/flags', label: 'Flags', icon: Flag, roles: ['Leader', 'Admin'] },
+  { href: '/leader/archive', label: 'Archive', icon: Archive, roles: ['Leader', 'Admin'] },
+  { href: '/admin', label: 'Admin', icon: Settings, roles: ['Admin'] },
 ] as const
 
 export function Navbar({ userRole, displayName }: NavbarProps) {

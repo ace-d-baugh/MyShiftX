@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-type BadgeVariant = 'trade' | 'giveaway' | 'ot' | 'pending' | 'leader' | 'copro' | 'admin' | 'cast'
+type BadgeVariant = 'trade' | 'giveaway' | 'ot' | 'pending' | 'guest' | 'cast' | 'copro' | 'leader' | 'admin'
 
 interface BadgeProps {
   variant: BadgeVariant
@@ -14,10 +14,11 @@ export function Badge({ variant, children, className }: BadgeProps) {
     giveaway: 'badge badge-giveaway',
     ot: 'badge badge-ot',
     pending: 'badge bg-accent/20 text-text',
-    leader: 'badge bg-primary/20 text-primary',
-    copro: 'badge bg-info/20 text-info',
-    admin: 'badge bg-warning/20 text-warning',
+    guest: 'badge bg-text/10 text-text/60',
     cast: 'badge bg-secondary/40 text-text',
+    copro: 'badge bg-info/20 text-info',
+    leader: 'badge bg-primary/20 text-primary',
+    admin: 'badge bg-warning/20 text-warning',
   }
   return <span className={cn(variants[variant], className)}>{children}</span>
 }
