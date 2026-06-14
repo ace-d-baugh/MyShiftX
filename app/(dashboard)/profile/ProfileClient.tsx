@@ -138,7 +138,7 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
             <label className="block text-sm font-medium text-text mb-1">Display Name</label>
             <input
               type="text"
-              className={`input ${nameError ? 'border-warning' : ''}`}
+              className={`input placeholder:text-text/50 ${nameError ? 'border-warning' : ''}`}
               value={displayName}
               onChange={e => { setDisplayName(e.target.value); setNameError(null) }}
               placeholder="Minnie M."
