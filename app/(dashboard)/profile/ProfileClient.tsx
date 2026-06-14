@@ -141,9 +141,9 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
               className={`input ${nameError ? 'border-warning' : ''}`}
               value={displayName}
               onChange={e => { setDisplayName(e.target.value); setNameError(null) }}
-              placeholder="Matthew B."
+              placeholder="Minnie M."
             />
-            <p className="mt-1 text-xs text-text/40">Format: FirstName LastInitial. (e.g., &ldquo;Matthew B.&rdquo;)</p>
+            <p className="mt-1 text-xs text-text/40">Format: FirstName LastInitial. (e.g., &ldquo;Minnie M.&rdquo;)</p>
             {nameError && <p className="mt-1 text-xs text-warning">{nameError}</p>}
           </div>
 
@@ -151,10 +151,10 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
             <label className="block text-sm font-medium text-text mb-1">Phone Number (optional)</label>
             <input
               type="tel"
-              className="input"
+              className="input placeholder:text-text/50"
               value={phoneNumber}
               onChange={e => setPhoneNumber(e.target.value)}
-              placeholder="+1 (407) 555-0000"
+              placeholder="(407) 555-0000"
             />
           </div>
 

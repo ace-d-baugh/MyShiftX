@@ -11,22 +11,25 @@ export default function VerifyEmailPage() {
   const hasNavigated = useRef(false)
 
   useEffect(() => {
-    const handleEmailVerification = async () => {
+    const navigate = () => {
       if (hasNavigated.current) return
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
-      if (authError || !user?.email_confirmed_at) return
-
       hasNavigated.current = true
-      await supabase
-        .from('users')
-        .update({ email_verified: true })
-        .eq('id', user.id)
-
       router.push('/board')
     }
 
-    handleEmailVerification()
+    // Check immediately in case the user already verified before landing here
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email_confirmed_at) navigate()
+    })
+
+    // React to the verification click in real time (even from another tab)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user?.email_confirmed_at) navigate()
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
+
   return (
     <div className="card shadow-lg text-center animate-auth-card-in">
       <div className="w-14 h-14 bg-info/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pop-in" style={{ animationDelay: '200ms' }}>

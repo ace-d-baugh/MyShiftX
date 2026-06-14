@@ -236,7 +236,7 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
         shifts.length === 0 ? (
           <EmptyState
             message="No shift offers found"
-            subtext={filterProperty || filterLocation || filterRole ? 'Try adjusting your filters.' : 'Be the first to post a shift!'}
+            subtext={filterProperty || filterLocation || filterRole ? 'Try adjusting your proficiencies.' : 'Be the first to post a shift!'}
             href="/board/new-shift"
             btnLabel="Post a Shift"
           />
@@ -257,7 +257,7 @@ export function BoardClient({ userId, displayName, userRole, properties, locatio
         requests.length === 0 ? (
           <EmptyState
             message="No shift requests found"
-            subtext={filterProperty || filterLocation || filterRole ? 'Try adjusting your filters.' : 'Need a shift? Post a request!'}
+            subtext={filterProperty || filterLocation || filterRole ? 'Try adjusting your proficiencies.' : 'Need a shift? Post a request!'}
             href="/board/new-request"
             btnLabel="Post a Request"
           />

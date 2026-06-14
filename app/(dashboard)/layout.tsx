@@ -38,6 +38,10 @@ export default async function DashboardLayout({
     redirect('/login?reason=deactivated')
   }
 
+  if (!userProfile || userProfile.role === 'guest') {
+    redirect('/verify-email')
+  }
+
   const userRole = userProfile?.role ?? 'cast'
   const displayName = userProfile?.display_name ?? user.email ?? 'Cast Member'
 
