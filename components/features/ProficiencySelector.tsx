@@ -164,16 +164,23 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
       {proficiencies.length === 0 ? (
         <p className="text-sm text-text/50 italic">No proficiencies added yet.</p>
       ) : (
-        <div className="space-y-2">
-          {proficiencies.map(p => (
-            <div key={p.id} className="flex items-center justify-between gap-2 bg-primary-light/50 rounded-md px-3 py-2">
-              <div className="text-sm min-w-0">
-                <span className="font-medium text-text truncate">{p.role_name}</span>
-                <span className="text-text/50 mx-1">&bull;</span>
-                <span className="text-text/70 truncate">{p.property_name}</span>
-                <span className="text-text/50 mx-1">&rsaquo;</span>
-                <span className="text-text/70 truncate">{p.location_name}</span>
-              </div>
+        <div className="border border-border rounded-lg overflow-hidden">
+          {/* Table header */}
+          <div className="grid grid-cols-[1fr_1fr_1fr_auto] bg-primary-light px-3 py-2 border-b border-border">
+            <span className="text-xs font-semibold text-text/60 uppercase tracking-wide">Role</span>
+            <span className="text-xs font-semibold text-text/60 uppercase tracking-wide">Property</span>
+            <span className="text-xs font-semibold text-text/60 uppercase tracking-wide">Location</span>
+            <span className="w-6" />
+          </div>
+          {/* Rows */}
+          {proficiencies.map((p, i) => (
+            <div
+              key={p.id}
+              className={`grid grid-cols-[1fr_1fr_1fr_auto] items-center px-3 py-2.5 gap-2 ${i % 2 === 1 ? 'bg-primary-light/30' : 'bg-white'}`}
+            >
+              <span className="text-sm font-medium text-text truncate">{p.role_name}</span>
+              <span className="text-sm text-text/70 truncate">{p.property_name}</span>
+              <span className="text-sm text-text/70 truncate">{p.location_name}</span>
               <button
                 onClick={() => handleRemove(p.id)}
                 disabled={saving}

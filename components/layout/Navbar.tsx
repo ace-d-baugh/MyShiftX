@@ -45,7 +45,7 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   const isActive = (href: string) => pathname.startsWith(href)
