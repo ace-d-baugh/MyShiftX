@@ -25,7 +25,15 @@ export default async function AdminPage() {
     supabase.from('properties').select('id, name, created_at').order('name'),
     supabase.from('locations').select('id, name, property_id, is_approved, created_at, properties(name)').order('name'),
     supabase.from('roles').select('id, name, is_approved, created_at').order('name'),
-    supabase.from('users').select('id, display_name, email, user_type, is_active, created_at').order('created_at', { ascending: false }).limit(100),
+    supabase.from('users').select(`
+      id, display_name, user_type, is_active, created_at,
+      user_proficiencies (
+        role_id, property_id, location_id,
+        roles ( id, name ),
+        properties ( id, name ),
+        locations ( id, name )
+      )
+    `).order('display_name').limit(200),
   ])
 
   return (
@@ -33,8 +41,9 @@ export default async function AdminPage() {
       properties={(propertiesRes.data ?? []) as { id: string; name: string; created_at: string }[]}
       locations={(locationsRes.data ?? []) as { id: string; name: string; property_id: string; is_approved: boolean; created_at: string; properties: { name: string } | null }[]}
       roles={(rolesRes.data ?? []) as { id: string; name: string; is_approved: boolean; created_at: string }[]}
-      users={(usersRes.data ?? []) as { id: string; display_name: string; email: string; user_type: UserType; is_active: boolean; created_at: string }[]}
+      users={(usersRes.data ?? []) as any}
       adminId={user.id}
+      currentUserType={userProfile.user_type}
     />
   )
 }

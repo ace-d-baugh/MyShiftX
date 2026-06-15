@@ -18,10 +18,11 @@ interface BoardClientProps {
   userId: string
   displayName: string
   userRole: UserType
+  isAdmin: boolean
   uniqueRoles: UniqueItem[]
   uniqueProperties: UniqueItem[]
   uniqueLocations: UniqueLocation[]
-  proficiencyEntries: ProficiencyEntry[] // reserved for future use (e.g. RLS validation)
+  proficiencyEntries: ProficiencyEntry[]
   hasProficiencies: boolean
 }
 
@@ -31,6 +32,7 @@ export function BoardClient({
   userId,
   displayName,
   userRole: _userRole,
+  isAdmin,
   uniqueRoles,
   uniqueProperties,
   uniqueLocations,
@@ -43,7 +45,12 @@ export function BoardClient({
   const [requests, setRequests] = useState<RequestData[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Filter state — default: all proficiency IDs checked
+  // Admin: single-select filters
+  const [adminFilterProperty, setAdminFilterProperty] = useState('')
+  const [adminFilterLocation, setAdminFilterLocation] = useState('')
+  const [adminFilterRole, setAdminFilterRole] = useState('')
+
+  // Non-admin: multi-select checkbox filters (default all checked)
   const [selectedRoleIds, setSelectedRoleIds] = useState<Set<string>>(
     () => new Set(uniqueRoles.map(r => r.id))
   )
@@ -52,7 +59,10 @@ export function BoardClient({
     () => new Set(uniqueLocations.map(l => l.id))
   )
 
-  // Locations visible in the filter panel (scoped by selected property)
+  const adminFilteredLocations = uniqueLocations.filter(
+    l => !adminFilterProperty || l.property_id === adminFilterProperty
+  )
+
   const visibleFilterLocations = scopePropertyId
     ? uniqueLocations.filter(l => l.property_id === scopePropertyId)
     : uniqueLocations
@@ -77,14 +87,7 @@ export function BoardClient({
     if (!hasProficiencies) { setLoading(false); return }
     setLoading(true)
     try {
-      const roleIds = [...selectedRoleIds]
-      const locationIds = [...selectedLocationIds]
-      if (roleIds.length === 0 || locationIds.length === 0) {
-        setShifts([])
-        return
-      }
-
-      const { data, error } = await supabase
+      let query = supabase
         .from('shifts')
         .select(`
           id, shift_title, created_by, user_id, start_time, end_time,
@@ -93,10 +96,20 @@ export function BoardClient({
         `)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
-        .in('role_id', roleIds)
-        .in('location_id', locationIds)
         .order('start_time', { ascending: true })
 
+      if (isAdmin) {
+        if (adminFilterProperty) query = query.eq('property_id', adminFilterProperty)
+        if (adminFilterLocation) query = query.eq('location_id', adminFilterLocation)
+        if (adminFilterRole) query = query.eq('role_id', adminFilterRole)
+      } else {
+        const roleIds = [...selectedRoleIds]
+        const locationIds = [...selectedLocationIds]
+        if (roleIds.length === 0 || locationIds.length === 0) { setShifts([]); setLoading(false); return }
+        query = query.in('role_id', roleIds).in('location_id', locationIds)
+      }
+
+      const { data, error } = await query
       if (error) throw error
 
       setShifts(
@@ -122,20 +135,13 @@ export function BoardClient({
     } finally {
       setLoading(false)
     }
-  }, [hasProficiencies, selectedRoleIds, selectedLocationIds])
+  }, [isAdmin, hasProficiencies, adminFilterProperty, adminFilterLocation, adminFilterRole, selectedRoleIds, selectedLocationIds])
 
   const loadRequests = useCallback(async () => {
     if (!hasProficiencies) { setLoading(false); return }
     setLoading(true)
     try {
-      const roleIds = [...selectedRoleIds]
-      const locationIds = [...selectedLocationIds]
-      if (roleIds.length === 0 || locationIds.length === 0) {
-        setRequests([])
-        return
-      }
-
-      const { data, error } = await supabase
+      let query = supabase
         .from('requests')
         .select(`
           id, created_by, user_id, preferred_times, requested_date,
@@ -144,10 +150,20 @@ export function BoardClient({
         `)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
-        .in('role_id', roleIds)
-        .in('location_id', locationIds)
         .order('requested_date', { ascending: true })
 
+      if (isAdmin) {
+        if (adminFilterProperty) query = query.eq('property_id', adminFilterProperty)
+        if (adminFilterLocation) query = query.eq('location_id', adminFilterLocation)
+        if (adminFilterRole) query = query.eq('role_id', adminFilterRole)
+      } else {
+        const roleIds = [...selectedRoleIds]
+        const locationIds = [...selectedLocationIds]
+        if (roleIds.length === 0 || locationIds.length === 0) { setRequests([]); setLoading(false); return }
+        query = query.in('role_id', roleIds).in('location_id', locationIds)
+      }
+
+      const { data, error } = await query
       if (error) throw error
 
       setRequests(
@@ -169,7 +185,7 @@ export function BoardClient({
     } finally {
       setLoading(false)
     }
-  }, [hasProficiencies, selectedRoleIds, selectedLocationIds])
+  }, [isAdmin, hasProficiencies, adminFilterProperty, adminFilterLocation, adminFilterRole, selectedRoleIds, selectedLocationIds])
 
   useEffect(() => {
     if (tab === 'offers') loadShifts()
@@ -237,10 +253,48 @@ export function BoardClient({
         ))}
       </div>
 
-      {/* Filters — only shown when user has proficiencies */}
-      {hasProficiencies && (
+      {/* Filters */}
+      {isAdmin ? (
+        /* Admin: single-select dropdowns across all properties/locations/roles */
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 p-4 bg-primary-light/40 rounded-lg">
+          <div>
+            <label className="block text-xs font-medium text-text/60 mb-1">Role</label>
+            <select
+              className="input text-sm h-9"
+              value={adminFilterRole}
+              onChange={e => setAdminFilterRole(e.target.value)}
+            >
+              <option value="">All Roles</option>
+              {uniqueRoles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text/60 mb-1">Property</label>
+            <select
+              className="input text-sm h-9"
+              value={adminFilterProperty}
+              onChange={e => { setAdminFilterProperty(e.target.value); setAdminFilterLocation('') }}
+            >
+              <option value="">All Properties</option>
+              {uniqueProperties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text/60 mb-1">Location</label>
+            <select
+              className="input text-sm h-9"
+              value={adminFilterLocation}
+              onChange={e => setAdminFilterLocation(e.target.value)}
+              disabled={!adminFilterProperty}
+            >
+              <option value="">All Locations</option>
+              {adminFilteredLocations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+            </select>
+          </div>
+        </div>
+      ) : hasProficiencies ? (
+        /* Cast/CoPro/Leader: multi-select checkboxes from proficiencies */
         <div className="mb-6 p-4 bg-primary-light/40 rounded-lg space-y-4">
-          {/* Role checkboxes */}
           {uniqueRoles.length > 0 && (
             <div>
               <p className="text-xs font-medium text-text/60 mb-2">Role</p>
@@ -260,7 +314,6 @@ export function BoardClient({
             </div>
           )}
 
-          {/* Property scope selector */}
           {uniqueProperties.length > 0 && (
             <div>
               <label className="block text-xs font-medium text-text/60 mb-1">Property</label>
@@ -275,7 +328,6 @@ export function BoardClient({
             </div>
           )}
 
-          {/* Location checkboxes */}
           {visibleFilterLocations.length > 0 && (
             <div>
               <p className="text-xs font-medium text-text/60 mb-2">Location</p>
@@ -295,7 +347,7 @@ export function BoardClient({
             </div>
           )}
         </div>
-      )}
+      ) : null}
 
       {/* Content */}
       {loading ? (

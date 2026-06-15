@@ -39,6 +39,32 @@ export default async function BoardPage() {
     .eq('id', user.id)
     .single() as unknown as { data: UserProfileRow }
 
+  const isAdmin = userProfile?.user_type === 'Admin'
+
+  // Admins see everything — fetch global lists instead of proficiencies
+  if (isAdmin) {
+    const [propertiesRes, locationsRes, rolesRes] = await Promise.all([
+      supabase.from('properties').select('id, name').order('name'),
+      supabase.from('locations').select('id, name, property_id').eq('is_approved', true).order('name'),
+      supabase.from('roles').select('id, name').eq('is_approved', true).order('name'),
+    ])
+
+    return (
+      <BoardClient
+        userId={user.id}
+        displayName={userProfile?.display_name ?? 'Admin'}
+        userRole="Admin"
+        isAdmin={true}
+        uniqueRoles={(rolesRes.data ?? []) as { id: string; name: string }[]}
+        uniqueProperties={(propertiesRes.data ?? []) as { id: string; name: string }[]}
+        uniqueLocations={(locationsRes.data ?? []) as { id: string; name: string; property_id: string }[]}
+        proficiencyEntries={[]}
+        hasProficiencies={true}
+      />
+    )
+  }
+
+  // All other types — board is scoped to their proficiencies
   const { data: proficiencyRows } = await supabase
     .from('user_proficiencies')
     .select(`
@@ -53,7 +79,6 @@ export default async function BoardPage() {
 
   const rows = proficiencyRows ?? []
 
-  // Dedupe by id
   const roleMap = new Map<string, { id: string; name: string }>()
   const propertyMap = new Map<string, { id: string; name: string }>()
   const locationMap = new Map<string, { id: string; name: string; property_id: string }>()
@@ -74,6 +99,7 @@ export default async function BoardPage() {
       userId={user.id}
       displayName={userProfile?.display_name ?? 'Cast Member'}
       userRole={userProfile?.user_type ?? 'Cast'}
+      isAdmin={false}
       uniqueRoles={uniqueRoles}
       uniqueProperties={uniqueProperties}
       uniqueLocations={uniqueLocations}

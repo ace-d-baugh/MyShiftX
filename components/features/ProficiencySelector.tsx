@@ -233,18 +233,20 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
           {selectedProperty && filteredLocations.length > 0 && (
             <div>
               <label className="block text-xs font-medium text-text/60 mb-2">Locations</label>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                {filteredLocations.map(l => (
-                  <label key={l.id} className="flex items-center gap-2 cursor-pointer min-h-0 py-0.5">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
-                      checked={selectedLocations.includes(l.id)}
-                      onChange={() => toggleLocation(l.id)}
-                    />
-                    <span className="text-sm text-text">{l.name}</span>
-                  </label>
-                ))}
+              <div className="border border-border rounded-lg p-3 max-h-48 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                  {filteredLocations.map(l => (
+                    <label key={l.id} className="flex items-center gap-2 cursor-pointer min-h-0 py-0.5">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
+                        checked={selectedLocations.includes(l.id)}
+                        onChange={() => toggleLocation(l.id)}
+                      />
+                      <span className="text-sm text-text">{l.name}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           )}

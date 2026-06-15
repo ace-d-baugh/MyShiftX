@@ -117,7 +117,7 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, approverId }: 
                     onClick={() => rejectLocation(loc.id)}
                     className="gap-1 min-h-0 h-9 px-3"
                   >
-                    <XCircle className="w-4 h-4" /> Reject
+                    <XCircle className="w-4 h-4" /> Remove
                   </Button>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, approverId }: 
                     onClick={() => rejectRole(role.id)}
                     className="gap-1 min-h-0 h-9 px-3"
                   >
-                    <XCircle className="w-4 h-4" /> Reject
+                    <XCircle className="w-4 h-4" /> Remove
                   </Button>
                 </div>
               </div>
