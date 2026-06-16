@@ -95,6 +95,18 @@ const config: Config = {
           '60%': { transform: 'scale(1.2)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-12px)' },
+        },
+        starFall: {
+          // Falls along a -30deg line (vertical drop paired with a proportional
+          // leftward drift) and stays tilted to match, like a streak of rain.
+          '0%': { transform: 'translateY(-10vh) translateX(0) rotate(-30deg)', opacity: '0' },
+          '8%': { opacity: '1' },
+          '92%': { opacity: '1' },
+          '100%': { transform: 'translateY(115vh) translateX(-66vh) rotate(-30deg)', opacity: '0' },
+        },
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.65s ease-out both',
@@ -105,6 +117,8 @@ const config: Config = {
         'auth-card-in': 'authCardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both',
         'shake': 'shake 0.45s ease-in-out',
         'pop-in': 'popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'float': 'float 3.5s ease-in-out infinite',
+        'star-fall': 'starFall 6s linear infinite',
       },
     },
   },

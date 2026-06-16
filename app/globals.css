@@ -153,11 +153,17 @@
     .animate-expand-width,
     .animate-auth-card-in,
     .animate-shake,
-    .animate-pop-in {
+    .animate-pop-in,
+    .animate-float {
       animation: none !important;
       opacity: 1 !important;
       width: 100% !important;
       transform: none !important;
+    }
+
+    .falling-star {
+      animation: none !important;
+      opacity: 0 !important;
     }
   }
 
