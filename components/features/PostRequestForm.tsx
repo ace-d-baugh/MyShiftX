@@ -50,7 +50,7 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
     location_id: '',
     requested_date: '',
     preferred_times: [] as PreferredTime[],
-    comments: '',
+    details: '',
   })
 
   // Properties available for the selected role
@@ -151,7 +151,7 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
         role_id: form.role_id,
         requested_date: form.requested_date,
         preferred_times: form.preferred_times,
-        comments: form.comments || null,
+        details: form.details || null,
         is_active: true,
       } as any)
       if (error) throw error
@@ -261,14 +261,14 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
         {errors.preferred_times && <p className="mt-1 text-xs text-warning">{errors.preferred_times}</p>}
       </div>
 
-      {/* Comments */}
+      {/* Details */}
       <div>
-        <label className="block text-sm font-medium text-text mb-1">Comments (optional)</label>
+        <label className="block text-sm font-medium text-text mb-1">Details (optional)</label>
         <textarea
-          name="comments"
+          name="details"
           className="input h-20 resize-none"
           placeholder="Any additional details..."
-          value={form.comments}
+          value={form.details}
           onChange={handleChange}
           maxLength={500}
         />

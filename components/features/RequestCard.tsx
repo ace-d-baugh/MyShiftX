@@ -33,7 +33,7 @@ export interface RequestData {
   role_name: string
   preferred_times: PreferredTime[]
   requested_date: string
-  comments: string | null
+  details: string | null
   is_active: boolean
   expires_at: string
   created_at: string
@@ -103,9 +103,9 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
           </div>
         </div>
 
-        {request.comments && (
+        {request.details && (
           <p className="text-sm text-text/60 bg-accent/10 rounded-md px-3 py-2 mb-3 italic">
-            &ldquo;{request.comments}&rdquo;
+            &ldquo;{request.details}&rdquo;
           </p>
         )}
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import { Plus, RefreshCw, Inbox } from 'lucide-react'
+import { Plus, RefreshCw, Inbox, Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
 import { RequestCard, type RequestData } from '@/components/features/RequestCard'
@@ -44,6 +44,7 @@ export function BoardClient({
   const [shifts, setShifts] = useState<ShiftData[]>([])
   const [requests, setRequests] = useState<RequestData[]>([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
 
   // Admin: single-select filters
   const [adminFilterProperty, setAdminFilterProperty] = useState('')
@@ -91,7 +92,7 @@ export function BoardClient({
         .from('shifts')
         .select(`
           id, shift_title, created_by, user_id, start_time, end_time,
-          is_trade, is_giveaway, is_overtime_approved, comments, is_active, expires_at, created_at,
+          is_trade, is_giveaway, is_overtime_approved, details, is_active, expires_at, created_at,
           properties(name), locations(name), roles(name)
         `)
         .eq('is_active', true)
@@ -126,7 +127,7 @@ export function BoardClient({
           is_trade: s.is_trade as boolean,
           is_giveaway: s.is_giveaway as boolean,
           is_overtime_approved: s.is_overtime_approved as boolean,
-          comments: s.comments as string | null,
+          details: s.details as string | null,
           is_active: s.is_active as boolean,
           expires_at: s.expires_at as string,
           created_at: s.created_at as string,
@@ -145,7 +146,7 @@ export function BoardClient({
         .from('requests')
         .select(`
           id, created_by, user_id, preferred_times, requested_date,
-          comments, is_active, expires_at, created_at,
+          details, is_active, expires_at, created_at,
           properties(name), locations(name), roles(name)
         `)
         .eq('is_active', true)
@@ -176,7 +177,7 @@ export function BoardClient({
           role_name: (r.roles as { name: string } | null)?.name ?? '',
           preferred_times: r.preferred_times as import('@/lib/database.types').PreferredTime[],
           requested_date: r.requested_date as string,
-          comments: r.comments as string | null,
+          details: r.details as string | null,
           is_active: r.is_active as boolean,
           expires_at: r.expires_at as string,
           created_at: r.created_at as string,
@@ -206,6 +207,31 @@ export function BoardClient({
     if (tab === 'offers') loadShifts()
     else loadRequests()
   }
+
+  const filteredShifts = useMemo(() => {
+    if (!search.trim()) return shifts
+    const q = search.toLowerCase()
+    return shifts.filter(s =>
+      s.shift_title.toLowerCase().includes(q) ||
+      s.created_by.toLowerCase().includes(q) ||
+      s.property_name.toLowerCase().includes(q) ||
+      s.location_name.toLowerCase().includes(q) ||
+      s.role_name.toLowerCase().includes(q) ||
+      (s.details ?? '').toLowerCase().includes(q)
+    )
+  }, [shifts, search])
+
+  const filteredRequests = useMemo(() => {
+    if (!search.trim()) return requests
+    const q = search.toLowerCase()
+    return requests.filter(r =>
+      r.created_by.toLowerCase().includes(q) ||
+      r.property_name.toLowerCase().includes(q) ||
+      r.location_name.toLowerCase().includes(q) ||
+      r.role_name.toLowerCase().includes(q) ||
+      (r.details ?? '').toLowerCase().includes(q)
+    )
+  }, [requests, search])
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -291,6 +317,15 @@ export function BoardClient({
               {adminFilteredLocations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
             </select>
           </div>
+          <div className="relative sm:col-span-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
+            <input
+              className="input pl-9 text-sm"
+              placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       ) : hasProficiencies ? (
         /* Cast/Mod/Leader: multi-select checkboxes from proficiencies */
@@ -346,6 +381,16 @@ export function BoardClient({
               </div>
             </div>
           )}
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
+            <input
+              className="input pl-9 text-sm"
+              placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       ) : null}
 
@@ -366,9 +411,13 @@ export function BoardClient({
             href={hasProficiencies ? '/board/new-shift' : '/profile'}
             btnLabel={hasProficiencies ? 'Post a Shift' : 'Add Proficiencies'}
           />
+        ) : filteredShifts.length === 0 ? (
+          <div className="text-center py-16 px-4 text-text/50 text-sm">
+            No shifts match &ldquo;{search}&rdquo;.
+          </div>
         ) : (
           <div className="space-y-4">
-            {shifts.map(shift => (
+            {filteredShifts.map(shift => (
               <ShiftCard
                 key={shift.id}
                 shift={shift}
@@ -391,9 +440,13 @@ export function BoardClient({
             href={hasProficiencies ? '/board/new-request' : '/profile'}
             btnLabel={hasProficiencies ? 'Post a Request' : 'Add Proficiencies'}
           />
+        ) : filteredRequests.length === 0 ? (
+          <div className="text-center py-16 px-4 text-text/50 text-sm">
+            No requests match &ldquo;{search}&rdquo;.
+          </div>
         ) : (
           <div className="space-y-4">
-            {requests.map(request => (
+            {filteredRequests.map(request => (
               <RequestCard
                 key={request.id}
                 request={request}

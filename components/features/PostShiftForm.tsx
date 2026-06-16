@@ -46,7 +46,7 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
     is_trade: false,
     is_giveaway: false,
     is_overtime_approved: false,
-    comments: '',
+    details: '',
   })
 
   // Properties available for the selected role
@@ -146,7 +146,7 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
         is_trade: form.is_trade,
         is_giveaway: form.is_giveaway,
         is_overtime_approved: form.is_overtime_approved,
-        comments: form.comments || null,
+        details: form.details || null,
         is_active: true,
       } as any)
       if (error) throw error
@@ -284,14 +284,14 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
         {errors.is_trade && <p className="mt-1 text-xs text-warning">{errors.is_trade}</p>}
       </div>
 
-      {/* Comments */}
+      {/* Details */}
       <div>
-        <label className="block text-sm font-medium text-text mb-1">Comments (optional)</label>
+        <label className="block text-sm font-medium text-text mb-1">Details (optional)</label>
         <textarea
-          name="comments"
+          name="details"
           className="input h-20 resize-none"
           placeholder="Any additional details..."
-          value={form.comments}
+          value={form.details}
           onChange={handleChange}
           maxLength={500}
         />

@@ -233,7 +233,7 @@ export interface Database {
           is_trade: boolean
           is_giveaway: boolean
           is_overtime_approved: boolean
-          comments: string | null
+          details: string | null
           is_active: boolean
           created_at: string
           expires_at: string
@@ -251,7 +251,7 @@ export interface Database {
           is_trade?: boolean
           is_giveaway?: boolean
           is_overtime_approved?: boolean
-          comments?: string | null
+          details?: string | null
           is_active?: boolean
           created_at?: string
         }
@@ -268,7 +268,7 @@ export interface Database {
           is_trade?: boolean
           is_giveaway?: boolean
           is_overtime_approved?: boolean
-          comments?: string | null
+          details?: string | null
           is_active?: boolean
           created_at?: string
         }
@@ -313,7 +313,7 @@ export interface Database {
           role_id: string
           preferred_times: PreferredTime[]
           requested_date: string
-          comments: string | null
+          details: string | null
           is_active: boolean
           created_at: string
           expires_at: string
@@ -327,7 +327,7 @@ export interface Database {
           role_id: string
           preferred_times: PreferredTime[]
           requested_date: string
-          comments?: string | null
+          details?: string | null
           is_active?: boolean
           created_at?: string
         }
@@ -340,7 +340,7 @@ export interface Database {
           role_id?: string
           preferred_times?: PreferredTime[]
           requested_date?: string
-          comments?: string | null
+          details?: string | null
           is_active?: boolean
           created_at?: string
         }

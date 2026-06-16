@@ -24,7 +24,7 @@ export interface ShiftData {
   is_trade: boolean
   is_giveaway: boolean
   is_overtime_approved: boolean
-  comments: string | null
+  details: string | null
   is_active: boolean
   expires_at: string
   created_at: string
@@ -105,9 +105,9 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate,
           </div>
         </div>
 
-        {shift.comments && (
+        {shift.details && (
           <p className="text-sm text-text/60 bg-primary-light/50 rounded-md px-3 py-2 mb-4 italic">
-            &ldquo;{shift.comments}&rdquo;
+            &ldquo;{shift.details}&rdquo;
           </p>
         )}
 

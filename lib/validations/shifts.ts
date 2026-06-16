@@ -10,7 +10,7 @@ export const shiftSchema = z.object({
   is_trade: z.boolean().default(false),
   is_giveaway: z.boolean().default(false),
   is_overtime_approved: z.boolean().default(false),
-  comments: z.string().optional(),
+  details: z.string().optional(),
 }).refine(data => new Date(data.end_time) > new Date(data.start_time), {
   message: 'End time must be after start time',
   path: ['end_time'],
@@ -25,7 +25,7 @@ export const requestSchema = z.object({
   role_id: z.string().uuid('Please select a role'),
   requested_date: z.string().min(1, 'Date is required'),
   preferred_times: z.array(z.enum(['morning', 'afternoon', 'evening', 'late'])).min(1, 'Select at least one time preference'),
-  comments: z.string().optional(),
+  details: z.string().optional(),
 })
 
 export type ShiftInput = z.infer<typeof shiftSchema>
