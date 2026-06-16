@@ -21,8 +21,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="WDWShiftX"
-              width={140}
-              height={48}
+              width={1560}
+              height={500}
               className="h-12 w-auto"
               priority
             />

@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${lato.variable} ${philosopher.variable}`}>
+    <html lang="en" className={`${lato.variable} ${philosopher.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -29,7 +29,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans text-text">{children}</body>
+      <body className="font-sans text-text" suppressHydrationWarning>{children}</body>
     </html>
   )
 }

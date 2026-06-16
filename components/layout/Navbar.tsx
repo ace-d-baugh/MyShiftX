@@ -78,8 +78,8 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0 }: Nav
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="WDWShiftX Logo"
-              width={120}
-              height={40}
+              width={1560}
+              height={500}
               priority
               className="h-10 w-auto"
             />
@@ -188,8 +188,8 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0 }: Nav
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="WDWShiftX Logo"
-              width={100}
-              height={32}
+              width={1560}
+              height={500}
               priority
               className="h-7 w-auto"
             />

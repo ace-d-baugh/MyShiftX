@@ -109,10 +109,9 @@ export default function NotFound() {
           <Image
             src="/logos/ShiftX-logo.svg"
             alt="WDWShiftX Logo"
-            width={90}
-            height={30}
-            className="h-7"
-            style={{ width: 'auto' }}
+            width={1560}
+            height={500}
+            className="h-7 w-auto"
           />
         </Link>
       </header>

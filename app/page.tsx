@@ -134,11 +134,10 @@ export default function HomePage() {
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="WDWShiftX Logo"
-              width={120}
-              height={40}
+              width={1560}
+              height={500}
               priority
-              className="h-10" 
-              style={{ width: 'auto' }}
+              className="h-10 w-auto"
             />
           </Link>
           <nav className="flex items-center gap-3">
@@ -349,10 +348,9 @@ export default function HomePage() {
               <Image
                 src="/logos/ShiftX-new.svg"
                 alt="WDWShiftX"
-                width={100}
-                height={32}
-                className="h-8 brightness-0 invert opacity-60"
-                style={{ width: 'auto' }}
+                width={1337}
+                height={429}
+                className="h-8 w-auto brightness-0 invert opacity-60"
               />
             </div>
             <div className="flex gap-6 text-sm">
