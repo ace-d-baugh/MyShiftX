@@ -7,6 +7,7 @@ import { Clock, MapPin, Briefcase, User, Flag, Edit, EyeOff, Mail } from 'lucide
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { FlagModal } from '@/components/features/FlagModal'
+import { CommentSection } from '@/components/features/CommentSection'
 import { cn } from '@/lib/utils'
 
 const ET = 'America/New_York'
@@ -28,6 +29,8 @@ export interface ShiftData {
   is_active: boolean
   expires_at: string
   created_at: string
+  comment_count?: number
+  interested_count?: number
 }
 
 interface ShiftCardProps {
@@ -155,6 +158,16 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate,
             )}
           </div>
         </div>
+
+        <CommentSection
+          postType="shift"
+          postId={shift.id}
+          isOwner={!!isOwner}
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          commentCount={shift.comment_count ?? 0}
+          interestedCount={shift.interested_count ?? 0}
+        />
       </div>
 
       <FlagModal

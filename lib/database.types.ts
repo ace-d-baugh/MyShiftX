@@ -2,8 +2,9 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type UserType = 'Guest' | 'Cast' | 'Mod' | 'Leader' | 'Admin'
 export type FlagStatus = 'pending' | 'resolved' | 'dismissed'
-export type FlagTargetType = 'post' | 'user'
+export type FlagTargetType = 'post' | 'user' | 'comment'
 export type PreferredTime = 'morning' | 'afternoon' | 'evening' | 'late'
+export type CommentPostType = 'shift' | 'request'
 
 export interface Database {
   public: {
@@ -410,6 +411,50 @@ export interface Database {
           {
             foreignKeyName: "flags_flagged_by_user_id_fkey"
             columns: ["flagged_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      comments: {
+        Row: {
+          id: string
+          post_type: CommentPostType
+          post_id: string
+          user_id: string | null
+          body: string
+          is_interested: boolean
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          post_type: CommentPostType
+          post_id: string
+          user_id?: string | null
+          body: string
+          is_interested?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          post_type?: CommentPostType
+          post_id?: string
+          user_id?: string | null
+          body?: string
+          is_interested?: boolean
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]

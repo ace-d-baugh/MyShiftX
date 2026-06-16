@@ -26,13 +26,16 @@ export function FlagsClient({ flags: initialFlags, resolverId }: FlagsClientProp
   const [flags, setFlags] = useState(initialFlags)
   const [processing, setProcessing] = useState<string | null>(null)
 
-  const resolveFlag = async (id: string, action: 'resolved' | 'dismissed') => {
-    setProcessing(id)
+  const resolveFlag = async (flag: FlagItem, action: 'resolved' | 'dismissed') => {
+    setProcessing(flag.id)
+    if (action === 'resolved' && flag.target_type === 'comment') {
+      await (supabase as any).from('comments').update({ is_active: false } as any).eq('id', flag.target_id)
+    }
     await (supabase as any).from('flags').update({
       status: action,
       resolved_by_user_id: resolverId,
-    } as any).eq('id', id)
-    setFlags(prev => prev.filter(f => f.id !== id))
+    } as any).eq('id', flag.id)
+    setFlags(prev => prev.filter(f => f.id !== flag.id))
     setProcessing(null)
   }
 
@@ -77,16 +80,16 @@ export function FlagsClient({ flags: initialFlags, resolverId }: FlagsClientProp
                   size="sm"
                   variant="danger"
                   loading={processing === flag.id}
-                  onClick={() => resolveFlag(flag.id, 'resolved')}
+                  onClick={() => resolveFlag(flag, 'resolved')}
                   className="gap-1 min-h-0 h-9 px-3 text-xs"
                 >
-                  <Trash2 className="w-3.5 h-3.5" /> Remove Post
+                  <Trash2 className="w-3.5 h-3.5" /> {flag.target_type === 'comment' ? 'Remove Comment' : 'Remove Post'}
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   loading={processing === flag.id}
-                  onClick={() => resolveFlag(flag.id, 'dismissed')}
+                  onClick={() => resolveFlag(flag, 'dismissed')}
                   className="gap-1 min-h-0 h-9 px-3 text-xs"
                 >
                   <CheckCircle className="w-3.5 h-3.5" /> Dismiss Flag

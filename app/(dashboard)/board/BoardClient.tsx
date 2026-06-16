@@ -92,6 +92,34 @@ export function BoardClient({
     })
   }
 
+  const attachCommentCounts = useCallback(async <T extends { id: string }>(
+    items: T[],
+    postType: 'shift' | 'request'
+  ): Promise<(T & { comment_count: number; interested_count: number })[]> => {
+    if (items.length === 0) return []
+    const ids = items.map(i => i.id)
+    const { data } = await supabase
+      .from('comments')
+      .select('post_id, user_id, is_interested')
+      .eq('post_type', postType)
+      .eq('is_active', true)
+      .in('post_id', ids)
+
+    const counts = new Map<string, { total: number; interested: Set<string> }>()
+    ;(data ?? []).forEach((c: { post_id: string; user_id: string | null; is_interested: boolean }) => {
+      const entry = counts.get(c.post_id) ?? { total: 0, interested: new Set<string>() }
+      entry.total += 1
+      if (c.is_interested && c.user_id) entry.interested.add(c.user_id)
+      counts.set(c.post_id, entry)
+    })
+
+    return items.map(i => ({
+      ...i,
+      comment_count: counts.get(i.id)?.total ?? 0,
+      interested_count: counts.get(i.id)?.interested.size ?? 0,
+    }))
+  }, [supabase])
+
   const loadShifts = useCallback(async () => {
     if (!hasProficiencies) { setLoading(false); return }
     setLoading(true)
@@ -121,30 +149,29 @@ export function BoardClient({
       const { data, error } = await query
       if (error) throw error
 
-      setShifts(
-        (data ?? []).map((s: Record<string, unknown>) => ({
-          id: s.id as string,
-          shift_title: s.shift_title as string,
-          created_by: s.created_by as string,
-          user_id: s.user_id as string | null,
-          property_name: (s.properties as { name: string } | null)?.name ?? '',
-          location_name: (s.locations as { name: string } | null)?.name ?? '',
-          role_name: (s.roles as { name: string } | null)?.name ?? '',
-          start_time: s.start_time as string,
-          end_time: s.end_time as string,
-          is_trade: s.is_trade as boolean,
-          is_giveaway: s.is_giveaway as boolean,
-          is_overtime_approved: s.is_overtime_approved as boolean,
-          details: s.details as string | null,
-          is_active: s.is_active as boolean,
-          expires_at: s.expires_at as string,
-          created_at: s.created_at as string,
-        }))
-      )
+      const mapped = (data ?? []).map((s: Record<string, unknown>) => ({
+        id: s.id as string,
+        shift_title: s.shift_title as string,
+        created_by: s.created_by as string,
+        user_id: s.user_id as string | null,
+        property_name: (s.properties as { name: string } | null)?.name ?? '',
+        location_name: (s.locations as { name: string } | null)?.name ?? '',
+        role_name: (s.roles as { name: string } | null)?.name ?? '',
+        start_time: s.start_time as string,
+        end_time: s.end_time as string,
+        is_trade: s.is_trade as boolean,
+        is_giveaway: s.is_giveaway as boolean,
+        is_overtime_approved: s.is_overtime_approved as boolean,
+        details: s.details as string | null,
+        is_active: s.is_active as boolean,
+        expires_at: s.expires_at as string,
+        created_at: s.created_at as string,
+      }))
+      setShifts(await attachCommentCounts(mapped, 'shift'))
     } finally {
       setLoading(false)
     }
-  }, [isAdmin, hasProficiencies, adminFilterProperty, adminFilterLocation, adminFilterRole, selectedRoleIds, selectedLocationIds])
+  }, [isAdmin, hasProficiencies, adminFilterProperty, adminFilterLocation, adminFilterRole, selectedRoleIds, selectedLocationIds, attachCommentCounts])
 
   const loadRequests = useCallback(async () => {
     if (!hasProficiencies) { setLoading(false); return }
@@ -175,26 +202,25 @@ export function BoardClient({
       const { data, error } = await query
       if (error) throw error
 
-      setRequests(
-        (data ?? []).map((r: Record<string, unknown>) => ({
-          id: r.id as string,
-          created_by: r.created_by as string,
-          user_id: r.user_id as string | null,
-          property_name: (r.properties as { name: string } | null)?.name ?? '',
-          location_name: (r.locations as { name: string } | null)?.name ?? '',
-          role_name: (r.roles as { name: string } | null)?.name ?? '',
-          preferred_times: r.preferred_times as import('@/lib/database.types').PreferredTime[],
-          requested_date: r.requested_date as string,
-          details: r.details as string | null,
-          is_active: r.is_active as boolean,
-          expires_at: r.expires_at as string,
-          created_at: r.created_at as string,
-        }))
-      )
+      const mapped = (data ?? []).map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        created_by: r.created_by as string,
+        user_id: r.user_id as string | null,
+        property_name: (r.properties as { name: string } | null)?.name ?? '',
+        location_name: (r.locations as { name: string } | null)?.name ?? '',
+        role_name: (r.roles as { name: string } | null)?.name ?? '',
+        preferred_times: r.preferred_times as import('@/lib/database.types').PreferredTime[],
+        requested_date: r.requested_date as string,
+        details: r.details as string | null,
+        is_active: r.is_active as boolean,
+        expires_at: r.expires_at as string,
+        created_at: r.created_at as string,
+      }))
+      setRequests(await attachCommentCounts(mapped, 'request'))
     } finally {
       setLoading(false)
     }
-  }, [isAdmin, hasProficiencies, adminFilterProperty, adminFilterLocation, adminFilterRole, selectedRoleIds, selectedLocationIds])
+  }, [isAdmin, hasProficiencies, adminFilterProperty, adminFilterLocation, adminFilterRole, selectedRoleIds, selectedLocationIds, attachCommentCounts])
 
   useEffect(() => {
     if (tab === 'offers') loadShifts()

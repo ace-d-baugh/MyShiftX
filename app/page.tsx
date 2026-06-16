@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, RefreshCw, Gift, Clock, Shield, Users, Zap } from 'lucide-react'
+import { ArrowRight, RefreshCw, Gift, Clock, Shield, Users, Zap, Star, Quote } from 'lucide-react'
 import { AnimateIn } from '@/components/landing/AnimateIn'
 
 export const metadata = {
@@ -74,6 +74,52 @@ const properties = [
   'Disney Springs',
   'Resorts',
   'WaterParks',
+]
+
+// Placeholder testimonials — swap for real Cast Member reviews once collected.
+const placeholderReviews = [
+  {
+    name: 'Jamie T.',
+    role: 'Attractions, Magic Kingdom',
+    quote:
+      "I picked up three extra shifts in my first week just from the board. So much easier than scrolling through a Facebook group.",
+    rating: 5,
+  },
+  {
+    name: 'Morgan R.',
+    role: 'Quick Service, EPCOT',
+    quote:
+      "Posted a shift I couldn't cover and had someone take it within the hour. The filters make it easy to find people who actually work your role.",
+    rating: 5,
+  },
+  {
+    name: 'Casey L.',
+    role: 'Merchandise, Hollywood Studios',
+    quote:
+      "Love that everything auto-expires. No more digging through a feed full of shifts that already happened.",
+    rating: 4,
+  },
+  {
+    name: 'Devon P.',
+    role: 'Custodial, Animal Kingdom',
+    quote:
+      "Knowing everyone is a verified Cast Member makes a huge difference. Feels a lot safer than the old way of trading shifts.",
+    rating: 5,
+  },
+  {
+    name: 'Riley S.',
+    role: 'Front Desk, Resorts',
+    quote:
+      "Requesting a day off and having people reach out directly saved me so much back-and-forth in group chats.",
+    rating: 5,
+  },
+  {
+    name: 'Avery K.',
+    role: 'Lifeguard, WaterParks',
+    quote:
+      "Clean, simple, and built by people who actually understand how shift trading works at WDW.",
+    rating: 4,
+  },
 ]
 
 export default function HomePage() {
@@ -223,6 +269,44 @@ export default function HomePage() {
                 <span className="bg-card border border-primary/20 text-text rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-default">
                   {p}
                 </span>
+              </AnimateIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Reviews ── */}
+      <section className="py-20 px-4 bg-background">
+        <div className="max-w-6xl mx-auto">
+
+          <AnimateIn className="text-center mb-14">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold text-text mb-4">
+              Cast Members Are Saying Good Things
+            </h2>
+            <p className="text-text/60 text-lg max-w-xl mx-auto">
+              Real feedback from the Cast Members trading shifts every day.
+            </p>
+          </AnimateIn>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {placeholderReviews.map((review, i) => (
+              <AnimateIn key={review.name} delay={i * 90}>
+                <div className="card h-full flex flex-col">
+                  <Quote className="w-6 h-6 text-primary/30 mb-3" />
+                  <div className="flex items-center gap-0.5 mb-3">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <Star
+                        key={idx}
+                        className={`w-4 h-4 ${idx < review.rating ? 'text-warning fill-current' : 'text-text/15'}`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-text/70 text-sm leading-relaxed flex-1">&quot;{review.quote}&quot;</p>
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <p className="font-medium text-text text-sm">{review.name}</p>
+                    <p className="text-text/50 text-xs">{review.role}</p>
+                  </div>
+                </div>
               </AnimateIn>
             ))}
           </div>

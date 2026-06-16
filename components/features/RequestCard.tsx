@@ -7,6 +7,7 @@ import { Calendar, MapPin, Briefcase, User, Flag, Edit, EyeOff, Mail, Clock } fr
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { FlagModal } from '@/components/features/FlagModal'
+import { CommentSection } from '@/components/features/CommentSection'
 import { cn } from '@/lib/utils'
 import type { PreferredTime } from '@/lib/database.types'
 
@@ -37,6 +38,8 @@ export interface RequestData {
   is_active: boolean
   expires_at: string
   created_at: string
+  comment_count?: number
+  interested_count?: number
 }
 
 interface RequestCardProps {
@@ -155,6 +158,16 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
             )}
           </div>
         </div>
+
+        <CommentSection
+          postType="request"
+          postId={request.id}
+          isOwner={!!isOwner}
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          commentCount={request.comment_count ?? 0}
+          interestedCount={request.interested_count ?? 0}
+        />
       </div>
 
       <FlagModal
