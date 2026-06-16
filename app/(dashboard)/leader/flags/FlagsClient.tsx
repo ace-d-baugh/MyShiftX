@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Flag, CheckCircle, XCircle, ExternalLink } from 'lucide-react'
+import { Flag, CheckCircle, Trash2, ExternalLink } from 'lucide-react'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
@@ -80,7 +80,7 @@ export function FlagsClient({ flags: initialFlags, resolverId }: FlagsClientProp
                   onClick={() => resolveFlag(flag.id, 'resolved')}
                   className="gap-1 min-h-0 h-9 px-3 text-xs"
                 >
-                  <XCircle className="w-3.5 h-3.5" /> Remove Post
+                  <Trash2 className="w-3.5 h-3.5" /> Remove Post
                 </Button>
                 <Button
                   size="sm"

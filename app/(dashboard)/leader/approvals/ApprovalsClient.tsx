@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, XCircle, MapPin, Briefcase } from 'lucide-react'
+import { CheckCircle, Trash2, MapPin, Briefcase } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { useRouter } from 'next/navigation'
@@ -117,7 +117,7 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, approverId }: 
                     onClick={() => rejectLocation(loc.id)}
                     className="gap-1 min-h-0 h-9 px-3"
                   >
-                    <XCircle className="w-4 h-4" /> Remove
+                    <Trash2 className="w-4 h-4" /> Remove
                   </Button>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, approverId }: 
                     onClick={() => rejectRole(role.id)}
                     className="gap-1 min-h-0 h-9 px-3"
                   >
-                    <XCircle className="w-4 h-4" /> Remove
+                    <Trash2 className="w-4 h-4" /> Remove
                   </Button>
                 </div>
               </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
-import { Settings, Building, MapPin, Briefcase, Users, Plus, CheckCircle, XCircle, Pencil, X, Save, Search, UserCog } from 'lucide-react'
+import { Settings, Building, MapPin, Briefcase, Users, Plus, CheckCircle, Pencil, X, Save, Search, UserCog, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -71,6 +71,9 @@ export function AdminClient({
   // Inline editing
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingValue, setEditingValue] = useState('')
+
+  // Delete confirmation
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 
   // Cast tab filters
   const [castSearch, setCastSearch] = useState('')
@@ -195,8 +198,23 @@ export function AdminClient({
   }
 
   const startEdit = (id: string, name: string) => {
+    setDeleteConfirmId(null)
     setEditingId(id)
     setEditingValue(name)
+  }
+
+  const deleteProperty = async (id: string) => {
+    setProcessing(id)
+    const { error: e } = await (supabase as any).from('properties').delete().eq('id', id)
+    if (e) {
+      setError(e.message)
+    } else {
+      setProperties(prev => prev.filter(p => p.id !== id))
+      setLocations(prev => prev.filter(l => l.property_id !== id))
+      showSuccess('Property deleted.')
+    }
+    setDeleteConfirmId(null)
+    setProcessing(null)
   }
 
   const tabs: { key: AdminTab; label: string; icon: React.ReactNode }[] = [
@@ -298,17 +316,17 @@ export function AdminClient({
                         {r.is_approved ? 'Approved' : 'Pending'}
                       </span>
                       <button
-                        onClick={() => toggleRoleApproval(r.id, r.is_approved)}
-                        disabled={processing === r.id}
-                        className="p-1.5 text-text/50 hover:text-primary min-h-0 min-w-0 transition-colors"
-                      >
-                        {r.is_approved ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-                      </button>
-                      <button
                         onClick={() => startEdit(r.id, r.name)}
                         className="p-1.5 text-text/50 hover:text-primary min-h-0 min-w-0 transition-colors"
                       >
                         <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => toggleRoleApproval(r.id, r.is_approved)}
+                        disabled={processing === r.id}
+                        className="p-1.5 text-text/50 hover:text-primary min-h-0 min-w-0 transition-colors"
+                      >
+                        {r.is_approved ? <Trash2 className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                       </button>
                     </div>
                   </>
@@ -335,49 +353,79 @@ export function AdminClient({
             </Button>
           </div>
           <div className="space-y-2">
-            {properties.map(p => (
-              <div key={p.id} className="card flex items-center gap-4">
-                {editingId === p.id ? (
-                  <>
-                    <input
-                      className="input flex-1 text-sm"
-                      value={editingValue}
-                      onChange={e => setEditingValue(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') saveEditInline('properties', p.id); if (e.key === 'Escape') setEditingId(null) }}
-                      autoFocus
-                    />
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        onClick={() => saveEditInline('properties', p.id)}
-                        disabled={processing === p.id}
-                        className="p-1.5 rounded text-success hover:bg-success/10 min-h-0 min-w-0 transition-colors"
-                      >
-                        <Save className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="p-1.5 rounded text-text/50 hover:bg-text/10 min-h-0 min-w-0 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <span className="font-medium text-text flex-1">{p.name}</span>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs text-text/40">{new Date(p.created_at).toLocaleDateString()}</span>
-                      <button
-                        onClick={() => startEdit(p.id, p.name)}
-                        className="p-1.5 text-text/50 hover:text-primary min-h-0 min-w-0 transition-colors"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
+            {properties.map(p => {
+              const locCount = locations.filter(l => l.property_id === p.id).length
+              return (
+                <div key={p.id} className="card flex items-center gap-4">
+                  {editingId === p.id ? (
+                    <>
+                      <input
+                        className="input flex-1 text-sm"
+                        value={editingValue}
+                        onChange={e => setEditingValue(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') saveEditInline('properties', p.id); if (e.key === 'Escape') setEditingId(null) }}
+                        autoFocus
+                      />
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => saveEditInline('properties', p.id)}
+                          disabled={processing === p.id}
+                          className="p-1.5 rounded text-success hover:bg-success/10 min-h-0 min-w-0 transition-colors"
+                        >
+                          <Save className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="p-1.5 rounded text-text/50 hover:bg-text/10 min-h-0 min-w-0 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </>
+                  ) : deleteConfirmId === p.id ? (
+                    <>
+                      <span className="text-sm text-warning flex-1">
+                        Delete &ldquo;{p.name}&rdquo;{locCount > 0 ? ` and its ${locCount} location${locCount === 1 ? '' : 's'}` : ''}? This cannot be undone.
+                      </span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => deleteProperty(p.id)}
+                          disabled={processing === p.id}
+                          className="p-1.5 rounded text-warning hover:bg-warning/10 min-h-0 min-w-0 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmId(null)}
+                          className="p-1.5 rounded text-text/50 hover:bg-text/10 min-h-0 min-w-0 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-medium text-text flex-1">{p.name}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-text/40">{new Date(p.created_at).toLocaleDateString()}</span>
+                        <button
+                          onClick={() => startEdit(p.id, p.name)}
+                          className="p-1.5 text-text/50 hover:text-primary min-h-0 min-w-0 transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmId(p.id)}
+                          className="p-1.5 text-text/50 hover:text-warning min-h-0 min-w-0 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
@@ -440,17 +488,17 @@ export function AdminClient({
                         {l.is_approved ? 'Approved' : 'Pending'}
                       </span>
                       <button
-                        onClick={() => toggleLocationApproval(l.id, l.is_approved)}
-                        disabled={processing === l.id}
-                        className="p-1.5 text-text/50 hover:text-primary min-h-0 min-w-0 transition-colors"
-                      >
-                        {l.is_approved ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-                      </button>
-                      <button
                         onClick={() => startEdit(l.id, l.name)}
                         className="p-1.5 text-text/50 hover:text-primary min-h-0 min-w-0 transition-colors"
                       >
                         <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => toggleLocationApproval(l.id, l.is_approved)}
+                        disabled={processing === l.id}
+                        className="p-1.5 text-text/50 hover:text-primary min-h-0 min-w-0 transition-colors"
+                      >
+                        {l.is_approved ? <Trash2 className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                       </button>
                     </div>
                   </>
