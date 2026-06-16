@@ -40,10 +40,10 @@ interface AdminClientProps {
   currentUserType: UserType
 }
 
-const userTypeOptions: UserType[] = ['Guest', 'Cast', 'CoPro', 'Leader', 'Admin']
+const userTypeOptions: UserType[] = ['Guest', 'Cast', 'Mod', 'Leader', 'Admin']
 
-const userTypeVariant: Record<UserType, 'guest' | 'cast' | 'copro' | 'leader' | 'admin'> = {
-  Guest: 'guest', Cast: 'cast', CoPro: 'copro', Leader: 'leader', Admin: 'admin',
+const userTypeVariant: Record<UserType, 'guest' | 'cast' | 'mod' | 'leader' | 'admin'> = {
+  Guest: 'guest', Cast: 'cast', Mod: 'mod', Leader: 'leader', Admin: 'admin',
 }
 
 export function AdminClient({

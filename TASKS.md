@@ -6,7 +6,7 @@ WDWShiftX appears to be a mostly complete application based on the PRD and code 
 ## Completed Core Features
 - ✅ Database schema with all required tables (users, properties, locations, roles, user_proficiencies, shifts, requests, flags, black_listed)
 - ✅ Authentication system (login, register, forgot password, verify email, reset password)
-- ✅ Role-based access control (Cast, CoPro, Leader, Admin)
+- ✅ Role-based access control (Cast, Mod, Leader, Admin)
 - ✅ Shift board UI with filtering by proficiencies
 - ✅ Request board UI
 - ✅ Proficiency system (Property → Location → Role hierarchy)

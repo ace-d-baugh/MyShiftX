@@ -293,7 +293,7 @@ export function BoardClient({
           </div>
         </div>
       ) : hasProficiencies ? (
-        /* Cast/CoPro/Leader: multi-select checkboxes from proficiencies */
+        /* Cast/Mod/Leader: multi-select checkboxes from proficiencies */
         <div className="mb-6 p-4 bg-primary-light/40 rounded-lg space-y-4">
           {uniqueRoles.length > 0 && (
             <div>

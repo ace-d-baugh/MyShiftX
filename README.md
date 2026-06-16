@@ -58,7 +58,7 @@ WDWShiftX provides:
 1. **Structured Data:** Every post follows a consistent format (Property → Location → Role → DateTime)
 2. **Smart Filtering:** Users only see shifts they're qualified for based on saved proficiencies
 3. **Verification:** HubID + PERNER validation ensures only active Cast Members can register
-4. **Role-Based Moderation:** Copros, Leaders, and Admins maintain platform integrity
+4. **Role-Based Moderation:** Mods, Leaders, and Admins maintain platform integrity
 5. **Audit Trails:** Soft deletes and flag systems provide accountability
 
 ---
@@ -88,7 +88,7 @@ WDWShiftX provides:
 ### 🔐 Security & Verification
 - HubID + PERNER validation (never stored)
 - Email verification required
-- Auto-promotion to CoPro for @disney.com emails
+- Auto-promotion to Mod for @disney.com emails
 - Inactivity management (3-month warning, 5-month deactivation)
 
 ### 🎯 Proficiency System
@@ -115,8 +115,8 @@ WDWShiftX provides:
 |------|-------------|
 | **Guest** | View landing page, login, register |
 | **Cast** | View/filter boards, post shifts/requests, edit profile |
-| **CoPro** | Cast permissions + CRUD all posts, flag users, deactivate other Copros |
-| **Leader** | CoPro permissions + approve suggestions, manage flags, access archives |
+| **Mod** | Cast permissions + CRUD all posts, flag users, deactivate other Mods |
+| **Leader** | Mod permissions + approve suggestions, manage flags, access archives |
 | **Admin** | Full system control, manage Properties, assign Leader permissions |
 
 ---

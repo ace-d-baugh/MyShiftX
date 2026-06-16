@@ -8,7 +8,7 @@
 1. [Authentication & Registration](#1-authentication--registration)
 2. [Guest User](#2-guest-user)
 3. [Cast Member](#3-cast-member)
-4. [CoPro](#4-copro)
+4. [Mod](#4-mod)
 5. [Leader](#5-leader)
 6. [Admin](#6-admin)
 7. [Database Verification](#7-database-verification)
@@ -216,23 +216,23 @@
 
 ---
 
-## 4. CoPro
+## 4. Mod
 
-> **Setup:** An account with `user_type = 'CoPro'`, with proficiencies set.
+> **Setup:** An account with `user_type = 'Mod'`, with proficiencies set.
 
-### COPRO-001 — Board behavior
+### MOD-001 — Board behavior
 
 | # | Step | Expected Result |
 |---|------|-----------------|
 | 1 | Go to `/board` | Board loads; filter panel shows checkboxes (same as Cast, proficiency-scoped) |
-| 2 | Posts visible | Only posts matching CoPro's own proficiencies appear |
+| 2 | Posts visible | Only posts matching Mod's own proficiencies appear |
 
 **Result:** `[ ]`
 **Comments:**
 
 ---
 
-### COPRO-002 — Access restrictions
+### MOD-002 — Access restrictions
 
 | # | Step | Expected Result |
 |---|------|-----------------|
@@ -426,7 +426,7 @@
 
 | # | Check | Expected |
 |---|-------|----------|
-| 1 | `SELECT * FROM user_types ORDER BY name;` | 5 rows: Admin, Cast, CoPro, Guest, Leader |
+| 1 | `SELECT * FROM user_types ORDER BY name;` | 5 rows: Admin, Cast, Guest, Leader, Mod |
 | 2 | All values are capitalized (not lowercase) | ✓ |
 
 **Result:** `[ ]`
@@ -438,7 +438,7 @@
 
 | # | Check | Expected |
 |---|-------|----------|
-| 1 | `SELECT DISTINCT user_type FROM users;` | Only values from the set: Guest, Cast, CoPro, Leader, Admin |
+| 1 | `SELECT DISTINCT user_type FROM users;` | Only values from the set: Guest, Cast, Mod, Leader, Admin |
 | 2 | `SELECT * FROM users WHERE user_type = 'guest';` | 0 rows (old lowercase values should be gone) |
 | 3 | New user created via registration | Row exists with `user_type = 'Guest'` and `is_active = true` |
 | 4 | After email verification | Same user's `user_type` changes to `'Cast'` |

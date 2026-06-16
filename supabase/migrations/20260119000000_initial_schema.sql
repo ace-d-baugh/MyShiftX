@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS user_types (
 INSERT INTO user_types (name) VALUES
   ('Guest'),
   ('Cast'),
-  ('CoPro'),
+  ('Mod'),
   ('Leader'),
   ('Admin')
 ON CONFLICT (name) DO NOTHING;
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone_number TEXT,
   notify_via_email BOOLEAN DEFAULT FALSE,
   notify_via_sms BOOLEAN DEFAULT FALSE,
-  user_type TEXT CHECK (user_type IN ('Guest', 'Cast', 'CoPro', 'Leader', 'Admin')) DEFAULT 'Guest',
+  user_type TEXT CHECK (user_type IN ('Guest', 'Cast', 'Mod', 'Leader', 'Admin')) DEFAULT 'Guest',
   is_active BOOLEAN DEFAULT TRUE,
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),

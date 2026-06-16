@@ -94,8 +94,8 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
     )
   }
 
-  const userTypeVariant: Record<UserType, 'guest' | 'cast' | 'copro' | 'leader' | 'admin'> = {
-    Guest: 'guest', Cast: 'cast', CoPro: 'copro', Leader: 'leader', Admin: 'admin',
+  const userTypeVariant: Record<UserType, 'guest' | 'cast' | 'mod' | 'leader' | 'admin'> = {
+    Guest: 'guest', Cast: 'cast', Mod: 'mod', Leader: 'leader', Admin: 'admin',
   }
 
   return (

@@ -1,6 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export type UserType = 'Guest' | 'Cast' | 'CoPro' | 'Leader' | 'Admin'
+export type UserType = 'Guest' | 'Cast' | 'Mod' | 'Leader' | 'Admin'
 export type FlagStatus = 'pending' | 'resolved' | 'dismissed'
 export type FlagTargetType = 'post' | 'user'
 export type PreferredTime = 'morning' | 'afternoon' | 'evening' | 'late'
