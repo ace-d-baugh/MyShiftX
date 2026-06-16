@@ -11,7 +11,8 @@
 4. [Mod](#4-mod)
 5. [Leader](#5-leader)
 6. [Admin](#6-admin)
-7. [Database Verification](#7-database-verification)
+7. [Proficiency Approval Workflow](#7-proficiency-approval-workflow)
+8. [Database Verification](#8-database-verification)
 
 ---
 
@@ -121,7 +122,7 @@
 
 ## 3. Cast Member
 
-> **Setup:** A verified account with `user_type = 'Cast'`. Should have at least 2 proficiencies set up (different roles and locations).
+> **Setup:** A verified account with `user_type = 'Cast'`. Should have at least 2 **approved** proficiencies set up (different roles and locations).
 
 ### CAST-001 — Profile & proficiency selector
 
@@ -134,8 +135,10 @@
 | 5 | On a medium-width screen (≥768px) | Location checkboxes display in 2 columns |
 | 6 | On a narrow screen (<768px) | Location checkboxes display in 1 column |
 | 7 | Select multiple locations and click "Add X Proficiencies" | Button label shows the count (e.g., "Add 3 Proficiencies") |
-| 8 | After adding | New rows appear in the proficiency list; one row per location |
-| 9 | Click the trash icon on a proficiency | Row is removed immediately |
+| 8 | After adding | New rows appear in the proficiency list; one row per location, each showing a "Pending" badge |
+| 9 | Pre-existing, already-approved proficiencies | Show no badge (no "Pending" pill) |
+| 10 | Helper text above the list | Mentions that new proficiencies need Mod/Leader approval before they unlock the board |
+| 11 | Click the trash icon on a proficiency (pending or approved) | Row is removed immediately |
 
 **Result:** `[ ]`
 **Comments:**
@@ -154,6 +157,7 @@
 | 6 | A post exists for a role/location **not** in your proficiencies | That post does **not** appear in your board |
 | 7 | A post exists for a role/location **in** your proficiencies | That post **does** appear |
 | 8 | Click "Shift Requests" tab | Requests load with same proficiency-scoped filters |
+| 9 | A post exists for a role/location where you only hold a **pending** (unapproved) proficiency | That post does **not** appear, and that role/location is absent from the filter checkboxes entirely |
 
 **Result:** `[ ]`
 **Comments:**
@@ -166,6 +170,7 @@
 |---|------|-----------------|
 | 1 | Cast with **no proficiencies** goes to `/board` | Shows "Try adjusting your proficiencies" with a link to `/profile` |
 | 2 | Cast **with proficiencies** but no matching posts | Shows "Be the first to post!" with a "Post a Shift" button |
+| 3 | Cast whose **only** proficiency is still **pending** approval | Board treats them the same as "no proficiencies" — shows the "Add Proficiencies" empty state, not "Be the first to post!" |
 
 **Result:** `[ ]`
 **Comments:**
@@ -177,7 +182,7 @@
 | # | Step | Expected Result |
 |---|------|-----------------|
 | 1 | Click "Post Shift" on the board | Post Shift form loads |
-| 2 | Role dropdown | Only shows roles from **your proficiencies** |
+| 2 | Role dropdown | Only shows roles from your **approved** proficiencies; a role you only hold as a pending proficiency is absent |
 | 3 | Select a Role | Property dropdown populates with only properties linked to that role in your proficiencies |
 | 4 | Select a Property | Location dropdown populates with only locations for that role+property combo |
 | 5 | Select a different Role | Property and Location fields reset |
@@ -194,7 +199,7 @@
 | # | Step | Expected Result |
 |---|------|-----------------|
 | 1 | Click "Post Request" on the board | Post Request form loads |
-| 2 | Role → Property → Location cascade | Same cascading behavior as Post Shift (proficiency-scoped) |
+| 2 | Role → Property → Location cascade | Same cascading behavior as Post Shift (proficiency-scoped, **approved-only**) |
 | 3 | Submit a valid request | Request appears on the Shift Requests tab |
 
 **Result:** `[ ]`
@@ -218,7 +223,7 @@
 
 ## 4. Mod
 
-> **Setup:** An account with `user_type = 'Mod'`, with proficiencies set.
+> **Setup:** An account with `user_type = 'Mod'`, with at least one **approved** proficiency (needed to test Cast Approval scoping in Section 7).
 
 ### MOD-001 — Board behavior
 
@@ -232,12 +237,27 @@
 
 ---
 
-### MOD-002 — Access restrictions
+### MOD-002 — Approvals access (scoped)
 
 | # | Step | Expected Result |
 |---|------|-----------------|
 | 1 | Navigate to `/admin` | Redirected to `/board` |
-| 2 | Navigate to `/leader/approvals` | Redirected away |
+| 2 | Navigate to `/leader/approvals` | Page loads (Mod is **not** redirected away) |
+| 3 | Page content | Only the "Cast Approvals" section is visible; Locations and Roles sections are absent entirely |
+| 4 | Navigate to `/leader/flags` | Redirected away |
+| 5 | Navigate to `/leader/archive` | Redirected away |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+### MOD-003 — Navbar
+
+| # | Step | Expected Result |
+|---|------|-----------------|
+| 1 | Navbar while logged in as Mod | Shows Board, Profile, Approvals links |
+| 2 | Navbar | Does **not** show Flags, Archive, or Admin links |
 
 **Result:** `[ ]`
 **Comments:**
@@ -264,7 +284,7 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Navigate to `/leader/approvals` | Approvals page loads |
+| 1 | Navigate to `/leader/approvals` | Approvals page loads, showing **all three** sections: Cast Approvals, Locations, Roles |
 | 2 | Navigate to `/leader/flags` | Flags page loads |
 | 3 | Navigate to `/leader/archive` | Archive page loads |
 | 4 | Navbar | Shows Approvals, Flags, Archive links; does **not** show Admin link |
@@ -418,7 +438,106 @@
 
 ---
 
-## 7. Database Verification
+## 7. Proficiency Approval Workflow
+
+> **Setup:** Need at least one Cast account, one Mod account with an approved proficiency, one Leader account, and one Admin account. The Mod and Leader should hold an approved proficiency for the **same** role+location as the Cast user's pending request for the scoping tests.
+
+### PROF-001 — New proficiency starts pending
+
+| # | Step | Expected Result |
+|---|------|-----------------|
+| 1 | As Cast, add a new proficiency via `/profile` | Row appears immediately with a "Pending" badge |
+| 2 | Check Supabase `user_proficiencies` row for it | `is_approved = false`, `suggested_by_user_id` = the Cast user's id, `approved_by_user_id` and `approved_at` are `null` |
+| 3 | Go to `/board` | The role/location from the pending proficiency grants **no** board access (post visibility, filters unaffected by it) |
+| 4 | Try to post a shift/request for that role | Role is absent from the Post Shift / Post Request role dropdown |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+### PROF-002 — Approval unlocks board access
+
+| # | Step | Expected Result |
+|---|------|-----------------|
+| 1 | A Mod/Leader/Admin approves the Cast user's pending proficiency (see PROF-005) | — |
+| 2 | Cast user refreshes `/profile` | The "Pending" badge is gone from that row |
+| 3 | Cast user refreshes `/board` | That role/location now appears in the filter checkboxes and matching posts become visible |
+| 4 | Cast user opens Post Shift / Post Request | That role now appears in the Role dropdown |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+### PROF-003 — Approvals page visibility by role
+
+| # | Step | Expected Result |
+|---|------|-----------------|
+| 1 | Cast navigates to `/leader/approvals` | Redirected away; no access |
+| 2 | Mod navigates to `/leader/approvals` | Page loads; only "Cast Approvals" section is shown |
+| 3 | Leader navigates to `/leader/approvals` | Page loads; "Cast Approvals", "Locations", and "Roles" sections all shown |
+| 4 | Admin navigates to `/leader/approvals` | Page loads; all three sections shown |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+### PROF-004 — Approval scoping (Mod/Leader vs Admin)
+
+| # | Step | Expected Result |
+|---|------|-----------------|
+| 1 | Cast submits a pending proficiency for Role A / Location A | Row created with `is_approved = false` |
+| 2 | A Mod whose own approved proficiency is Role A / Location A opens "Cast Approvals" | The pending request **is** visible in the list |
+| 3 | A different Mod whose approved proficiencies do **not** include Role A / Location A opens "Cast Approvals" | The pending request is **not** visible in their list |
+| 4 | Admin opens "Cast Approvals" | The pending request is visible regardless of the Admin's own proficiencies |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+### PROF-005 — Approve action
+
+| # | Step | Expected Result |
+|---|------|-----------------|
+| 1 | In "Cast Approvals", click "Approve" on a pending row | Row disappears from the list immediately |
+| 2 | Check the `user_proficiencies` row in Supabase | `is_approved = true`, `approved_by_user_id` = the approver's id, `approved_at` is populated |
+| 3 | Queue count in the header | Decrements by 1 |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+### PROF-006 — Reject action
+
+| # | Step | Expected Result |
+|---|------|-----------------|
+| 1 | In "Cast Approvals", click "Remove" on a pending row | Row disappears from the list immediately |
+| 2 | Check Supabase `user_proficiencies` for that row | Row is **hard deleted** (no longer exists) |
+| 3 | Cast user's `/profile` | The proficiency is gone entirely; they must re-add it to request again |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+### PROF-007 — Approval queue counts & empty states
+
+| # | Step | Expected Result |
+|---|------|-----------------|
+| 1 | No pending Cast proficiencies exist (for the viewer's scope) | "Cast Approvals" section shows "No pending cast requests." |
+| 2 | Header summary line with 0 total pending items across all sections | Reads "All caught up! No pending approvals." |
+| 3 | Header summary line with pending items | Reads "N item(s) awaiting approval" with the correct singular/plural form |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+## 8. Database Verification
 
 > Run these checks directly in Supabase → Table Editor or SQL Editor.
 
@@ -531,4 +650,34 @@
 
 ---
 
-*Last updated: 2026-06-14*
+### DB-009 — user_proficiencies approval columns
+
+| # | Check | Expected |
+|---|-------|----------|
+| 1 | `SELECT column_name FROM information_schema.columns WHERE table_name = 'user_proficiencies';` | Includes `is_approved`, `suggested_by_user_id`, `approved_by_user_id`, `approved_at` |
+| 2 | `SELECT * FROM user_proficiencies WHERE created_at < '2026-06-15' AND is_approved IS NOT true;` (pre-migration rows) | 0 rows — all pre-existing rows were backfilled to `is_approved = true` |
+| 3 | Insert a new row directly (or via the UI) without specifying `is_approved` | Defaults to `false` |
+| 4 | A new row added via the UI's "Add Proficiency" | `suggested_by_user_id` is set to the requesting user's id |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+### DB-010 — Proficiency approval RLS scoping
+
+| # | Check | Expected |
+|---|-------|----------|
+| 1 | Log in as a Mod with an approved Role A / Location A proficiency. `SELECT * FROM user_proficiencies WHERE is_approved = false;` | Only returns pending rows that match Role A / Location A |
+| 2 | Log in as a Mod with **no** matching approved proficiency. Same query | Returns 0 rows |
+| 3 | Log in as Admin. Same query | Returns ALL pending rows, regardless of the Admin's own proficiencies |
+| 4 | As a non-matching Mod, attempt `UPDATE user_proficiencies SET is_approved = true WHERE id = '<a non-matching pending row>';` | 0 rows affected (RLS blocks it) |
+| 5 | As a matching Mod, attempt the same `UPDATE` on a matching pending row | 1 row affected; succeeds |
+| 6 | Log in as a plain Cast user (not Mod/Leader/Admin) with a matching role/location proficiency. `SELECT * FROM user_proficiencies WHERE is_approved = false AND user_id != auth.uid();` | 0 rows — Cast users cannot see other users' pending rows under any circumstance |
+
+**Result:** `[ ]`
+**Comments:**
+
+---
+
+*Last updated: 2026-06-15*

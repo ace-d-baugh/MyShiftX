@@ -93,8 +93,9 @@ WDWShiftX provides:
 
 ### 🎯 Proficiency System
 - 3-tier hierarchy: Property → Location → Role
-- User suggestions with Leader approval queue
-- Only see shifts you're qualified for
+- New proficiencies start **pending** and need Mod/Leader/Admin approval before they unlock board access or posting
+- User suggestions with Mod/Leader/Admin approval queue, scoped to approvers who hold a matching approved role+location
+- Only see shifts you're qualified for (approved proficiencies only)
 
 ### 🚩 Moderation & Flagging
 - Flag inappropriate posts or profiles
@@ -115,7 +116,7 @@ WDWShiftX provides:
 |------|-------------|
 | **Guest** | View landing page, login, register |
 | **Cast** | View/filter boards, post shifts/requests, edit profile |
-| **Mod** | Cast permissions + CRUD all posts, flag users, deactivate other Mods |
+| **Mod** | Cast permissions + CRUD all posts, flag users, deactivate other Mods, approve/reject pending Cast proficiencies matching their own approved role+location |
 | **Leader** | Mod permissions + approve suggestions, manage flags, access archives |
 | **Admin** | Full system control, manage Properties, assign Leader permissions |
 
@@ -204,7 +205,7 @@ npm run db:reset     # Reset database (dev only)
 - **properties** - Top-level locations (Magic Kingdom, EPCOT, etc.)
 - **locations** - Specific areas within properties
 - **roles** - Job functions
-- **user_proficiencies** - User's qualified Property/Location/Role combinations
+- **user_proficiencies** - User's qualified Property/Location/Role combinations; gated by an `is_approved` flag (new proficiencies start pending and require Mod/Leader/Admin approval before they grant board access)
 - **shifts** - Shift offers (trades/giveaways)
 - **requests** - Shift requests
 - **flags** - Moderation flags
@@ -244,16 +245,17 @@ See [PRD Section 9](docs/PRD.md#9-database-schema) for full schema definitions.
 
 ### Phase 1: Alpha (Current)
 - [x] PRD finalized
-- [ ] Database schema implementation
-- [ ] Authentication flow
-- [ ] Basic shift board UI
-- [ ] Proficiency system
+- [x] Database schema implementation
+- [x] Authentication flow
+- [x] Basic shift board UI
+- [x] Proficiency system
+- [x] Proficiency approval workflow (Mod/Leader/Admin approve or reject pending Cast proficiencies, scoped to matching role+location)
 
 ### Phase 2: Beta
-- [ ] Moderation tools
-- [ ] Archive/history access
-- [ ] Flag management
-- [ ] Invite-only launch (3 properties)
+- [x] Moderation tools
+- [x] Archive/history access
+- [x] Flag management
+- [ ] Invite-only launch (3 locations)
 
 ### Phase 3: Public Launch
 - [ ] Full property rollout
