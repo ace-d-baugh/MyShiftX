@@ -5,6 +5,7 @@ import { Plus, Trash2, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { Checkbox } from '@/components/ui/Checkbox'
 
 interface Property { id: string; name: string }
 interface Location { id: string; name: string; property_id: string }
@@ -255,9 +256,7 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                   {filteredLocations.map(l => (
                     <label key={l.id} className="flex items-center gap-2 cursor-pointer min-h-0 py-0.5">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
+                      <Checkbox
                         checked={selectedLocations.includes(l.id)}
                         onChange={() => toggleLocation(l.id)}
                       />

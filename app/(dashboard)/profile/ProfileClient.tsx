@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ProficiencySelector } from '@/components/features/ProficiencySelector'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
 import type { UserType } from '@/lib/database.types'
 
@@ -178,11 +179,9 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
               <p className="text-sm font-medium text-text">Email Notifications</p>
               <p className="text-xs text-text/50">Receive updates via email</p>
             </div>
-            <input
-              type="checkbox"
+            <Checkbox
               checked={notifyEmail}
               onChange={e => setNotifyEmail(e.target.checked)}
-              className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
             />
           </label>
           <label className="flex items-center justify-between gap-4 cursor-pointer min-h-0">
@@ -190,11 +189,9 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
               <p className="text-sm font-medium text-text">SMS Notifications</p>
               <p className="text-xs text-text/50">Receive text message alerts</p>
             </div>
-            <input
-              type="checkbox"
+            <Checkbox
               checked={notifySms}
               onChange={e => setNotifySms(e.target.checked)}
-              className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
             />
           </label>
         </div>

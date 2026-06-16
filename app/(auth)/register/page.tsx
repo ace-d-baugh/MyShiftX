@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, UserPlus, AlertTriangle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Checkbox } from '@/components/ui/Checkbox'
 import {
   registerSchema,
   hubIdRegex,
@@ -242,11 +243,10 @@ export default function RegisterPage() {
 
         {/* Terms */}
         <div className="flex items-start gap-3">
-          <input
+          <Checkbox
             id="terms_accepted"
             name="terms_accepted"
-            type="checkbox"
-            className="mt-1 rounded border-border text-primary h-5 w-5"
+            className="mt-1"
             checked={form.terms_accepted}
             onChange={handleChange}
           />

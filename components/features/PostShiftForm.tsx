@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { shiftSchema } from '@/lib/validations/shifts'
 import { Button } from '@/components/ui/Button'
+import { Checkbox } from '@/components/ui/Checkbox'
 import { Plus } from 'lucide-react'
 
 interface ProficiencyRow {
@@ -269,15 +270,15 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
         </p>
         <div className="flex flex-wrap gap-4">
           <label className="flex items-center gap-2 cursor-pointer min-h-0">
-            <input type="checkbox" name="is_trade" checked={form.is_trade} onChange={handleChange} className="h-4 w-4 min-h-0 min-w-0 text-primary" />
+            <Checkbox name="is_trade" checked={form.is_trade} onChange={handleChange} />
             <span className="text-sm text-text">Trade</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer min-h-0">
-            <input type="checkbox" name="is_giveaway" checked={form.is_giveaway} onChange={handleChange} className="h-4 w-4 min-h-0 min-w-0 text-primary" />
+            <Checkbox name="is_giveaway" checked={form.is_giveaway} onChange={handleChange} />
             <span className="text-sm text-text">Giveaway</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer min-h-0">
-            <input type="checkbox" name="is_overtime_approved" checked={form.is_overtime_approved} onChange={handleChange} className="h-4 w-4 min-h-0 min-w-0 text-primary" />
+            <Checkbox name="is_overtime_approved" checked={form.is_overtime_approved} onChange={handleChange} />
             <span className="text-sm text-text">OT Approved</span>
           </label>
         </div>

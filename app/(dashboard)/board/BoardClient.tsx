@@ -2,13 +2,18 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import { Plus, RefreshCw, Inbox, Search } from 'lucide-react'
+import { parseISO } from 'date-fns'
+import { formatInTimeZone } from 'date-fns-tz'
+import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
 import { RequestCard, type RequestData } from '@/components/features/RequestCard'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { Checkbox } from '@/components/ui/Checkbox'
 import { cn } from '@/lib/utils'
 import type { UserType } from '@/lib/database.types'
+
+const ET = 'America/New_York'
 
 interface UniqueItem { id: string; name: string }
 interface UniqueLocation { id: string; name: string; property_id: string }
@@ -45,6 +50,9 @@ export function BoardClient({
   const [requests, setRequests] = useState<RequestData[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
+  const [myPostsOnly, setMyPostsOnly] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   // Admin: single-select filters
   const [adminFilterProperty, setAdminFilterProperty] = useState('')
@@ -209,29 +217,43 @@ export function BoardClient({
   }
 
   const filteredShifts = useMemo(() => {
-    if (!search.trim()) return shifts
-    const q = search.toLowerCase()
-    return shifts.filter(s =>
-      s.shift_title.toLowerCase().includes(q) ||
-      s.created_by.toLowerCase().includes(q) ||
-      s.property_name.toLowerCase().includes(q) ||
-      s.location_name.toLowerCase().includes(q) ||
-      s.role_name.toLowerCase().includes(q) ||
-      (s.details ?? '').toLowerCase().includes(q)
-    )
-  }, [shifts, search])
+    let list = shifts
+    if (myPostsOnly) list = list.filter(s => s.user_id === userId)
+    if (dateFilter) {
+      list = list.filter(s => formatInTimeZone(parseISO(s.start_time), ET, 'yyyy-MM-dd') === dateFilter)
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter(s =>
+        s.shift_title.toLowerCase().includes(q) ||
+        s.created_by.toLowerCase().includes(q) ||
+        s.property_name.toLowerCase().includes(q) ||
+        s.location_name.toLowerCase().includes(q) ||
+        s.role_name.toLowerCase().includes(q) ||
+        (s.details ?? '').toLowerCase().includes(q)
+      )
+    }
+    return list
+  }, [shifts, search, dateFilter, myPostsOnly, userId])
 
   const filteredRequests = useMemo(() => {
-    if (!search.trim()) return requests
-    const q = search.toLowerCase()
-    return requests.filter(r =>
-      r.created_by.toLowerCase().includes(q) ||
-      r.property_name.toLowerCase().includes(q) ||
-      r.location_name.toLowerCase().includes(q) ||
-      r.role_name.toLowerCase().includes(q) ||
-      (r.details ?? '').toLowerCase().includes(q)
-    )
-  }, [requests, search])
+    let list = requests
+    if (myPostsOnly) list = list.filter(r => r.user_id === userId)
+    if (dateFilter) list = list.filter(r => r.requested_date === dateFilter)
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter(r =>
+        r.created_by.toLowerCase().includes(q) ||
+        r.property_name.toLowerCase().includes(q) ||
+        r.location_name.toLowerCase().includes(q) ||
+        r.role_name.toLowerCase().includes(q) ||
+        (r.details ?? '').toLowerCase().includes(q)
+      )
+    }
+    return list
+  }, [requests, search, dateFilter, myPostsOnly, userId])
+
+  const currentPostCount = tab === 'offers' ? shifts.length : requests.length
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -279,55 +301,87 @@ export function BoardClient({
         ))}
       </div>
 
-      {/* Filters */}
-      {isAdmin ? (
+      {currentPostCount > 1 && (
+      <>
+      {/* Filters toggle */}
+      <button
+        onClick={() => setFiltersOpen(o => !o)}
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary mb-4 min-h-0 min-w-0"
+      >
+        <SlidersHorizontal className="w-4 h-4" />
+        Filters
+        <ChevronDown className={cn('w-4 h-4 transition-transform', filtersOpen && 'rotate-180')} />
+      </button>
+
+      {filtersOpen && (
+        isAdmin ? (
         /* Admin: single-select dropdowns across all properties/locations/roles */
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 p-4 bg-primary-light/40 rounded-lg">
-          <div>
-            <label className="block text-xs font-medium text-text/60 mb-1">Role</label>
-            <select
-              className="input text-sm h-9"
-              value={adminFilterRole}
-              onChange={e => setAdminFilterRole(e.target.value)}
-            >
-              <option value="">All Roles</option>
-              {uniqueRoles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
+        <div className="mb-6 p-4 bg-primary-light/40 rounded-lg space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-text/60 mb-1">Role</label>
+              <select
+                className="input text-sm h-9"
+                value={adminFilterRole}
+                onChange={e => setAdminFilterRole(e.target.value)}
+              >
+                <option value="">All Roles</option>
+                {uniqueRoles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text/60 mb-1">Property</label>
+              <select
+                className="input text-sm h-9"
+                value={adminFilterProperty}
+                onChange={e => { setAdminFilterProperty(e.target.value); setAdminFilterLocation('') }}
+              >
+                <option value="">All Properties</option>
+                {uniqueProperties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text/60 mb-1">Location</label>
+              <select
+                className="input text-sm h-9"
+                value={adminFilterLocation}
+                onChange={e => setAdminFilterLocation(e.target.value)}
+                disabled={!adminFilterProperty}
+              >
+                <option value="">All Locations</option>
+                {adminFilteredLocations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-text/60 mb-1">Date</label>
+              <input
+                type="date"
+                className="input text-sm h-9"
+                value={dateFilter}
+                onChange={e => setDateFilter(e.target.value)}
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-text/60 mb-1">Property</label>
-            <select
-              className="input text-sm h-9"
-              value={adminFilterProperty}
-              onChange={e => { setAdminFilterProperty(e.target.value); setAdminFilterLocation('') }}
-            >
-              <option value="">All Properties</option>
-              {uniqueProperties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-text/60 mb-1">Location</label>
-            <select
-              className="input text-sm h-9"
-              value={adminFilterLocation}
-              onChange={e => setAdminFilterLocation(e.target.value)}
-              disabled={!adminFilterProperty}
-            >
-              <option value="">All Locations</option>
-              {adminFilteredLocations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-            </select>
-          </div>
-          <div className="relative sm:col-span-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
-            <input
-              className="input pl-9 text-sm"
-              placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
+              <input
+                className="input pl-9 text-sm"
+                placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer min-h-0 shrink-0 px-1">
+              <Checkbox
+                checked={myPostsOnly}
+                onChange={e => setMyPostsOnly(e.target.checked)}
+              />
+              <span className="text-sm text-text whitespace-nowrap">My posts only</span>
+            </label>
           </div>
         </div>
-      ) : hasProficiencies ? (
+      ) : (
         /* Cast/Mod/Leader: multi-select checkboxes from proficiencies */
         <div className="mb-6 p-4 bg-primary-light/40 rounded-lg space-y-4">
           {uniqueRoles.length > 0 && (
@@ -336,9 +390,7 @@ export function BoardClient({
               <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                 {uniqueRoles.map(r => (
                   <label key={r.id} className="flex items-center gap-1.5 cursor-pointer min-h-0">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
+                    <Checkbox
                       checked={selectedRoleIds.has(r.id)}
                       onChange={() => toggleRole(r.id)}
                     />
@@ -369,9 +421,7 @@ export function BoardClient({
               <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                 {visibleFilterLocations.map(l => (
                   <label key={l.id} className="flex items-center gap-1.5 cursor-pointer min-h-0">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 min-h-0 min-w-0 text-primary rounded"
+                    <Checkbox
                       checked={selectedLocationIds.has(l.id)}
                       onChange={() => toggleLocation(l.id)}
                     />
@@ -382,17 +432,39 @@ export function BoardClient({
             </div>
           )}
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
+          <div>
+            <label className="block text-xs font-medium text-text/60 mb-1">Date</label>
             <input
-              className="input pl-9 text-sm"
-              placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
+              type="date"
+              className="input text-sm h-9"
+              value={dateFilter}
+              onChange={e => setDateFilter(e.target.value)}
             />
           </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
+              <input
+                className="input pl-9 text-sm"
+                placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer min-h-0 shrink-0 px-1">
+              <Checkbox
+                checked={myPostsOnly}
+                onChange={e => setMyPostsOnly(e.target.checked)}
+              />
+              <span className="text-sm text-text whitespace-nowrap">My posts only</span>
+            </label>
+          </div>
         </div>
-      ) : null}
+        )
+      )}
+      </>
+      )}
 
       {/* Content */}
       {loading ? (
@@ -413,7 +485,7 @@ export function BoardClient({
           />
         ) : filteredShifts.length === 0 ? (
           <div className="text-center py-16 px-4 text-text/50 text-sm">
-            No shifts match &ldquo;{search}&rdquo;.
+            {search.trim() ? <>No shifts match &ldquo;{search}&rdquo;.</> : 'No shifts match your filters.'}
           </div>
         ) : (
           <div className="space-y-4">
@@ -442,7 +514,7 @@ export function BoardClient({
           />
         ) : filteredRequests.length === 0 ? (
           <div className="text-center py-16 px-4 text-text/50 text-sm">
-            No requests match &ldquo;{search}&rdquo;.
+            {search.trim() ? <>No requests match &ldquo;{search}&rdquo;.</> : 'No requests match your filters.'}
           </div>
         ) : (
           <div className="space-y-4">
