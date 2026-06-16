@@ -122,7 +122,7 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
           <UserCheck className="w-5 h-5 text-primary" /> Cast Approvals ({profs.length})
         </h2>
         {profs.length === 0 ? (
-          <p className="text-sm text-text/50 italic">No pending proficiency requests.</p>
+          <p className="text-sm text-text/50 italic">No pending cast requests.</p>
         ) : (
           <div className="space-y-3">
             {profs.map(prof => (
