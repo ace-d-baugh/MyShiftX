@@ -25,6 +25,7 @@ import type { UserType } from '@/lib/database.types'
 interface NavbarProps {
   userRole: UserType
   displayName: string
+  pendingApprovalsCount?: number
 }
 
 const navItems = [
@@ -36,7 +37,7 @@ const navItems = [
   { href: '/admin', label: 'Admin', icon: Settings, roles: ['Admin'] },
 ] as const
 
-export function Navbar({ userRole, displayName }: NavbarProps) {
+export function Navbar({ userRole, displayName, pendingApprovalsCount = 0 }: NavbarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -64,6 +65,7 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
   }
 
   const isActive = (href: string) => pathname.startsWith(href)
+  const approvalsBadgeCount = pendingApprovalsCount > 9 ? '9+' : pendingApprovalsCount
 
   return (
     <>
@@ -158,7 +160,7 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
                   key={href}
                   href={href}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-0 min-w-0',
+                    'relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-0 min-w-0',
                     isActive(href)
                       ? 'bg-primary-light text-primary'
                       : 'text-text/60 hover:text-text hover:bg-primary-light/50'
@@ -166,6 +168,11 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
                 >
                   <Icon className="w-4 h-4" />
                   {label}
+                  {href === '/leader/approvals' && pendingApprovalsCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-warning text-white text-[10px] font-bold leading-none">
+                      {approvalsBadgeCount}
+                    </span>
+                  )}
                 </Link>
               ))}
             </nav>
@@ -217,6 +224,11 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
                 >
                   <Icon className="w-4 h-4" />
                   {label}
+                  {href === '/leader/approvals' && pendingApprovalsCount > 0 && (
+                    <span className="ml-auto flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-warning text-white text-xs font-bold leading-none">
+                      {approvalsBadgeCount}
+                    </span>
+                  )}
                 </Link>
               ))}
               <div className="flex items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-text/70 border-t border-border">
@@ -268,7 +280,14 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
                   : 'text-text/50 hover:text-text'
               )}
             >
-              <Icon className="w-5 h-5" />
+              <span className="relative">
+                <Icon className="w-5 h-5" />
+                {href === '/leader/approvals' && pendingApprovalsCount > 0 && (
+                  <span className="absolute -top-1 -right-2 flex items-center justify-center min-w-[1rem] h-4 px-1 rounded-full bg-warning text-white text-[9px] font-bold leading-none">
+                    {approvalsBadgeCount}
+                  </span>
+                )}
+              </span>
               <span className="text-[10px]">{label}</span>
             </Link>
           ))}

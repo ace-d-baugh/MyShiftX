@@ -45,9 +45,19 @@ export default async function DashboardLayout({
   const userRole = userProfile?.user_type ?? 'Cast'
   const displayName = userProfile?.display_name ?? user.email ?? 'Cast Member'
 
+  let pendingApprovalsCount = 0
+  if (['Mod', 'Leader', 'Admin'].includes(userRole)) {
+    const [{ count: pendingProfs }, { count: pendingLocs }, { count: pendingRoles }] = await Promise.all([
+      supabase.from('user_proficiencies').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+      supabase.from('locations').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+      supabase.from('roles').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+    ])
+    pendingApprovalsCount = (pendingProfs ?? 0) + (pendingLocs ?? 0) + (pendingRoles ?? 0)
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar userRole={userRole} displayName={displayName} />
+      <Navbar userRole={userRole} displayName={displayName} pendingApprovalsCount={pendingApprovalsCount} />
       <main className="flex-1 pb-20 md:pb-0">
         {children}
       </main>

@@ -4,8 +4,51 @@ import { useState } from 'react'
 import { CheckCircle, Trash2, MapPin, Briefcase, UserCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 import { useRouter } from 'next/navigation'
 import type { UserType } from '@/lib/database.types'
+
+type ConfirmKind = 'profs' | 'locs' | 'roles'
+type ConfirmAction = 'approve' | 'reject'
+interface ConfirmState {
+  kind: ConfirmKind
+  action: ConfirmAction
+  id: string
+  label: string
+}
+
+const CONFIRM_COPY: Record<ConfirmKind, Record<ConfirmAction, { title: string; message: string }>> = {
+  profs: {
+    approve: {
+      title: 'Confirm Cast Approval',
+      message: 'Does this look right? Do you personally know this Cast Member and can confirm they actually work this role at this location?',
+    },
+    reject: {
+      title: 'Confirm Rejection',
+      message: 'Are you sure? The Cast Member will need to submit this request again.',
+    },
+  },
+  locs: {
+    approve: {
+      title: 'Confirm Location Approval',
+      message: 'Does this look right? Confirm the location name is accurate and belongs at this property before approving.',
+    },
+    reject: {
+      title: 'Confirm Rejection',
+      message: 'Are you sure you want to remove this location suggestion?',
+    },
+  },
+  roles: {
+    approve: {
+      title: 'Confirm Role Approval',
+      message: 'Does this look right? Confirm the role name is accurate before approving.',
+    },
+    reject: {
+      title: 'Confirm Rejection',
+      message: 'Are you sure you want to remove this role suggestion?',
+    },
+  },
+}
 
 interface PendingLocation {
   id: string
@@ -49,6 +92,7 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
   const [locs, setLocs] = useState(pendingLocations)
   const [roles, setRoles] = useState(pendingRoles)
   const [profs, setProfs] = useState(pendingProficiencies)
+  const [confirm, setConfirm] = useState<ConfirmState | null>(null)
   const canManageRolesLocations = userRole === 'Leader' || userRole === 'Admin'
 
   const approveLocation = async (id: string) => {
@@ -105,6 +149,19 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
     setProcessing(null)
   }
 
+  const runConfirmedAction = async () => {
+    if (!confirm) return
+    const { kind, action, id } = confirm
+    if (kind === 'profs') {
+      await (action === 'approve' ? approveProficiency(id) : rejectProficiency(id))
+    } else if (kind === 'locs') {
+      await (action === 'approve' ? approveLocation(id) : rejectLocation(id))
+    } else {
+      await (action === 'approve' ? approveRole(id) : rejectRole(id))
+    }
+    setConfirm(null)
+  }
+
   const totalPending = locs.length + roles.length + profs.length
 
   return (
@@ -141,7 +198,12 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
                     size="sm"
                     variant="outline"
                     loading={processing === prof.id}
-                    onClick={() => approveProficiency(prof.id)}
+                    onClick={() => setConfirm({
+                      kind: 'profs',
+                      action: 'approve',
+                      id: prof.id,
+                      label: `${prof.roles?.name ?? 'Unknown Role'} · ${prof.locations?.name ?? 'Unknown Location'}${prof.users ? ` — requested by ${prof.users.display_name}` : ''}`,
+                    })}
                     className="gap-1 text-success border-success hover:bg-success/10 min-h-0 h-9 px-3"
                   >
                     <CheckCircle className="w-4 h-4" /> Approve
@@ -150,7 +212,12 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
                     size="sm"
                     variant="danger"
                     loading={processing === prof.id}
-                    onClick={() => rejectProficiency(prof.id)}
+                    onClick={() => setConfirm({
+                      kind: 'profs',
+                      action: 'reject',
+                      id: prof.id,
+                      label: `${prof.roles?.name ?? 'Unknown Role'} · ${prof.locations?.name ?? 'Unknown Location'}${prof.users ? ` — requested by ${prof.users.display_name}` : ''}`,
+                    })}
                     className="gap-1 min-h-0 h-9 px-3"
                   >
                     <Trash2 className="w-4 h-4" /> Remove
@@ -187,7 +254,12 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
                         size="sm"
                         variant="outline"
                         loading={processing === loc.id}
-                        onClick={() => approveLocation(loc.id)}
+                        onClick={() => setConfirm({
+                          kind: 'locs',
+                          action: 'approve',
+                          id: loc.id,
+                          label: `${loc.name}${loc.properties ? ` — ${loc.properties.name}` : ''}`,
+                        })}
                         className="gap-1 text-success border-success hover:bg-success/10 min-h-0 h-9 px-3"
                       >
                         <CheckCircle className="w-4 h-4" /> Approve
@@ -196,7 +268,12 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
                         size="sm"
                         variant="danger"
                         loading={processing === loc.id}
-                        onClick={() => rejectLocation(loc.id)}
+                        onClick={() => setConfirm({
+                          kind: 'locs',
+                          action: 'reject',
+                          id: loc.id,
+                          label: `${loc.name}${loc.properties ? ` — ${loc.properties.name}` : ''}`,
+                        })}
                         className="gap-1 min-h-0 h-9 px-3"
                       >
                         <Trash2 className="w-4 h-4" /> Remove
@@ -230,7 +307,7 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
                         size="sm"
                         variant="outline"
                         loading={processing === role.id}
-                        onClick={() => approveRole(role.id)}
+                        onClick={() => setConfirm({ kind: 'roles', action: 'approve', id: role.id, label: role.name })}
                         className="gap-1 text-success border-success hover:bg-success/10 min-h-0 h-9 px-3"
                       >
                         <CheckCircle className="w-4 h-4" /> Approve
@@ -239,7 +316,7 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
                         size="sm"
                         variant="danger"
                         loading={processing === role.id}
-                        onClick={() => rejectRole(role.id)}
+                        onClick={() => setConfirm({ kind: 'roles', action: 'reject', id: role.id, label: role.name })}
                         className="gap-1 min-h-0 h-9 px-3"
                       >
                         <Trash2 className="w-4 h-4" /> Remove
@@ -252,6 +329,33 @@ export function ApprovalsClient({ pendingLocations, pendingRoles, pendingProfici
           </section>
         </>
       )}
+
+      <Modal
+        open={confirm !== null}
+        onClose={() => setConfirm(null)}
+        title={confirm ? CONFIRM_COPY[confirm.kind][confirm.action].title : undefined}
+        size="sm"
+      >
+        {confirm && (
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-text">{confirm.label}</p>
+            <p className="text-sm text-text/70">{CONFIRM_COPY[confirm.kind][confirm.action].message}</p>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setConfirm(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                variant={confirm.action === 'approve' ? 'outline' : 'danger'}
+                loading={processing === confirm.id}
+                onClick={runConfirmedAction}
+                className={confirm.action === 'approve' ? 'flex-1 text-success border-success hover:bg-success/10' : 'flex-1'}
+              >
+                {confirm.action === 'approve' ? 'Yes, Approve' : 'Yes, Remove'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }
