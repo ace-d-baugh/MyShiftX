@@ -75,7 +75,8 @@ export default async function BoardPage() {
       locations(id, name, property_id),
       properties(id, name)
     `)
-    .eq('user_id', user.id) as unknown as { data: ProficiencyRow[] | null }
+    .eq('user_id', user.id)
+    .eq('is_approved', true) as unknown as { data: ProficiencyRow[] | null }
 
   const rows = proficiencyRows ?? []
 

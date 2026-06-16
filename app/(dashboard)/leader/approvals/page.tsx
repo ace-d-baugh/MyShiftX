@@ -17,7 +17,7 @@ export default async function ApprovalsPage() {
   const { data: userProfile } = await supabase
     .from('users').select('user_type').eq('id', user.id).single() as unknown as { data: ProfileRow }
 
-  if (!userProfile || !(['Leader', 'Admin'] as UserType[]).includes(userProfile.user_type)) {
+  if (!userProfile || !(['Mod', 'Leader', 'Admin'] as UserType[]).includes(userProfile.user_type)) {
     redirect('/board')
   }
 
@@ -33,11 +33,19 @@ export default async function ApprovalsPage() {
     .eq('is_approved', false)
     .order('created_at', { ascending: true })
 
+  const { data: pendingProficiencies } = await supabase
+    .from('user_proficiencies')
+    .select('id, role_id, location_id, created_at, roles(name), properties(name), locations(name), users!user_id(display_name)')
+    .eq('is_approved', false)
+    .order('created_at', { ascending: true })
+
   return (
     <ApprovalsClient
       pendingLocations={(pendingLocations ?? []) as { id: string; name: string; property_id: string; created_at: string; properties: { name: string } | null; users: { display_name: string } | null }[]}
       pendingRoles={(pendingRoles ?? []) as { id: string; name: string; created_at: string; users: { display_name: string } | null }[]}
+      pendingProficiencies={(pendingProficiencies ?? []) as { id: string; role_id: string; location_id: string; created_at: string; roles: { name: string } | null; properties: { name: string } | null; locations: { name: string } | null; users: { display_name: string } | null }[]}
       approverId={user.id}
+      userRole={userProfile.user_type}
     />
   )
 }

@@ -81,7 +81,8 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
           locations(id, name, property_id),
           properties(id, name)
         `)
-        .eq('user_id', userId) as { data: ProficiencyRow[] | null }
+        .eq('user_id', userId)
+        .eq('is_approved', true) as { data: ProficiencyRow[] | null }
 
       const rows = data ?? []
       setProficiencies(rows)

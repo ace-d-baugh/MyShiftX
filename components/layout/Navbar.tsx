@@ -30,7 +30,7 @@ interface NavbarProps {
 const navItems = [
   { href: '/board', label: 'Board', icon: LayoutGrid, roles: ['Cast', 'Mod', 'Leader', 'Admin'] },
   { href: '/profile', label: 'Profile', icon: User, roles: ['Cast', 'Mod', 'Leader', 'Admin'] },
-  { href: '/leader/approvals', label: 'Approvals', icon: ShieldCheck, roles: ['Leader', 'Admin'] },
+  { href: '/leader/approvals', label: 'Approvals', icon: ShieldCheck, roles: ['Mod', 'Leader', 'Admin'] },
   { href: '/leader/flags', label: 'Flags', icon: Flag, roles: ['Leader', 'Admin'] },
   { href: '/leader/archive', label: 'Archive', icon: Archive, roles: ['Leader', 'Admin'] },
   { href: '/admin', label: 'Admin', icon: Settings, roles: ['Admin'] },

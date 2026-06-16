@@ -158,6 +158,10 @@ export interface Database {
           property_id: string
           location_id: string
           role_id: string
+          is_approved: boolean
+          suggested_by_user_id: string | null
+          approved_by_user_id: string | null
+          approved_at: string | null
           created_at: string
         }
         Insert: {
@@ -166,6 +170,10 @@ export interface Database {
           property_id: string
           location_id: string
           role_id: string
+          is_approved?: boolean
+          suggested_by_user_id?: string | null
+          approved_by_user_id?: string | null
+          approved_at?: string | null
           created_at?: string
         }
         Update: {
@@ -174,6 +182,10 @@ export interface Database {
           property_id?: string
           location_id?: string
           role_id?: string
+          is_approved?: boolean
+          suggested_by_user_id?: string | null
+          approved_by_user_id?: string | null
+          approved_at?: string | null
           created_at?: string
         }
         Relationships: [
@@ -196,6 +208,13 @@ export interface Database {
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_proficiencies_suggested_by_user_id_fkey"
+            columns: ["suggested_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]

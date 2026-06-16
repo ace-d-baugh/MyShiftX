@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 
 interface Property { id: string; name: string }
 interface Location { id: string; name: string; property_id: string }
@@ -16,6 +17,7 @@ interface Proficiency {
   property_name: string
   location_name: string
   role_name: string
+  is_approved: boolean
 }
 
 interface ProficiencySelectorProps {
@@ -56,6 +58,7 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
             property_id,
             location_id,
             role_id,
+            is_approved,
             properties(name),
             locations(name),
             roles(name)
@@ -71,6 +74,7 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
           property_id: p.property_id as string,
           location_id: p.location_id as string,
           role_id: p.role_id as string,
+          is_approved: p.is_approved as boolean,
           property_name: (p.properties as { name: string } | null)?.name ?? '',
           location_name: (p.locations as { name: string } | null)?.name ?? '',
           role_name: (p.roles as { name: string } | null)?.name ?? '',
@@ -110,6 +114,7 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
         property_id: selectedProperty,
         location_id: locId,
         role_id: selectedRole,
+        suggested_by_user_id: userId,
       }))
 
     try {
@@ -157,7 +162,7 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
     <div className="space-y-4">
       <div>
         <h3 className="font-medium text-text mb-1">My Proficiencies</h3>
-        <p className="text-xs text-text/50">Add the roles and locations you can work to filter the board.</p>
+        <p className="text-xs text-text/50">Add the roles and locations you can work to filter the board. New proficiencies need approval from a Mod/Leader before they unlock board access.</p>
       </div>
 
       {/* Existing proficiencies */}
@@ -166,21 +171,27 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
       ) : (
         <div className="border border-border rounded-lg overflow-hidden">
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_1fr_1fr_auto] bg-primary-light px-3 py-2 border-b border-border">
+          <div className="grid grid-cols-[1fr_1fr_1fr_auto_auto] bg-primary-light px-3 py-2 border-b border-border">
             <span className="text-xs font-semibold text-text/60 uppercase tracking-wide">Role</span>
             <span className="text-xs font-semibold text-text/60 uppercase tracking-wide">Property</span>
             <span className="text-xs font-semibold text-text/60 uppercase tracking-wide">Location</span>
+            <span className="w-16" />
             <span className="w-6" />
           </div>
           {/* Rows */}
           {proficiencies.map((p, i) => (
             <div
               key={p.id}
-              className={`grid grid-cols-[1fr_1fr_1fr_auto] items-center px-3 py-2.5 gap-2 ${i % 2 === 1 ? 'bg-primary-light/30' : 'bg-card'}`}
+              className={`grid grid-cols-[1fr_1fr_1fr_auto_auto] items-center px-3 py-2.5 gap-2 ${i % 2 === 1 ? 'bg-primary-light/30' : 'bg-card'}`}
             >
               <span className="text-sm font-medium text-text truncate">{p.role_name}</span>
               <span className="text-sm text-text/70 truncate">{p.property_name}</span>
               <span className="text-sm text-text/70 truncate">{p.location_name}</span>
+              {p.is_approved ? (
+                <span className="w-16" />
+              ) : (
+                <Badge variant="pending" className="text-xs py-0.5 shrink-0">Pending</Badge>
+              )}
               <button
                 onClick={() => handleRemove(p.id)}
                 disabled={saving}
