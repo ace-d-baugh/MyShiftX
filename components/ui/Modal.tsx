@@ -58,7 +58,7 @@ export function Modal({ open, onClose, title, children, className, size = 'md' }
       {/* Panel */}
       <div
         className={cn(
-          'relative bg-white rounded-xl shadow-xl w-full p-6 z-10',
+          'relative bg-card rounded-xl shadow-xl w-full p-6 z-10',
           sizes[size],
           className
         )}

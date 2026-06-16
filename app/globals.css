@@ -24,6 +24,19 @@
     --color-ring: 269 100% 75%; /* #BD80FF */
   }
 
+  .dark {
+    /* Same purple hue family as light mode, inverted for dark surfaces */
+    --color-primary-light: 269 35% 20%;
+    --color-secondary: 269 45% 32%;
+    --color-text: 269 30% 92%;
+    --color-background: 269 30% 9%;
+    --color-foreground: 269 30% 92%;
+    --color-card: 269 24% 14%;
+    --color-card-foreground: 269 30% 92%;
+    --color-border: 269 18% 26%;
+    --color-input: 269 18% 26%;
+  }
+
   * {
     @apply border-border;
   }
@@ -55,6 +68,24 @@
     @apply font-accent;
   }
 }
+
+/*
+ * Unlayered on purpose: low-alpha text (e.g. text-text/40) blends toward whatever is
+ * behind it, so its contrast is capped by the opacity fraction itself, not by how light
+ * --color-text is. On the dark background these faded tiers became too dim to read, so
+ * dark mode gets its own, higher alpha per tier. Being unlayered guarantees these win over
+ * Tailwind's generated utility-layer rules regardless of source order.
+ */
+.dark .text-text\/40 { color: hsl(var(--color-text) / 0.55); }
+.dark .text-text\/50 { color: hsl(var(--color-text) / 0.65); }
+.dark .text-text\/60 { color: hsl(var(--color-text) / 0.75); }
+.dark .text-text\/70 { color: hsl(var(--color-text) / 0.82); }
+.dark .text-text\/80 { color: hsl(var(--color-text) / 0.88); }
+.dark .text-primary\/50 { color: hsl(var(--color-primary) / 0.7); }
+.dark .text-primary\/70 { color: hsl(var(--color-primary) / 0.85); }
+.dark .text-warning\/60 { color: hsl(var(--color-warning) / 0.78); }
+.dark .placeholder\:text-text\/40::placeholder { color: hsl(var(--color-text) / 0.55); }
+.dark .placeholder\:text-text\/50::placeholder { color: hsl(var(--color-text) / 0.65); }
 
 @layer components {
   /* Badge styles for Trade, Giveaway, OT */

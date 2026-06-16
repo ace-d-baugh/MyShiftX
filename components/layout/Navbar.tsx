@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -14,9 +14,12 @@ import {
   LogOut,
   Menu,
   X,
+  ChevronDown,
+  Moon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { applyTheme, getStoredTheme } from '@/lib/theme'
 import type { UserType } from '@/lib/database.types'
 
 interface NavbarProps {
@@ -38,6 +41,12 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
   const router = useRouter()
   const supabase = createClient()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const [darkMode, setDarkMode] = useState(false)
+
+  useEffect(() => {
+    setDarkMode(getStoredTheme() === 'dark')
+  }, [])
 
   const visibleItems = navItems.filter(item =>
     (item.roles as readonly string[]).includes(userRole)
@@ -48,12 +57,18 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
     window.location.href = '/login'
   }
 
+  const toggleDarkMode = () => {
+    const next = !darkMode
+    setDarkMode(next)
+    applyTheme(next ? 'dark' : 'light')
+  }
+
   const isActive = (href: string) => pathname.startsWith(href)
 
   return (
     <>
       {/* Desktop top navbar */}
-      <header className="hidden md:block sticky top-0 z-50 bg-white border-b border-border shadow-sm">
+      <header className="hidden md:block sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         {/* Top bar: Logo + User/Logout */}
         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
           <Link href="/board" className="flex flex-row items-center gap-0 align-baseline">
@@ -68,21 +83,74 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
             />
           </Link>
 
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-text/60 font-medium">{displayName}</span>
+          <div className="relative">
             <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-text/60 hover:text-warning hover:bg-warning/10 transition-colors min-h-0 min-w-0"
-              aria-label="Log out"
+              onClick={() => setAccountMenuOpen(o => !o)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-text/60 hover:text-text hover:bg-primary-light/50 transition-colors min-h-0 min-w-0"
+              aria-haspopup="menu"
+              aria-expanded={accountMenuOpen}
             >
-              <LogOut className="w-4 h-4" />
-              Log Out
+              <span className="font-medium">{displayName}</span>
+              <ChevronDown className={cn('w-4 h-4 transition-transform', accountMenuOpen && 'rotate-180')} />
             </button>
+
+            {accountMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setAccountMenuOpen(false)} />
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-56 rounded-md border border-border bg-card shadow-lg z-50 py-1"
+                >
+                  <Link
+                    href="/profile"
+                    onClick={() => setAccountMenuOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-text/80 hover:bg-primary-light/50 hover:text-text transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Link>
+
+                  <div className="flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-text/80">
+                    <span className="flex items-center gap-2">
+                      <Moon className="w-4 h-4" />
+                      Dark Mode
+                    </span>
+                    <button
+                      onClick={toggleDarkMode}
+                      role="switch"
+                      aria-checked={darkMode}
+                      aria-label="Toggle dark mode"
+                      className={cn(
+                        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0',
+                        darkMode ? 'bg-primary' : 'bg-border'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+                          darkMode ? 'translate-x-5' : 'translate-x-0.5'
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="my-1 border-t border-border" />
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-warning hover:bg-warning/10 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Log Out
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
         {/* Sub-nav bar: Nav Links */}
-        <div className="border-t border-border bg-white">
+        <div className="border-t border-border bg-card">
           <div className="max-w-7xl mx-auto px-4">
             <nav className="flex items-center justify-center gap-1 h-10">
               {visibleItems.map(({ href, label, icon: Icon }) => (
@@ -106,7 +174,7 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
       </header>
 
       {/* Mobile top bar */}
-      <header className="md:hidden sticky top-0 z-50 bg-white border-b border-border shadow-sm">
+      <header className="md:hidden sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         <div className="px-4 flex items-center justify-between h-14">
           <Link href="/board"className="flex flex-row items-center gap-0 align-baseline">
             <h1 className="font-accent text-4xl md:text-4xl font-bold text-primary leading-tight align-middle">WDW</h1>
@@ -129,7 +197,7 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
 
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="bg-white border-b border-border shadow-lg">
+          <div className="bg-card border-b border-border shadow-lg">
             <div className="px-4 py-2 border-b border-border">
               <p className="text-xs text-text/40 font-medium uppercase tracking-wide">Signed in as</p>
               <p className="text-sm font-medium text-text">{displayName}</p>
@@ -151,6 +219,29 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
                   {label}
                 </Link>
               ))}
+              <div className="flex items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-text/70 border-t border-border">
+                <span className="flex items-center gap-3">
+                  <Moon className="w-4 h-4" />
+                  Dark Mode
+                </span>
+                <button
+                  onClick={toggleDarkMode}
+                  role="switch"
+                  aria-checked={darkMode}
+                  aria-label="Toggle dark mode"
+                  className={cn(
+                    'relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0',
+                    darkMode ? 'bg-primary' : 'bg-border'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+                      darkMode ? 'translate-x-5' : 'translate-x-0.5'
+                    )}
+                  />
+                </button>
+              </div>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-warning hover:bg-warning/10 transition-colors w-full text-left"
@@ -164,7 +255,7 @@ export function Navbar({ userRole, displayName }: NavbarProps) {
       </header>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border safe-area-pb">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-pb">
         <div className="flex items-stretch">
           {visibleItems.slice(0, 5).map(({ href, label, icon: Icon }) => (
             <Link

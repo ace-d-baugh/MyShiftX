@@ -3,6 +3,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -11,45 +12,47 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Semantic / CSS-variable-driven colors (match globals.css --color-* vars)
-        border: 'hsl(var(--color-border))',
-        input: 'hsl(var(--color-input))',
-        ring: 'hsl(var(--color-ring))',
-        background: 'hsl(var(--color-background))',
-        foreground: 'hsl(var(--color-foreground))',
+        // Semantic / CSS-variable-driven colors (match globals.css --color-* vars).
+        // The <alpha-value> placeholder lets Tailwind opacity modifiers (e.g. text-text/50)
+        // keep working once these are variables instead of static hex.
+        border: 'hsl(var(--color-border) / <alpha-value>)',
+        input: 'hsl(var(--color-input) / <alpha-value>)',
+        ring: 'hsl(var(--color-ring) / <alpha-value>)',
+        background: 'hsl(var(--color-background) / <alpha-value>)',
+        foreground: 'hsl(var(--color-foreground) / <alpha-value>)',
         card: {
-          DEFAULT: 'hsl(var(--color-card))',
-          foreground: 'hsl(var(--color-card-foreground))',
+          DEFAULT: 'hsl(var(--color-card) / <alpha-value>)',
+          foreground: 'hsl(var(--color-card-foreground) / <alpha-value>)',
         },
         muted: {
-          DEFAULT: 'hsl(var(--color-primary-light))',
-          foreground: 'hsl(var(--color-text))',
+          DEFAULT: 'hsl(var(--color-primary-light) / <alpha-value>)',
+          foreground: 'hsl(var(--color-text) / <alpha-value>)',
         },
         // Design system brand colors
         primary: {
-          DEFAULT: '#BD80FF',
-          light: '#F2E6FF',
+          DEFAULT: 'hsl(var(--color-primary) / <alpha-value>)',
+          light: 'hsl(var(--color-primary-light) / <alpha-value>)',
           foreground: '#ffffff',
         },
         secondary: {
-          DEFAULT: '#DEBFFF',
+          DEFAULT: 'hsl(var(--color-secondary) / <alpha-value>)',
           foreground: '#2F2040',
         },
         accent: {
-          DEFAULT: '#FFEA80',
+          DEFAULT: 'hsl(var(--color-accent) / <alpha-value>)',
           foreground: '#2F2040',
         },
-        text: '#2F2040',
-        success: '#9BE673',
-        info: '#80D4FF',
-        warning: '#EE808A',
+        text: 'hsl(var(--color-text) / <alpha-value>)',
+        success: 'hsl(var(--color-success) / <alpha-value>)',
+        info: 'hsl(var(--color-info) / <alpha-value>)',
+        warning: 'hsl(var(--color-warning) / <alpha-value>)',
         destructive: {
-          DEFAULT: '#EE808A',
+          DEFAULT: 'hsl(var(--color-warning) / <alpha-value>)',
           foreground: '#ffffff',
         },
         popover: {
-          DEFAULT: 'hsl(var(--color-card))',
-          foreground: 'hsl(var(--color-card-foreground))',
+          DEFAULT: 'hsl(var(--color-card) / <alpha-value>)',
+          foreground: 'hsl(var(--color-card-foreground) / <alpha-value>)',
         },
       },
       fontFamily: {

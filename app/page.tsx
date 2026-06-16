@@ -78,10 +78,10 @@ const properties = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-border animate-slide-down">
+      <header className="sticky top-0 z-50 bg-background/90 backdrop-blur border-b border-border animate-slide-down">
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between">
           <Link href="/board" className="flex flex-row items-center gap-0 align-baseline">
             <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">WDW</h1>
@@ -107,7 +107,7 @@ export default function HomePage() {
       </header>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-light via-white to-white pt-20 pb-24 px-4">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary-light via-background to-background pt-20 pb-24 px-4">
 
         {/* Animated background blobs */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -176,7 +176,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Features ── */}
-      <section className="py-20 px-4 bg-white">
+      <section className="py-20 px-4 bg-background">
         <div className="max-w-6xl mx-auto">
 
           <AnimateIn className="text-center mb-14">
@@ -220,7 +220,7 @@ export default function HomePage() {
           <div className="flex flex-wrap justify-center gap-3">
             {properties.map((p, i) => (
               <AnimateIn key={p} animation="fade-in" delay={i * 70}>
-                <span className="bg-white border border-primary/20 text-text rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-default">
+                <span className="bg-card border border-primary/20 text-text rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-default">
                   {p}
                 </span>
               </AnimateIn>
@@ -257,7 +257,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-text text-white/60 py-8 px-4 mt-auto">
+      <footer className="bg-[#2F2040] text-white/60 py-8 px-4 mt-auto">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-row items-center gap-0 align-baseline">

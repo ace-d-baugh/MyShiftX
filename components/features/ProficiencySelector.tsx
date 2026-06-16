@@ -176,7 +176,7 @@ export function ProficiencySelector({ userId, onUpdate }: ProficiencySelectorPro
           {proficiencies.map((p, i) => (
             <div
               key={p.id}
-              className={`grid grid-cols-[1fr_1fr_1fr_auto] items-center px-3 py-2.5 gap-2 ${i % 2 === 1 ? 'bg-primary-light/30' : 'bg-white'}`}
+              className={`grid grid-cols-[1fr_1fr_1fr_auto] items-center px-3 py-2.5 gap-2 ${i % 2 === 1 ? 'bg-primary-light/30' : 'bg-card'}`}
             >
               <span className="text-sm font-medium text-text truncate">{p.role_name}</span>
               <span className="text-sm text-text/70 truncate">{p.property_name}</span>

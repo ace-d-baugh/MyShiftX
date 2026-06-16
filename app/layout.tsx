@@ -22,6 +22,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${lato.variable} ${philosopher.variable}`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem('wdwshiftx-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="font-sans text-text">{children}</body>
     </html>
   )
