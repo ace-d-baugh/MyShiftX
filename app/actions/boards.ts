@@ -103,12 +103,11 @@ export async function lookupBoardByCode(code: string): Promise<{
       return { rateLimited: true, error: 'Too many attempts. Please wait a minute before trying again.' }
     }
 
-    // Look up the board
-    const { data: board } = await supabase
-      .from('boards')
-      .select('id, name, invite_code_enabled, is_active')
-      .eq('invite_code', upperCode)
-      .single()
+    // Look up the board via SECURITY DEFINER function (bypasses RLS so a
+    // non-member can find a board by its invite code)
+    const { data: rows } = await supabase
+      .rpc('lookup_board_by_invite_code', { p_code: upperCode })
+    const board = (rows as { id: string; name: string; is_active: boolean; invite_code_enabled: boolean }[] | null)?.[0] ?? null
 
     if (!board || !board.is_active) {
       await recordAttempt(supabase, userId, upperCode, 'invalid_code')

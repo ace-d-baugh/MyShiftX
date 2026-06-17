@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO, formatDistanceToNow } from 'date-fns'
 import { Clock, LayoutGrid, User, Flag, Edit, EyeOff, Mail } from 'lucide-react'
@@ -37,16 +38,13 @@ interface ShiftCardProps {
   currentUserId?: string
   currentUserName?: string
   onDeactivate?: (id: string) => void
-  onEdit?: (shift: ShiftData) => void
 }
 
-export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate, onEdit }: ShiftCardProps) {
+export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate }: ShiftCardProps) {
+  const router = useRouter()
   const [flagOpen, setFlagOpen] = useState(false)
 
   const isOwner = currentUserId && shift.user_id === currentUserId
-
-  const formatTime = (iso: string) =>
-    formatInTimeZone(parseISO(iso), ET, 'MMM d, yyyy h:mm a zzz')
 
   const expiresIn = () => {
     const exp = parseISO(shift.expires_at)
@@ -63,6 +61,9 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate,
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
   }
 
+  const startTime = formatInTimeZone(parseISO(shift.start_time), ET, 'h:mm a')
+  const endTime   = formatInTimeZone(parseISO(shift.end_time),   ET, 'h:mm a zzz')
+
   return (
     <>
       <div className={cn(
@@ -73,7 +74,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate,
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-accent font-bold text-text text-base leading-tight truncate">
+            <h3 className="font-accent font-bold text-text text-lg leading-tight truncate">
               {shift.shift_title}
             </h3>
             <p className="text-xs text-text/50 mt-0.5 flex items-center gap-1">
@@ -96,10 +97,12 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate,
           </div>
           <div className="flex items-center gap-2 text-sm text-text/70">
             <Clock className="w-4 h-4 text-primary shrink-0" />
-            <div>
-              <div>{formatTime(shift.start_time)}</div>
-              <div className="text-xs text-text/50">to {formatInTimeZone(parseISO(shift.end_time), ET, 'h:mm a')} &bull; {duration()}</div>
-            </div>
+            <span className="font-medium">
+              {startTime}
+              <span className="text-text/40 mx-1.5">→</span>
+              {endTime}
+              <span className="text-text/40 font-normal ml-2 text-xs">({duration()})</span>
+            </span>
           </div>
         </div>
 
@@ -118,7 +121,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate,
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onEdit?.(shift)}
+                  onClick={() => router.push(`/wall/edit-shift/${shift.id}`)}
                   className="gap-1 text-xs px-2 py-1 min-h-0 h-8"
                 >
                   <Edit className="w-3 h-3" /> Edit

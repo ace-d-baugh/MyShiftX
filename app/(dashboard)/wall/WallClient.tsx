@@ -37,6 +37,29 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
   const [myPostsOnly, setMyPostsOnly] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
+  // Collapsed state for day-group accordions, persisted per user
+  const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(`wall-collapsed-${userId}`)
+      if (raw) setCollapsedKeys(new Set(JSON.parse(raw) as string[]))
+    } catch {}
+  }, [userId])
+
+  const toggleCollapsed = useCallback((t: Tab, dayKey: string) => {
+    const k = `${t}|${dayKey}`
+    setCollapsedKeys(prev => {
+      const next = new Set(prev)
+      if (next.has(k)) next.delete(k)
+      else next.add(k)
+      try {
+        localStorage.setItem(`wall-collapsed-${userId}`, JSON.stringify([...next]))
+      } catch {}
+      return next
+    })
+  }, [userId])
+
   const attachCommentCounts = useCallback(async <T extends { id: string }>(
     items: T[],
     postType: 'shift' | 'request'
@@ -195,7 +218,47 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
     return list
   }, [requests, search, dateFilter, boardFilter, myPostsOnly, userId])
 
+  // Group shifts by their start date in ET
+  const shiftDayGroups = useMemo(() => {
+    const groups = new Map<string, { dayLabel: string; items: ShiftData[] }>()
+    filteredShifts.forEach(shift => {
+      const dayKey = formatInTimeZone(parseISO(shift.start_time), ET, 'yyyy-MM-dd')
+      const dayLabel = formatInTimeZone(parseISO(shift.start_time), ET, 'EEEE, MMMM d, yyyy')
+      if (!groups.has(dayKey)) groups.set(dayKey, { dayLabel, items: [] })
+      groups.get(dayKey)!.items.push(shift)
+    })
+    return [...groups.entries()].map(([dayKey, v]) => ({ dayKey, ...v }))
+  }, [filteredShifts])
+
+  // Group requests by requested_date
+  const requestDayGroups = useMemo(() => {
+    const groups = new Map<string, { dayLabel: string; items: RequestData[] }>()
+    filteredRequests.forEach(req => {
+      const dayKey = req.requested_date
+      // Use noon UTC so ET conversion never crosses a date boundary
+      const dayLabel = formatInTimeZone(req.requested_date + 'T12:00:00Z', ET, 'EEEE, MMMM d, yyyy')
+      if (!groups.has(dayKey)) groups.set(dayKey, { dayLabel, items: [] })
+      groups.get(dayKey)!.items.push(req)
+    })
+    return [...groups.entries()].map(([dayKey, v]) => ({ dayKey, ...v }))
+  }, [filteredRequests])
+
   const currentPostCount = tab === 'offers' ? shifts.length : requests.length
+
+  const tabLabel = (t: Tab) => {
+    const count = t === 'offers' ? filteredShifts.length : filteredRequests.length
+    return (
+      <span className="flex items-center gap-1.5">
+        {t === 'offers' ? 'Shift Offers' : 'Shift Requests'}
+        <span className={cn(
+          'text-xs font-semibold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center leading-none',
+          tab === t ? 'bg-primary/20 text-primary' : 'bg-text/10 text-text/50'
+        )}>
+          {count}
+        </span>
+      </span>
+    )
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -232,17 +295,18 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
             key={t}
             onClick={() => setTab(t)}
             className={cn(
-              'px-5 py-3 text-sm font-medium transition-colors border-b-2 -mb-px capitalize min-h-0 min-w-0',
+              'px-5 py-3 text-sm font-medium transition-colors border-b-2 -mb-px min-h-0 min-w-0',
               tab === t
                 ? 'border-primary text-primary'
                 : 'border-transparent text-text/50 hover:text-text'
             )}
           >
-            {t === 'offers' ? 'Shift Offers' : 'Shift Requests'}
+            {tabLabel(t)}
           </button>
         ))}
       </div>
 
+      {/* Filters */}
       {currentPostCount > 1 && (
         <>
           <button
@@ -319,15 +383,25 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
             {search.trim() ? <>No shifts match &ldquo;{search}&rdquo;.</> : 'No shifts match your filters.'}
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredShifts.map(shift => (
-              <ShiftCard
-                key={shift.id}
-                shift={shift}
-                currentUserId={userId}
-                currentUserName={displayName}
-                onDeactivate={handleDeactivateShift}
-              />
+          <div className="space-y-5">
+            {shiftDayGroups.map(group => (
+              <DayGroup
+                key={group.dayKey}
+                dayLabel={group.dayLabel}
+                count={group.items.length}
+                isCollapsed={collapsedKeys.has(`offers|${group.dayKey}`)}
+                onToggle={() => toggleCollapsed('offers', group.dayKey)}
+              >
+                {group.items.map(shift => (
+                  <ShiftCard
+                    key={shift.id}
+                    shift={shift}
+                    currentUserId={userId}
+                    currentUserName={displayName}
+                    onDeactivate={handleDeactivateShift}
+                  />
+                ))}
+              </DayGroup>
             ))}
           </div>
         )
@@ -344,15 +418,25 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
             {search.trim() ? <>No requests match &ldquo;{search}&rdquo;.</> : 'No requests match your filters.'}
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredRequests.map(request => (
-              <RequestCard
-                key={request.id}
-                request={request}
-                currentUserId={userId}
-                currentUserName={displayName}
-                onDeactivate={handleDeactivateRequest}
-              />
+          <div className="space-y-5">
+            {requestDayGroups.map(group => (
+              <DayGroup
+                key={group.dayKey}
+                dayLabel={group.dayLabel}
+                count={group.items.length}
+                isCollapsed={collapsedKeys.has(`requests|${group.dayKey}`)}
+                onToggle={() => toggleCollapsed('requests', group.dayKey)}
+              >
+                {group.items.map(request => (
+                  <RequestCard
+                    key={request.id}
+                    request={request}
+                    currentUserId={userId}
+                    currentUserName={displayName}
+                    onDeactivate={handleDeactivateRequest}
+                  />
+                ))}
+              </DayGroup>
             ))}
           </div>
         )
@@ -361,7 +445,53 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
   )
 }
 
-function EmptyState({ message, subtext, href, btnLabel }: { message: string; subtext: string; href: string; btnLabel: string }) {
+// ── Day-group accordion ────────────────────────────────────────────────────────
+
+function DayGroup({
+  dayLabel, count, isCollapsed, onToggle, children,
+}: {
+  dayLabel: string
+  count: number
+  isCollapsed: boolean
+  onToggle: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <div className="rounded-xl border border-border overflow-hidden">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-card hover:bg-primary-light/30 transition-colors min-h-0"
+        aria-expanded={!isCollapsed}
+      >
+        <span className="flex items-center gap-2.5 min-w-0">
+          <span className="font-accent font-bold text-text text-sm truncate">{dayLabel}</span>
+          <span className="text-[11px] font-semibold bg-primary/15 text-primary px-2 py-0.5 rounded-full shrink-0 leading-none">
+            {count}
+          </span>
+        </span>
+        <ChevronDown className={cn(
+          'w-4 h-4 text-text/40 transition-transform duration-200 shrink-0',
+          !isCollapsed && 'rotate-180'
+        )} />
+      </button>
+
+      {!isCollapsed && (
+        <div className="max-h-[68rem] overflow-y-auto">
+          <div className="p-4 space-y-4">
+            {children}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Empty state ────────────────────────────────────────────────────────────────
+
+function EmptyState({ message, subtext, href, btnLabel }: {
+  message: string; subtext: string; href: string; btnLabel: string
+}) {
   return (
     <div className="text-center py-16 px-4">
       <div className="w-16 h-16 bg-primary-light rounded-full flex items-center justify-center mx-auto mb-4">

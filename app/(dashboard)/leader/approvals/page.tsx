@@ -28,16 +28,25 @@ export default async function ApprovalsPage() {
   const isAdmin = profile?.role === 'Admin'
   if (!isAdmin && !isMod) redirect('/wall')
 
-  // RLS scopes this to boards where the viewer is a Mod/Leader (or Admin sees all)
-  const { data: pendingRequests } = await supabase
-    .from('user_boards')
-    .select('id, board_id, requested_at, users(display_name), boards(name)')
-    .eq('is_approved', false)
-    .order('requested_at', { ascending: true })
+  // Use a SECURITY DEFINER RPC so the multi-table RLS interaction
+  // (user_boards → boards → is_board_member → user_boards) doesn't
+  // silently drop rows. Authorization is checked inside the function.
+  const { data: rows } = await supabase.rpc('get_pending_board_requests')
+
+  const pendingRequests: PendingRequest[] = (rows ?? []).map((r: {
+    id: string; board_id: string; requested_at: string;
+    user_display_name: string | null; board_name: string | null
+  }) => ({
+    id:           r.id,
+    board_id:     r.board_id,
+    requested_at: r.requested_at,
+    users:        r.user_display_name ? { display_name: r.user_display_name } : null,
+    boards:       r.board_name        ? { name: r.board_name }               : null,
+  }))
 
   return (
     <ApprovalsClient
-      pendingRequests={(pendingRequests ?? []) as PendingRequest[]}
+      pendingRequests={pendingRequests}
       approverId={user.id}
     />
   )

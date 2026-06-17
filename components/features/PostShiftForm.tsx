@@ -6,19 +6,39 @@ import { createClient } from '@/lib/supabase/client'
 import { shiftSchema } from '@/lib/validations/shifts'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
-import { Plus } from 'lucide-react'
+import { Plus, Save } from 'lucide-react'
 
 interface Board { id: string; name: string }
+
+export interface ShiftInitialData {
+  board_id: string | null
+  shift_title: string
+  start_time: string
+  end_time: string
+  is_trade: boolean
+  is_giveaway: boolean
+  is_overtime_approved: boolean
+  details: string | null
+}
 
 interface PostShiftFormProps {
   userId: string
   displayName: string
   onSuccess?: () => void
+  shiftId?: string
+  initialData?: ShiftInitialData
 }
 
-export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormProps) {
+function toLocalDatetimeInput(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initialData }: PostShiftFormProps) {
   const router = useRouter()
   const supabase = createClient()
+  const isEdit = !!shiftId
 
   const [boards, setBoards] = useState<Board[]>([])
   const [loading, setLoading] = useState(false)
@@ -27,14 +47,14 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
   const [serverError, setServerError] = useState<string | null>(null)
 
   const [form, setForm] = useState({
-    board_id: '',
-    shift_title: '',
-    start_time: '',
-    end_time: '',
-    is_trade: false,
-    is_giveaway: false,
-    is_overtime_approved: false,
-    details: '',
+    board_id:              initialData?.board_id              ?? '',
+    shift_title:           initialData?.shift_title           ?? '',
+    start_time:            initialData ? toLocalDatetimeInput(initialData.start_time) : '',
+    end_time:              initialData ? toLocalDatetimeInput(initialData.end_time)   : '',
+    is_trade:              initialData?.is_trade              ?? false,
+    is_giveaway:           initialData?.is_giveaway           ?? false,
+    is_overtime_approved:  initialData?.is_overtime_approved  ?? false,
+    details:               initialData?.details               ?? '',
   })
 
   useEffect(() => {
@@ -51,11 +71,13 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
         .sort((a, b) => a.name.localeCompare(b.name))
 
       setBoards(boardList)
-      if (boardList.length === 1) setForm(prev => ({ ...prev, board_id: boardList[0].id }))
+      if (!isEdit && boardList.length === 1) {
+        setForm(prev => ({ ...prev, board_id: boardList[0].id }))
+      }
       setDataLoading(false)
     }
     load()
-  }, [userId])
+  }, [userId, isEdit])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target
@@ -81,24 +103,42 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
 
     setLoading(true)
     try {
-      const { error } = await supabase.from('shifts').insert({
-        created_by: displayName,
-        user_id: userId,
-        board_id: form.board_id,
-        shift_title: form.shift_title,
-        start_time: startUTC,
-        end_time: endUTC,
-        is_trade: form.is_trade,
-        is_giveaway: form.is_giveaway,
-        is_overtime_approved: form.is_overtime_approved,
-        details: form.details || null,
-        is_active: true,
-      })
-      if (error) throw error
+      if (isEdit) {
+        const { error } = await supabase
+          .from('shifts')
+          .update({
+            board_id:             form.board_id,
+            shift_title:          form.shift_title,
+            start_time:           startUTC,
+            end_time:             endUTC,
+            is_trade:             form.is_trade,
+            is_giveaway:          form.is_giveaway,
+            is_overtime_approved: form.is_overtime_approved,
+            details:              form.details || null,
+          })
+          .eq('id', shiftId)
+          .eq('user_id', userId)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('shifts').insert({
+          created_by:           displayName,
+          user_id:              userId,
+          board_id:             form.board_id,
+          shift_title:          form.shift_title,
+          start_time:           startUTC,
+          end_time:             endUTC,
+          is_trade:             form.is_trade,
+          is_giveaway:          form.is_giveaway,
+          is_overtime_approved: form.is_overtime_approved,
+          details:              form.details || null,
+          is_active:            true,
+        })
+        if (error) throw error
+      }
       onSuccess?.()
       router.push('/wall')
     } catch (err: unknown) {
-      setServerError(err instanceof Error ? err.message : 'Failed to post shift.')
+      setServerError(err instanceof Error ? err.message : isEdit ? 'Failed to update shift.' : 'Failed to post shift.')
     } finally {
       setLoading(false)
     }
@@ -111,7 +151,8 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
   if (boards.length === 0) {
     return (
       <div className="py-8 text-center text-sm text-text/60">
-        You haven&apos;t joined any boards yet. <a href="/profile" className="text-primary underline">Join or create a board</a> before posting a shift.
+        You haven&apos;t joined any boards yet.{' '}
+        <a href="/profile" className="text-primary underline">Join or create a board</a> before posting a shift.
       </div>
     )
   }
@@ -224,7 +265,7 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
       </div>
 
       <Button type="submit" loading={loading} className="w-full gap-2">
-        <Plus className="w-4 h-4" /> Post Shift
+        {isEdit ? <><Save className="w-4 h-4" /> Update Shift</> : <><Plus className="w-4 h-4" /> Post Shift</>}
       </Button>
     </form>
   )

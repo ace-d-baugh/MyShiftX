@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { requestSchema } from '@/lib/validations/shifts'
 import { Button } from '@/components/ui/Button'
-import { Plus } from 'lucide-react'
+import { Plus, Save } from 'lucide-react'
 import type { PreferredTime } from '@/lib/database.types'
 
 const TIME_OPTIONS: { value: PreferredTime; label: string; desc: string }[] = [
@@ -17,15 +17,25 @@ const TIME_OPTIONS: { value: PreferredTime; label: string; desc: string }[] = [
 
 interface Board { id: string; name: string }
 
+export interface RequestInitialData {
+  board_id: string | null
+  requested_date: string
+  preferred_times: PreferredTime[]
+  details: string | null
+}
+
 interface PostRequestFormProps {
   userId: string
   displayName: string
   onSuccess?: () => void
+  requestId?: string
+  initialData?: RequestInitialData
 }
 
-export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestFormProps) {
+export function PostRequestForm({ userId, displayName, onSuccess, requestId, initialData }: PostRequestFormProps) {
   const router = useRouter()
   const supabase = createClient()
+  const isEdit = !!requestId
 
   const [boards, setBoards] = useState<Board[]>([])
   const [loading, setLoading] = useState(false)
@@ -34,10 +44,10 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
   const [serverError, setServerError] = useState<string | null>(null)
 
   const [form, setForm] = useState({
-    board_id: '',
-    requested_date: '',
-    preferred_times: [] as PreferredTime[],
-    details: '',
+    board_id:        initialData?.board_id        ?? '',
+    requested_date:  initialData?.requested_date  ?? '',
+    preferred_times: initialData?.preferred_times ?? ([] as PreferredTime[]),
+    details:         initialData?.details         ?? '',
   })
 
   useEffect(() => {
@@ -54,11 +64,13 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
         .sort((a, b) => a.name.localeCompare(b.name))
 
       setBoards(boardList)
-      if (boardList.length === 1) setForm(prev => ({ ...prev, board_id: boardList[0].id }))
+      if (!isEdit && boardList.length === 1) {
+        setForm(prev => ({ ...prev, board_id: boardList[0].id }))
+      }
       setDataLoading(false)
     }
     load()
-  }, [userId])
+  }, [userId, isEdit])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -90,20 +102,34 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
 
     setLoading(true)
     try {
-      const { error } = await supabase.from('requests').insert({
-        created_by: displayName,
-        user_id: userId,
-        board_id: form.board_id,
-        requested_date: form.requested_date,
-        preferred_times: form.preferred_times,
-        details: form.details || null,
-        is_active: true,
-      })
-      if (error) throw error
+      if (isEdit) {
+        const { error } = await supabase
+          .from('requests')
+          .update({
+            board_id:        form.board_id,
+            requested_date:  form.requested_date,
+            preferred_times: form.preferred_times,
+            details:         form.details || null,
+          })
+          .eq('id', requestId)
+          .eq('user_id', userId)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('requests').insert({
+          created_by:      displayName,
+          user_id:         userId,
+          board_id:        form.board_id,
+          requested_date:  form.requested_date,
+          preferred_times: form.preferred_times,
+          details:         form.details || null,
+          is_active:       true,
+        })
+        if (error) throw error
+      }
       onSuccess?.()
       router.push('/wall')
     } catch (err: unknown) {
-      setServerError(err instanceof Error ? err.message : 'Failed to post request.')
+      setServerError(err instanceof Error ? err.message : isEdit ? 'Failed to update request.' : 'Failed to post request.')
     } finally {
       setLoading(false)
     }
@@ -116,7 +142,8 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
   if (boards.length === 0) {
     return (
       <div className="py-8 text-center text-sm text-text/60">
-        You haven&apos;t joined any boards yet. <a href="/profile" className="text-primary underline">Join or create a board</a> before posting a request.
+        You haven&apos;t joined any boards yet.{' '}
+        <a href="/profile" className="text-primary underline">Join or create a board</a> before posting a request.
       </div>
     )
   }
@@ -201,7 +228,7 @@ export function PostRequestForm({ userId, displayName, onSuccess }: PostRequestF
       </div>
 
       <Button type="submit" loading={loading} className="w-full gap-2">
-        <Plus className="w-4 h-4" /> Post Request
+        {isEdit ? <><Save className="w-4 h-4" /> Update Request</> : <><Plus className="w-4 h-4" /> Post Request</>}
       </Button>
     </form>
   )

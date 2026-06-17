@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { format, parseISO } from 'date-fns'
-import { formatInTimeZone } from 'date-fns-tz'
-import { Calendar, LayoutGrid, User, Flag, Edit, EyeOff, Mail, Clock } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { LayoutGrid, User, Flag, Edit, EyeOff, Mail, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { FlagModal } from '@/components/features/FlagModal'
@@ -46,21 +45,13 @@ interface RequestCardProps {
   currentUserId?: string
   currentUserName?: string
   onDeactivate?: (id: string) => void
-  onEdit?: (request: RequestData) => void
 }
 
-export function RequestCard({ request, currentUserId, currentUserName, onDeactivate, onEdit }: RequestCardProps) {
+export function RequestCard({ request, currentUserId, currentUserName, onDeactivate }: RequestCardProps) {
+  const router = useRouter()
   const [flagOpen, setFlagOpen] = useState(false)
 
   const isOwner = currentUserId && request.user_id === currentUserId
-
-  const formattedDate = (() => {
-    try {
-      return format(parseISO(request.requested_date), 'EEEE, MMMM d, yyyy')
-    } catch {
-      return request.requested_date
-    }
-  })()
 
   return (
     <>
@@ -68,7 +59,7 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-accent font-bold text-text text-base leading-tight">
+            <h3 className="font-accent font-bold text-text text-lg leading-tight">
               Shift Wanted
             </h3>
             <p className="text-xs text-text/50 mt-0.5 flex items-center gap-1">
@@ -81,10 +72,6 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
 
         {/* Details */}
         <div className="space-y-1.5 mb-3">
-          <div className="flex items-center gap-2 text-sm text-text/70">
-            <Calendar className="w-4 h-4 text-accent shrink-0" />
-            <span className="font-medium text-text">{formattedDate}</span>
-          </div>
           <div className="flex items-center gap-2 text-sm text-text/70">
             <LayoutGrid className="w-4 h-4 text-accent shrink-0" />
             <span className="truncate font-medium">{request.board_name}</span>
@@ -118,7 +105,7 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onEdit?.(request)}
+                  onClick={() => router.push(`/wall/edit-request/${request.id}`)}
                   className="gap-1 text-xs px-2 py-1 min-h-0 h-8"
                 >
                   <Edit className="w-3 h-3" /> Edit
