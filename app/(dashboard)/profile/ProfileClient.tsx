@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Bell, Shield, Trash2, Save, CheckCircle } from 'lucide-react'
+import { User, Bell, Shield, Trash2, Save, CheckCircle, Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { Button } from '@/components/ui/Button'
@@ -40,6 +40,7 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
   const [error, setError] = useState<string | null>(null)
   const [nameError, setNameError] = useState<string | null>(null)
   const [deactivateConfirm, setDeactivateConfirm] = useState(false)
+  const [createBoardOpen, setCreateBoardOpen] = useState(false)
 
   // Track whether a valid display name has been saved
   const [hasDisplayNameSaved, setHasDisplayNameSaved] = useState(
@@ -204,12 +205,26 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
           <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
             <Shield className="w-5 h-5 text-success" />
           </div>
-          <div>
+          <div className="flex-1">
             <h2 className="font-accent font-bold text-text">My Boards</h2>
             <p className="text-xs text-text/50">Join boards and manage your memberships</p>
           </div>
+          <button
+            onClick={() => setCreateBoardOpen(true)}
+            disabled={!hasDisplayNameSaved}
+            className="p-1.5 rounded-md border border-border text-text/40 hover:text-primary hover:border-primary hover:bg-primary-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-0 min-w-0"
+            title="Create a board"
+            aria-label="Create a board"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
         </div>
-        <MyBoardsSection userId={sessionUserId} displayNameReady={hasDisplayNameSaved} />
+        <MyBoardsSection
+          userId={sessionUserId}
+          displayNameReady={hasDisplayNameSaved}
+          createOpen={createBoardOpen}
+          onCreateOpenChange={setCreateBoardOpen}
+        />
       </div>
 
       {/* Danger Zone */}

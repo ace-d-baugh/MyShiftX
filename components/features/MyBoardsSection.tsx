@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import {
   LayoutGrid, Plus, X, Pencil, Key, Trash2, Check, Copy,
-  RefreshCw, Users, Crown,
+  RefreshCw, Users, Crown, MoreVertical,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { BoardRole } from '@/lib/database.types'
@@ -36,13 +36,15 @@ interface MemberEntry {
 interface MyBoardsSectionProps {
   userId: string
   displayNameReady: boolean
+  createOpen: boolean
+  onCreateOpenChange: (open: boolean) => void
 }
 
 const roleVariant: Record<BoardRole, 'user' | 'mod' | 'leader'> = {
   User: 'user', Mod: 'mod', Leader: 'leader',
 }
 
-export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionProps) {
+export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreateOpenChange }: MyBoardsSectionProps) {
   const supabase = createClient()
   const [boards, setBoards] = useState<BoardEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -57,7 +59,6 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
   const [confirmLoading, setConfirmLoading] = useState(false)
 
   // Create flow
-  const [createOpen, setCreateOpen] = useState(false)
   const [createName, setCreateName] = useState('')
   const [createLoading, setCreateLoading] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
@@ -90,6 +91,10 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
   const [transferTarget, setTransferTarget] = useState<MemberEntry | null>(null)
   const [transferLoading, setTransferLoading] = useState(false)
 
+  // Mobile board action menu
+  const [menuBoard, setMenuBoard] = useState<BoardEntry | null>(null)
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null)
+
   const loadBoards = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
@@ -115,6 +120,10 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
   }, [supabase, userId])
 
   useEffect(() => { loadBoards() }, [loadBoards])
+
+  useEffect(() => {
+    if (createOpen) { setCreateName(''); setCreateError(null) }
+  }, [createOpen])
 
   // ── Join ──────────────────────────────────────────────────────────────────
 
@@ -156,7 +165,7 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
     const result = await createBoard(createName)
     setCreateLoading(false)
     if (result.error) { setCreateError(result.error); return }
-    setCreateOpen(false)
+    onCreateOpenChange(false)
     setCreateName('')
     await loadBoards()
   }
@@ -284,6 +293,13 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
     await loadBoards()
   }
 
+  const openBoardMenu = (board: BoardEntry, e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
+    setMenuBoard(board)
+  }
+  const closeBoardMenu = () => { setMenuBoard(null); setMenuPos(null) }
+
   const approvedBoards = boards.filter(b => b.is_approved)
   const pendingBoards  = boards.filter(b => !b.is_approved)
 
@@ -326,17 +342,18 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 min-w-0">
-                        <LayoutGrid className="w-4 h-4 text-primary shrink-0" />
-                        <span className="font-medium text-text truncate">{board.name}</span>
+                      <div className="flex items-start gap-2 min-w-0">
+                        <LayoutGrid className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <span className="font-medium text-text flex-1">{board.name}</span>
                         <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{board.role}</Badge>
                       </div>
                     )}
                   </td>
 
                   {/* Actions cell */}
-                  <td className="px-3 py-2.5">
-                    <div className="flex items-center justify-end gap-0.5">
+                  <td className="px-3 py-2.5 align-top">
+                    {/* Desktop: icon row */}
+                    <div className="hidden sm:flex items-center justify-end gap-0.5">
                       {editingId !== board.board_id && board.role === 'Leader' && (
                         <>
                           <button onClick={() => startEdit(board)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Rename" aria-label="Rename board">
@@ -366,6 +383,27 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
                         </button>
                       )}
                     </div>
+
+                    {/* Mobile: three-dot menu */}
+                    {editingId !== board.board_id && (
+                      <div className="sm:hidden flex items-center justify-end">
+                        {leaveId === board.board_id ? (
+                          <span className="flex items-center gap-1 text-xs whitespace-nowrap">
+                            <span className="text-text/50">Leave?</span>
+                            <button onClick={handleLeave} disabled={leaveLoading} className="text-warning font-medium hover:underline">Yes</button>
+                            <button onClick={() => setLeaveId(null)} className="text-text/40 hover:underline">No</button>
+                          </span>
+                        ) : (
+                          <button
+                            onClick={e => openBoardMenu(board, e)}
+                            className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0"
+                            aria-label="Board actions"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -436,18 +474,52 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
         )}
       </div>
 
-      {/* Create a board button */}
-      <div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          onClick={() => { setCreateOpen(true); setCreateName(''); setCreateError(null) }}
-          disabled={!displayNameReady}
-        >
-          <Plus className="w-4 h-4" /> Create a Board
-        </Button>
-      </div>
+      {/* ── Mobile Board Actions Dropdown ───────────────────────────────── */}
+      {menuBoard && menuPos && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={closeBoardMenu} />
+          <div
+            className="fixed z-20 bg-card border border-border rounded-lg shadow-lg min-w-[160px] py-1"
+            style={{ top: menuPos.top, right: menuPos.right }}
+          >
+            {menuBoard.role === 'Leader' && (
+              <>
+                <button
+                  onClick={() => { startEdit(menuBoard); closeBoardMenu() }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20 text-left"
+                >
+                  <Pencil className="w-3.5 h-3.5 shrink-0" /> Rename
+                </button>
+                <button
+                  onClick={() => { openMembers(menuBoard); closeBoardMenu() }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20 text-left"
+                >
+                  <Users className="w-3.5 h-3.5 shrink-0" /> Members
+                </button>
+                <button
+                  onClick={() => { setCodeBoard(menuBoard); setCodeCopied(false); closeBoardMenu() }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20 text-left"
+                >
+                  <Key className="w-3.5 h-3.5 shrink-0" /> Invite Code
+                </button>
+                <button
+                  onClick={() => { setDeleteId(menuBoard.board_id); closeBoardMenu() }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-warning hover:bg-warning/10 text-left"
+                >
+                  <Trash2 className="w-3.5 h-3.5 shrink-0" /> Delete Board
+                </button>
+                <div className="border-t border-border my-1" />
+              </>
+            )}
+            <button
+              onClick={() => { setLeaveId(menuBoard.board_id); closeBoardMenu() }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-warning hover:bg-warning/10 text-left"
+            >
+              <X className="w-3.5 h-3.5 shrink-0" /> Leave Board
+            </button>
+          </div>
+        </>
+      )}
 
       {/* ── Join Confirmation Modal ──────────────────────────────────────── */}
       {pendingJoin && (
@@ -470,7 +542,7 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
 
       {/* ── Create Board Modal ───────────────────────────────────────────── */}
       {createOpen && (
-        <Modal onClose={() => setCreateOpen(false)}>
+        <Modal onClose={() => onCreateOpenChange(false)}>
           <h3 className="font-accent font-bold text-text text-lg mb-4">Create a Board</h3>
           <div className="space-y-3">
             <div>
@@ -488,7 +560,7 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
               {createError && <p className="mt-1 text-xs text-warning">{createError}</p>}
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setCreateOpen(false)}>Cancel</Button>
+              <Button variant="outline" size="sm" onClick={() => onCreateOpenChange(false)}>Cancel</Button>
               <Button size="sm" loading={createLoading} onClick={handleCreate} className="gap-1.5">
                 <Plus className="w-4 h-4" /> Create
               </Button>

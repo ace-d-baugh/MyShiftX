@@ -103,6 +103,16 @@ const config: Config = {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-12px)' },
         },
+        navMenuOpen: {
+          '0%':   { opacity: '0', transform: 'translateY(-10px)' },
+          '55%':  { opacity: '1', transform: 'translateY(6px)' },
+          '75%':  { transform: 'translateY(-3px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        navMenuClose: {
+          '0%':   { opacity: '1', transform: 'translateY(0)' },
+          '100%': { opacity: '0', transform: 'translateY(-10px)' },
+        },
         starFall: {
           // Falls along a -30deg line (vertical drop paired with a proportional
           // leftward drift) and stays tilted to match, like a streak of rain.
@@ -123,7 +133,9 @@ const config: Config = {
         'pop-in': 'popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both',
         'float': 'float 3.5s ease-in-out infinite',
         'star-fall': 'starFall 6s linear infinite',
-        'card-in':   'cardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'card-in':      'cardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'nav-menu-open':  'navMenuOpen 0.38s ease-out both',
+        'nav-menu-close': 'navMenuClose 0.18s ease-in both',
       },
       transitionTimingFunction: {
         spring: 'cubic-bezier(0.16, 1, 0.3, 1)',

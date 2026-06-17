@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -51,6 +51,7 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoa
   const router = useRouter()
   const supabase = createClient()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuClosing, setMobileMenuClosing] = useState(false)
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
 
@@ -76,6 +77,24 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoa
     setDarkMode(next)
     applyTheme(next ? 'dark' : 'light')
   }
+
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const openMobileMenu = () => {
+    if (closeTimerRef.current) { clearTimeout(closeTimerRef.current); closeTimerRef.current = null }
+    setMobileMenuOpen(true)
+    setMobileMenuClosing(false)
+  }
+  const closeMobileMenu = () => {
+    if (mobileMenuClosing) return
+    setMobileMenuClosing(true)
+    closeTimerRef.current = setTimeout(() => {
+      setMobileMenuOpen(false)
+      setMobileMenuClosing(false)
+      closeTimerRef.current = null
+    }, 200)
+  }
+  const toggleMobileMenu = () => mobileMenuOpen && !mobileMenuClosing ? closeMobileMenu() : openMobileMenu()
 
   const isActive = (href: string) => pathname.startsWith(href)
   const approvalsBadgeCount = pendingApprovalsCount > 9 ? '9+' : pendingApprovalsCount
@@ -208,17 +227,20 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoa
             />
           </Link>
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={toggleMobileMenu}
             className="p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen && !mobileMenuClosing ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="bg-card border-b border-border shadow-lg">
+          <div
+            className="bg-card border-b border-border shadow-lg"
+            style={{ animation: mobileMenuClosing ? 'navMenuClose 0.18s ease-in both' : 'navMenuOpen 0.38s ease-out both' }}
+          >
             <div className="px-4 py-2 border-b border-border">
               <p className="text-xs text-text/40 font-medium uppercase tracking-wide">Signed in as</p>
               <p className="text-sm font-medium text-text">{displayName}</p>
@@ -228,7 +250,7 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoa
                 <Link
                   key={href}
                   href={href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={closeMobileMenu}
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors',
                     isActive(href)
