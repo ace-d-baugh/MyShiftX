@@ -38,6 +38,7 @@ export interface RequestData {
   created_at: string
   comment_count?: number
   interested_count?: number
+  contactReady?: boolean
 }
 
 interface RequestCardProps {
@@ -56,35 +57,35 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
   return (
     <>
       <div className="card border-l-4 border-l-accent transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-accent font-bold text-text text-lg leading-tight">
-              Shift Wanted
-            </h3>
-            <p className="text-xs text-text/50 mt-0.5 flex items-center gap-1">
-              <User className="w-3 h-3" />
-              Requested by {request.created_by}
-            </p>
-          </div>
+        {/* Title + badge */}
+        <div className="flex items-start justify-between gap-3 mb-1">
+          <h3 className="font-accent font-bold text-text text-lg leading-tight flex-1 min-w-0">
+            Shift Wanted
+          </h3>
           <span className="badge bg-accent/20 text-text shrink-0">Request</span>
         </div>
 
-        {/* Details */}
-        <div className="space-y-1.5 mb-3">
-          <div className="flex items-center gap-2 text-sm text-text/70">
-            <LayoutGrid className="w-4 h-4 text-accent shrink-0" />
-            <span className="truncate font-medium">{request.board_name}</span>
+        {/* Preferred times — directly below title */}
+        <div className="flex items-center gap-1.5 mb-3">
+          <Clock className="w-3.5 h-3.5 text-accent shrink-0" />
+          <div className="flex flex-wrap gap-1.5">
+            {request.preferred_times.map(t => (
+              <span key={t} className={cn('badge text-sm', timeBadgeVariant[t])}>
+                {timeLabels[t]}
+              </span>
+            ))}
           </div>
-          <div className="flex items-start gap-2 text-sm text-text/70">
-            <Clock className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-            <div className="flex flex-wrap gap-1">
-              {request.preferred_times.map(t => (
-                <span key={t} className={cn('badge text-xs', timeBadgeVariant[t])}>
-                  {timeLabels[t]}
-                </span>
-              ))}
-            </div>
+        </div>
+
+        {/* Board (left) · Requester (right) */}
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-1.5 text-xs text-text/50 min-w-0">
+            <LayoutGrid className="w-3.5 h-3.5 text-accent/70 shrink-0" />
+            <span className="truncate">{request.board_name}</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-text/50 shrink-0">
+            <User className="w-3 h-3" />
+            <span>{request.created_by}</span>
           </div>
         </div>
 
@@ -102,6 +103,7 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
           currentUserName={currentUserName}
           commentCount={request.comment_count ?? 0}
           interestedCount={request.interested_count ?? 0}
+          boardId={request.board_id ?? undefined}
           actions={
             isOwner ? (
               <>
@@ -124,12 +126,21 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
               </>
             ) : (
               <>
-                <a
-                  href={`mailto:?subject=Re: Shift Request on MyShiftX&body=Hi ${request.created_by},%0A%0AI saw your shift request on MyShiftX and I have a shift available!%0A%0A- ${currentUserName ?? 'A User'}`}
-                  className="btn btn-primary text-xs px-2 py-1 min-h-0 h-7 gap-1 no-underline inline-flex items-center rounded-md"
-                >
-                  <Mail className="w-3 h-3" /> Contact
-                </a>
+                {request.contactReady ? (
+                  <a
+                    href={`mailto:?subject=Re: Shift Request on MyShiftX&body=Hi ${request.created_by},%0A%0AI saw your shift request on MyShiftX and I have a shift available!%0A%0A- ${currentUserName ?? 'A User'}`}
+                    className="btn btn-primary text-xs px-2 py-1 min-h-0 h-7 gap-1 no-underline inline-flex items-center rounded-md"
+                  >
+                    <Mail className="w-3 h-3" /> Contact
+                  </a>
+                ) : (
+                  <span
+                    className="text-xs px-2 py-1 h-7 gap-1 inline-flex items-center rounded-md bg-text/8 text-text/30 cursor-not-allowed border border-border"
+                    title="This user hasn't set up a contact method yet"
+                  >
+                    <Mail className="w-3 h-3" /> Contact
+                  </span>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -150,6 +161,7 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
         onClose={() => setFlagOpen(false)}
         targetType="post"
         targetId={request.id}
+        boardId={request.board_id ?? undefined}
       />
     </>
   )

@@ -31,6 +31,7 @@ export interface ShiftData {
   created_at: string
   comment_count?: number
   interested_count?: number
+  contactReady?: boolean
 }
 
 interface ShiftCardProps {
@@ -112,6 +113,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
           currentUserName={currentUserName}
           commentCount={shift.comment_count ?? 0}
           interestedCount={shift.interested_count ?? 0}
+          boardId={shift.board_id ?? undefined}
           actions={
             isOwner ? (
               <>
@@ -134,12 +136,21 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
               </>
             ) : (
               <>
-                <a
-                  href={`mailto:?subject=Re: ${encodeURIComponent(shift.shift_title)} on MyShiftX&body=Hi ${shift.created_by},%0A%0AI saw your shift post on MyShiftX and I'm interested!%0A%0A- ${currentUserName ?? 'A User'}`}
-                  className="btn btn-primary text-xs px-2 py-1 min-h-0 h-7 gap-1 no-underline inline-flex items-center rounded-md"
-                >
-                  <Mail className="w-3 h-3" /> Contact
-                </a>
+                {shift.contactReady ? (
+                  <a
+                    href={`mailto:?subject=Re: ${encodeURIComponent(shift.shift_title)} on MyShiftX&body=Hi ${shift.created_by},%0A%0AI saw your shift post on MyShiftX and I'm interested!%0A%0A- ${currentUserName ?? 'A User'}`}
+                    className="btn btn-primary text-xs px-2 py-1 min-h-0 h-7 gap-1 no-underline inline-flex items-center rounded-md"
+                  >
+                    <Mail className="w-3 h-3" /> Contact
+                  </a>
+                ) : (
+                  <span
+                    className="text-xs px-2 py-1 h-7 gap-1 inline-flex items-center rounded-md bg-text/8 text-text/30 cursor-not-allowed border border-border"
+                    title="This user hasn't set up a contact method yet"
+                  >
+                    <Mail className="w-3 h-3" /> Contact
+                  </span>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -160,6 +171,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
         onClose={() => setFlagOpen(false)}
         targetType="post"
         targetId={shift.id}
+        boardId={shift.board_id ?? undefined}
       />
     </>
   )

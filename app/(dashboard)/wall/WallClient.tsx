@@ -98,7 +98,8 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
           id, shift_title, created_by, user_id, board_id,
           start_time, end_time, is_trade, is_giveaway, is_overtime_approved,
           details, is_active, expires_at, created_at,
-          boards(name)
+          boards(name),
+          users!user_id(notify_via_email, notify_via_sms, phone_number)
         `)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
@@ -106,23 +107,28 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
 
       if (error) throw error
 
-      const mapped = (data ?? []).map((s: Record<string, unknown>) => ({
-        id: s.id as string,
-        shift_title: s.shift_title as string,
-        created_by: s.created_by as string,
-        user_id: s.user_id as string | null,
-        board_id: s.board_id as string | null,
-        board_name: (s.boards as { name: string } | null)?.name ?? '',
-        start_time: s.start_time as string,
-        end_time: s.end_time as string,
-        is_trade: s.is_trade as boolean,
-        is_giveaway: s.is_giveaway as boolean,
-        is_overtime_approved: s.is_overtime_approved as boolean,
-        details: s.details as string | null,
-        is_active: s.is_active as boolean,
-        expires_at: s.expires_at as string,
-        created_at: s.created_at as string,
-      }))
+      const mapped = (data ?? []).map((s: Record<string, unknown>) => {
+        const poster = s.users as { notify_via_email: boolean; notify_via_sms: boolean; phone_number: string | null } | null
+        return {
+          id: s.id as string,
+          shift_title: s.shift_title as string,
+          created_by: s.created_by as string,
+          user_id: s.user_id as string | null,
+          board_id: s.board_id as string | null,
+          board_name: (s.boards as { name: string } | null)?.name ?? '',
+          start_time: s.start_time as string,
+          end_time: s.end_time as string,
+          is_trade: s.is_trade as boolean,
+          is_giveaway: s.is_giveaway as boolean,
+          is_overtime_approved: s.is_overtime_approved as boolean,
+          details: s.details as string | null,
+          is_active: s.is_active as boolean,
+          expires_at: s.expires_at as string,
+          created_at: s.created_at as string,
+          contactReady: (poster?.notify_via_email ?? false) ||
+                        ((poster?.notify_via_sms ?? false) && !!poster?.phone_number),
+        }
+      })
       setShifts(await attachCommentCounts(mapped, 'shift'))
     } finally {
       setLoading(false)
@@ -138,7 +144,8 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
         .select(`
           id, created_by, user_id, board_id, preferred_times, requested_date,
           details, is_active, expires_at, created_at,
-          boards(name)
+          boards(name),
+          users!user_id(notify_via_email, notify_via_sms, phone_number)
         `)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
@@ -146,19 +153,24 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
 
       if (error) throw error
 
-      const mapped = (data ?? []).map((r: Record<string, unknown>) => ({
-        id: r.id as string,
-        created_by: r.created_by as string,
-        user_id: r.user_id as string | null,
-        board_id: r.board_id as string | null,
-        board_name: (r.boards as { name: string } | null)?.name ?? '',
-        preferred_times: r.preferred_times as import('@/lib/database.types').PreferredTime[],
-        requested_date: r.requested_date as string,
-        details: r.details as string | null,
-        is_active: r.is_active as boolean,
-        expires_at: r.expires_at as string,
-        created_at: r.created_at as string,
-      }))
+      const mapped = (data ?? []).map((r: Record<string, unknown>) => {
+        const poster = r.users as { notify_via_email: boolean; notify_via_sms: boolean; phone_number: string | null } | null
+        return {
+          id: r.id as string,
+          created_by: r.created_by as string,
+          user_id: r.user_id as string | null,
+          board_id: r.board_id as string | null,
+          board_name: (r.boards as { name: string } | null)?.name ?? '',
+          preferred_times: r.preferred_times as import('@/lib/database.types').PreferredTime[],
+          requested_date: r.requested_date as string,
+          details: r.details as string | null,
+          is_active: r.is_active as boolean,
+          expires_at: r.expires_at as string,
+          created_at: r.created_at as string,
+          contactReady: (poster?.notify_via_email ?? false) ||
+                        ((poster?.notify_via_sms ?? false) && !!poster?.phone_number),
+        }
+      })
       setRequests(await attachCommentCounts(mapped, 'request'))
     } finally {
       setLoading(false)

@@ -31,6 +31,7 @@ interface CommentSectionProps {
   currentUserName?: string
   commentCount: number
   interestedCount: number
+  boardId?: string
   actions?: React.ReactNode
 }
 
@@ -41,6 +42,7 @@ export function CommentSection({
   currentUserId,
   commentCount,
   interestedCount,
+  boardId,
   actions,
 }: CommentSectionProps) {
   const supabase = useMemo(() => createClient(), [])
@@ -451,6 +453,7 @@ export function CommentSection({
         onClose={() => setFlagCommentId(null)}
         targetType="comment"
         targetId={flagCommentId ?? ''}
+        boardId={boardId}
       />
 
       <Modal open={confirmRemoveId !== null} onClose={() => setConfirmRemoveId(null)} title="Remove interest?" size="sm">

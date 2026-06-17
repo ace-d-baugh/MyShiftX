@@ -20,9 +20,10 @@ interface FlagModalProps {
   onClose: () => void
   targetType: FlagTargetType
   targetId: string
+  boardId?: string
 }
 
-export function FlagModal({ open, onClose, targetType, targetId }: FlagModalProps) {
+export function FlagModal({ open, onClose, targetType, targetId, boardId }: FlagModalProps) {
   const supabase = createClient()
   const [reason, setReason] = useState('')
   const [customReason, setCustomReason] = useState('')
@@ -55,6 +56,7 @@ export function FlagModal({ open, onClose, targetType, targetId }: FlagModalProp
         flagged_by_user_id: user?.id ?? null,
         target_type: targetType,
         target_id: targetId,
+        board_id: boardId ?? null,
         reason: finalReason,
         status: 'pending',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

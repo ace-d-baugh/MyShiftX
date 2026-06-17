@@ -353,6 +353,53 @@ export async function updateUserBoardRole(
   }
 }
 
+// ── Transfer board ownership (Leader only) ───────────────────────────────────
+
+export async function transferBoardOwnership(
+  boardId: string,
+  newLeaderUserId: string
+): Promise<{ error?: string }> {
+  try {
+    const { supabase, userId } = await getSession()
+
+    // Confirm caller is currently a Leader of this board
+    const { data: mine } = await supabase
+      .from('user_boards')
+      .select('id, role')
+      .eq('board_id', boardId)
+      .eq('user_id', userId)
+      .eq('is_approved', true)
+      .single()
+
+    if (!mine || mine.role !== 'Leader') {
+      return { error: 'Only Leaders can transfer ownership.' }
+    }
+
+    // Promote the new leader
+    const { error: promoteErr } = await supabase
+      .from('user_boards')
+      .update({ role: 'Leader' })
+      .eq('board_id', boardId)
+      .eq('user_id', newLeaderUserId)
+      .eq('is_approved', true)
+
+    if (promoteErr) return { error: promoteErr.message }
+
+    // Demote current leader to Mod
+    const { error: demoteErr } = await supabase
+      .from('user_boards')
+      .update({ role: 'Mod' })
+      .eq('id', mine.id)
+
+    if (demoteErr) return { error: demoteErr.message }
+
+    revalidatePath('/profile')
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Unknown error' }
+  }
+}
+
 // ── Remove a member from a board (Mod / Leader) ───────────────────────────────
 
 export async function removeUserFromBoard(userBoardId: string): Promise<{ error?: string }> {
