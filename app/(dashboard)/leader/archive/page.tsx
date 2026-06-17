@@ -18,17 +18,19 @@ export default async function ArchivePage() {
 
   if (!profile || (profile.role !== 'Admin' && !isMod)) redirect('/wall')
 
+  const now = new Date().toISOString()
+
   const [{ data: archivedShifts }, { data: archivedRequests }] = await Promise.all([
     supabase
       .from('shifts')
       .select('id, shift_title, created_by, start_time, end_time, is_trade, is_giveaway, is_overtime_approved, created_at, boards(name)')
-      .eq('is_active', false)
+      .or(`is_active.eq.false,expires_at.lte.${now}`)
       .order('created_at', { ascending: false })
       .limit(50),
     supabase
       .from('requests')
       .select('id, created_by, requested_date, preferred_times, created_at, boards(name)')
-      .eq('is_active', false)
+      .or(`is_active.eq.false,expires_at.lte.${now}`)
       .order('created_at', { ascending: false })
       .limit(50),
   ])
