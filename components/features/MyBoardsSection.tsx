@@ -302,105 +302,76 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
       ) : approvedBoards.length === 0 ? (
         <p className="text-sm text-text/50">You haven&apos;t joined any boards yet.</p>
       ) : (
-        <ul className="space-y-2">
-          {approvedBoards.map(board => (
-            <li key={board.userBoardId} className="flex items-center gap-2 py-2 border-b border-border last:border-0">
-              {editingId === board.board_id ? (
-                <>
-                  <LayoutGrid className="w-4 h-4 text-primary shrink-0" />
-                  <input
-                    className="input text-sm flex-1 h-8"
-                    value={editName}
-                    onChange={e => setEditName(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') handleRename(board.board_id); if (e.key === 'Escape') setEditingId(null) }}
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => handleRename(board.board_id)}
-                    disabled={editLoading}
-                    className="p-1 text-success hover:text-success/80 min-h-0 min-w-0"
-                    aria-label="Save name"
-                  >
-                    <Check className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="p-1 text-text/40 hover:text-text min-h-0 min-w-0"
-                    aria-label="Cancel"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <LayoutGrid className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-sm font-medium text-text flex-1 truncate">{board.name}</span>
-                  <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{board.role}</Badge>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {board.role === 'Leader' && (
-                      <>
-                        <button
-                          onClick={() => startEdit(board)}
-                          className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0"
-                          aria-label="Rename board"
-                          title="Rename board"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
+        <div className="rounded-lg border border-border overflow-hidden">
+          <table className="w-full text-sm">
+            <tbody>
+              {approvedBoards.map(board => (
+                <tr key={board.userBoardId} className="border-b border-border last:border-0 hover:bg-primary-light/10 transition-colors">
+                  {/* Board name + role cell */}
+                  <td className="px-3 py-2.5">
+                    {editingId === board.board_id ? (
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          className="input text-sm flex-1 h-8"
+                          value={editName}
+                          onChange={e => setEditName(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') handleRename(board.board_id); if (e.key === 'Escape') setEditingId(null) }}
+                          autoFocus
+                        />
+                        <button onClick={() => handleRename(board.board_id)} disabled={editLoading} className="p-1 text-success hover:text-success/80 min-h-0 min-w-0" aria-label="Save">
+                          <Check className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => openMembers(board)}
-                          className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0"
-                          aria-label="View members"
-                          title="View members"
-                        >
-                          <Users className="w-3.5 h-3.5" />
+                        <button onClick={() => setEditingId(null)} className="p-1 text-text/40 hover:text-text min-h-0 min-w-0" aria-label="Cancel">
+                          <X className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => { setCodeBoard(board); setCodeCopied(false) }}
-                          className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0"
-                          aria-label="Manage invite code"
-                          title="Manage invite code"
-                        >
-                          <Key className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteId(board.board_id)}
-                          className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0"
-                          aria-label="Delete board"
-                          title="Delete board"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    )}
-                    {leaveId === board.board_id ? (
-                      <span className="flex items-center gap-1 text-xs">
-                        <span className="text-text/60">Leave?</span>
-                        <button
-                          onClick={handleLeave}
-                          disabled={leaveLoading}
-                          className="text-warning font-medium hover:underline"
-                        >
-                          Yes
-                        </button>
-                        <button onClick={() => setLeaveId(null)} className="text-text/40 hover:underline">No</button>
-                      </span>
+                      </div>
                     ) : (
-                      <button
-                        onClick={() => setLeaveId(board.board_id)}
-                        className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0"
-                        aria-label="Leave board"
-                        title="Leave board"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <LayoutGrid className="w-4 h-4 text-primary shrink-0" />
+                        <span className="font-medium text-text truncate">{board.name}</span>
+                        <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{board.role}</Badge>
+                      </div>
                     )}
-                  </div>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+                  </td>
+
+                  {/* Actions cell */}
+                  <td className="px-3 py-2.5">
+                    <div className="flex items-center justify-end gap-0.5">
+                      {editingId !== board.board_id && board.role === 'Leader' && (
+                        <>
+                          <button onClick={() => startEdit(board)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Rename" aria-label="Rename board">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => openMembers(board)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Members" aria-label="View members">
+                            <Users className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => { setCodeBoard(board); setCodeCopied(false) }} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Invite code" aria-label="Manage invite code">
+                            <Key className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => setDeleteId(board.board_id)} className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0" title="Delete board" aria-label="Delete board">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="w-px h-4 bg-border mx-1" />
+                        </>
+                      )}
+                      {leaveId === board.board_id ? (
+                        <span className="flex items-center gap-1 text-xs whitespace-nowrap">
+                          <span className="text-text/50">Leave?</span>
+                          <button onClick={handleLeave} disabled={leaveLoading} className="text-warning font-medium hover:underline">Yes</button>
+                          <button onClick={() => setLeaveId(null)} className="text-text/40 hover:underline">No</button>
+                        </span>
+                      ) : (
+                        <button onClick={() => setLeaveId(board.board_id)} className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0" title="Leave board" aria-label="Leave board">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Pending requests */}
