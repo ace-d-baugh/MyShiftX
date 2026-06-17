@@ -32,7 +32,7 @@ MyShiftX replaces the chaos of Facebook groups with a structured, secure platfor
 
 - **Trade shifts** with trusted peers on your boards
 - **Give away shifts** you can't work
-- **Request specific shifts** from others
+- **Request specific shifts** on a request section
 - **Stay scoped** — only see posts from boards you've joined
 
 Built as a Progressive Web App (PWA) for mobile-first access, with board-level moderation to ensure trust and accountability.
