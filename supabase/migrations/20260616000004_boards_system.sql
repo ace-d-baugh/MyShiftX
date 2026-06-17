@@ -115,14 +115,8 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.users (id, email, display_name, role, is_active)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'display_name', 'User'),
-    'Guest',
-    true
-  )
+  INSERT INTO public.users (id, email, role, is_active)
+  VALUES (NEW.id, NEW.email, 'Guest', true)
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;

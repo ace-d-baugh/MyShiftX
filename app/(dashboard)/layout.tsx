@@ -5,7 +5,7 @@ import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import type { GlobalRole } from '@/lib/database.types'
 
-type UserProfileRow = { id: string; display_name: string; role: GlobalRole; is_active: boolean } | null
+type UserProfileRow = { id: string; display_name: string | null; role: GlobalRole; is_active: boolean } | null
 
 export default async function DashboardLayout({
   children,

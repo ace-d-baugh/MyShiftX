@@ -427,8 +427,8 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
               <label className="block text-sm font-medium text-text mb-1">Board Name</label>
               <input
                 type="text"
-                className="input text-sm"
-                placeholder="e.g., Night Crew"
+                className="input placeholder:text-text/50 text-sm"
+                placeholder="e.g. Company and Team Name"
                 value={createName}
                 maxLength={60}
                 onChange={e => { setCreateName(e.target.value); setCreateError(null) }}

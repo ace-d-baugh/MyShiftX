@@ -14,7 +14,7 @@ export interface Database {
       users: {
         Row: {
           id: string
-          display_name: string
+          display_name: string | null
           email: string
           email_verified: boolean
           phone_number: string | null
@@ -28,7 +28,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          display_name: string
+          display_name?: string | null
           email: string
           email_verified?: boolean
           phone_number?: string | null

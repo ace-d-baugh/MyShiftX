@@ -32,7 +32,7 @@ export default async function AdminPage() {
   return (
     <AdminClient
       boards={(boardsRes.data ?? []) as { id: string; name: string; invite_code_enabled: boolean; is_active: boolean; created_at: string }[]}
-      users={(usersRes.data ?? []) as { id: string; display_name: string; role: string; is_active: boolean; created_at: string }[]}
+      users={(usersRes.data ?? []) as { id: string; display_name: string | null; role: string; is_active: boolean; created_at: string }[]}
       adminId={user.id}
     />
   )

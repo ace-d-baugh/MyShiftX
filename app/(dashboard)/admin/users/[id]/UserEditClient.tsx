@@ -12,7 +12,7 @@ import type { GlobalRole } from '@/lib/database.types'
 
 interface EditUser {
   id: string
-  display_name: string
+  display_name: string | null
   email: string
   role: GlobalRole
   is_active: boolean
@@ -33,7 +33,7 @@ interface UserEditClientProps {
 export function UserEditClient({ user, adminId }: UserEditClientProps) {
   const supabase = createClient()
   const router = useRouter()
-  const [displayName, setDisplayName] = useState(user.display_name)
+  const [displayName, setDisplayName] = useState(user.display_name ?? '')
   const [role, setRole] = useState<GlobalRole>(user.role)
   const [isActive, setIsActive] = useState(user.is_active)
   const [saving, setSaving] = useState(false)
@@ -41,7 +41,7 @@ export function UserEditClient({ user, adminId }: UserEditClientProps) {
   const [error, setError] = useState<string | null>(null)
 
   const isDirty =
-    displayName !== user.display_name ||
+    displayName !== (user.display_name ?? '') ||
     role !== user.role ||
     isActive !== user.is_active
 

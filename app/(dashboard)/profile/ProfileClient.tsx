@@ -12,7 +12,7 @@ import type { GlobalRole } from '@/lib/database.types'
 
 interface UserProfile {
   id: string
-  display_name: string
+  display_name: string | null
   email: string
   phone_number: string | null
   notify_via_email: boolean
@@ -53,7 +53,7 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
     setSaveSuccess(false)
 
     if (!displayNameRegex.test(displayName)) {
-      setNameError('Format: "FirstName LastInitial." (e.g., "Matthew B.")')
+      setNameError('Format: "FirstName LastInitial." (e.g., "Mickey M.")')
       return
     }
 

@@ -6,7 +6,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Board-level roles (Mod / Leader) live in user_boards.
 CREATE TABLE IF NOT EXISTS users (
   id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  display_name     TEXT        NOT NULL,
+  display_name     TEXT,
   email            TEXT        UNIQUE NOT NULL,
   email_verified   BOOLEAN     DEFAULT FALSE,
   phone_number     TEXT,
@@ -169,14 +169,8 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.users (id, email, display_name, role, is_active)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'display_name', 'User'),
-    'Guest',
-    true
-  )
+  INSERT INTO public.users (id, email, role, is_active)
+  VALUES (NEW.id, NEW.email, 'Guest', true)
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;

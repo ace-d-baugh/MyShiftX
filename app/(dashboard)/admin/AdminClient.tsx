@@ -21,7 +21,7 @@ interface Board {
 
 interface UserRow {
   id: string
-  display_name: string
+  display_name: string | null
   role: string
   is_active: boolean
   created_at: string
@@ -72,7 +72,7 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId }: A
 
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
-      if (userSearch && !u.display_name.toLowerCase().includes(userSearch.toLowerCase())) return false
+      if (userSearch && !(u.display_name ?? '').toLowerCase().includes(userSearch.toLowerCase())) return false
       if (filterRole && u.role !== filterRole) return false
       return true
     })
@@ -214,7 +214,7 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId }: A
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className={cn('font-medium', u.is_active ? 'text-text' : 'text-text/40 line-through')}>
-                        {u.display_name}
+                        {u.display_name ?? <span className="italic text-text/40">No display name</span>}
                       </p>
                       <Badge variant={roleVariant[u.role as GlobalRole] ?? 'user'}>{u.role}</Badge>
                       {!u.is_active && <span className="badge text-xs bg-warning/20 text-warning">Inactive</span>}

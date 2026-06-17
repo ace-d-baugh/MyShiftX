@@ -5,7 +5,7 @@ export const displayNameRegex = /^[A-Z][a-zA-Z]*(?:[-\s][A-Z][a-zA-Z]*)* [A-Z]\.
 export const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirm_password: z.string(),
+  confirm_password: z.string().min(1, 'Please confirm your password'),
   terms_accepted: z.literal(true, { errorMap: () => ({ message: 'You must accept the Terms & Conditions' }) }),
 }).refine(data => data.password === data.confirm_password, {
   message: 'Passwords do not match',
