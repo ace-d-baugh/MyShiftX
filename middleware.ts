@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
     console.log(`[MW] ${fullPath} | user=${user?.email ?? 'none'} | err=${error?.message ?? 'none'}`)
   }
 
-  const protectedRoutes = ['/dashboard', '/profile', '/board', '/archive', '/admin', '/leader']
+  const protectedRoutes = ['/dashboard', '/profile', '/wall', '/archive', '/admin', '/leader']
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
 
   const authRoutes = ['/login', '/register']
@@ -47,7 +47,7 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/board'
+    url.pathname = '/wall'
     url.search = ''
     return NextResponse.redirect(url)
   }

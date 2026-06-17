@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
-export const metadata = { title: 'Privacy Policy – WDWShiftX' }
+export const metadata = { title: 'Privacy Policy – MyShiftX' }
 
 export default function PrivacyPage() {
   return (
@@ -23,14 +23,13 @@ export default function PrivacyPage() {
               <li><strong>Shift data:</strong> Shifts and requests you post on the board</li>
               <li><strong>Proficiencies:</strong> Work locations and roles you specify</li>
             </ul>
-            <p className="mt-3"><strong>We never store your HubID or PERNER.</strong> These are used only for in-browser format verification during registration and are discarded immediately.</p>
           </section>
 
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">2. How We Use Your Information</h2>
             <ul className="list-disc list-inside space-y-1">
               <li>To provide and operate the shift trading service</li>
-              <li>To display your posts to other verified Cast Members</li>
+              <li>To display your posts to other registered users</li>
               <li>To send notifications (if enabled) about relevant shifts</li>
               <li>To moderate the platform and enforce our Terms of Service</li>
               <li>To improve the service based on usage patterns</li>
@@ -39,7 +38,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">3. Information Sharing</h2>
-            <p>We do not sell, trade, or rent your personal information. Your display name and shift posts are visible to other registered Cast Members. We may share information with:</p>
+            <p>We do not sell, trade, or rent your personal information. Your display name and shift posts are visible to other registered users. We may share information with:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Service providers (Supabase for database hosting)</li>
               <li>Law enforcement when required by law</li>
@@ -80,7 +79,7 @@ export default function PrivacyPage() {
 
         <div className="mt-10 pt-6 border-t border-border">
           <p className="text-xs text-text/40 text-center">
-            WDWShiftX is not affiliated with, authorized by, endorsed by, or in any way officially connected with The Walt Disney Company.
+            MyShiftX is an independent platform and is not affiliated with, sponsored by, or endorsed by any specific employer.
           </p>
         </div>
       </div>

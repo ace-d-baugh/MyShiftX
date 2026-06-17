@@ -1,51 +1,44 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { ApprovalsClient } from './ApprovalsClient'
-import type { UserType } from '@/lib/database.types'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = { title: 'Approvals – WDWShiftX' }
+export const metadata = { title: 'Approvals – MyShiftX' }
 
-type ProfileRow = { user_type: UserType } | null
+interface PendingRequest {
+  id: string
+  board_id: string
+  requested_at: string
+  users: { display_name: string } | null
+  boards: { name: string } | null
+}
 
 export default async function ApprovalsPage() {
   const supabase = createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: userProfile } = await supabase
-    .from('users').select('user_type').eq('id', user.id).single() as unknown as { data: ProfileRow }
+  // Check access: must be a board mod/leader or Admin
+  const [{ data: profile }, { data: isMod }] = await Promise.all([
+    supabase.from('users').select('role').eq('id', user.id).single(),
+    supabase.rpc('is_any_board_moderator'),
+  ])
 
-  if (!userProfile || !(['Mod', 'Leader', 'Admin'] as UserType[]).includes(userProfile.user_type)) {
-    redirect('/board')
-  }
+  const isAdmin = profile?.role === 'Admin'
+  if (!isAdmin && !isMod) redirect('/wall')
 
-  const { data: pendingLocations } = await supabase
-    .from('locations')
-    .select('id, name, property_id, created_at, properties(name), users!suggested_by_user_id(display_name)')
+  // RLS scopes this to boards where the viewer is a Mod/Leader (or Admin sees all)
+  const { data: pendingRequests } = await supabase
+    .from('user_boards')
+    .select('id, board_id, requested_at, users(display_name), boards(name)')
     .eq('is_approved', false)
-    .order('created_at', { ascending: true })
-
-  const { data: pendingRoles } = await supabase
-    .from('roles')
-    .select('id, name, created_at, users!suggested_by_user_id(display_name)')
-    .eq('is_approved', false)
-    .order('created_at', { ascending: true })
-
-  const { data: pendingProficiencies } = await supabase
-    .from('user_proficiencies')
-    .select('id, role_id, location_id, created_at, roles(name), properties(name), locations(name), users!user_id(display_name)')
-    .eq('is_approved', false)
-    .order('created_at', { ascending: true })
+    .order('requested_at', { ascending: true })
 
   return (
     <ApprovalsClient
-      pendingLocations={(pendingLocations ?? []) as { id: string; name: string; property_id: string; created_at: string; properties: { name: string } | null; users: { display_name: string } | null }[]}
-      pendingRoles={(pendingRoles ?? []) as { id: string; name: string; created_at: string; users: { display_name: string } | null }[]}
-      pendingProficiencies={(pendingProficiencies ?? []) as { id: string; role_id: string; location_id: string; created_at: string; roles: { name: string } | null; properties: { name: string } | null; locations: { name: string } | null; users: { display_name: string } | null }[]}
+      pendingRequests={(pendingRequests ?? []) as PendingRequest[]}
       approverId={user.id}
-      userRole={userProfile.user_type}
     />
   )
 }

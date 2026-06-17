@@ -4,12 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { User, Bell, Shield, Trash2, Save, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { ProficiencySelector } from '@/components/features/ProficiencySelector'
+import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
-import type { UserType } from '@/lib/database.types'
+import type { GlobalRole } from '@/lib/database.types'
 
 interface UserProfile {
   id: string
@@ -18,7 +17,7 @@ interface UserProfile {
   phone_number: string | null
   notify_via_email: boolean
   notify_via_sms: boolean
-  user_type: UserType
+  role: GlobalRole
   is_active: boolean
   created_at: string
 }
@@ -42,6 +41,11 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
   const [nameError, setNameError] = useState<string | null>(null)
   const [deactivateConfirm, setDeactivateConfirm] = useState(false)
 
+  // Track whether a valid display name has been saved
+  const [hasDisplayNameSaved, setHasDisplayNameSaved] = useState(
+    !!(user?.display_name && user.display_name !== 'User' && displayNameRegex.test(user.display_name))
+  )
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -55,18 +59,19 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
 
     setSaving(true)
     try {
-      const { error: updateError } = await (supabase as any)
+      const { error: updateError } = await supabase
         .from('users')
         .update({
           display_name: displayName,
           phone_number: phoneNumber || null,
           notify_via_email: notifyEmail,
           notify_via_sms: notifySms,
-        } as any)
+        })
         .eq('id', sessionUserId)
 
       if (updateError) throw updateError
       setSaveSuccess(true)
+      setHasDisplayNameSaved(displayNameRegex.test(displayName))
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save profile.')
@@ -78,7 +83,7 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
   const handleDeactivate = async () => {
     setSaving(true)
     try {
-      await (supabase as any).from('users').update({ is_active: false } as any).eq('id', sessionUserId)
+      await supabase.from('users').update({ is_active: false }).eq('id', sessionUserId)
       await supabase.auth.signOut()
       router.push('/login?reason=deactivated')
     } catch (err: unknown) {
@@ -95,15 +100,11 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
     )
   }
 
-  const userTypeVariant: Record<UserType, 'guest' | 'cast' | 'mod' | 'leader' | 'admin'> = {
-    Guest: 'guest', Cast: 'cast', Mod: 'mod', Leader: 'leader', Admin: 'admin',
-  }
-
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
       <div>
         <h1 className="font-accent text-2xl font-bold text-text">My Profile</h1>
-        <p className="text-sm text-text/60">Manage your account settings and proficiencies</p>
+        <p className="text-sm text-text/60">Manage your account settings and boards</p>
       </div>
 
       {/* Account Info */}
@@ -114,12 +115,7 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
           </div>
           <div>
             <h2 className="font-accent font-bold text-text">Account Info</h2>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs text-text/50">{user.email}</span>
-              <Badge variant={userTypeVariant[user.user_type]} className="text-xs py-0">
-                {user.user_type}
-              </Badge>
-            </div>
+            <span className="text-xs text-text/50">{user.email}</span>
           </div>
         </div>
 
@@ -202,18 +198,18 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
         </div>
       </div>
 
-      {/* Proficiencies */}
+      {/* My Boards */}
       <div className="card shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
             <Shield className="w-5 h-5 text-success" />
           </div>
           <div>
-            <h2 className="font-accent font-bold text-text">Proficiencies</h2>
-            <p className="text-xs text-text/50">Manage your work locations and roles</p>
+            <h2 className="font-accent font-bold text-text">My Boards</h2>
+            <p className="text-xs text-text/50">Join boards and manage your memberships</p>
           </div>
         </div>
-        <ProficiencySelector userId={sessionUserId} />
+        <MyBoardsSection userId={sessionUserId} displayNameReady={hasDisplayNameSaved} />
       </div>
 
       {/* Danger Zone */}

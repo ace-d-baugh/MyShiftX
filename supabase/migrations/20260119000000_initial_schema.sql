@@ -1,151 +1,133 @@
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- User types lookup table
-CREATE TABLE IF NOT EXISTS user_types (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT UNIQUE NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-INSERT INTO user_types (name) VALUES
-  ('Guest'),
-  ('Cast'),
-  ('Mod'),
-  ('Leader'),
-  ('Admin')
-ON CONFLICT (name) DO NOTHING;
-
--- Users table
+-- ── Users ──────────────────────────────────────────────────
+-- Global platform role: Guest (unverified) | User (verified) | Admin
+-- Board-level roles (Mod / Leader) live in user_boards.
 CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  display_name TEXT NOT NULL,
-  email TEXT UNIQUE NOT NULL,
-  email_verified BOOLEAN DEFAULT FALSE,
-  password_hash TEXT NOT NULL,
-  phone_number TEXT,
-  notify_via_email BOOLEAN DEFAULT FALSE,
-  notify_via_sms BOOLEAN DEFAULT FALSE,
-  user_type TEXT CHECK (user_type IN ('Guest', 'Cast', 'Mod', 'Leader', 'Admin')) DEFAULT 'Guest',
-  is_active BOOLEAN DEFAULT TRUE,
-  last_login_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  display_name     TEXT        NOT NULL,
+  email            TEXT        UNIQUE NOT NULL,
+  email_verified   BOOLEAN     DEFAULT FALSE,
+  phone_number     TEXT,
+  notify_via_email BOOLEAN     DEFAULT FALSE,
+  notify_via_sms   BOOLEAN     DEFAULT FALSE,
+  role             TEXT        CHECK (role IN ('Guest', 'User', 'Admin')) DEFAULT 'Guest',
+  is_active        BOOLEAN     DEFAULT TRUE,
+  last_login_at    TIMESTAMPTZ,
+  created_at       TIMESTAMPTZ DEFAULT NOW(),
+  updated_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Properties table
-CREATE TABLE IF NOT EXISTS properties (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT UNIQUE NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+-- ── Boards ─────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS boards (
+  id                  UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
+  name                TEXT    NOT NULL UNIQUE,
+  invite_code         TEXT    NOT NULL UNIQUE,
+  invite_code_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  created_by          UUID    REFERENCES users(id) ON DELETE SET NULL,
+  is_active           BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at          TIMESTAMPTZ DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Locations table
-CREATE TABLE IF NOT EXISTS locations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  is_approved BOOLEAN DEFAULT FALSE,
-  suggested_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  approved_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  approved_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(property_id, name)
+-- ── User ↔ Board membership ────────────────────────────────
+CREATE TABLE IF NOT EXISTS user_boards (
+  id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id             UUID        NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
+  board_id            UUID        NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
+  role                TEXT        NOT NULL CHECK (role IN ('User', 'Mod', 'Leader')),
+  is_approved         BOOLEAN     NOT NULL DEFAULT FALSE,
+  approved_by_user_id UUID        REFERENCES users(id) ON DELETE SET NULL,
+  approved_at         TIMESTAMPTZ,
+  requested_at        TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, board_id)
 );
 
--- Roles table
-CREATE TABLE IF NOT EXISTS roles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT UNIQUE NOT NULL,
-  is_approved BOOLEAN DEFAULT FALSE,
-  suggested_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  approved_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  approved_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+-- ── Board invite-code rate limiting ───────────────────────
+CREATE TABLE IF NOT EXISTS board_join_attempts (
+  id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  code_entered TEXT        NOT NULL,
+  outcome      TEXT        NOT NULL CHECK (outcome IN ('invalid_code', 'user_declined', 'success')),
+  attempted_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- User proficiencies junction table
-CREATE TABLE IF NOT EXISTS user_proficiencies (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
-  location_id UUID REFERENCES locations(id) ON DELETE CASCADE,
-  role_id UUID REFERENCES roles(id) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, location_id, role_id)
-);
-
--- Shifts table (offers)
+-- ── Shifts (offers) ───────────────────────────────────────
 CREATE TABLE IF NOT EXISTS shifts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_by TEXT NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
-  location_id UUID REFERENCES locations(id) ON DELETE CASCADE,
-  role_id UUID REFERENCES roles(id) ON DELETE CASCADE,
-  shift_title TEXT NOT NULL,
-  start_time TIMESTAMPTZ NOT NULL,
-  end_time TIMESTAMPTZ NOT NULL,
-  is_trade BOOLEAN DEFAULT FALSE,
-  is_giveaway BOOLEAN DEFAULT FALSE,
-  is_overtime_approved BOOLEAN DEFAULT FALSE,
-  comments TEXT,
-  is_active BOOLEAN DEFAULT TRUE,
-  expires_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  id                   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_by           TEXT        NOT NULL,
+  user_id              UUID        REFERENCES users(id)  ON DELETE SET NULL,
+  board_id             UUID        REFERENCES boards(id) ON DELETE CASCADE,
+  shift_title          TEXT        NOT NULL,
+  start_time           TIMESTAMPTZ NOT NULL,
+  end_time             TIMESTAMPTZ NOT NULL,
+  is_trade             BOOLEAN     DEFAULT FALSE,
+  is_giveaway          BOOLEAN     DEFAULT FALSE,
+  is_overtime_approved BOOLEAN     DEFAULT FALSE,
+  details              TEXT,
+  is_active            BOOLEAN     DEFAULT TRUE,
+  expires_at           TIMESTAMPTZ,
+  created_at           TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Requests table
+-- ── Requests ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS requests (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_by TEXT NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
-  location_id UUID REFERENCES locations(id) ON DELETE CASCADE,
-  role_id UUID REFERENCES roles(id) ON DELETE CASCADE,
-  preferred_times TEXT[] NOT NULL CHECK (preferred_times <@ ARRAY['morning', 'afternoon', 'evening', 'late']),
-  requested_date DATE NOT NULL,
-  comments TEXT,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  expires_at TIMESTAMPTZ
+  id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_by      TEXT        NOT NULL,
+  user_id         UUID        REFERENCES users(id)  ON DELETE SET NULL,
+  board_id        UUID        REFERENCES boards(id) ON DELETE CASCADE,
+  preferred_times TEXT[]      NOT NULL CHECK (preferred_times <@ ARRAY['morning', 'afternoon', 'evening', 'late']),
+  requested_date  DATE        NOT NULL,
+  details         TEXT,
+  is_active       BOOLEAN     DEFAULT TRUE,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  expires_at      TIMESTAMPTZ
 );
 
--- Flags table
+-- ── Flags ─────────────────────────────────────────────────
+-- board_id set for post/comment flags (board the post belongs to)
+-- and for board flags (board_id = target_id).
 CREATE TABLE IF NOT EXISTS flags (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  flagged_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  target_type TEXT CHECK (target_type IN ('post', 'user')) NOT NULL,
-  target_id UUID NOT NULL,
-  reason TEXT NOT NULL,
-  status TEXT CHECK (status IN ('pending', 'resolved', 'dismissed')) DEFAULT 'pending',
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  flagged_by_user_id  UUID REFERENCES users(id) ON DELETE SET NULL,
+  target_type         TEXT CHECK (target_type IN ('post', 'user', 'comment', 'board')) NOT NULL,
+  target_id           UUID NOT NULL,
+  board_id            UUID REFERENCES boards(id) ON DELETE SET NULL,
+  reason              TEXT NOT NULL,
+  status              TEXT CHECK (status IN ('pending', 'resolved', 'dismissed')) DEFAULT 'pending',
   resolved_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Black listed emails table
-CREATE TABLE IF NOT EXISTS black_listed (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT UNIQUE NOT NULL,
-  failed_attempts INTEGER DEFAULT 0 CHECK (failed_attempts >= 0),
-  blocked BOOLEAN DEFAULT FALSE,
-  ip_address INET,
-  origin_country TEXT,
-  origin_city TEXT,
+-- ── Comments ──────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS comments (
+  id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_type  TEXT        CHECK (post_type IN ('shift', 'request')) NOT NULL,
+  post_id    UUID        NOT NULL,
+  user_id    UUID        REFERENCES users(id) ON DELETE SET NULL,
+  body       TEXT        NOT NULL,
+  is_interested BOOLEAN  DEFAULT FALSE,
+  is_active  BOOLEAN     DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Indexes per PRD Section 6
-CREATE INDEX IF NOT EXISTS idx_shifts_active_time ON shifts(is_active, start_time, created_at);
-CREATE INDEX IF NOT EXISTS idx_requests_active_date ON requests(is_active, requested_date);
-CREATE INDEX IF NOT EXISTS idx_flags_status_time ON flags(status, created_at);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_user_type_active ON users(user_type, is_active);
-CREATE INDEX IF NOT EXISTS idx_user_proficiencies_user ON user_proficiencies(user_id, location_id, role_id);
-CREATE INDEX IF NOT EXISTS idx_black_listed_email ON black_listed(email);
+-- ── Indexes ───────────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS idx_shifts_board             ON shifts(board_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_shifts_active_time       ON shifts(is_active, start_time, created_at);
+CREATE INDEX IF NOT EXISTS idx_requests_board           ON requests(board_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_requests_active_date     ON requests(is_active, requested_date);
+CREATE INDEX IF NOT EXISTS idx_flags_status_time        ON flags(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_users_email              ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role_active        ON users(role, is_active);
+CREATE INDEX IF NOT EXISTS idx_boards_invite_code       ON boards(invite_code);
+CREATE INDEX IF NOT EXISTS idx_user_boards_user         ON user_boards(user_id, is_approved);
+CREATE INDEX IF NOT EXISTS idx_user_boards_board        ON user_boards(board_id, is_approved);
+CREATE INDEX IF NOT EXISTS idx_join_attempts_user_time  ON board_join_attempts(user_id, attempted_at);
 
--- Function to set expires_at for shifts
+-- ── Trigger functions ─────────────────────────────────────
+
 CREATE OR REPLACE FUNCTION set_shift_expires_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -154,7 +136,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Function to set expires_at for requests
 CREATE OR REPLACE FUNCTION set_request_expires_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -163,17 +144,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger for shifts
-CREATE TRIGGER set_shifts_expires_at
-  BEFORE INSERT ON shifts
-  FOR EACH ROW EXECUTE FUNCTION set_shift_expires_at();
-
--- Trigger for requests
-CREATE TRIGGER set_requests_expires_at
-  BEFORE INSERT ON requests
-  FOR EACH ROW EXECUTE FUNCTION set_request_expires_at();
-
--- Auto-update updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -182,40 +152,142 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Apply trigger to users
+CREATE OR REPLACE FUNCTION public.get_user_role()
+RETURNS text
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT LOWER(role) FROM public.users WHERE id = auth.uid()
+$$;
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.users (id, email, display_name, role, is_active)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'display_name', 'User'),
+    'Guest',
+    true
+  )
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.handle_email_verified()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF OLD.email_confirmed_at IS NULL AND NEW.email_confirmed_at IS NOT NULL THEN
+    UPDATE public.users
+    SET role = 'User', email_verified = true
+    WHERE id = NEW.id AND role = 'Guest';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_board_member(p_board_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM user_boards
+    WHERE user_id = auth.uid()
+      AND board_id = p_board_id
+      AND is_approved = true
+  )
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_board_moderator(p_board_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM user_boards
+    WHERE user_id = auth.uid()
+      AND board_id = p_board_id
+      AND is_approved = true
+      AND role IN ('Mod', 'Leader')
+  )
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_board_leader(p_board_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM user_boards
+    WHERE user_id = auth.uid()
+      AND board_id = p_board_id
+      AND is_approved = true
+      AND role = 'Leader'
+  )
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_any_board_moderator()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM user_boards
+    WHERE user_id = auth.uid()
+      AND is_approved = true
+      AND role IN ('Mod', 'Leader')
+  )
+$$;
+
+-- ── Triggers ──────────────────────────────────────────────
+
+CREATE TRIGGER set_shifts_expires_at
+  BEFORE INSERT ON shifts
+  FOR EACH ROW EXECUTE FUNCTION set_shift_expires_at();
+
+CREATE TRIGGER set_requests_expires_at
+  BEFORE INSERT ON requests
+  FOR EACH ROW EXECUTE FUNCTION set_request_expires_at();
+
 CREATE TRIGGER update_users_updated_at
   BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Apply trigger to black_listed
-CREATE TRIGGER update_black_listed_updated_at
-  BEFORE UPDATE ON black_listed
+CREATE TRIGGER update_boards_updated_at
+  BEFORE UPDATE ON boards
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Auto-expire shifts function
-CREATE OR REPLACE FUNCTION expire_shifts()
-RETURNS void AS $$
-  UPDATE shifts
-  SET is_active = FALSE
-  WHERE is_active = TRUE
-  AND expires_at <= NOW();
-$$ LANGUAGE sql;
+CREATE TRIGGER update_comments_updated_at
+  BEFORE UPDATE ON comments
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Auto-expire requests function
-CREATE OR REPLACE FUNCTION expire_requests()
-RETURNS void AS $$
-  UPDATE requests
-  SET is_active = FALSE
-  WHERE is_active = TRUE
-  AND expires_at <= NOW();
-$$ LANGUAGE sql;
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Seed Properties
-INSERT INTO properties (name) VALUES
-  ('Magic Kingdom'),
-  ('EPCOT'),
-  ('Animal Kingdom'),
-  ('Resorts'),
-  ('Disney Springs'),
-  ('Hollywood Studios')
-ON CONFLICT (name) DO NOTHING;
+DROP TRIGGER IF EXISTS on_auth_user_email_verified ON auth.users;
+CREATE TRIGGER on_auth_user_email_verified
+  AFTER UPDATE ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_email_verified();

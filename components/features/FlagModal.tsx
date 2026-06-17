@@ -11,7 +11,7 @@ const FLAG_REASONS = [
   'Spam or duplicate post',
   'Incorrect information',
   'Harassment or inappropriate content',
-  'Not a real Disney Cast Member',
+  'Not a real user',
   'Other',
 ]
 

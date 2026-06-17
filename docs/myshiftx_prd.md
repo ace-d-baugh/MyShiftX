@@ -1,4 +1,4 @@
-# PRD: WDWShiftX (Version 2.1)
+# PRD: MyShiftX (Version 2.1)
 
 **Project Lead:** Ace Baugh  
 **Status:** Final Draft  
@@ -9,9 +9,9 @@
 
 ## 1. Executive Summary
 
-WDWShiftX is a dedicated, non-affiliated bulletin board for Walt Disney World Cast Members to broadcast shift availability (trades/giveaways) and requests. It aims to solve the "noise" and "security" issues of Facebook groups by using structured data and role-based access control.
+MyShiftX is a dedicated, independent bulletin board for users to broadcast shift availability (trades/giveaways) and requests. It aims to solve the "noise" and "security" issues of Facebook groups by using structured data and role-based access control.
 
-**Key Disclaimer:** Not affiliated with, authorized by, or endorsed by The Walt Disney Company.
+**Key Disclaimer:** MyShiftX is an independent platform and is not affiliated with, sponsored by, or endorsed by any specific employer.
 
 ---
 
@@ -20,9 +20,9 @@ WDWShiftX is a dedicated, non-affiliated bulletin board for Walt Disney World Ca
 | Role | Access Level | Description |
 |------|--------------|-------------|
 | **Guest** | Public | Can only see the landing page, login, and registration. |
-| **Cast** | Email Verified | Basic CM access. Can view/filter boards within proficiencies, CRUD shift owned offers/requests, Suggest new locations & shift titles, and edit & deactivate own profile. |
-| **CoPro** | Moderator | CMs with @disney.com emails. Can do all Cast can do plus flag users and posts, and deactivate other CoPros. |
-| **Leader** | Manager | Can do all a CoPro can do plus verify/deactivate Copros and other Leaders. Can promote Copros to Leaders. Can approve location/role suggestions. Access to archived posts and filtered flag queue. Remove an email from Black List|
+| **User** | Email Verified | Basic access. Can view/filter boards within proficiencies, CRUD shift owned offers/requests, Suggest new locations & shift titles, and edit & deactivate own profile. |
+| **Mod** | Moderator | Can do all User can do plus flag users and posts, and deactivate other Mods. |
+| **Leader** | Manager | Can do all a Mod can do plus verify/deactivate Mods and other Leaders. Can promote Mods to Leaders. Can approve location/role suggestions. Access to archived posts and filtered flag queue. Remove an email from Black List|
 | **Admin** | Superuser | Full system control. Can assign Leader permissions, manage all profiles, and CRUD Properties, Locations, and Roles. |
 
 ---
@@ -31,23 +31,18 @@ WDWShiftX is a dedicated, non-affiliated bulletin board for Walt Disney World Ca
 
 ### The Registration Handshake
 
-1. **Input:** User provides Email, Password, HubID, PERNER.
+1. **Input:** User provides Email, Password.
 2. **Server-Side Validation:**
-   - HubID Regex: `/^[a-zA-Z]{5}\d{3}$/` (e.g., HAUGM027)
-   - PERNER Regex: `/^\d{8}$/` (e.g., 01713069)
    - Email not on "Balck List"
 3. **Action:** If validation passes, account is created with `email_verified = false`.
 4. **Email Verification:** Verification link sent to provided email. Account remains inactive until verified.
-5. **Disposal:** HubID and PERNER are used only for initial validation and are never stored in the database.
-6. **Terms & Conditions:** Checkbox required to enable registration submit button. T&C link opens in new tab.
+5. **Terms & Conditions:** Checkbox required to enable registration submit button. T&C link opens in new tab.
 
 ### Email Changes
 
 - Users can update email addresses.
 - New email must be verified before old email is replaced.
 - Re-login required after email change.
-- **Auto-Promotion:** If new email is @disney.com, user is promoted to CoPro upon next login.
-- **Auto-Demotion:** If CoPro or Leader changes from @disney.com to non-Disney email, user is demoted to Cast. Warning displayed before change.
 
 ### Inactivity Management
 
@@ -66,7 +61,7 @@ Three-tier system to ensure users only see shifts they are qualified for:
 
 ### User Proficiency Suggestions
 
-- Cast can suggest new Locations and Roles.
+- Users can suggest new Locations and Roles.
 - Suggestions are immediately added to suggester's profile and available for use by others.
 - Suggestions remain in pending approval queue until reviewed by Leaders.
 - Leaders access pending items via dedicated queue page with login notification badge.
@@ -98,7 +93,7 @@ Three-tier system to ensure users only see shifts they are qualified for:
 **Post Editing:**
 - Users can edit their own posts as long as `is_active = true`.
 - No notifications sent for edits.
-- Edit history visible to CoPros+ for abuse tracking.
+- Edit history visible to Mods+ for abuse tracking.
 
 **Post Deactivation:**
 - Users can deactivate their own posts.
@@ -177,8 +172,13 @@ Same page as Shift Board with tab toggle.
 
 ### D. Account Management
 
+**Registration Fields:**
+- Email
+- Password
+- Terms & Conditions acceptance (checkbox)
+
 **Profile Fields:**
-- Display Name (format: "FirstName LastInitial." e.g., "Matthew B.")
+- Display Name (format: "FirstName LastInitial." e.g., "Matthew B.") — set and edited on the Profile page after registration; defaults to `'User'` until the user sets it.
 - Email (editable with verification)
 - Phone Number (optional, editable)
 - Notification Preferences:
@@ -189,9 +189,6 @@ Same page as Shift Board with tab toggle.
 **Password Recovery:**
 - Email-based "Forgot Password" flow.
 - Reset tokens (implementation: separate table or JSONB in users table - TBD).
-
-**Display Name:**
-- Editable post-registration.
 
 ---
 
@@ -208,7 +205,7 @@ Same page as Shift Board with tab toggle.
 - Other misconduct
 
 **Flag Workflow:**
-1. Cast/CoPro/Leader clicks flag button on post or profile.
+1. User/Mod/Leader clicks flag button on post or profile.
 2. Flag enters pending queue with status `pending`.
 3. Flagged content remains visible.
 4. Leaders see flags filtered by their proficiencies only.
@@ -222,8 +219,8 @@ Same page as Shift Board with tab toggle.
 - Leaders can view target's Property/Location/Role via `target_id`.
 
 **Deactivation:**
-- CoPros can deactivate other CoPros.
-- Leaders can deactivate CoPros and other Leaders.
+- Mods can deactivate other Mods.
+- Leaders can deactivate Mods and other Leaders.
 - Leaders can demote themselves and others.
 - Deactivated users: all associated posts become orphaned but remain visible with original created_by name.
 
@@ -248,11 +245,6 @@ Same page as Shift Board with tab toggle.
 ---
 
 ### G. Security
-**Failed Registration Flow:**
- - HubID & PERNER must pass Regex upon atempting to submit registration
- - Registration page reloads with everything filled out but empty inputs for HubID and PERNER warning: "HubID or PERNER or both are not correct, please enter them again or see you Leader for correct formatting."
- - Five failed attempts will place the email address in the banned emails list
-
 **Email Black List**
  - Blocked emails from creating or recreating profiles.
 
@@ -332,14 +324,14 @@ Same page as Shift Board with tab toggle.
 ```sql
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  display_name TEXT NOT NULL,
+  display_name TEXT NOT NULL DEFAULT 'User',
   email TEXT UNIQUE NOT NULL,
   email_verified BOOLEAN DEFAULT FALSE,
   password_hash TEXT NOT NULL,
   phone_number TEXT,
   notify_via_email BOOLEAN DEFAULT FALSE,
   notify_via_sms BOOLEAN DEFAULT FALSE,
-  role TEXT CHECK (role IN ('cast', 'copro', 'leader', 'admin')) DEFAULT 'cast',
+  role TEXT CHECK (role IN ('user', 'mod', 'leader', 'admin')) DEFAULT 'user',
   is_active BOOLEAN DEFAULT TRUE,
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -480,19 +472,18 @@ CREATE TABLE black_listed (
 ### Disclaimers
 
 **Footer (All Pages):**
-- "Not affiliated with, authorized by, or endorsed by The Walt Disney Company."
-- Copyright notice: "© 2026 WDWShiftX"
+- "MyShiftX is an independent platform and is not affiliated with, sponsored by, or endorsed by any specific employer."
+- Copyright notice: "© 2026 MyShiftX"
 - Links: Terms & Conditions, Privacy Policy (boilerplate placeholder)
 
 **Terms & Conditions:**
-- Overtime badge disclaimer: "Verify OT approval in HUB before claiming"
-- Accuracy: "WDWShiftX is a bulletin board only; users are responsible for final execution through Disney's official systems."
+- Overtime badge disclaimer: "Verify OT approval with your employer before claiming"
+- Accuracy: "MyShiftX is a bulletin board only; users are responsible for final execution through their employer's official systems."
 - Ghosting: Users who claim shifts but fail to process them may be flagged and subject to moderation.
-- Misuse of this application may be used for real disciplinary action by leaders of the Walt Disney Company.
+- Misuse of this application may be used for real disciplinary action by employers.
 
 ### Data Privacy
 
-- **HubID & PERNER:** Never stored. Used only for registration validation.
 - **Email Change History:** Audit trail (implementation TBD).
 - **Privacy Policy:** Boilerplate placeholder until full scope review.
 
@@ -504,7 +495,7 @@ CREATE TABLE black_listed (
 - **Push Notifications:** Instant alerts for matching shifts.
 - **Analytics Dashboard:** Leaders see shift trends by Property/Location/Role.
 - **Mobile App Wrapper:** Native iOS/Android apps (if PWA insufficient).
-- **Multi-Language Support:** Spanish, Portuguese for international CMs.
+- **Multi-Language Support:** Spanish, Portuguese for international users.
 - **Calendar View:** Importing schedules via OCR of images and ability to add shifts to posts.
 - **Paid Features:** Adding a way for users to get enhanced features or ad-free experience for low price.
 - **Ads:** Adding ads to offset the price of running the application.
@@ -513,7 +504,7 @@ CREATE TABLE black_listed (
 
 ## 12. Success Metrics
 
-- **User Adoption:** 500+ verified Cast Members in first 3 months.
+- **User Adoption:** 500+ verified users in first 3 months.
 - **Engagement:** Average 10+ active posts per day.
 - **Moderation Efficiency:** Flags resolved within 24 hours.
 - **Uptime:** 99.5% during peak hours (Saturday nights).
@@ -524,7 +515,7 @@ CREATE TABLE black_listed (
 
 1. **Alpha:** Single role/location for internal testing.
 2. **Beta:** Expand to 3 properties, invite-only.
-3. **Public Launch:** Full rollout with marketing to CM communities.
+3. **Public Launch:** Full rollout with marketing to user communities.
 
 ---
 

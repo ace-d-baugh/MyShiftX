@@ -22,12 +22,16 @@ const MAX_STARS = 50
 
 const QUIPS = [
   'This page called out sick today.',
-  'Looks like this page already got picked up by another Cast Member.',
+  'Looks like this page already got picked up by another user.',
   "This shift never made it onto the board.",
   'Status: expired, just like every other shift post.',
   "This page swapped with someone else and didn't tell us.",
-  'This page was given an ER.',
+  'This page was took a vacation day.',
   'This page is on a break — an unscheduled one.',
+  'This page is a no-call, no-show.',
+  'You need at least 8 hours of rest between viewing the last page and trying to view this one.',
+  'This page is pending union arbitration.',
+  'This page clocked out early.',
 ]
 
 export default function NotFound() {
@@ -105,10 +109,10 @@ export default function NotFound() {
       {/* Brand lockup */}
       <header className="relative z-10 px-4 py-6 animate-slide-down">
         <Link href="/" className="inline-flex items-center gap-0 align-baseline">
-          <span className="font-accent text-3xl font-bold text-primary leading-tight align-middle">WDW</span>
+          <span className="font-accent text-3xl font-bold text-primary leading-tight align-middle">My</span>
           <Image
             src="/logos/ShiftX-logo.svg"
-            alt="WDWShiftX Logo"
+            alt="MyShiftX Logo"
             width={1560}
             height={500}
             className="h-7 w-auto"
@@ -161,8 +165,8 @@ export default function NotFound() {
             Back to Home
             <ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
-          <Link href="/board" className="btn btn-outline text-base px-8 py-3 min-h-0 h-12">
-            Browse the Board
+          <Link href="/wall" className="btn btn-outline text-base px-8 py-3 min-h-0 h-12">
+            Browse The Wall
           </Link>
         </div>
       </main>

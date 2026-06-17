@@ -1,5 +1,5 @@
 
-# WDWShiftX Development Progress
+# MyShiftX Development Progress
 
 **Last Updated:** February 24, 2026
 **Project Lead:** Ace Baugh
@@ -44,7 +44,7 @@
 
 ### Database Schema Implementation
 - ✅ Create `users` table with RBAC fields
-- ✅ Create `properties` table (seed with MK, EPCOT, AK, Resorts, Disney Springs, Hollywood Studios)
+- ✅ Create `properties` table (seed with starter properties)
 - ✅ Create `locations` table with approval workflow
 - ✅ Create `roles` table with approval workflow
 - ✅ Create `user_proficiencies` junction table
@@ -68,7 +68,7 @@
 - 📋 `users` - Users can read own profile, Leaders can read all
 - 📋 `shifts` - Read: all authenticated; Write: own posts only
 - 📋 `requests` - Read: all authenticated; Write: own posts only
-- 📋 `flags` - Read: Leaders filtered by proficiency; Write: Cast+
+- 📋 `flags` - Read: Leaders filtered by proficiency; Write: User+
 - 📋 `user_proficiencies` - Read: own; Write: own
 - 📋 `locations` - Read: all; Write: Admin only (except suggestions)
 - 📋 `roles` - Read: all; Write: Admin only (except suggestions)
@@ -84,8 +84,6 @@
 - ✅ Auto-expire shifts function (SQL function `expire_shifts()`)
 - ✅ Auto-expire requests function (SQL function `expire_requests()`)
 - ✅ Auto-update `updated_at` trigger on `users` and `black_listed`
-- 📋 Auto-promote to Copro on @disney.com email verification
-- 📋 Auto-demote from Copro/Leader on email change to non-Disney
 - 📋 Increment `black_listed.failed_attempts` on registration failure
 - 📋 Block registration if email in `black_listed` with `blocked = true`
 
@@ -94,20 +92,16 @@
 ## Phase 2: Authentication & User Management
 
 ### Registration Flow
-- ✅ Build registration form UI (Email, Password, Display Name, HubID, PERNER)
-- ✅ HubID validation regex: `/^[a-zA-Z]{5}\d{3}$/`
-- ✅ PERNER validation regex: `/^\d{8}$/`
+- ✅ Build registration form UI (Email, Password)
 - ✅ Terms & Conditions checkbox (required)
 - ✅ T&C page (`/terms`)
 - ✅ Client-side Zod validation for all fields
-- ✅ Display name format validation ("FirstName LastInitial.")
 - 📋 Check email against `black_listed` table (requires RLS + backend function)
 - 📋 Send email verification link (requires Supabase email config)
 - 📋 Handle 5 failed attempts → add to `black_listed`
 
 **Notes:**
-- HubID and PERNER are NEVER stored in database ✅
-- Failed registration shows warning: "HubID or PERNER or both are not correct..."
+- Display name is no longer collected at registration; it defaults to `'User'` and is set later on the Profile page
 
 ---
 
@@ -130,7 +124,6 @@
 - ✅ Proficiency multi-select UI (Property → Location → Role cascade)
 - ✅ Account deactivation (user-initiated, soft delete)
 - 📋 Email change flow with new email verification
-- 📋 Warning modal for @disney.com → non-Disney email change
 
 ---
 

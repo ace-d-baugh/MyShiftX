@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
-import { Archive, Clock, MapPin, Briefcase } from 'lucide-react'
+import { Archive, Clock, LayoutGrid } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/Badge'
 
@@ -19,9 +19,7 @@ interface ArchivedShift {
   is_giveaway: boolean
   is_overtime_approved: boolean
   created_at: string
-  properties: { name: string } | null
-  locations: { name: string } | null
-  roles: { name: string } | null
+  boards: { name: string } | null
 }
 
 interface ArchivedRequest {
@@ -30,9 +28,7 @@ interface ArchivedRequest {
   requested_date: string
   preferred_times: string[]
   created_at: string
-  properties: { name: string } | null
-  locations: { name: string } | null
-  roles: { name: string } | null
+  boards: { name: string } | null
 }
 
 interface ArchiveClientProps {
@@ -88,8 +84,7 @@ export function ArchiveClient({ archivedShifts, archivedRequests }: ArchiveClien
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text/60">
-                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{s.properties?.name} &rsaquo; {s.locations?.name}</span>
-                  <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" />{s.roles?.name}</span>
+                  <span className="flex items-center gap-1"><LayoutGrid className="w-3 h-3" />{s.boards?.name ?? '—'}</span>
                   <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatInTimeZone(parseISO(s.start_time), ET, 'MMM d, h:mm a')}</span>
                 </div>
               </div>
@@ -115,8 +110,7 @@ export function ArchiveClient({ archivedShifts, archivedRequests }: ArchiveClien
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text/60">
-                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{r.properties?.name} &rsaquo; {r.locations?.name}</span>
-                  <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" />{r.roles?.name}</span>
+                  <span className="flex items-center gap-1"><LayoutGrid className="w-3 h-3" />{r.boards?.name ?? '—'}</span>
                 </div>
               </div>
             ))}

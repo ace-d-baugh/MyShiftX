@@ -49,7 +49,7 @@ export default function LoginPage() {
         setServerError(error.message)
         return
       }
-      router.push('/board')
+      router.push('/wall')
     } catch {
       setServerError('An unexpected error occurred. Please try again.')
     } finally {

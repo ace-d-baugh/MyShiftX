@@ -1,13 +1,10 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { AdminClient } from './AdminClient'
-import type { UserType } from '@/lib/database.types'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = { title: 'Admin – WDWShiftX' }
-
-type ProfileRow = { user_type: UserType } | null
+export const metadata = { title: 'Admin – MyShiftX' }
 
 export default async function AdminPage() {
   const supabase = createServerClient()
@@ -15,35 +12,28 @@ export default async function AdminPage() {
   if (!user) redirect('/login')
 
   const { data: userProfile } = await supabase
-    .from('users').select('user_type').eq('id', user.id).single() as unknown as { data: ProfileRow }
+    .from('users').select('role').eq('id', user.id).single()
 
-  if (!userProfile || userProfile.user_type !== 'Admin') {
-    redirect('/board')
-  }
+  if (!userProfile || userProfile.role !== 'Admin') redirect('/wall')
 
-  const [propertiesRes, locationsRes, rolesRes, usersRes] = await Promise.all([
-    supabase.from('properties').select('id, name, created_at').order('name'),
-    supabase.from('locations').select('id, name, property_id, is_approved, created_at, properties(name)').order('name'),
-    supabase.from('roles').select('id, name, is_approved, created_at').order('name'),
-    supabase.from('users').select(`
-      id, display_name, user_type, is_active, created_at,
-      user_proficiencies (
-        role_id, property_id, location_id,
-        roles ( id, name ),
-        properties ( id, name ),
-        locations ( id, name )
-      )
-    `).order('display_name').limit(200),
+  const [boardsRes, usersRes] = await Promise.all([
+    supabase
+      .from('boards')
+      .select('id, name, invite_code_enabled, is_active, created_at')
+      .order('name')
+      .limit(200),
+    supabase
+      .from('users')
+      .select('id, display_name, role, is_active, created_at')
+      .order('display_name')
+      .limit(200),
   ])
 
   return (
     <AdminClient
-      properties={(propertiesRes.data ?? []) as { id: string; name: string; created_at: string }[]}
-      locations={(locationsRes.data ?? []) as { id: string; name: string; property_id: string; is_approved: boolean; created_at: string; properties: { name: string } | null }[]}
-      roles={(rolesRes.data ?? []) as { id: string; name: string; is_approved: boolean; created_at: string }[]}
-      users={(usersRes.data ?? []) as any}
+      boards={(boardsRes.data ?? []) as { id: string; name: string; invite_code_enabled: boolean; is_active: boolean; created_at: string }[]}
+      users={(usersRes.data ?? []) as { id: string; display_name: string; role: string; is_active: boolean; created_at: string }[]}
       adminId={user.id}
-      currentUserType={userProfile.user_type}
     />
   )
 }

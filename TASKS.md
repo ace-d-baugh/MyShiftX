@@ -1,12 +1,12 @@
-# WDWShiftX TASKS.md
+# MyShiftX TASKS.md
 
 ## Current Status
-WDWShiftX appears to be a mostly complete application based on the PRD and code review. The database schema is implemented, authentication exists, and core features are in place.
+MyShiftX appears to be a mostly complete application based on the PRD and code review. The database schema is implemented, authentication exists, and core features are in place.
 
 ## Completed Core Features
 - ✅ Database schema with all required tables (users, properties, locations, roles, user_proficiencies, shifts, requests, flags, black_listed)
 - ✅ Authentication system (login, register, forgot password, verify email, reset password)
-- ✅ Role-based access control (Cast, Mod, Leader, Admin)
+- ✅ Role-based access control (User, Mod, Leader, Admin)
 - ✅ Shift board UI with filtering by proficiencies
 - ✅ Request board UI
 - ✅ Proficiency system (Property → Location → Role hierarchy)
@@ -38,7 +38,7 @@ WDWShiftX appears to be a mostly complete application based on the PRD and code 
 | 12 | Implement push notifications for shift matches | ⏳ Medium | Pending | Notify users when new shifts match their proficiencies |
 | 13 | Add analytics dashboard for Leaders/Admins | ⏳ Low | Pending | View platform usage, flag statistics, etc. |
 | 14 | Implement invitation system for new properties | ⏳ Low | Pending | Allow Leaders to invite users to specific properties |
-| 15 | Add multi-language support (Spanish) | ⏳ Low | Pending | Begin i18n implementation for Spanish-speaking CMs |
+| 15 | Add multi-language support (Spanish) | ⏳ Low | Pending | Begin i18n implementation for Spanish-speaking users |
 
 ### Phase 3: Polish & Optimization
 | ID | Task | Priority | Status | Notes |
@@ -58,7 +58,7 @@ WDWShiftX appears to be a mostly complete application based on the PRD and code 
 | 24 | Perform cross-browser testing | ⏳ Medium | Pending | Test on Safari, Chrome, Firefox, Edge |
 | 25 | Conduct accessibility audit (WCAG 2.1 AA) | ⏳ Medium | Pending | Ensure compliance with accessibility standards |
 | 26 | Perform load testing for peak usage times | ⏳ Low | Pending | Simulate Saturday night traffic spikes |
-| 27 | User acceptance testing with pilot group | ⏳ Medium | Pending | Test with small group of Cast Members |
+| 27 | User acceptance testing with pilot group | ⏳ Medium | Pending | Test with small group of users |
 
 ## Open Questions
 1. Should we implement real-time updates using Supabase Realtime for live shift board updates?

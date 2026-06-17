@@ -46,7 +46,7 @@ export default function ResetPasswordPage() {
         return
       }
       setSuccess(true)
-      setTimeout(() => router.push('/board'), 2000)
+      setTimeout(() => router.push('/wall'), 2000)
     } catch {
       setServerError('An unexpected error occurred. Please try again.')
     } finally {

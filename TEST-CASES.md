@@ -1,4 +1,4 @@
-# WDWShiftX — Test Cases
+# MyShiftX — Test Cases
 
 **How to use:** Work through each test top to bottom. Mark `[PASS]`, `[FAIL]`, or `[SKIP]` in the result column and add any observations in the Comments field. Re-run any `[FAIL]` after a fix before shipping.
 
@@ -7,7 +7,7 @@
 ## Table of Contents
 1. [Authentication & Registration](#1-authentication--registration)
 2. [Guest User](#2-guest-user)
-3. [Cast Member](#3-cast-member)
+3. [User](#3-user)
 4. [Mod](#4-mod)
 5. [Leader](#5-leader)
 6. [Admin](#6-admin)
@@ -24,19 +24,9 @@
 |---|------|-----------------|
 | 1 | Go to `/register` while logged out | Registration form loads with all fields visible |
 | 2 | Submit the form completely empty | All required fields show error messages; form does not submit |
-| 3 | Enter HubID `abc123` (wrong format) | Error: invalid HubID format |
-| 4 | Enter HubID `BAUGM007` (5 letters + 3 digits) | HubID field accepts the value |
-| 5 | Enter PERNER `1234` (only 4 digits) | Error: invalid PERNER format |
-| 6 | Enter PERNER `12345678` (8 digits) | PERNER field accepts the value |
-| 7 | Enter display name `mickey m.` (lowercase) | Error: wrong format |
-| 8 | Enter display name `Mickey` (no last initial) | Error: wrong format |
-| 9 | Enter display name `Mickey M.` | Accepted |
-| 10 | Enter display name `Mary-Beth C.` | Accepted (hyphenated) |
-| 11 | Enter display name `McKay E.` | Accepted (multiple caps) |
-| 12 | Enter display name `Mary Beth D.` | Accepted (two first names) |
-| 13 | Enter password `abc1234` (7 chars) | Error: minimum 8 characters |
-| 14 | Enter password `abc12345` (8 chars) | Accepted |
-| 15 | Submit without checking Terms checkbox | Submit button is disabled or shows error |
+| 3 | Enter password `abc1234` (7 chars) | Error: minimum 8 characters |
+| 4 | Enter password `abc12345` (8 chars) | Accepted |
+| 5 | Submit without checking Terms checkbox | Submit button is disabled or shows error |
 
 **Result:** `[ ]`
 **Comments:**
@@ -64,7 +54,7 @@
 |---|------|-----------------|
 | 1 | Open the verification email sent to the new address | Email received with a confirmation link |
 | 2 | Click the confirmation link | Redirected to the app (verify-email or board) |
-| 3 | Open Supabase → `public.users` for that user | `user_type` has changed from `'Guest'` to `'Cast'` |
+| 3 | Open Supabase → `public.users` for that user | `user_type` has changed from `'Guest'` to `'User'` |
 | 4 | Open Supabase → `auth.users` for that user | `email_confirmed_at` is now populated |
 
 **Result:** `[ ]`
@@ -76,7 +66,7 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Go to `/login` with valid Cast credentials | Logs in and redirects to `/board` |
+| 1 | Go to `/login` with valid user credentials | Logs in and redirects to `/board` |
 | 2 | While logged in, navigate to `/login` | Redirected to `/board` (cannot re-visit login) |
 | 3 | While logged in, navigate to `/register` | Redirected to `/board` |
 | 4 | Click "Log Out" | Full page reload occurs; lands on `/login` |
@@ -120,15 +110,15 @@
 
 ---
 
-## 3. Cast Member
+## 3. User
 
-> **Setup:** A verified account with `user_type = 'Cast'`. Should have at least 2 **approved** proficiencies set up (different roles and locations).
+> **Setup:** A verified account with `user_type = 'User'`. Should have at least 2 **approved** proficiencies set up (different roles and locations).
 
-### CAST-001 — Profile & proficiency selector
+### USER-001 — Profile & proficiency selector
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Go to `/profile` | Profile page loads with display name and "Cast" badge |
+| 1 | Go to `/profile` | Profile page loads with display name and "User" badge |
 | 2 | View proficiency section | Existing proficiencies listed as "Role • Property › Location" |
 | 3 | In "Add Proficiency", select a Role | Property dropdown becomes enabled |
 | 4 | Select a Property | Location checkboxes appear inside a bordered box |
@@ -145,7 +135,7 @@
 
 ---
 
-### CAST-002 — Board visibility (proficiency-scoped)
+### USER-002 — Board visibility (proficiency-scoped)
 
 | # | Step | Expected Result |
 |---|------|-----------------|
@@ -164,20 +154,20 @@
 
 ---
 
-### CAST-003 — Empty states
+### USER-003 — Empty states
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Cast with **no proficiencies** goes to `/board` | Shows "Try adjusting your proficiencies" with a link to `/profile` |
-| 2 | Cast **with proficiencies** but no matching posts | Shows "Be the first to post!" with a "Post a Shift" button |
-| 3 | Cast whose **only** proficiency is still **pending** approval | Board treats them the same as "no proficiencies" — shows the "Add Proficiencies" empty state, not "Be the first to post!" |
+| 1 | User with **no proficiencies** goes to `/board` | Shows "Try adjusting your proficiencies" with a link to `/profile` |
+| 2 | User **with proficiencies** but no matching posts | Shows "Be the first to post!" with a "Post a Shift" button |
+| 3 | User whose **only** proficiency is still **pending** approval | Board treats them the same as "no proficiencies" — shows the "Add Proficiencies" empty state, not "Be the first to post!" |
 
 **Result:** `[ ]`
 **Comments:**
 
 ---
 
-### CAST-004 — Post a shift
+### USER-004 — Post a shift
 
 | # | Step | Expected Result |
 |---|------|-----------------|
@@ -194,7 +184,7 @@
 
 ---
 
-### CAST-005 — Post a request
+### USER-005 — Post a request
 
 | # | Step | Expected Result |
 |---|------|-----------------|
@@ -207,7 +197,7 @@
 
 ---
 
-### CAST-006 — Access restrictions
+### USER-006 — Access restrictions
 
 | # | Step | Expected Result |
 |---|------|-----------------|
@@ -223,13 +213,13 @@
 
 ## 4. Mod
 
-> **Setup:** An account with `user_type = 'Mod'`, with at least one **approved** proficiency (needed to test Cast Approval scoping in Section 7).
+> **Setup:** An account with `user_type = 'Mod'`, with at least one **approved** proficiency (needed to test User Approval scoping in Section 7).
 
 ### MOD-001 — Board behavior
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Go to `/board` | Board loads; filter panel shows checkboxes (same as Cast, proficiency-scoped) |
+| 1 | Go to `/board` | Board loads; filter panel shows checkboxes (same as User, proficiency-scoped) |
 | 2 | Posts visible | Only posts matching Mod's own proficiencies appear |
 
 **Result:** `[ ]`
@@ -243,7 +233,7 @@
 |---|------|-----------------|
 | 1 | Navigate to `/admin` | Redirected to `/board` |
 | 2 | Navigate to `/leader/approvals` | Page loads (Mod is **not** redirected away) |
-| 3 | Page content | Only the "Cast Approvals" section is visible; Locations and Roles sections are absent entirely |
+| 3 | Page content | Only the "User Approvals" section is visible; Locations and Roles sections are absent entirely |
 | 4 | Navigate to `/leader/flags` | Redirected away |
 | 5 | Navigate to `/leader/archive` | Redirected away |
 
@@ -284,7 +274,7 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Navigate to `/leader/approvals` | Approvals page loads, showing **all three** sections: Cast Approvals, Locations, Roles |
+| 1 | Navigate to `/leader/approvals` | Approvals page loads, showing **all three** sections: User Approvals, Locations, Roles |
 | 2 | Navigate to `/leader/flags` | Flags page loads |
 | 3 | Navigate to `/leader/archive` | Archive page loads |
 | 4 | Navbar | Shows Approvals, Flags, Archive links; does **not** show Admin link |
@@ -330,7 +320,7 @@
 | # | Step | Expected Result |
 |---|------|-----------------|
 | 1 | Navigate to `/admin` | Admin panel loads |
-| 2 | Tab order | **Roles** is the first tab, then Properties, Locations, Cast |
+| 2 | Tab order | **Roles** is the first tab, then Properties, Locations, Users |
 | 3 | Click each tab | Sliding underline indicator animates smoothly to the active tab |
 | 4 | Tabs on a small screen | All 4 tabs fit in one row without horizontal scrolling |
 
@@ -384,11 +374,11 @@
 
 ---
 
-### ADMIN-006 — Cast tab
+### ADMIN-006 — Users tab
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Open Cast tab | List of all users; each shows display name + user_type badge |
+| 1 | Open Users tab | List of all users; each shows display name + user_type badge |
 | 2 | Users with proficiencies | Show a dot-separated list of their role names below the display name |
 | 3 | Users with no proficiencies | Show "No Roles Yet" in italic |
 | 4 | Inactive users | Display name has strikethrough; "Inactive" badge shown |
@@ -412,11 +402,11 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Click "Edit" on a Cast tab user | Navigates to `/admin/users/[id]` |
+| 1 | Click "Edit" on a Users tab user | Navigates to `/admin/users/[id]` |
 | 2 | Page shows | Display name, email (read-only), User Type dropdown, Active toggle, proficiencies list |
 | 3 | Email field | Cannot be edited (display only) |
-| 4 | Change display name and save | Returns to `/admin`; name reflects the change in Cast tab |
-| 5 | Change User Type and save | Returns to `/admin`; user's badge in Cast tab shows new type |
+| 4 | Change display name and save | Returns to `/admin`; name reflects the change in Users tab |
+| 5 | Change User Type and save | Returns to `/admin`; user's badge in Users tab shows new type |
 | 6 | Toggle Active off and save | Returns to `/admin`; user shows as Inactive |
 | 7 | Click the back arrow without saving | Returns to `/admin` with no changes made |
 | 8 | Visiting `/admin/users/[nonexistent-id]` | Returns a 404 page |
@@ -440,14 +430,14 @@
 
 ## 7. Proficiency Approval Workflow
 
-> **Setup:** Need at least one Cast account, one Mod account with an approved proficiency, one Leader account, and one Admin account. The Mod and Leader should hold an approved proficiency for the **same** role+location as the Cast user's pending request for the scoping tests.
+> **Setup:** Need at least one User account, one Mod account with an approved proficiency, one Leader account, and one Admin account. The Mod and Leader should hold an approved proficiency for the **same** role+location as the User's pending request for the scoping tests.
 
 ### PROF-001 — New proficiency starts pending
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | As Cast, add a new proficiency via `/profile` | Row appears immediately with a "Pending" badge |
-| 2 | Check Supabase `user_proficiencies` row for it | `is_approved = false`, `suggested_by_user_id` = the Cast user's id, `approved_by_user_id` and `approved_at` are `null` |
+| 1 | As a User, add a new proficiency via `/profile` | Row appears immediately with a "Pending" badge |
+| 2 | Check Supabase `user_proficiencies` row for it | `is_approved = false`, `suggested_by_user_id` = the user's id, `approved_by_user_id` and `approved_at` are `null` |
 | 3 | Go to `/board` | The role/location from the pending proficiency grants **no** board access (post visibility, filters unaffected by it) |
 | 4 | Try to post a shift/request for that role | Role is absent from the Post Shift / Post Request role dropdown |
 
@@ -460,10 +450,10 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | A Mod/Leader/Admin approves the Cast user's pending proficiency (see PROF-005) | — |
-| 2 | Cast user refreshes `/profile` | The "Pending" badge is gone from that row |
-| 3 | Cast user refreshes `/board` | That role/location now appears in the filter checkboxes and matching posts become visible |
-| 4 | Cast user opens Post Shift / Post Request | That role now appears in the Role dropdown |
+| 1 | A Mod/Leader/Admin approves the user's pending proficiency (see PROF-005) | — |
+| 2 | User refreshes `/profile` | The "Pending" badge is gone from that row |
+| 3 | User refreshes `/board` | That role/location now appears in the filter checkboxes and matching posts become visible |
+| 4 | User opens Post Shift / Post Request | That role now appears in the Role dropdown |
 
 **Result:** `[ ]`
 **Comments:**
@@ -474,9 +464,9 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Cast navigates to `/leader/approvals` | Redirected away; no access |
-| 2 | Mod navigates to `/leader/approvals` | Page loads; only "Cast Approvals" section is shown |
-| 3 | Leader navigates to `/leader/approvals` | Page loads; "Cast Approvals", "Locations", and "Roles" sections all shown |
+| 1 | User navigates to `/leader/approvals` | Redirected away; no access |
+| 2 | Mod navigates to `/leader/approvals` | Page loads; only "User Approvals" section is shown |
+| 3 | Leader navigates to `/leader/approvals` | Page loads; "User Approvals", "Locations", and "Roles" sections all shown |
 | 4 | Admin navigates to `/leader/approvals` | Page loads; all three sections shown |
 
 **Result:** `[ ]`
@@ -488,10 +478,10 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | Cast submits a pending proficiency for Role A / Location A | Row created with `is_approved = false` |
-| 2 | A Mod whose own approved proficiency is Role A / Location A opens "Cast Approvals" | The pending request **is** visible in the list |
-| 3 | A different Mod whose approved proficiencies do **not** include Role A / Location A opens "Cast Approvals" | The pending request is **not** visible in their list |
-| 4 | Admin opens "Cast Approvals" | The pending request is visible regardless of the Admin's own proficiencies |
+| 1 | User submits a pending proficiency for Role A / Location A | Row created with `is_approved = false` |
+| 2 | A Mod whose own approved proficiency is Role A / Location A opens "User Approvals" | The pending request **is** visible in the list |
+| 3 | A different Mod whose approved proficiencies do **not** include Role A / Location A opens "User Approvals" | The pending request is **not** visible in their list |
+| 4 | Admin opens "User Approvals" | The pending request is visible regardless of the Admin's own proficiencies |
 
 **Result:** `[ ]`
 **Comments:**
@@ -502,7 +492,7 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | In "Cast Approvals", click "Approve" on a pending row | Row disappears from the list immediately |
+| 1 | In "User Approvals", click "Approve" on a pending row | Row disappears from the list immediately |
 | 2 | Check the `user_proficiencies` row in Supabase | `is_approved = true`, `approved_by_user_id` = the approver's id, `approved_at` is populated |
 | 3 | Queue count in the header | Decrements by 1 |
 
@@ -515,9 +505,9 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | In "Cast Approvals", click "Remove" on a pending row | Row disappears from the list immediately |
+| 1 | In "User Approvals", click "Remove" on a pending row | Row disappears from the list immediately |
 | 2 | Check Supabase `user_proficiencies` for that row | Row is **hard deleted** (no longer exists) |
-| 3 | Cast user's `/profile` | The proficiency is gone entirely; they must re-add it to request again |
+| 3 | User's `/profile` | The proficiency is gone entirely; they must re-add it to request again |
 
 **Result:** `[ ]`
 **Comments:**
@@ -528,7 +518,7 @@
 
 | # | Step | Expected Result |
 |---|------|-----------------|
-| 1 | No pending Cast proficiencies exist (for the viewer's scope) | "Cast Approvals" section shows "No pending cast requests." |
+| 1 | No pending user proficiencies exist (for the viewer's scope) | "User Approvals" section shows "No pending user requests." |
 | 2 | Header summary line with 0 total pending items across all sections | Reads "All caught up! No pending approvals." |
 | 3 | Header summary line with pending items | Reads "N item(s) awaiting approval" with the correct singular/plural form |
 
@@ -545,7 +535,7 @@
 
 | # | Check | Expected |
 |---|-------|----------|
-| 1 | `SELECT * FROM user_types ORDER BY name;` | 5 rows: Admin, Cast, Guest, Leader, Mod |
+| 1 | `SELECT * FROM user_types ORDER BY name;` | 5 rows: Admin, Guest, Leader, Mod, User |
 | 2 | All values are capitalized (not lowercase) | ✓ |
 
 **Result:** `[ ]`
@@ -557,10 +547,10 @@
 
 | # | Check | Expected |
 |---|-------|----------|
-| 1 | `SELECT DISTINCT user_type FROM users;` | Only values from the set: Guest, Cast, Mod, Leader, Admin |
+| 1 | `SELECT DISTINCT user_type FROM users;` | Only values from the set: Guest, User, Mod, Leader, Admin |
 | 2 | `SELECT * FROM users WHERE user_type = 'guest';` | 0 rows (old lowercase values should be gone) |
 | 3 | New user created via registration | Row exists with `user_type = 'Guest'` and `is_active = true` |
-| 4 | After email verification | Same user's `user_type` changes to `'Cast'` |
+| 4 | After email verification | Same user's `user_type` changes to `'User'` |
 | 5 | `SELECT * FROM users WHERE user_type IS NULL;` | 0 rows |
 
 **Result:** `[ ]`
@@ -574,7 +564,7 @@
 |---|-------|----------|
 | 1 | Register a brand new account | Within seconds, a row appears in `public.users` |
 | 2 | Check `user_type` of that row | `'Guest'` |
-| 3 | Check `display_name` | Matches what was entered at registration |
+| 3 | Check `display_name` | Defaults to `'User'` |
 | 4 | Check `is_active` | `true` |
 
 **Result:** `[ ]`
@@ -587,8 +577,8 @@
 | # | Check | Expected |
 |---|-------|----------|
 | 1 | Before clicking the verification link | `user_type = 'Guest'` |
-| 2 | After clicking the verification link | `user_type = 'Cast'` |
-| 3 | If user was already `'Cast'` or higher and email is re-confirmed | `user_type` does **not** change (trigger only fires on Guest) |
+| 2 | After clicking the verification link | `user_type = 'User'` |
+| 3 | If user was already `'User'` or higher and email is re-confirmed | `user_type` does **not** change (trigger only fires on Guest) |
 
 **Result:** `[ ]`
 **Comments:**
@@ -599,7 +589,7 @@
 
 | # | Check | Expected |
 |---|-------|----------|
-| 1 | Log in as a Cast user, then in SQL Editor: `SELECT get_user_role();` | Returns `'cast'` (lowercase) |
+| 1 | Log in as a User, then in SQL Editor: `SELECT get_user_role();` | Returns `'user'` (lowercase) |
 | 2 | For an Admin user: `SELECT get_user_role();` | Returns `'admin'` (lowercase) |
 | 3 | For a Leader user | Returns `'leader'` |
 
@@ -612,9 +602,9 @@
 
 | # | Check | Expected |
 |---|-------|----------|
-| 1 | Log in as Cast User A. Query `SELECT * FROM user_proficiencies;` | Only returns User A's own rows |
+| 1 | Log in as User A. Query `SELECT * FROM user_proficiencies;` | Only returns User A's own rows |
 | 2 | Log in as Admin. Query `SELECT * FROM user_proficiencies;` | Returns ALL users' proficiency rows |
-| 3 | Add a proficiency as Cast User A | Row inserted with correct `user_id`, `role_id`, `property_id`, `location_id` |
+| 3 | Add a proficiency as User A | Row inserted with correct `user_id`, `role_id`, `property_id`, `location_id` |
 | 4 | Remove a proficiency | Row is deleted; board updates accordingly |
 
 **Result:** `[ ]`
@@ -626,8 +616,8 @@
 
 | # | Check | Expected |
 |---|-------|----------|
-| 1 | Cast User A posts a shift | Row inserted in `shifts` table with `created_by = User A's id` |
-| 2 | Cast User B (different proficiencies) queries shifts | Does **not** see User A's shift if it's outside User B's proficiencies |
+| 1 | User A posts a shift | Row inserted in `shifts` table with `created_by = User A's id` |
+| 2 | User B (different proficiencies) queries shifts | Does **not** see User A's shift if it's outside User B's proficiencies |
 | 3 | Admin queries shifts | Sees all active shifts regardless of role/location |
 | 4 | User A deactivates their own shift | `is_active` set to `false`; shift disappears from board |
 | 5 | User A tries to deactivate User B's shift | No change (RLS prevents it) |
@@ -643,7 +633,7 @@
 |---|-------|----------|
 | 1 | `SELECT indexname FROM pg_indexes WHERE tablename = 'users';` | `idx_users_user_type_active` exists; `idx_users_role_active` does **not** exist |
 | 2 | Try to insert a user with `user_type = 'moderator'` | Fails with CHECK constraint violation |
-| 3 | Try to insert a user with `user_type = 'cast'` (lowercase) | Fails with CHECK constraint violation |
+| 3 | Try to insert a user with `user_type = 'user'` (lowercase) | Fails with CHECK constraint violation |
 
 **Result:** `[ ]`
 **Comments:**
@@ -673,7 +663,7 @@
 | 3 | Log in as Admin. Same query | Returns ALL pending rows, regardless of the Admin's own proficiencies |
 | 4 | As a non-matching Mod, attempt `UPDATE user_proficiencies SET is_approved = true WHERE id = '<a non-matching pending row>';` | 0 rows affected (RLS blocks it) |
 | 5 | As a matching Mod, attempt the same `UPDATE` on a matching pending row | 1 row affected; succeeds |
-| 6 | Log in as a plain Cast user (not Mod/Leader/Admin) with a matching role/location proficiency. `SELECT * FROM user_proficiencies WHERE is_approved = false AND user_id != auth.uid();` | 0 rows — Cast users cannot see other users' pending rows under any circumstance |
+| 6 | Log in as a plain User (not Mod/Leader/Admin) with a matching role/location proficiency. `SELECT * FROM user_proficiencies WHERE is_approved = false AND user_id != auth.uid();` | 0 rows — regular users cannot see other users' pending rows under any circumstance |
 
 **Result:** `[ ]`
 **Comments:**

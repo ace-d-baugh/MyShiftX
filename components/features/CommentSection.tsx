@@ -74,7 +74,7 @@ export function CommentSection({
       const mapped = (data ?? []).map((c: Record<string, unknown>) => ({
         id: c.id as string,
         user_id: c.user_id as string | null,
-        display_name: (c.users as { display_name: string } | null)?.display_name ?? 'Former Cast Member',
+        display_name: (c.users as { display_name: string } | null)?.display_name ?? 'Former User',
         body: c.body as string,
         is_interested: c.is_interested as boolean,
         created_at: c.created_at as string,

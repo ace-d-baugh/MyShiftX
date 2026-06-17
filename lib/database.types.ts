@@ -1,20 +1,16 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export type UserType = 'Guest' | 'Cast' | 'Mod' | 'Leader' | 'Admin'
-export type FlagStatus = 'pending' | 'resolved' | 'dismissed'
-export type FlagTargetType = 'post' | 'user' | 'comment'
-export type PreferredTime = 'morning' | 'afternoon' | 'evening' | 'late'
+export type GlobalRole  = 'Guest' | 'User' | 'Admin'
+export type BoardRole   = 'User' | 'Mod' | 'Leader'
+export type FlagStatus      = 'pending' | 'resolved' | 'dismissed'
+export type FlagTargetType  = 'post' | 'user' | 'comment' | 'board'
+export type PreferredTime   = 'morning' | 'afternoon' | 'evening' | 'late'
 export type CommentPostType = 'shift' | 'request'
+export type JoinOutcome     = 'invalid_code' | 'user_declined' | 'success'
 
 export interface Database {
   public: {
     Tables: {
-      user_types: {
-        Row: { id: string; name: UserType; created_at: string }
-        Insert: { id?: string; name: UserType; created_at?: string }
-        Update: { id?: string; name?: UserType; created_at?: string }
-        Relationships: []
-      }
       users: {
         Row: {
           id: string
@@ -24,7 +20,7 @@ export interface Database {
           phone_number: string | null
           notify_via_email: boolean
           notify_via_sms: boolean
-          user_type: UserType
+          role: GlobalRole
           is_active: boolean
           last_login_at: string | null
           created_at: string
@@ -38,7 +34,7 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          user_type?: UserType
+          role?: GlobalRole
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -52,7 +48,7 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          user_type?: UserType
+          role?: GlobalRole
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -60,160 +56,121 @@ export interface Database {
         }
         Relationships: []
       }
-      properties: {
-        Row: { id: string; name: string; created_at: string }
-        Insert: { id?: string; name: string; created_at?: string }
-        Update: { id?: string; name?: string; created_at?: string }
-        Relationships: []
-      }
-      locations: {
+      boards: {
         Row: {
           id: string
-          property_id: string
           name: string
-          is_approved: boolean
-          suggested_by_user_id: string | null
-          approved_by_user_id: string | null
-          approved_at: string | null
+          invite_code: string
+          invite_code_enabled: boolean
+          created_by: string | null
+          is_active: boolean
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
-          property_id: string
           name: string
-          is_approved?: boolean
-          suggested_by_user_id?: string | null
-          approved_by_user_id?: string | null
-          approved_at?: string | null
+          invite_code: string
+          invite_code_enabled?: boolean
+          created_by?: string | null
+          is_active?: boolean
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
-          property_id?: string
           name?: string
-          is_approved?: boolean
-          suggested_by_user_id?: string | null
-          approved_by_user_id?: string | null
-          approved_at?: string | null
+          invite_code?: string
+          invite_code_enabled?: boolean
+          created_by?: string | null
+          is_active?: boolean
           created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "locations_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "locations_suggested_by_user_id_fkey"
-            columns: ["suggested_by_user_id"]
+            foreignKeyName: "boards_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]
       }
-      roles: {
-        Row: {
-          id: string
-          name: string
-          is_approved: boolean
-          suggested_by_user_id: string | null
-          approved_by_user_id: string | null
-          approved_at: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          is_approved?: boolean
-          suggested_by_user_id?: string | null
-          approved_by_user_id?: string | null
-          approved_at?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          is_approved?: boolean
-          suggested_by_user_id?: string | null
-          approved_by_user_id?: string | null
-          approved_at?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "roles_suggested_by_user_id_fkey"
-            columns: ["suggested_by_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      user_proficiencies: {
+      user_boards: {
         Row: {
           id: string
           user_id: string
-          property_id: string
-          location_id: string
-          role_id: string
+          board_id: string
+          role: BoardRole
           is_approved: boolean
-          suggested_by_user_id: string | null
           approved_by_user_id: string | null
           approved_at: string | null
-          created_at: string
+          requested_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          property_id: string
-          location_id: string
-          role_id: string
+          board_id: string
+          role: BoardRole
           is_approved?: boolean
-          suggested_by_user_id?: string | null
           approved_by_user_id?: string | null
           approved_at?: string | null
-          created_at?: string
+          requested_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          property_id?: string
-          location_id?: string
-          role_id?: string
+          board_id?: string
+          role?: BoardRole
           is_approved?: boolean
-          suggested_by_user_id?: string | null
           approved_by_user_id?: string | null
           approved_at?: string | null
-          created_at?: string
+          requested_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_proficiencies_user_id_fkey"
+            foreignKeyName: "user_boards_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_proficiencies_location_id_fkey"
-            columns: ["location_id"]
+            foreignKeyName: "user_boards_board_id_fkey"
+            columns: ["board_id"]
             isOneToOne: false
-            referencedRelation: "locations"
+            referencedRelation: "boards"
             referencedColumns: ["id"]
-          },
+          }
+        ]
+      }
+      board_join_attempts: {
+        Row: {
+          id: string
+          user_id: string
+          code_entered: string
+          outcome: JoinOutcome
+          attempted_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          code_entered: string
+          outcome: JoinOutcome
+          attempted_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          code_entered?: string
+          outcome?: JoinOutcome
+          attempted_at?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "user_proficiencies_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_proficiencies_suggested_by_user_id_fkey"
-            columns: ["suggested_by_user_id"]
+            foreignKeyName: "board_join_attempts_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -225,9 +182,7 @@ export interface Database {
           id: string
           created_by: string
           user_id: string | null
-          property_id: string
-          location_id: string
-          role_id: string
+          board_id: string | null
           shift_title: string
           start_time: string
           end_time: string
@@ -243,9 +198,7 @@ export interface Database {
           id?: string
           created_by: string
           user_id?: string | null
-          property_id: string
-          location_id: string
-          role_id: string
+          board_id?: string | null
           shift_title: string
           start_time: string
           end_time: string
@@ -260,9 +213,7 @@ export interface Database {
           id?: string
           created_by?: string
           user_id?: string | null
-          property_id?: string
-          location_id?: string
-          role_id?: string
+          board_id?: string | null
           shift_title?: string
           start_time?: string
           end_time?: string
@@ -282,24 +233,10 @@ export interface Database {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "shifts_property_id_fkey"
-            columns: ["property_id"]
+            foreignKeyName: "shifts_board_id_fkey"
+            columns: ["board_id"]
             isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shifts_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shifts_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
+            referencedRelation: "boards"
             referencedColumns: ["id"]
           }
         ]
@@ -309,9 +246,7 @@ export interface Database {
           id: string
           created_by: string
           user_id: string | null
-          property_id: string
-          location_id: string
-          role_id: string
+          board_id: string | null
           preferred_times: PreferredTime[]
           requested_date: string
           details: string | null
@@ -323,9 +258,7 @@ export interface Database {
           id?: string
           created_by: string
           user_id?: string | null
-          property_id: string
-          location_id: string
-          role_id: string
+          board_id?: string | null
           preferred_times: PreferredTime[]
           requested_date: string
           details?: string | null
@@ -336,9 +269,7 @@ export interface Database {
           id?: string
           created_by?: string
           user_id?: string | null
-          property_id?: string
-          location_id?: string
-          role_id?: string
+          board_id?: string | null
           preferred_times?: PreferredTime[]
           requested_date?: string
           details?: string | null
@@ -354,24 +285,10 @@ export interface Database {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "requests_property_id_fkey"
-            columns: ["property_id"]
+            foreignKeyName: "requests_board_id_fkey"
+            columns: ["board_id"]
             isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "requests_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "requests_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
+            referencedRelation: "boards"
             referencedColumns: ["id"]
           }
         ]
@@ -382,6 +299,7 @@ export interface Database {
           flagged_by_user_id: string | null
           target_type: FlagTargetType
           target_id: string
+          board_id: string | null
           reason: string
           status: FlagStatus
           resolved_by_user_id: string | null
@@ -392,6 +310,7 @@ export interface Database {
           flagged_by_user_id?: string | null
           target_type: FlagTargetType
           target_id: string
+          board_id?: string | null
           reason: string
           status?: FlagStatus
           resolved_by_user_id?: string | null
@@ -402,6 +321,7 @@ export interface Database {
           flagged_by_user_id?: string | null
           target_type?: FlagTargetType
           target_id?: string
+          board_id?: string | null
           reason?: string
           status?: FlagStatus
           resolved_by_user_id?: string | null
@@ -460,42 +380,6 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
-      }
-      black_listed: {
-        Row: {
-          id: string
-          email: string
-          failed_attempts: number
-          blocked: boolean
-          ip_address: string | null
-          origin_country: string | null
-          origin_city: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          email: string
-          failed_attempts?: number
-          blocked?: boolean
-          ip_address?: string | null
-          origin_country?: string | null
-          origin_city?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string
-          failed_attempts?: number
-          blocked?: boolean
-          ip_address?: string | null
-          origin_country?: string | null
-          origin_city?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
     }
     Views: Record<string, never>

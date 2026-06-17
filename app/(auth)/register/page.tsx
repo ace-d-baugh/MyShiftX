@@ -3,16 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, UserPlus, AlertTriangle } from 'lucide-react'
+import { Eye, EyeOff, UserPlus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Checkbox } from '@/components/ui/Checkbox'
-import {
-  registerSchema,
-  hubIdRegex,
-  pernerRegex,
-  type RegisterInput,
-} from '@/lib/validations/auth'
-import { z } from 'zod'
+import { registerSchema, type RegisterInput } from '@/lib/validations/auth'
 
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>
 
@@ -23,14 +17,10 @@ export default function RegisterPage() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
-  const [hubWarning, setHubWarning] = useState(false)
 
   const [form, setForm] = useState({
-    display_name: '',
     email: '',
     password: '',
-    hub_id: '',
-    perner: '',
     terms_accepted: false,
   })
 
@@ -45,23 +35,7 @@ export default function RegisterPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setServerError(null)
-    setHubWarning(false)
 
-    // Validate HubID and PERNER format (never stored)
-    const hubValid = hubIdRegex.test(form.hub_id)
-    const pernerValid = pernerRegex.test(form.perner)
-
-    if (!hubValid || !pernerValid) {
-      setHubWarning(true)
-      setErrors(prev => ({
-        ...prev,
-        hub_id: 'Invalid HubID or PERNER',
-        perner: 'Invalid HubID or PERNER',
-      }))
-      return
-    }
-
-    // Validate with Zod schema
     const parseResult = registerSchema.safeParse({
       ...form,
       terms_accepted: form.terms_accepted as true,
@@ -79,13 +53,11 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      // NOTE: HubID and PERNER are validated above but NEVER sent to the server.
       // The public.users profile row is created automatically by a DB trigger on auth.users.
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
         options: {
-          data: { display_name: form.display_name },
           emailRedirectTo: `${window.location.origin}/verify-email`,
         },
       })
@@ -98,7 +70,7 @@ export default function RegisterPage() {
       if (data.user && !data.session) {
         router.push('/verify-email')
       } else {
-        router.push('/board')
+        router.push('/wall')
       }
     } catch {
       setServerError('An unexpected error occurred. Please try again.')
@@ -110,14 +82,7 @@ export default function RegisterPage() {
   return (
     <div className="card shadow-lg animate-auth-card-in">
       <h1 className="font-accent text-2xl font-bold text-text mb-1">Create Account</h1>
-      <p className="text-text/60 text-sm mb-6">Join the WDWShiftX Cast Member community.</p>
-
-      {hubWarning && (
-        <div className="mb-4 p-3 rounded-md bg-accent/20 border border-accent text-text text-sm flex gap-2 animate-shake">
-          <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
-          <span>HubID or PERNER verification failed. Please check your credentials. These are never stored.</span>
-        </div>
-      )}
+      <p className="text-text/60 text-sm mb-6">Join the MyShiftX community.</p>
 
       {serverError && (
         <div key={serverError} className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm animate-shake">
@@ -126,71 +91,6 @@ export default function RegisterPage() {
       )}
 
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
-        {/* HubID */}
-        <div>
-          <label htmlFor="hub_id" className="block text-sm font-medium text-text mb-1">
-            HubID <span className="text-warning">*</span>
-          </label>
-          <input
-            id="hub_id"
-            name="hub_id"
-            type="text"
-            autoComplete="off"
-            className={`input placeholder:text-text/50 ${errors.hub_id ? 'border-warning' : ''}`}
-            placeholder="HubID"
-            value={form.hub_id}
-            onChange={handleChange}
-          />
-          <p className="mt-1 text-xs text-text/40">Used for verification only — never stored.</p>
-          {errors.hub_id && (
-            <p className="mt-1 text-xs text-warning">{errors.hub_id}</p>
-          )}
-        </div>
-
-        {/* PERNER */}
-        <div>
-          <label htmlFor="perner" className="block text-sm font-medium text-text mb-1">
-            PERNER <span className="text-warning">*</span>
-          </label>
-          <input
-            id="perner"
-            name="perner"
-            type="text"
-            autoComplete="off"
-            inputMode="numeric"
-            className={`input placeholder:text-text/50 ${errors.perner ? 'border-warning' : ''}`}
-            placeholder="Full PERNER"
-            value={form.perner}
-            onChange={handleChange}
-            maxLength={8}
-          />
-          <p className="mt-1 text-xs text-text/40">Used for verification only — never stored.</p>
-          {errors.perner && (
-            <p className="mt-1 text-xs text-warning">{errors.perner}</p>
-          )}
-        </div>
-
-        {/* Display Name */}
-        <div>
-          <label htmlFor="display_name" className="block text-sm font-medium text-text mb-1">
-            Display Name <span className="text-warning">*</span>
-          </label>
-          <input
-            id="display_name"
-            name="display_name"
-            type="text"
-            autoComplete="name"
-            className={`input placeholder:text-text/50 ${errors.display_name ? 'border-warning' : ''}`}
-            placeholder="Mickey M."
-            value={form.display_name}
-            onChange={handleChange}
-          />
-          <p className="mt-1 text-xs text-text/40">For clarification, please format: First Name Last Initial. (e.g., &ldquo;Mickey M.&rdquo;)</p>
-          {errors.display_name && (
-            <p className="mt-1 text-xs text-warning">{errors.display_name}</p>
-          )}
-        </div>
-
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-text mb-1">

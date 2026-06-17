@@ -1,9 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      { source: '/board',          destination: '/wall',          permanent: true },
+      { source: '/board/:path*',   destination: '/wall/:path*',   permanent: true },
+    ]
+  },
   experimental: {
     // Disable the client-side Router Cache for dynamic routes.
     // Without this, a server-side redirect() gets cached by the browser router
-    // and causes an infinite HandleRedirect loop (board → /login → board...).
+    // and causes an infinite HandleRedirect loop (wall → /login → wall...).
     // This is the documented @supabase/ssr fix for Next.js 14.2+.
     staleTimes: {
       dynamic: 0,

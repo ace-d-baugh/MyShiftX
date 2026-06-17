@@ -1,6 +1,6 @@
 # Supabase local development configuration
 
-project_id = "wdwshiftx"
+project_id = "myshiftx"
 
 [api]
 enabled = true

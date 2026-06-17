@@ -14,7 +14,7 @@ export default function VerifyEmailPage() {
     const navigate = () => {
       if (hasNavigated.current) return
       hasNavigated.current = true
-      router.push('/board')
+      router.push('/wall')
     }
 
     // Check immediately in case the user already verified before landing here
@@ -38,7 +38,7 @@ export default function VerifyEmailPage() {
       <h1 className="font-accent text-2xl font-bold text-text mb-2">Check Your Email</h1>
       <p className="text-text/60 text-sm mb-2">
         We&apos;ve sent a verification link to your email address.
-        Please click the link to activate your WDWShiftX account.
+        Please click the link to activate your MyShiftX account.
       </p>
       <p className="text-text/60 text-sm mb-6">
         Once verified, you&apos;ll be able to access the full shift board.

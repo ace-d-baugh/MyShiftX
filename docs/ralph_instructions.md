@@ -1,21 +1,21 @@
 # Ralph Agent Instructions
 
 **Agent Name:** Ralph (or any AI coding assistant)  
-**Project:** WDWShiftX  
+**Project:** MyShiftX  
 **Last Updated:** January 19, 2026
 
 ---
 
 ## Quick Start for Ralph
 
-Hey Ralph! You're working on WDWShiftX, a shift-trading PWA for Disney Cast Members. Here's everything you need to know.
+Hey Ralph! You're working on MyShiftX, a shift-trading PWA for users. Here's everything you need to know.
 
 ---
 
 ## Core Documents to Read First
 
-1. **docs/wdwshiftx_prd.md** - Complete product requirements (read sections 1-9 minimum)
-2. **docs/wdwshiftx_progress.md** - Your task list and status tracker
+1. **docs/myshiftx_prd.md** - Complete product requirements (read sections 1-9 minimum)
+2. **docs/myshiftx_progress.md** - Your task list and status tracker
 3. **design-tokens.md** - Design system (colors, fonts, accessibility)
 4. **README.md** - Project overview and tech stack
 
@@ -23,7 +23,7 @@ Hey Ralph! You're working on WDWShiftX, a shift-trading PWA for Disney Cast Memb
 
 ## Your Primary Responsibilities
 
-1. **Update Progress Document** - After completing any task, update `docs/wdwshiftx_progress.md` with:
+1. **Update Progress Document** - After completing any task, update `docs/myshiftx_progress.md` with:
    - Changed emoji (📋 → 🚧 → ✅)
    - Date completed
    - Any blockers encountered
@@ -37,7 +37,6 @@ Hey Ralph! You're working on WDWShiftX, a shift-trading PWA for Disney Cast Memb
    - Follow existing code patterns in the repo
 
 4. **Security First**
-   - Never store HubID or PERNER in database
    - Always validate user permissions (RBAC)
    - Use Supabase RLS policies, not just application-level checks
    - Sanitize all user inputs
@@ -47,17 +46,16 @@ Hey Ralph! You're working on WDWShiftX, a shift-trading PWA for Disney Cast Memb
 ## Critical Rules (DO NOT VIOLATE)
 
 ### ❌ NEVER Do These Things:
-- Store HubID or PERNER in any database table
 - Skip email verification requirements
 - Bypass RBAC permission checks
 - Use localStorage/sessionStorage (not supported in some contexts)
-- Suggest Disney affiliation or use Disney trademarks
+- Suggest affiliation with any specific employer
 - Hard delete records (always soft delete with `is_active = false`)
 - Ignore timezone handling (all times must be ET)
 
 ### ✅ ALWAYS Do These Things:
 - Reference PRD Section 9 for database schema questions
-- Test with different user roles (Guest, Cast, Copro, Leader, Admin)
+- Test with different user roles (Guest, User, Mod, Leader, Admin)
 - Handle mobile-first (phones are primary use case)
 - Follow WCAG 2.1 AA standards (7:1 contrast, 44px touch targets)
 - Document any PRD deviations in progress notes
@@ -84,9 +82,9 @@ Hey Ralph! You're working on WDWShiftX, a shift-trading PWA for Disney Cast Memb
 ```
 users
 ├── id (UUID, PK)
-├── display_name (TEXT) - format: "FirstName LastInitial."
+├── display_name (TEXT) - format: "FirstName LastInitial.", defaults to 'User'
 ├── email (TEXT, UNIQUE)
-├── role (TEXT) - guest|cast|copro|leader|admin
+├── role (TEXT) - guest|user|mod|leader|admin
 └── is_active (BOOLEAN) - for soft deletes
 
 properties → locations → roles
@@ -115,7 +113,7 @@ flags
 ## Common Task Patterns
 
 ### Creating a New Feature
-1. Check `docs/wdwshiftx_progress.md` for task details
+1. Check `docs/myshiftx_progress.md` for task details
 2. Read relevant PRD section
 3. Implement with tests (if applicable)
 4. Update progress document with ✅
@@ -154,25 +152,12 @@ const etTime = formatInTimeZone(
 
 ## Validation Patterns
 
-### HubID Validation
-```typescript
-const hubIdRegex = /^[a-zA-Z]{5}\d{3}$/
-// Valid: BAUGM007, SMITH123
-// Invalid: BAU007, BAUGH0007, 12345678
-```
-
-### PERNER Validation
-```typescript
-const pernerRegex = /^\d{8}$/
-// Valid: 00511062, 12345678
-// Invalid: 511062, 123456789, ABC12345
-```
-
 ### Display Name Format
 ```typescript
 // Format: "FirstName LastInitial."
 // Valid: "Matthew B.", "Sarah J."
 // Invalid: "Matt", "Matthew Baugh", "M.B."
+// Set/edited on the Profile page (post-registration); defaults to 'User'
 ```
 
 ---
@@ -246,7 +231,7 @@ Implement using Vercel Edge Middleware or Supabase Edge Functions + Upstash Redi
 
 ## Progress Update Template
 
-When updating `docs/wdwshiftx_progress.md`, use this format:
+When updating `docs/myshiftx_progress.md`, use this format:
 
 ```markdown
 ### [Section Name]
@@ -265,10 +250,9 @@ When updating `docs/wdwshiftx_progress.md`, use this format:
 ## Common Gotchas
 
 1. **Orphaned Posts** - When user is deactivated, `user_id` becomes NULL but `created_by` (TEXT) preserves username
-2. **Email Changes** - Auto-promote to Copro if new email is @disney.com, auto-demote if changing from @disney.com
-3. **Soft Deletes** - Check `is_active = true` in ALL queries, not just RLS
-4. **Expiration Logic** - Cron jobs handle this, not application logic
-5. **Timezone** - Server uses ET for all datetime operations
+2. **Soft Deletes** - Check `is_active = true` in ALL queries, not just RLS
+3. **Expiration Logic** - Cron jobs handle this, not application logic
+4. **Timezone** - Server uses ET for all datetime operations
 
 ---
 
@@ -278,7 +262,7 @@ Before marking any feature as complete (✅):
 
 - [ ] Works on mobile (responsive)
 - [ ] WCAG 2.1 AA compliant (contrast, touch targets)
-- [ ] All user roles tested (Guest, Cast, Copro, Leader, Admin)
+- [ ] All user roles tested (Guest, User, Mod, Leader, Admin)
 - [ ] Edge cases handled (empty states, errors, loading)
 - [ ] Rate limits enforced
 - [ ] TypeScript compiles (`npm run type-check`)
@@ -296,10 +280,10 @@ Ralph, start here:
 4. Create Supabase project
 5. Begin Phase 1: Database Schema Implementation
 
-Update `docs/wdwshiftx_progress.md` as you go!
+Update `docs/myshiftx_progress.md` as you go!
 
 ---
 
-**Remember:** You're building for Cast Members who work long shifts and need quick, reliable shift trades. Mobile-first, security-first, user-first. Let's build something they'll love.
+**Remember:** You're building for users who work long shifts and need quick, reliable shift trades. Mobile-first, security-first, user-first. Let's build something they'll love.
 
 Good luck, Ralph! 🚀

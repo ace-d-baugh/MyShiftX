@@ -1,17 +1,10 @@
 import { z } from 'zod'
 
-export const hubIdRegex = /^[a-zA-Z]{5}\d{3}$/
-export const pernerRegex = /^\d{8}$/
 export const displayNameRegex = /^[A-Z][a-zA-Z]*(?:[-\s][A-Z][a-zA-Z]*)* [A-Z]\.$/
 
 export const registerSchema = z.object({
-  display_name: z.string()
-    .min(1, 'Display name is required')
-    .regex(displayNameRegex, 'Format: "FirstName LastInitial." (e.g., "Mary-Beth C." or "McKay D.")'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  hub_id: z.string().regex(hubIdRegex, 'Invalid HubID format'),
-  perner: z.string().regex(pernerRegex, 'Invalid PERNER format'),
   terms_accepted: z.literal(true, { errorMap: () => ({ message: 'You must accept the Terms & Conditions' }) }),
 })
 

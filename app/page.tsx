@@ -4,9 +4,9 @@ import { ArrowRight, RefreshCw, Gift, Clock, Shield, Users, Zap, Star, Quote } f
 import { AnimateIn } from '@/components/landing/AnimateIn'
 
 export const metadata = {
-  title: 'WDWShiftX – Shift Trading for Disney Cast Members',
+  title: 'MyShiftX – Shift Trading for Shift Workers',
   description:
-    'The smarter way for Disney Cast Members to trade, giveaway, and request shifts. Fast, safe, and built for the magic.',
+    'The smarter way to trade, give away, and request shifts at work. Fast, safe, and built for shift workers.',
 }
 
 const features = [
@@ -23,7 +23,7 @@ const features = [
     icon: Gift,
     title: 'Request Board',
     description:
-      'Need a specific date off? Post a shift request and let other CMs reach out. Set preferred morning, afternoon, evening, or late time blocks.',
+      'Need a specific date off? Post a shift request and let other users reach out. Set preferred morning, afternoon, evening, or late time blocks.',
     border: 'border-l-info',
     iconBg: 'bg-info/10',
     iconColor: 'text-info',
@@ -32,7 +32,7 @@ const features = [
     icon: Zap,
     title: 'Smart Filtering',
     description:
-      "Filter shifts by your proficiency locations and roles. Only see what's relevant to you across all six Disney World properties.",
+      "Filter shifts by your proficiency locations and roles. Only see what's relevant to you across every property you work.",
     border: 'border-l-success',
     iconBg: 'bg-success/10',
     iconColor: 'text-success',
@@ -48,18 +48,18 @@ const features = [
   },
   {
     icon: Shield,
-    title: 'CM Verification',
+    title: 'Leader-Approved Profiles',
     description:
-      'Cast Member credentials verified at registration — never stored. Only real Cast Members can access the platform.',
+      'Roles and locations you add are reviewed and approved by your leaders before they go live, keeping the board accurate and trustworthy.',
     border: 'border-l-warning',
     iconBg: 'bg-warning/10',
     iconColor: 'text-warning',
   },
   {
     icon: Users,
-    title: 'CM Community',
+    title: 'Built-In Moderation',
     description:
-      'Built for CMs, by CMs. Leader oversight, flagging system, and moderation tools keep the board clean and trustworthy.',
+      'Built for shift workers, by shift workers. Leader oversight, a flagging system, and moderation tools keep the board clean and trustworthy.',
     border: 'border-l-secondary',
     iconBg: 'bg-secondary/30',
     iconColor: 'text-primary',
@@ -67,57 +67,56 @@ const features = [
 ]
 
 const properties = [
-  'Magic Kingdom',
-  'EPCOT',
-  'Hollywood Studios',
-  'Animal Kingdom',
-  'Disney Springs',
-  'Resorts',
-  'WaterParks',
+  'Theme Parks',
+  'Hotels & Resorts',
+  'Restaurants',
+  'Retail Stores',
+  'Warehouses',
+  'Event Venues',
 ]
 
-// Placeholder testimonials — swap for real Cast Member reviews once collected.
+// Placeholder testimonials — swap for real user reviews once collected.
 const placeholderReviews = [
   {
     name: 'Jamie T.',
-    role: 'Attractions, Magic Kingdom',
+    role: 'Attractions Team Member',
     quote:
       "I picked up three extra shifts in my first week just from the board. So much easier than scrolling through a Facebook group.",
     rating: 5,
   },
   {
     name: 'Morgan R.',
-    role: 'Quick Service, EPCOT',
+    role: 'Quick Service Associate',
     quote:
       "Posted a shift I couldn't cover and had someone take it within the hour. The filters make it easy to find people who actually work your role.",
     rating: 5,
   },
   {
     name: 'Casey L.',
-    role: 'Merchandise, Hollywood Studios',
+    role: 'Merchandise Associate',
     quote:
       "Love that everything auto-expires. No more digging through a feed full of shifts that already happened.",
     rating: 4,
   },
   {
     name: 'Devon P.',
-    role: 'Custodial, Animal Kingdom',
+    role: 'Custodial Team Member',
     quote:
-      "Knowing everyone is a verified Cast Member makes a huge difference. Feels a lot safer than the old way of trading shifts.",
+      "Knowing my leader approves every role and location on the board makes a huge difference. Feels a lot safer than the old way of trading shifts.",
     rating: 5,
   },
   {
     name: 'Riley S.',
-    role: 'Front Desk, Resorts',
+    role: 'Front Desk Associate',
     quote:
       "Requesting a day off and having people reach out directly saved me so much back-and-forth in group chats.",
     rating: 5,
   },
   {
     name: 'Avery K.',
-    role: 'Lifeguard, WaterParks',
+    role: 'Lifeguard',
     quote:
-      "Clean, simple, and built by people who actually understand how shift trading works at WDW.",
+      "Clean, simple, and built by people who actually understand how shift trading works.",
     rating: 4,
   },
 ]
@@ -129,11 +128,11 @@ export default function HomePage() {
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 bg-background/90 backdrop-blur border-b border-border animate-slide-down">
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between">
-          <Link href="/board" className="flex flex-row items-center gap-0 align-baseline">
-            <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">WDW</h1>
+          <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
+            <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">My</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
-              alt="WDWShiftX Logo"
+              alt="MyShiftX Logo"
               width={1560}
               height={500}
               priority
@@ -175,16 +174,16 @@ export default function HomePage() {
           <div className="animate-fade-in" style={{ animationDelay: '0ms' }}>
             <span className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-medium mb-6">
               <Zap className="w-4 h-4" />
-              Built for Disney Cast Members
+              Built for Shift Workers
             </span>
           </div>
 
           {/* Headline */}
           <div className="animate-fade-in-up" style={{ animationDelay: '150ms' }}>
             <h1 className="font-accent text-4xl md:text-6xl font-bold text-text mb-6 leading-tight">
-              Shift Trading,{' '}
+              Your Shift Exchange{' '}
               <span className="text-primary relative inline-block">
-                Made Magical
+                Star
                 {/* Animated underline draws after the headline appears */}
                 <span
                   className="absolute -bottom-1 left-0 h-[3px] rounded-full bg-gradient-to-r from-primary via-secondary to-primary animate-expand-width"
@@ -197,8 +196,8 @@ export default function HomePage() {
           {/* Sub-copy */}
           <div className="animate-fade-in-up" style={{ animationDelay: '320ms' }}>
             <p className="text-lg md:text-xl text-text/70 max-w-2xl mx-auto mb-10">
-              WDWShiftX is the fast, safe, and CM-verified platform for trading, giving away,
-              and requesting shifts at Walt Disney World. Ditch the chaos.
+              MyShiftX is the fast, safe, and simple platform for trading, giving away,
+              and requesting shifts at work. Ditch the chaos.
             </p>
           </div>
 
@@ -229,7 +228,7 @@ export default function HomePage() {
               Shift Happens. We Handle It.
             </h2>
             <p className="text-text/60 text-lg max-w-xl mx-auto">
-              A complete shift management solution designed specifically for Cast Members.
+              A complete shift management solution designed specifically for shift workers.
             </p>
           </AnimateIn>
 
@@ -258,9 +257,9 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto text-center">
           <AnimateIn>
             <h2 className="font-accent text-2xl md:text-3xl font-bold text-text mb-3">
-              All Properties Covered
+              Built For Any Workplace
             </h2>
-            <p className="text-text/60 mb-8">Find shifts across every park and resort area.</p>
+            <p className="text-text/60 mb-8">Find shifts across every property and department you work.</p>
           </AnimateIn>
           <div className="flex flex-wrap justify-center gap-3">
             {properties.map((p, i) => (
@@ -280,10 +279,10 @@ export default function HomePage() {
 
           <AnimateIn className="text-center mb-14">
             <h2 className="font-accent text-3xl md:text-4xl font-bold text-text mb-4">
-              Cast Members Are Saying Good Things
+              Users Are Saying Good Things
             </h2>
             <p className="text-text/60 text-lg max-w-xl mx-auto">
-              Real feedback from the Cast Members trading shifts every day.
+              Real feedback from the people trading shifts every day.
             </p>
           </AnimateIn>
 
@@ -326,7 +325,7 @@ export default function HomePage() {
               Ready to Simplify Your Schedule?
             </h2>
             <p className="text-white/80 text-lg mb-8">
-              Join the WDWShiftX community today.
+              Join the MyShiftX community today.
             </p>
             <Link
               href="/register"
@@ -344,10 +343,10 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-row items-center gap-0 align-baseline">
-              <span className="font-accent text-5xl font-bold text-white/60 leading-tight align-middle">WDW</span>
+              <span className="font-accent text-5xl font-bold text-white/60 leading-tight align-middle">My</span>
               <Image
                 src="/logos/ShiftX-new.svg"
-                alt="WDWShiftX"
+                alt="MyShiftX"
                 width={1337}
                 height={429}
                 className="h-8 w-auto brightness-0 invert opacity-60"
@@ -361,12 +360,11 @@ export default function HomePage() {
           </div>
           <div className="mt-6 pt-6 border-t border-white/10 text-xs text-center text-white/40">
             <p>
-              WDWShiftX is not affiliated with, authorized by, endorsed by, or in any way officially
-              connected with The Walt Disney Company, Disney Enterprises, Inc., or any of its
-              subsidiaries or affiliates. All Disney trademarks and intellectual property are
-              property of their respective owners.
+              MyShiftX is an independent platform and is not affiliated with, sponsored by,
+              or endorsed by any specific employer. All trademarks are property of their
+              respective owners.
             </p>
-            <p className="mt-2">© {new Date().getFullYear()} WDWShiftX. All rights reserved.</p>
+            <p className="mt-2">© {new Date().getFullYear()} MyShiftX. All rights reserved.</p>
           </div>
         </div>
       </footer>

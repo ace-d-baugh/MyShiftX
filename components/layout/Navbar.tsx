@@ -20,24 +20,33 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { applyTheme, getStoredTheme } from '@/lib/theme'
-import type { UserType } from '@/lib/database.types'
+import type { GlobalRole } from '@/lib/database.types'
 
 interface NavbarProps {
-  userRole: UserType
+  userRole: GlobalRole
   displayName: string
   pendingApprovalsCount?: number
+  isBoardModerator?: boolean
 }
 
-const navItems = [
-  { href: '/board', label: 'Board', icon: LayoutGrid, roles: ['Cast', 'Mod', 'Leader', 'Admin'] },
-  { href: '/profile', label: 'Profile', icon: User, roles: ['Cast', 'Mod', 'Leader', 'Admin'] },
-  { href: '/leader/approvals', label: 'Approvals', icon: ShieldCheck, roles: ['Mod', 'Leader', 'Admin'] },
-  { href: '/leader/flags', label: 'Flags', icon: Flag, roles: ['Leader', 'Admin'] },
-  { href: '/leader/archive', label: 'Archive', icon: Archive, roles: ['Leader', 'Admin'] },
-  { href: '/admin', label: 'Admin', icon: Settings, roles: ['Admin'] },
-] as const
+interface NavItem {
+  href: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  requiresMod?: boolean
+  requiresAdmin?: boolean
+}
 
-export function Navbar({ userRole, displayName, pendingApprovalsCount = 0 }: NavbarProps) {
+const navItems: NavItem[] = [
+  { href: '/wall',              label: 'The Wall',  icon: LayoutGrid  },
+  { href: '/profile',           label: 'Profile',   icon: User        },
+  { href: '/leader/approvals',  label: 'Approvals', icon: ShieldCheck, requiresMod: true  },
+  { href: '/leader/flags',      label: 'Flags',     icon: Flag,        requiresMod: true  },
+  { href: '/leader/archive',    label: 'Archive',   icon: Archive,     requiresMod: true  },
+  { href: '/admin',             label: 'Admin',     icon: Settings,    requiresAdmin: true },
+]
+
+export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoardModerator = false }: NavbarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -49,9 +58,13 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0 }: Nav
     setDarkMode(getStoredTheme() === 'dark')
   }, [])
 
-  const visibleItems = navItems.filter(item =>
-    (item.roles as readonly string[]).includes(userRole)
-  )
+  const isAdmin = userRole === 'Admin'
+
+  const visibleItems = navItems.filter(item => {
+    if (item.requiresAdmin) return isAdmin
+    if (item.requiresMod)   return isBoardModerator || isAdmin
+    return true
+  })
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -73,11 +86,11 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0 }: Nav
       <header className="hidden md:block sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         {/* Top bar: Logo + User/Logout */}
         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
-          <Link href="/board" className="flex flex-row items-center gap-0 align-baseline">
-            <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">WDW</h1>
+          <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
+            <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">My</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
-              alt="WDWShiftX Logo"
+              alt="MyShiftX Logo"
               width={1560}
               height={500}
               priority
@@ -183,17 +196,18 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0 }: Nav
       {/* Mobile top bar */}
       <header className="md:hidden sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         <div className="px-4 flex items-center justify-between h-14">
-          <Link href="/board"className="flex flex-row items-center gap-0 align-baseline">
-            <h1 className="font-accent text-4xl md:text-4xl font-bold text-primary leading-tight align-middle">WDW</h1>
+          <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
+            <h1 className="font-accent text-4xl md:text-4xl font-bold text-primary leading-tight align-middle">My</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
-              alt="WDWShiftX Logo"
+              alt="MyShiftX Logo"
               width={1560}
               height={500}
               priority
               className="h-7 w-auto"
             />
-          </Link>          <button
+          </Link>
+          <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
             aria-label="Toggle menu"

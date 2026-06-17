@@ -17,10 +17,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8 animate-slide-down">
           <Link href="/" className="inline-flex flex-row items-center justify-center gap-0">
-            <h1 className="font-accent text-6xl font-bold text-primary align-middle">WDW</h1>
+            <h1 className="font-accent text-6xl font-bold text-primary align-middle">My</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
-              alt="WDWShiftX"
+              alt="MyShiftX"
               width={1560}
               height={500}
               className="h-12 w-auto"
@@ -35,7 +35,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           className="text-center text-xs text-text/40 mt-8 px-4 animate-fade-in"
           style={{ animationDelay: '400ms' }}
         >
-          Not affiliated with, authorized by, or endorsed by The Walt Disney Company.
+          MyShiftX is an independent platform and is not affiliated with, sponsored by, or endorsed by any specific employer.
         </p>
       </div>
     </div>

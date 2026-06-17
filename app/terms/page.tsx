@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
-export const metadata = { title: 'Terms & Conditions – WDWShiftX' }
+export const metadata = { title: 'Terms & Conditions – MyShiftX' }
 
 export default function TermsPage() {
   return (
@@ -16,17 +16,17 @@ export default function TermsPage() {
         <div className="prose prose-sm max-w-none space-y-6 text-text/80">
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">1. Acceptance of Terms</h2>
-            <p>By registering for and using WDWShiftX (&ldquo;the Service&rdquo;), you agree to be bound by these Terms &amp; Conditions. If you do not agree, please do not use the Service.</p>
+            <p>By registering for and using MyShiftX (&ldquo;the Service&rdquo;), you agree to be bound by these Terms &amp; Conditions. If you do not agree, please do not use the Service.</p>
           </section>
 
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">2. Eligibility</h2>
-            <p>The Service is intended exclusively for current Walt Disney World Resort Cast Members. By registering, you represent and warrant that you are a current Cast Member. HubID and PERNER are used solely for verification at registration and are never stored on our servers.</p>
+            <p>You must be at least 16 years old to use the Service. By registering, you represent and warrant that all information you provide is accurate and that you will use the Service in good faith.</p>
           </section>
 
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">3. Disclaimer of Affiliation</h2>
-            <p>WDWShiftX is an independent platform created by Cast Members, for Cast Members. It is <strong>not</strong> affiliated with, authorized by, endorsed by, or in any way officially connected with The Walt Disney Company, Disney Enterprises, Inc., or any of its subsidiaries or affiliates. All Disney-related trademarks, service marks, and trade names are property of their respective owners.</p>
+            <p>MyShiftX is an independent platform and is <strong>not</strong> affiliated with, authorized by, endorsed by, or in any way officially connected with any specific employer whose shifts may be posted or discussed by users. All trademarks, service marks, and trade names referenced on the platform are property of their respective owners.</p>
           </section>
 
           <section>
@@ -37,14 +37,14 @@ export default function TermsPage() {
               <li>Not post shifts you do not personally hold or control</li>
               <li>Not harass, threaten, or demean other users</li>
               <li>Not use the platform for any commercial purpose</li>
-              <li>Comply with all applicable Disney Cast Member policies and agreements</li>
+              <li>Comply with all applicable policies and agreements with your employer related to any shifts posted or accepted through the Service</li>
               <li>Not attempt to circumvent any security measures</li>
             </ul>
           </section>
 
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">5. Shift Transactions</h2>
-            <p>WDWShiftX facilitates communication between Cast Members. We do not guarantee successful shift trades or giveaways. All shift arrangements are solely between the Cast Members involved. Always ensure shift changes comply with official Disney scheduling policies and your leadership.</p>
+            <p>MyShiftX facilitates communication between users. We do not guarantee successful shift trades or giveaways. All shift arrangements are solely between the users involved. Always ensure shift changes comply with your employer&apos;s scheduling policies and your leadership.</p>
           </section>
 
           <section>
@@ -54,7 +54,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">7. Limitation of Liability</h2>
-            <p>WDWShiftX is provided &ldquo;as is&rdquo; without warranties of any kind. We are not liable for any damages arising from your use of the Service, failed shift arrangements, or any disciplinary actions by your employer.</p>
+            <p>MyShiftX is provided &ldquo;as is&rdquo; without warranties of any kind. We are not liable for any damages arising from your use of the Service, failed shift arrangements, or any disciplinary actions by your employer.</p>
           </section>
 
           <section>
@@ -70,7 +70,7 @@ export default function TermsPage() {
 
         <div className="mt-10 pt-6 border-t border-border">
           <p className="text-xs text-text/40 text-center">
-            WDWShiftX is not affiliated with, authorized by, endorsed by, or in any way officially connected with The Walt Disney Company.
+            MyShiftX is an independent platform and is not affiliated with, sponsored by, or endorsed by any specific employer.
           </p>
         </div>
       </div>

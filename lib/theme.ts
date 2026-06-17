@@ -1,6 +1,6 @@
 export type Theme = 'light' | 'dark'
 
-export const THEME_STORAGE_KEY = 'wdwshiftx-theme'
+export const THEME_STORAGE_KEY = 'myshiftx-theme'
 
 export function getStoredTheme(): Theme {
   if (typeof window === 'undefined') return 'light'

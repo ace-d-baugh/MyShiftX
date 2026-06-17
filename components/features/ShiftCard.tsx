@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO, formatDistanceToNow } from 'date-fns'
-import { Clock, MapPin, Briefcase, User, Flag, Edit, EyeOff, Mail } from 'lucide-react'
+import { Clock, LayoutGrid, User, Flag, Edit, EyeOff, Mail } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { FlagModal } from '@/components/features/FlagModal'
@@ -17,9 +17,8 @@ export interface ShiftData {
   shift_title: string
   created_by: string
   user_id: string | null
-  property_name: string
-  location_name: string
-  role_name: string
+  board_id: string | null
+  board_name: string
   start_time: string
   end_time: string
   is_trade: boolean
@@ -92,12 +91,8 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate,
         {/* Details */}
         <div className="space-y-1.5 mb-4">
           <div className="flex items-center gap-2 text-sm text-text/70">
-            <MapPin className="w-4 h-4 text-primary shrink-0" />
-            <span className="truncate">{shift.property_name} &rsaquo; {shift.location_name}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-text/70">
-            <Briefcase className="w-4 h-4 text-primary shrink-0" />
-            <span>{shift.role_name}</span>
+            <LayoutGrid className="w-4 h-4 text-primary shrink-0" />
+            <span className="truncate font-medium">{shift.board_name}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-text/70">
             <Clock className="w-4 h-4 text-primary shrink-0" />
@@ -140,7 +135,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate,
             ) : (
               <>
                 <a
-                  href={`mailto:?subject=Re: ${encodeURIComponent(shift.shift_title)} on WDWShiftX&body=Hi ${shift.created_by},%0A%0AI saw your shift post on WDWShiftX and I'm interested!%0A%0A- ${currentUserName ?? 'A Cast Member'}`}
+                  href={`mailto:?subject=Re: ${encodeURIComponent(shift.shift_title)} on MyShiftX&body=Hi ${shift.created_by},%0A%0AI saw your shift post on MyShiftX and I'm interested!%0A%0A- ${currentUserName ?? 'A User'}`}
                   className="btn btn-primary text-xs px-3 py-1 min-h-0 h-8 gap-1 no-underline inline-flex items-center rounded-md"
                 >
                   <Mail className="w-3 h-3" /> Contact
