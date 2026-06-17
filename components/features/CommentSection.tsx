@@ -31,6 +31,7 @@ interface CommentSectionProps {
   currentUserName?: string
   commentCount: number
   interestedCount: number
+  actions?: React.ReactNode
 }
 
 export function CommentSection({
@@ -40,6 +41,7 @@ export function CommentSection({
   currentUserId,
   commentCount,
   interestedCount,
+  actions,
 }: CommentSectionProps) {
   const supabase = useMemo(() => createClient(), [])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -232,35 +234,42 @@ export function CommentSection({
 
   return (
     <>
-      <div className="flex items-center gap-2 pt-3 mt-3 border-t border-border">
-        <button
-          type="button"
-          onClick={toggleComments}
-          className="badge bg-text/10 text-text/70 hover:bg-primary-light cursor-pointer inline-flex items-center gap-1 transition-colors"
-        >
-          <MessageSquare className="w-3.5 h-3.5" />
-          Comments ({displayCommentCount})
-          <ChevronDown className={cn('w-3 h-3 transition-transform', commentsOpen && 'rotate-180')} />
-        </button>
-        <button
-          type="button"
-          onClick={handleInterestedPillClick}
-          disabled={isOwner ? false : !currentUserId || posting}
-          className={cn(
-            'badge inline-flex items-center gap-1 transition-colors',
-            isOwner
-              ? 'bg-primary/20 text-primary hover:bg-primary/30 cursor-pointer'
-              : myInterest
-                ? 'bg-primary/20 text-primary cursor-default'
-                : currentUserId
-                  ? 'bg-text/10 text-text/60 hover:bg-primary-light cursor-pointer'
-                  : 'bg-text/10 text-text/50 cursor-default'
-          )}
-        >
-          <Star className={cn('w-3.5 h-3.5', (displayInterestedCount > 0 || myInterest) && 'fill-current')} />
-          Interested ({displayInterestedCount})
-          {isOwner && <ChevronDown className={cn('w-3 h-3 transition-transform', interestedOpen && 'rotate-180')} />}
-        </button>
+      <div className="flex items-center justify-between gap-2 pt-3 mt-3 border-t border-border">
+        <div className="flex items-center gap-2 min-w-0">
+          <button
+            type="button"
+            onClick={toggleComments}
+            className="badge bg-text/10 text-text/70 hover:bg-primary-light cursor-pointer inline-flex items-center gap-1 transition-colors shrink-0"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            Comments ({displayCommentCount})
+            <ChevronDown className={cn('w-3 h-3 transition-transform', commentsOpen && 'rotate-180')} />
+          </button>
+          <button
+            type="button"
+            onClick={handleInterestedPillClick}
+            disabled={isOwner ? false : !currentUserId || posting}
+            className={cn(
+              'badge inline-flex items-center gap-1 transition-colors shrink-0',
+              isOwner
+                ? 'bg-primary/20 text-primary hover:bg-primary/30 cursor-pointer'
+                : myInterest
+                  ? 'bg-primary/20 text-primary cursor-default'
+                  : currentUserId
+                    ? 'bg-text/10 text-text/60 hover:bg-primary-light cursor-pointer'
+                    : 'bg-text/10 text-text/50 cursor-default'
+            )}
+          >
+            <Star className={cn('w-3.5 h-3.5', (displayInterestedCount > 0 || myInterest) && 'fill-current')} />
+            Interested ({displayInterestedCount})
+            {isOwner && <ChevronDown className={cn('w-3 h-3 transition-transform', interestedOpen && 'rotate-180')} />}
+          </button>
+        </div>
+        {actions && (
+          <div className="flex items-center gap-1.5 shrink-0">
+            {actions}
+          </div>
+        )}
       </div>
 
       {error && <p className="text-xs text-warning mt-1.5">{error}</p>}

@@ -95,6 +95,10 @@ const config: Config = {
           '60%': { transform: 'scale(1.2)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
+        cardIn: {
+          '0%':   { opacity: '0', transform: 'translateY(10px) scale(0.99)' },
+          '100%': { opacity: '1', transform: 'translateY(0)   scale(1)'    },
+        },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-12px)' },
@@ -119,6 +123,10 @@ const config: Config = {
         'pop-in': 'popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both',
         'float': 'float 3.5s ease-in-out infinite',
         'star-fall': 'starFall 6s linear infinite',
+        'card-in':   'cardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both',
+      },
+      transitionTimingFunction: {
+        spring: 'cubic-bezier(0.16, 1, 0.3, 1)',
       },
     },
   },

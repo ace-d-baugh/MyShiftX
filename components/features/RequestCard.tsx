@@ -55,7 +55,7 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
 
   return (
     <>
-      <div className="card hover:shadow-md transition-shadow border-l-4 border-l-accent">
+      <div className="card border-l-4 border-l-accent transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
@@ -94,53 +94,6 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
           </p>
         )}
 
-        {/* Footer */}
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xs text-text/40">
-            Expires at end of day
-          </span>
-          <div className="flex items-center gap-1.5">
-            {isOwner ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push(`/wall/edit-request/${request.id}`)}
-                  className="gap-1 text-xs px-2 py-1 min-h-0 h-8"
-                >
-                  <Edit className="w-3 h-3" /> Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => onDeactivate?.(request.id)}
-                  className="gap-1 text-xs px-2 py-1 min-h-0 h-8"
-                >
-                  <EyeOff className="w-3 h-3" /> Remove
-                </Button>
-              </>
-            ) : (
-              <>
-                <a
-                  href={`mailto:?subject=Re: Shift Request on MyShiftX&body=Hi ${request.created_by},%0A%0AI saw your shift request on MyShiftX and I have a shift available!%0A%0A- ${currentUserName ?? 'A User'}`}
-                  className="btn btn-primary text-xs px-3 py-1 min-h-0 h-8 gap-1 no-underline inline-flex items-center rounded-md"
-                >
-                  <Mail className="w-3 h-3" /> Contact
-                </a>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setFlagOpen(true)}
-                  className="gap-1 text-xs px-2 py-1 min-h-0 h-8 text-text/40 hover:text-warning"
-                  aria-label="Flag request"
-                >
-                  <Flag className="w-3 h-3" />
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-
         <CommentSection
           postType="request"
           postId={request.id}
@@ -149,6 +102,46 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
           currentUserName={currentUserName}
           commentCount={request.comment_count ?? 0}
           interestedCount={request.interested_count ?? 0}
+          actions={
+            isOwner ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push(`/wall/edit-request/${request.id}`)}
+                  className="gap-1 text-xs px-2 py-1 min-h-0 h-7"
+                >
+                  <Edit className="w-3 h-3" /> Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => onDeactivate?.(request.id)}
+                  className="gap-1 text-xs px-2 py-1 min-h-0 h-7"
+                >
+                  <EyeOff className="w-3 h-3" /> Remove
+                </Button>
+              </>
+            ) : (
+              <>
+                <a
+                  href={`mailto:?subject=Re: Shift Request on MyShiftX&body=Hi ${request.created_by},%0A%0AI saw your shift request on MyShiftX and I have a shift available!%0A%0A- ${currentUserName ?? 'A User'}`}
+                  className="btn btn-primary text-xs px-2 py-1 min-h-0 h-7 gap-1 no-underline inline-flex items-center rounded-md"
+                >
+                  <Mail className="w-3 h-3" /> Contact
+                </a>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFlagOpen(true)}
+                  className="text-xs px-1.5 py-1 min-h-0 h-7 text-text/40 hover:text-warning"
+                  aria-label="Flag request"
+                >
+                  <Flag className="w-3 h-3" />
+                </Button>
+              </>
+            )
+          }
         />
       </div>
 

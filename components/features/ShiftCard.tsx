@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatInTimeZone } from 'date-fns-tz'
-import { parseISO, formatDistanceToNow } from 'date-fns'
+import { parseISO } from 'date-fns'
 import { Clock, LayoutGrid, User, Flag, Edit, EyeOff, Mail } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -46,12 +46,6 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
 
   const isOwner = currentUserId && shift.user_id === currentUserId
 
-  const expiresIn = () => {
-    const exp = parseISO(shift.expires_at)
-    if (exp <= new Date()) return 'Expired'
-    return `Expires ${formatDistanceToNow(exp, { addSuffix: true })}`
-  }
-
   const duration = () => {
     const start = parseISO(shift.start_time)
     const end = parseISO(shift.end_time)
@@ -67,21 +61,15 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
   return (
     <>
       <div className={cn(
-        'card hover:shadow-md transition-shadow border-l-4',
+        'card border-l-4 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
         shift.is_trade && shift.is_giveaway ? 'border-l-primary' :
         shift.is_trade ? 'border-l-info' : 'border-l-success'
       )}>
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-accent font-bold text-text text-lg leading-tight truncate">
-              {shift.shift_title}
-            </h3>
-            <p className="text-xs text-text/50 mt-0.5 flex items-center gap-1">
-              <User className="w-3 h-3" />
-              Posted by {shift.created_by}
-            </p>
-          </div>
+        {/* Title + badges */}
+        <div className="flex items-start justify-between gap-3 mb-1">
+          <h3 className="font-accent font-bold text-text text-lg leading-tight truncate flex-1 min-w-0">
+            {shift.shift_title}
+          </h3>
           <div className="flex flex-wrap gap-1 shrink-0">
             {shift.is_trade && <Badge variant="trade">Trade</Badge>}
             {shift.is_giveaway && <Badge variant="giveaway">Giveaway</Badge>}
@@ -89,73 +77,32 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
           </div>
         </div>
 
-        {/* Details */}
-        <div className="space-y-1.5 mb-4">
-          <div className="flex items-center gap-2 text-sm text-text/70">
-            <LayoutGrid className="w-4 h-4 text-primary shrink-0" />
-            <span className="truncate font-medium">{shift.board_name}</span>
+        {/* Times — directly below title */}
+        <div className="flex items-center gap-1.5 text-base font-medium text-text/80 mb-3">
+          <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
+          {startTime}
+          <span className="text-text/40 mx-0.5">→</span>
+          {endTime}
+          <span className="text-text/40 font-normal text-xs ml-1">({duration()})</span>
+        </div>
+
+        {/* Board (left) · Poster (right) */}
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-1.5 text-xs text-text/50 min-w-0">
+            <LayoutGrid className="w-3.5 h-3.5 text-primary/70 shrink-0" />
+            <span className="truncate">{shift.board_name}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-text/70">
-            <Clock className="w-4 h-4 text-primary shrink-0" />
-            <span className="font-medium">
-              {startTime}
-              <span className="text-text/40 mx-1.5">→</span>
-              {endTime}
-              <span className="text-text/40 font-normal ml-2 text-xs">({duration()})</span>
-            </span>
+          <div className="flex items-center gap-1 text-xs text-text/50 shrink-0">
+            <User className="w-3 h-3" />
+            <span>{shift.created_by}</span>
           </div>
         </div>
 
         {shift.details && (
-          <p className="text-sm text-text/60 bg-primary-light/50 rounded-md px-3 py-2 mb-4 italic">
+          <p className="text-sm text-text/60 bg-primary-light/50 rounded-md px-3 py-2 mb-3 italic">
             &ldquo;{shift.details}&rdquo;
           </p>
         )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xs text-text/40">{expiresIn()}</span>
-          <div className="flex items-center gap-1.5">
-            {isOwner ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push(`/wall/edit-shift/${shift.id}`)}
-                  className="gap-1 text-xs px-2 py-1 min-h-0 h-8"
-                >
-                  <Edit className="w-3 h-3" /> Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => onDeactivate?.(shift.id)}
-                  className="gap-1 text-xs px-2 py-1 min-h-0 h-8"
-                >
-                  <EyeOff className="w-3 h-3" /> Remove
-                </Button>
-              </>
-            ) : (
-              <>
-                <a
-                  href={`mailto:?subject=Re: ${encodeURIComponent(shift.shift_title)} on MyShiftX&body=Hi ${shift.created_by},%0A%0AI saw your shift post on MyShiftX and I'm interested!%0A%0A- ${currentUserName ?? 'A User'}`}
-                  className="btn btn-primary text-xs px-3 py-1 min-h-0 h-8 gap-1 no-underline inline-flex items-center rounded-md"
-                >
-                  <Mail className="w-3 h-3" /> Contact
-                </a>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setFlagOpen(true)}
-                  className="gap-1 text-xs px-2 py-1 min-h-0 h-8 text-text/40 hover:text-warning"
-                  aria-label="Flag post"
-                >
-                  <Flag className="w-3 h-3" />
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
 
         <CommentSection
           postType="shift"
@@ -165,6 +112,46 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
           currentUserName={currentUserName}
           commentCount={shift.comment_count ?? 0}
           interestedCount={shift.interested_count ?? 0}
+          actions={
+            isOwner ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push(`/wall/edit-shift/${shift.id}`)}
+                  className="gap-1 text-xs px-2 py-1 min-h-0 h-7"
+                >
+                  <Edit className="w-3 h-3" /> Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => onDeactivate?.(shift.id)}
+                  className="gap-1 text-xs px-2 py-1 min-h-0 h-7"
+                >
+                  <EyeOff className="w-3 h-3" /> Remove
+                </Button>
+              </>
+            ) : (
+              <>
+                <a
+                  href={`mailto:?subject=Re: ${encodeURIComponent(shift.shift_title)} on MyShiftX&body=Hi ${shift.created_by},%0A%0AI saw your shift post on MyShiftX and I'm interested!%0A%0A- ${currentUserName ?? 'A User'}`}
+                  className="btn btn-primary text-xs px-2 py-1 min-h-0 h-7 gap-1 no-underline inline-flex items-center rounded-md"
+                >
+                  <Mail className="w-3 h-3" /> Contact
+                </a>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFlagOpen(true)}
+                  className="text-xs px-1.5 py-1 min-h-0 h-7 text-text/40 hover:text-warning"
+                  aria-label="Flag post"
+                >
+                  <Flag className="w-3 h-3" />
+                </Button>
+              </>
+            )
+          }
         />
       </div>
 

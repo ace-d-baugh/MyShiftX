@@ -383,7 +383,26 @@ export interface Database {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      lookup_board_by_invite_code: {
+        Args: { p_code: string }
+        Returns: { id: string; name: string; is_active: boolean; invite_code_enabled: boolean }[]
+      }
+      get_pending_board_requests: {
+        Args: Record<string, never>
+        Returns: {
+          id: string; board_id: string; user_id: string;
+          requested_at: string; user_display_name: string | null; board_name: string | null
+        }[]
+      }
+      is_any_board_moderator: { Args: Record<string, never>; Returns: boolean }
+      is_board_member:     { Args: { p_board_id: string }; Returns: boolean }
+      is_board_moderator:  { Args: { p_board_id: string }; Returns: boolean }
+      is_board_leader:     { Args: { p_board_id: string }; Returns: boolean }
+      is_board_applicant:  { Args: { p_board_id: string }; Returns: boolean }
+      expire_shifts:   { Args: Record<string, never>; Returns: void }
+      expire_requests: { Args: Record<string, never>; Returns: void }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }

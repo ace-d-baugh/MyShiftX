@@ -384,24 +384,34 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
           </div>
         ) : (
           <div className="space-y-5">
-            {shiftDayGroups.map(group => (
-              <DayGroup
+            {shiftDayGroups.map((group, gi) => (
+              <div
                 key={group.dayKey}
-                dayLabel={group.dayLabel}
-                count={group.items.length}
-                isCollapsed={collapsedKeys.has(`offers|${group.dayKey}`)}
-                onToggle={() => toggleCollapsed('offers', group.dayKey)}
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${gi * 60}ms` }}
               >
-                {group.items.map(shift => (
-                  <ShiftCard
-                    key={shift.id}
-                    shift={shift}
-                    currentUserId={userId}
-                    currentUserName={displayName}
-                    onDeactivate={handleDeactivateShift}
-                  />
-                ))}
-              </DayGroup>
+                <DayGroup
+                  dayLabel={group.dayLabel}
+                  count={group.items.length}
+                  isCollapsed={collapsedKeys.has(`offers|${group.dayKey}`)}
+                  onToggle={() => toggleCollapsed('offers', group.dayKey)}
+                >
+                  {group.items.map((shift, ci) => (
+                    <div
+                      key={shift.id}
+                      className="animate-card-in"
+                      style={{ animationDelay: `${Math.min(gi * 60 + ci * 45, 480)}ms` }}
+                    >
+                      <ShiftCard
+                        shift={shift}
+                        currentUserId={userId}
+                        currentUserName={displayName}
+                        onDeactivate={handleDeactivateShift}
+                      />
+                    </div>
+                  ))}
+                </DayGroup>
+              </div>
             ))}
           </div>
         )
@@ -419,24 +429,34 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
           </div>
         ) : (
           <div className="space-y-5">
-            {requestDayGroups.map(group => (
-              <DayGroup
+            {requestDayGroups.map((group, gi) => (
+              <div
                 key={group.dayKey}
-                dayLabel={group.dayLabel}
-                count={group.items.length}
-                isCollapsed={collapsedKeys.has(`requests|${group.dayKey}`)}
-                onToggle={() => toggleCollapsed('requests', group.dayKey)}
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${gi * 60}ms` }}
               >
-                {group.items.map(request => (
-                  <RequestCard
-                    key={request.id}
-                    request={request}
-                    currentUserId={userId}
-                    currentUserName={displayName}
-                    onDeactivate={handleDeactivateRequest}
-                  />
-                ))}
-              </DayGroup>
+                <DayGroup
+                  dayLabel={group.dayLabel}
+                  count={group.items.length}
+                  isCollapsed={collapsedKeys.has(`requests|${group.dayKey}`)}
+                  onToggle={() => toggleCollapsed('requests', group.dayKey)}
+                >
+                  {group.items.map((request, ci) => (
+                    <div
+                      key={request.id}
+                      className="animate-card-in"
+                      style={{ animationDelay: `${Math.min(gi * 60 + ci * 45, 480)}ms` }}
+                    >
+                      <RequestCard
+                        request={request}
+                        currentUserId={userId}
+                        currentUserName={displayName}
+                        onDeactivate={handleDeactivateRequest}
+                      />
+                    </div>
+                  ))}
+                </DayGroup>
+              </div>
             ))}
           </div>
         )
@@ -458,10 +478,11 @@ function DayGroup({
 }) {
   return (
     <div className="rounded-xl border border-border overflow-hidden">
+      {/* Header */}
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-card hover:bg-primary-light/30 transition-colors min-h-0"
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-card hover:bg-primary-light/30 active:bg-primary-light/50 transition-colors duration-150 min-h-0"
         aria-expanded={!isCollapsed}
       >
         <span className="flex items-center gap-2.5 min-w-0">
@@ -471,18 +492,24 @@ function DayGroup({
           </span>
         </span>
         <ChevronDown className={cn(
-          'w-4 h-4 text-text/40 transition-transform duration-200 shrink-0',
+          'w-4 h-4 text-text/40 transition-transform duration-300 ease-spring shrink-0',
           !isCollapsed && 'rotate-180'
         )} />
       </button>
 
-      {!isCollapsed && (
-        <div className="max-h-[68rem] overflow-y-auto">
-          <div className="p-4 space-y-4">
-            {children}
+      {/* Animated content — grid-rows trick avoids JS height measurement */}
+      <div className={cn(
+        'grid transition-[grid-template-rows] duration-300 ease-spring',
+        isCollapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
+      )}>
+        <div className="overflow-hidden">
+          <div className="max-h-[68rem] overflow-y-auto scrollbar-thin">
+            <div className="p-4 space-y-4">
+              {children}
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

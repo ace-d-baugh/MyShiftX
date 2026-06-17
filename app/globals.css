@@ -154,11 +154,16 @@
     .animate-auth-card-in,
     .animate-shake,
     .animate-pop-in,
-    .animate-float {
+    .animate-float,
+    .animate-card-in {
       animation: none !important;
       opacity: 1 !important;
       width: 100% !important;
       transform: none !important;
+    }
+
+    .transition-\[grid-template-rows\] {
+      transition: none !important;
     }
 
     .falling-star {
