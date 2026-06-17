@@ -155,8 +155,8 @@ const etTime = formatInTimeZone(
 ### Display Name Format
 ```typescript
 // Format: "FirstName LastInitial."
-// Valid: "Matthew B.", "Sarah J."
-// Invalid: "Matt", "Matthew Baugh", "M.B."
+// Valid: "Thomas M.", "Sarah J."
+// Invalid: "Tom", "Thomas Mortensen", "T.M."
 // Set/edited on the Profile page (post-registration); defaults to 'User'
 ```
 

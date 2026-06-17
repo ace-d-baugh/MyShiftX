@@ -53,7 +53,7 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
     setSaveSuccess(false)
 
     if (!displayNameRegex.test(displayName)) {
-      setNameError('Format: "FirstName LastInitial." (e.g., "Mickey M.")')
+      setNameError('Format: "FirstName LastInitial." (e.g., "Thomas M.")')
       return
     }
 
@@ -138,9 +138,9 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
               className={`input placeholder:text-text/50 ${nameError ? 'border-warning' : ''}`}
               value={displayName}
               onChange={e => { setDisplayName(e.target.value); setNameError(null) }}
-              placeholder="Minnie M."
+              placeholder="Thomas M."
             />
-            <p className="mt-1 text-xs text-text/40">Format: FirstName LastInitial. (e.g., &ldquo;Minnie M.&rdquo;)</p>
+            <p className="mt-1 text-xs text-text/40">Format: FirstName LastInitial. (e.g., &ldquo;Thomas M.&rdquo;)</p>
             {nameError && <p className="mt-1 text-xs text-warning">{nameError}</p>}
           </div>
 

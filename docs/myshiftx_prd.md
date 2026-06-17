@@ -178,7 +178,7 @@ Same page as Shift Board with tab toggle.
 - Terms & Conditions acceptance (checkbox)
 
 **Profile Fields:**
-- Display Name (format: "FirstName LastInitial." e.g., "Matthew B.") — set and edited on the Profile page after registration; defaults to `'User'` until the user sets it.
+- Display Name (format: "FirstName LastInitial." e.g., "Thomas B.") — set and edited on the Profile page after registration; defaults to `'User'` until the user sets it.
 - Email (editable with verification)
 - Phone Number (optional, editable)
 - Notification Preferences:
@@ -240,7 +240,7 @@ Same page as Shift Board with tab toggle.
 
 **Display:**
 - Separate section/page from live boards.
-- Orphaned posts show original username (e.g., "Matthew B.").
+- Orphaned posts show original username (e.g., "Thomas M.").
 
 ---
 
