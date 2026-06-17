@@ -364,7 +364,7 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
             <div className="flex gap-2">
               <input
                 type="text"
-                className="input text-sm uppercase tracking-widest flex-1 h-9"
+                className="input placeholder:text-text/30 text-sm uppercase tracking-widest flex-1 h-9"
                 placeholder="XXXXXXX"
                 maxLength={7}
                 value={joinCode}
@@ -427,7 +427,7 @@ export function MyBoardsSection({ userId, displayNameReady }: MyBoardsSectionPro
               <label className="block text-sm font-medium text-text mb-1">Board Name</label>
               <input
                 type="text"
-                className="input placeholder:text-text/50 text-sm"
+                className="input placeholder:text-text/30 text-sm"
                 placeholder="e.g. Company and Team Name"
                 value={createName}
                 maxLength={60}

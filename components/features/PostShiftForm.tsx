@@ -149,7 +149,7 @@ export function PostShiftForm({ userId, displayName, onSuccess }: PostShiftFormP
         <input
           name="shift_title"
           type="text"
-          className={`input placeholder:text-text/50 ${errors.shift_title ? 'border-warning' : ''}`}
+          className={`input placeholder:text-text/30 ${errors.shift_title ? 'border-warning' : ''}`}
           placeholder="e.g., Morning Opening Shift"
           value={form.shift_title}
           onChange={handleChange}
