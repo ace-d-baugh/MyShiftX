@@ -41,7 +41,7 @@ Built as a Progressive Web App (PWA) for mobile-first access, with board-level m
 
 ## The Problem
 
-Users currently rely on Facebook groups to coordinate shift trades in messy groups, which creates:
+Users currently rely on Facebook groups to coordinate shift trades, which creates:
 
 - **Noise:** Hundreds of unrelated posts make finding relevant shifts difficult
 - **Security risks:** No verification of user status or group membership
