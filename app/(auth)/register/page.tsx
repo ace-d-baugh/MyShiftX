@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const supabase = createClient()
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -21,6 +22,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     email: '',
     password: '',
+    confirm_password: '',
     terms_accepted: false,
   })
 
@@ -138,6 +140,36 @@ export default function RegisterPage() {
           </div>
           {errors.password && (
             <p className="mt-1 text-xs text-warning">{errors.password}</p>
+          )}
+        </div>
+
+        {/* Confirm Password */}
+        <div>
+          <label htmlFor="confirm_password" className="block text-sm font-medium text-text mb-1">
+            Confirm Password <span className="text-warning">*</span>
+          </label>
+          <div className="relative">
+            <input
+              id="confirm_password"
+              name="confirm_password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              autoComplete="new-password"
+              className={`input pr-10 placeholder:text-text/50 ${errors.confirm_password ? 'border-warning' : ''}`}
+              placeholder="Re-enter your password"
+              value={form.confirm_password}
+              onChange={handleChange}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text/40 hover:text-text min-h-0 min-w-0 h-auto w-auto p-1"
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+            >
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {errors.confirm_password && (
+            <p className="mt-1 text-xs text-warning">{errors.confirm_password}</p>
           )}
         </div>
 
