@@ -11,7 +11,7 @@ export const metadata = {
 
 interface Board { id: string; name: string }
 
-export default async function WallPage() {
+export default async function WallPage({ searchParams }: { searchParams: { tab?: string } }) {
   noStore()
 
   const supabase = createServerClient()
@@ -47,6 +47,7 @@ export default async function WallPage() {
       displayName={userProfile?.display_name ?? 'User'}
       boards={boards}
       hasBoards={boards.length > 0}
+      initialTab={searchParams.tab === 'requests' ? 'requests' : 'offers'}
     />
   )
 }

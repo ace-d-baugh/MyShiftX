@@ -244,7 +244,7 @@ export function CommentSection({
             className="badge bg-text/10 text-text/70 hover:bg-primary-light cursor-pointer inline-flex items-center gap-1 transition-colors shrink-0"
           >
             <MessageSquare className="w-3.5 h-3.5" />
-            Comments ({displayCommentCount})
+            <span className="hidden sm:inline">Comments </span>({displayCommentCount})
             <ChevronDown className={cn('w-3 h-3 transition-transform', commentsOpen && 'rotate-180')} />
           </button>
           <button
@@ -263,7 +263,7 @@ export function CommentSection({
             )}
           >
             <Star className={cn('w-3.5 h-3.5', (displayInterestedCount > 0 || myInterest) && 'fill-current')} />
-            Interested ({displayInterestedCount})
+            <span className="hidden sm:inline">Interested </span>({displayInterestedCount})
             {isOwner && <ChevronDown className={cn('w-3 h-3 transition-transform', interestedOpen && 'rotate-180')} />}
           </button>
         </div>

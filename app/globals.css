@@ -8,7 +8,7 @@
     --color-primary: 269 100% 75%; /* #BD80FF */
     --color-primary-light: 269 100% 95%; /* #F2E6FF */
     --color-secondary: 269 100% 87%; /* #DEBFFF */
-    --color-accent: 50 100% 75%; /* #FFEA80 */
+    --color-accent: 28 95% 65%; /* #F5912E – warm orange */
     --color-text: 269 35% 22%; /* #2F2040 */
     --color-success: 99 70% 67%; /* #9BE673 */
     --color-info: 200 100% 75%; /* #80D4FF */
@@ -94,15 +94,15 @@
   }
 
   .badge-trade {
-    @apply bg-info/20 text-info;
+    @apply bg-info/20 text-text;
   }
 
   .badge-giveaway {
-    @apply bg-success/20 text-success;
+    @apply bg-success/20 text-text;
   }
 
   .badge-ot {
-    @apply bg-warning/20 text-warning;
+    @apply bg-yellow-300/50 text-text;
   }
 
   /* Card component */

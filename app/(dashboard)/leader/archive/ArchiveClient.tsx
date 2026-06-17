@@ -78,8 +78,8 @@ export function ArchiveClient({ archivedShifts, archivedRequests }: ArchiveClien
                     <p className="text-xs text-text/50">by {s.created_by}</p>
                   </div>
                   <div className="flex gap-1">
-                    {s.is_trade && <Badge variant="trade">Trade</Badge>}
                     {s.is_giveaway && <Badge variant="giveaway">Giveaway</Badge>}
+                    {s.is_trade && <Badge variant="trade">Trade</Badge>}
                     {s.is_overtime_approved && <Badge variant="ot">OT</Badge>}
                   </div>
                 </div>

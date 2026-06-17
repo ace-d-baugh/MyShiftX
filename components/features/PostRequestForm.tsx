@@ -127,7 +127,7 @@ export function PostRequestForm({ userId, displayName, onSuccess, requestId, ini
         if (error) throw error
       }
       onSuccess?.()
-      router.push('/wall')
+      router.push('/wall?tab=requests')
     } catch (err: unknown) {
       setServerError(err instanceof Error ? err.message : isEdit ? 'Failed to update request.' : 'Failed to post request.')
     } finally {

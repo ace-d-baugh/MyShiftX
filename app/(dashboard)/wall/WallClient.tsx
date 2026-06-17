@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { parseISO } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
 import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { deactivateShift, deactivateRequest } from '@/app/actions/posts'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
 import { RequestCard, type RequestData } from '@/components/features/RequestCard'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -21,13 +22,14 @@ interface WallClientProps {
   displayName: string
   boards: Board[]
   hasBoards: boolean
+  initialTab?: Tab
 }
 
 type Tab = 'offers' | 'requests'
 
-export function WallClient({ userId, displayName, boards, hasBoards }: WallClientProps) {
+export function WallClient({ userId, displayName, boards, hasBoards, initialTab = 'offers' }: WallClientProps) {
   const supabase = useMemo(() => createClient(), [])
-  const [tab, setTab] = useState<Tab>('offers')
+  const [tab, setTab] = useState<Tab>(initialTab)
   const [shifts, setShifts] = useState<ShiftData[]>([])
   const [requests, setRequests] = useState<RequestData[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,6 +38,7 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
   const [boardFilter, setBoardFilter] = useState('')
   const [myPostsOnly, setMyPostsOnly] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [deactivateError, setDeactivateError] = useState<string | null>(null)
 
   // Collapsed state for day-group accordions, persisted per user
   const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(new Set())
@@ -177,19 +180,38 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
     }
   }, [hasBoards, attachCommentCounts, supabase])
 
+  const isFirstRender = useRef(true)
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      // Load both tabs in parallel on mount so both counts are accurate immediately
+      loadShifts()
+      loadRequests()
+      return
+    }
+    // On subsequent tab switches, only reload the newly active tab
     if (tab === 'offers') loadShifts()
     else loadRequests()
   }, [tab, loadShifts, loadRequests])
 
   const handleDeactivateShift = async (id: string) => {
-    await supabase.from('shifts').update({ is_active: false }).eq('id', id).eq('user_id', userId)
-    loadShifts()
+    setDeactivateError(null)
+    setShifts(prev => prev.filter(s => s.id !== id))
+    const result = await deactivateShift(id)
+    if (result.error) {
+      setDeactivateError(result.error)
+      loadShifts()
+    }
   }
 
   const handleDeactivateRequest = async (id: string) => {
-    await supabase.from('requests').update({ is_active: false }).eq('id', id).eq('user_id', userId)
-    loadRequests()
+    setDeactivateError(null)
+    setRequests(prev => prev.filter(r => r.id !== id))
+    const result = await deactivateRequest(id)
+    if (result.error) {
+      setDeactivateError(result.error)
+      loadRequests()
+    }
   }
 
   const refresh = () => {
@@ -294,11 +316,20 @@ export function WallClient({ userId, displayName, boards, hasBoards }: WallClien
               className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10"
             >
               <Plus className="w-4 h-4" />
-              {tab === 'offers' ? 'Post Shift' : 'Post Request'}
+              <span className="hidden sm:inline">{tab === 'offers' ? 'Post Shift' : 'Post Request'}</span>
+              <span className="sm:hidden">{tab === 'offers' ? 'Offer' : 'Request'}</span>
             </Link>
           )}
         </div>
       </div>
+
+      {/* Deactivate error */}
+      {deactivateError && (
+        <div className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm flex items-center justify-between">
+          <span>{deactivateError}</span>
+          <button onClick={() => setDeactivateError(null)} className="ml-2 underline text-xs">Dismiss</button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex border-b border-border mb-5">

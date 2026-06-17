@@ -236,12 +236,12 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
         </p>
         <div className="flex flex-wrap gap-4">
           <label className="flex items-center gap-2 cursor-pointer min-h-0">
-            <Checkbox name="is_trade" checked={form.is_trade} onChange={handleChange} />
-            <span className="text-sm text-text">Trade</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer min-h-0">
             <Checkbox name="is_giveaway" checked={form.is_giveaway} onChange={handleChange} />
             <span className="text-sm text-text">Giveaway</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer min-h-0">
+            <Checkbox name="is_trade" checked={form.is_trade} onChange={handleChange} />
+            <span className="text-sm text-text">Trade</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer min-h-0">
             <Checkbox name="is_overtime_approved" checked={form.is_overtime_approved} onChange={handleChange} />

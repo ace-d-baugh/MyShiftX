@@ -402,6 +402,8 @@ export interface Database {
       is_board_applicant:  { Args: { p_board_id: string }; Returns: boolean }
       expire_shifts:   { Args: Record<string, never>; Returns: void }
       expire_requests: { Args: Record<string, never>; Returns: void }
+      deactivate_own_shift:   { Args: { p_shift_id: string };   Returns: boolean }
+      deactivate_own_request: { Args: { p_request_id: string }; Returns: boolean }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>

@@ -34,7 +34,7 @@ export default async function EditRequestPage({ params }: PageProps) {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Link
-        href="/wall"
+        href="/wall?tab=requests"
         className="inline-flex items-center gap-1.5 text-sm text-text/60 hover:text-text mb-6 min-h-0 min-w-0"
       >
         <ArrowLeft className="w-4 h-4" /> Back to The Wall
