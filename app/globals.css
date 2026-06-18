@@ -76,6 +76,10 @@
  * dark mode gets its own, higher alpha per tier. Being unlayered guarantees these win over
  * Tailwind's generated utility-layer rules regardless of source order.
  */
+.dark .badge-trade,
+.dark .badge-giveaway,
+.dark .badge-ot { color: hsl(269 35% 22%); }
+
 .dark .text-text\/40 { color: hsl(var(--color-text) / 0.55); }
 .dark .text-text\/50 { color: hsl(var(--color-text) / 0.65); }
 .dark .text-text\/60 { color: hsl(var(--color-text) / 0.75); }
@@ -94,15 +98,15 @@
   }
 
   .badge-trade {
-    @apply bg-info/20 text-text;
+    @apply bg-info text-text;
   }
 
   .badge-giveaway {
-    @apply bg-success/20 text-text;
+    @apply bg-success text-text;
   }
 
   .badge-ot {
-    @apply bg-yellow-300/50 text-text;
+    @apply bg-yellow-300 text-text;
   }
 
   /* Card component */

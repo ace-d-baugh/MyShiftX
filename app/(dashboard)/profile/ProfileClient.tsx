@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Bell, Shield, Trash2, Save, CheckCircle, Plus } from 'lucide-react'
+import { User, Bell, LayoutDashboard, Trash2, Save, CheckCircle, Plus } from 'lucide-react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { Button } from '@/components/ui/Button'
@@ -203,10 +204,12 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
       <div className="card shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
-            <Shield className="w-5 h-5 text-success" />
+            <LayoutDashboard className="w-5 h-5 text-success" />
           </div>
           <div className="flex-1">
-            <h2 className="font-accent font-bold text-text">My Boards</h2>
+            <Link href="/boards" className="font-accent font-bold text-text hover:text-primary transition-colors">
+              My Boards
+            </Link>
             <p className="text-xs text-text/50">Join boards and manage your memberships</p>
           </div>
           <button

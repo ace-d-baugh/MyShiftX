@@ -5,12 +5,12 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
+  CalendarDays,
   LayoutGrid,
   User,
   ShieldCheck,
   Flag,
   Archive,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -25,47 +25,34 @@ import type { GlobalRole } from '@/lib/database.types'
 interface NavbarProps {
   userRole: GlobalRole
   displayName: string
-  pendingApprovalsCount?: number
   isBoardModerator?: boolean
+  isLeader?: boolean
+  pendingApprovalsCount?: number
+  pendingFlagsCount?: number
 }
 
-interface NavItem {
-  href: string
-  label: string
-  icon: React.ComponentType<{ className?: string }>
-  requiresMod?: boolean
-  requiresAdmin?: boolean
-}
-
-const navItems: NavItem[] = [
-  { href: '/wall',              label: 'The Wall',  icon: LayoutGrid  },
-  { href: '/profile',           label: 'Profile',   icon: User        },
-  { href: '/leader/approvals',  label: 'Approvals', icon: ShieldCheck, requiresMod: true  },
-  { href: '/leader/flags',      label: 'Flags',     icon: Flag,        requiresMod: true  },
-  { href: '/leader/archive',    label: 'Archive',   icon: Archive,     requiresMod: true  },
-  { href: '/admin',             label: 'Admin',     icon: Settings,    requiresAdmin: true },
-]
-
-export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoardModerator = false }: NavbarProps) {
+export function Navbar({
+  userRole,
+  displayName,
+  isBoardModerator = false,
+  isLeader = false,
+  pendingApprovalsCount = 0,
+  pendingFlagsCount = 0,
+}: NavbarProps) {
   const pathname = usePathname()
-  const router = useRouter()
   const supabase = createClient()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false)
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
 
-  useEffect(() => {
-    setDarkMode(getStoredTheme() === 'dark')
-  }, [])
+  useEffect(() => { setDarkMode(getStoredTheme() === 'dark') }, [])
 
   const isAdmin = userRole === 'Admin'
+  const showModItems = isBoardModerator || isAdmin
+  const hasUnresolved = pendingApprovalsCount > 0 || pendingFlagsCount > 0
 
-  const visibleItems = navItems.filter(item => {
-    if (item.requiresAdmin) return isAdmin
-    if (item.requiresMod)   return isBoardModerator || isAdmin
-    return true
-  })
+  const fmt = (n: number) => n > 99 ? '99+' : n > 0 ? String(n) : null
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -78,8 +65,8 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoa
     applyTheme(next ? 'dark' : 'light')
   }
 
+  // Mobile menu open/close with exit animation
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
   const openMobileMenu = () => {
     if (closeTimerRef.current) { clearTimeout(closeTimerRef.current); closeTimerRef.current = null }
     setMobileMenuOpen(true)
@@ -94,29 +81,36 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoa
       closeTimerRef.current = null
     }, 200)
   }
-  const toggleMobileMenu = () => mobileMenuOpen && !mobileMenuClosing ? closeMobileMenu() : openMobileMenu()
+  const toggleMobileMenu = () =>
+    mobileMenuOpen && !mobileMenuClosing ? closeMobileMenu() : openMobileMenu()
 
   const isActive = (href: string) => pathname.startsWith(href)
-  const approvalsBadgeCount = pendingApprovalsCount > 9 ? '9+' : pendingApprovalsCount
+
+  // ── Dropdown menu items (role-scoped) ──────────────────────────────────────
+  const dropdownItems = buildDropdownItems({
+    isAdmin, showModItems, isLeader,
+    pendingApprovalsCount, pendingFlagsCount, fmt,
+  })
 
   return (
     <>
-      {/* Desktop top navbar */}
+      {/* ── Desktop header ────────────────────────────────────────────────── */}
       <header className="hidden md:block sticky top-0 z-50 bg-card border-b border-border shadow-sm">
-        {/* Top bar: Logo + User/Logout */}
+
+        {/* Top bar: Logo + account button */}
         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
           <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
             <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">My</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="MyShiftX Logo"
-              width={1560}
-              height={500}
+              width={1560} height={500}
               priority
               className="h-10 w-auto"
             />
           </Link>
 
+          {/* Account dropdown */}
           <div className="relative">
             <button
               onClick={() => setAccountMenuOpen(o => !o)}
@@ -124,7 +118,12 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoa
               aria-haspopup="menu"
               aria-expanded={accountMenuOpen}
             >
-              <span className="font-medium">{displayName}</span>
+              <span className="relative">
+                <span className="font-medium text-text">{displayName}</span>
+                {hasUnresolved && (
+                  <span className="absolute -top-0.5 -right-2 w-2 h-2 rounded-full bg-warning ring-2 ring-card" />
+                )}
+              </span>
               <ChevronDown className={cn('w-4 h-4 transition-transform', accountMenuOpen && 'rotate-180')} />
             </button>
 
@@ -133,202 +132,256 @@ export function Navbar({ userRole, displayName, pendingApprovalsCount = 0, isBoa
                 <div className="fixed inset-0 z-40" onClick={() => setAccountMenuOpen(false)} />
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-56 rounded-md border border-border bg-card shadow-lg z-50 py-1"
+                  className="absolute right-0 top-full mt-2 w-60 rounded-xl border border-border bg-card shadow-xl z-50 py-1.5 overflow-hidden"
                 >
-                  <Link
-                    href="/profile"
-                    onClick={() => setAccountMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-text/80 hover:bg-primary-light/50 hover:text-text transition-colors"
-                  >
-                    <User className="w-4 h-4" />
-                    Profile
-                  </Link>
-
-                  <div className="flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-text/80">
-                    <span className="flex items-center gap-2">
-                      <Moon className="w-4 h-4" />
-                      Dark Mode
-                    </span>
-                    <button
-                      onClick={toggleDarkMode}
-                      role="switch"
-                      aria-checked={darkMode}
-                      aria-label="Toggle dark mode"
-                      className={cn(
-                        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0',
-                        darkMode ? 'bg-primary' : 'bg-border'
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform',
-                          darkMode ? 'translate-x-5' : 'translate-x-0.5'
-                        )}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="my-1 border-t border-border" />
-
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-warning hover:bg-warning/10 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Log Out
-                  </button>
+                  <DropdownContent
+                    items={dropdownItems}
+                    darkMode={darkMode}
+                    toggleDarkMode={toggleDarkMode}
+                    handleLogout={handleLogout}
+                    onNavigate={() => setAccountMenuOpen(false)}
+                  />
                 </div>
               </>
             )}
           </div>
         </div>
 
-        {/* Sub-nav bar: Nav Links */}
+        {/* Sub-nav: tabs */}
         <div className="border-t border-border bg-card">
           <div className="max-w-7xl mx-auto px-4">
             <nav className="flex items-center justify-center gap-1 h-10">
-              {visibleItems.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    'relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors min-h-0 min-w-0',
-                    isActive(href)
-                      ? 'bg-primary-light text-primary'
-                      : 'text-text/60 hover:text-text hover:bg-primary-light/50'
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                  {href === '/leader/approvals' && pendingApprovalsCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-warning text-white text-[10px] font-bold leading-none">
-                      {approvalsBadgeCount}
-                    </span>
-                  )}
-                </Link>
-              ))}
+              {/* The Wall */}
+              <Link
+                href="/wall"
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors min-h-0 min-w-0',
+                  isActive('/wall')
+                    ? 'bg-primary-light text-primary'
+                    : 'text-text/60 hover:text-text hover:bg-primary-light/50'
+                )}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                The Wall
+              </Link>
+
+              {/* The Calendar — coming soon */}
+              <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-text/30 cursor-not-allowed select-none" title="Coming soon">
+                <CalendarDays className="w-4 h-4" />
+                The Calendar
+              </span>
             </nav>
           </div>
         </div>
       </header>
 
-      {/* Mobile top bar */}
+      {/* ── Mobile top bar ────────────────────────────────────────────────── */}
       <header className="md:hidden sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         <div className="px-4 flex items-center justify-between h-14">
           <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
-            <h1 className="font-accent text-4xl md:text-4xl font-bold text-primary leading-tight align-middle">My</h1>
+            <h1 className="font-accent text-4xl font-bold text-primary leading-tight align-middle">My</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="MyShiftX Logo"
-              width={1560}
-              height={500}
+              width={1560} height={500}
               priority
               className="h-7 w-auto"
             />
           </Link>
-          <button
-            onClick={toggleMobileMenu}
-            className="p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen && !mobileMenuClosing ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+
+          <div className="flex items-center gap-2">
+            {/* Notification dot for mobile */}
+            {hasUnresolved && (
+              <span className="w-2 h-2 rounded-full bg-warning" />
+            )}
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen && !mobileMenuClosing
+                ? <X className="w-5 h-5" />
+                : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile menu dropdown */}
+        {/* Mobile slide-down menu */}
         {mobileMenuOpen && (
           <div
             className="bg-card border-b border-border shadow-lg"
             style={{ animation: mobileMenuClosing ? 'navMenuClose 0.18s ease-in both' : 'navMenuOpen 0.38s ease-out both' }}
           >
-            <div className="px-4 py-2 border-b border-border">
+            <div className="px-4 py-2.5 border-b border-border">
               <p className="text-xs text-text/40 font-medium uppercase tracking-wide">Signed in as</p>
               <p className="text-sm font-medium text-text">{displayName}</p>
             </div>
-            <nav className="py-2">
-              {visibleItems.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={closeMobileMenu}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors',
-                    isActive(href)
-                      ? 'bg-primary-light text-primary'
-                      : 'text-text/70 hover:bg-primary-light/50 hover:text-text'
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                  {href === '/leader/approvals' && pendingApprovalsCount > 0 && (
-                    <span className="ml-auto flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-warning text-white text-xs font-bold leading-none">
-                      {approvalsBadgeCount}
-                    </span>
-                  )}
-                </Link>
-              ))}
-              <div className="flex items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-text/70 border-t border-border">
-                <span className="flex items-center gap-3">
-                  <Moon className="w-4 h-4" />
-                  Dark Mode
-                </span>
-                <button
-                  onClick={toggleDarkMode}
-                  role="switch"
-                  aria-checked={darkMode}
-                  aria-label="Toggle dark mode"
-                  className={cn(
-                    'relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0',
-                    darkMode ? 'bg-primary' : 'bg-border'
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform',
-                      darkMode ? 'translate-x-5' : 'translate-x-0.5'
-                    )}
-                  />
-                </button>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-warning hover:bg-warning/10 transition-colors w-full text-left"
-              >
-                <LogOut className="w-4 h-4" />
-                Log Out
-              </button>
+            <nav className="py-1.5">
+              <DropdownContent
+                items={dropdownItems}
+                darkMode={darkMode}
+                toggleDarkMode={toggleDarkMode}
+                handleLogout={handleLogout}
+                onNavigate={closeMobileMenu}
+                mobile
+              />
             </nav>
           </div>
         )}
       </header>
 
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-pb">
+      {/* ── Mobile bottom nav (Wall + Calendar only) ─────────────────────── */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
         <div className="flex items-stretch">
-          {visibleItems.slice(0, 5).map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'flex flex-1 flex-col items-center justify-center py-2 gap-1 text-xs font-medium transition-colors min-h-[56px]',
-                isActive(href)
-                  ? 'text-primary bg-primary-light/50'
-                  : 'text-text/50 hover:text-text'
-              )}
-            >
-              <span className="relative">
-                <Icon className="w-5 h-5" />
-                {href === '/leader/approvals' && pendingApprovalsCount > 0 && (
-                  <span className="absolute -top-1 -right-2 flex items-center justify-center min-w-[1rem] h-4 px-1 rounded-full bg-warning text-white text-[9px] font-bold leading-none">
-                    {approvalsBadgeCount}
-                  </span>
-                )}
-              </span>
-              <span className="text-[10px]">{label}</span>
-            </Link>
-          ))}
+          {/* The Wall */}
+          <Link
+            href="/wall"
+            className={cn(
+              'flex flex-1 flex-col items-center justify-center py-2 gap-1 text-xs font-medium transition-colors min-h-[56px]',
+              isActive('/wall') ? 'text-primary bg-primary-light/50' : 'text-text/50 hover:text-text'
+            )}
+          >
+            <LayoutGrid className="w-5 h-5" />
+            <span className="text-[10px]">The Wall</span>
+          </Link>
+
+          {/* The Calendar — coming soon */}
+          <span className="flex flex-1 flex-col items-center justify-center py-2 gap-1 text-xs font-medium text-text/25 cursor-not-allowed min-h-[56px] select-none">
+            <CalendarDays className="w-5 h-5" />
+            <span className="text-[10px]">Calendar</span>
+          </span>
         </div>
       </nav>
+    </>
+  )
+}
+
+// ── Dropdown items builder ─────────────────────────────────────────────────────
+
+interface DropdownItemDef {
+  type: 'link' | 'separator'
+  href?: string
+  label?: string
+  icon?: React.ComponentType<{ className?: string }>
+  badge?: string | null
+}
+
+function buildDropdownItems({
+  isAdmin, showModItems, isLeader,
+  pendingApprovalsCount, pendingFlagsCount, fmt,
+}: {
+  isAdmin: boolean
+  showModItems: boolean
+  isLeader: boolean
+  pendingApprovalsCount: number
+  pendingFlagsCount: number
+  fmt: (n: number) => string | null
+}): DropdownItemDef[] {
+  const items: DropdownItemDef[] = [
+    { type: 'link', href: '/profile', label: 'Profile', icon: User },
+  ]
+
+  if (showModItems) {
+    items.push({ type: 'separator' })
+    items.push({
+      type: 'link',
+      href: '/leader/approvals',
+      label: 'Approvals',
+      icon: ShieldCheck,
+      badge: fmt(pendingApprovalsCount),
+    })
+    items.push({
+      type: 'link',
+      href: '/leader/flags',
+      label: 'Flags',
+      icon: Flag,
+      badge: fmt(pendingFlagsCount),
+    })
+    if (isLeader) {
+      items.push({
+        type: 'link',
+        href: '/leader/archive',
+        label: 'Archive',
+        icon: Archive,
+      })
+    }
+  }
+
+  return items
+}
+
+// ── Shared dropdown renderer ──────────────────────────────────────────────────
+
+function DropdownContent({
+  items, darkMode, toggleDarkMode, handleLogout, onNavigate, mobile = false,
+}: {
+  items: DropdownItemDef[]
+  darkMode: boolean
+  toggleDarkMode: () => void
+  handleLogout: () => void
+  onNavigate: () => void
+  mobile?: boolean
+}) {
+  const base = mobile
+    ? 'flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors w-full text-left'
+    : 'flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors w-full text-left'
+
+  return (
+    <>
+      {items.map((item, i) => {
+        if (item.type === 'separator') {
+          return <div key={i} className="my-1 border-t border-border" />
+        }
+        const Icon = item.icon!
+        return (
+          <Link
+            key={item.href}
+            href={item.href!}
+            onClick={onNavigate}
+            className={cn(base, 'text-text/80 hover:bg-primary-light/50 hover:text-text')}
+          >
+            <Icon className="w-4 h-4 shrink-0" />
+            <span className="flex-1">{item.label}</span>
+            {item.badge && (
+              <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-warning text-white text-xs font-bold leading-none">
+                {item.badge}
+              </span>
+            )}
+          </Link>
+        )
+      })}
+
+      {/* Dark mode toggle */}
+      <div className="my-1 border-t border-border" />
+      <div className={cn(base, 'text-text/80 cursor-default')}>
+        <Moon className="w-4 h-4 shrink-0" />
+        <span className="flex-1">Dark Mode</span>
+        <button
+          onClick={toggleDarkMode}
+          role="switch"
+          aria-checked={darkMode}
+          aria-label="Toggle dark mode"
+          className={cn(
+            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 cursor-pointer',
+            darkMode ? 'bg-primary' : 'bg-border'
+          )}
+        >
+          <span className={cn(
+            'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+            darkMode ? 'translate-x-5' : 'translate-x-0.5'
+          )} />
+        </button>
+      </div>
+
+      {/* Log out */}
+      <div className="my-1 border-t border-border" />
+      <button
+        onClick={handleLogout}
+        className={cn(base, 'text-warning hover:bg-warning/10')}
+      >
+        <LogOut className="w-4 h-4 shrink-0" />
+        Log Out
+      </button>
     </>
   )
 }

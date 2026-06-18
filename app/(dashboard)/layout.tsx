@@ -41,18 +41,38 @@ export default async function DashboardLayout({
 
   const userRole = userProfile?.role ?? 'User'
   const displayName = userProfile?.display_name ?? user.email ?? 'User'
+  const isAdmin = userRole === 'Admin'
 
   // Check if user is a board moderator (Mod or Leader of any board)
   const { data: isMod } = await supabase.rpc('is_any_board_moderator')
   const isBoardModerator = (isMod ?? false) as boolean
 
   let pendingApprovalsCount = 0
-  if (isBoardModerator || userRole === 'Admin') {
-    const { count } = await supabase
-      .from('user_boards')
-      .select('id', { count: 'exact', head: true })
-      .eq('is_approved', false)
-    pendingApprovalsCount = count ?? 0
+  let pendingFlagsCount = 0
+  let isLeader = isAdmin
+
+  if (isBoardModerator || isAdmin) {
+    const [approvalsRes, flagsRes, leaderRes] = await Promise.all([
+      supabase
+        .from('user_boards')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_approved', false),
+      supabase
+        .from('flags')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending'),
+      isAdmin
+        ? Promise.resolve({ count: 1 })
+        : supabase
+            .from('user_boards')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('role', 'Leader')
+            .eq('is_approved', true),
+    ])
+    pendingApprovalsCount = approvalsRes.count ?? 0
+    pendingFlagsCount     = flagsRes.count     ?? 0
+    if (!isAdmin) isLeader = (leaderRes.count ?? 0) > 0
   }
 
   return (
@@ -60,8 +80,10 @@ export default async function DashboardLayout({
       <Navbar
         userRole={userRole}
         displayName={displayName}
-        pendingApprovalsCount={pendingApprovalsCount}
         isBoardModerator={isBoardModerator}
+        isLeader={isLeader}
+        pendingApprovalsCount={pendingApprovalsCount}
+        pendingFlagsCount={pendingFlagsCount}
       />
       <main className="flex-1 pb-20 md:pb-0">
         {children}

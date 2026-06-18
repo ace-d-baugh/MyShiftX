@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
@@ -118,7 +119,10 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-1.5 text-xs text-text/50 min-w-0">
               <LayoutGrid className="w-3.5 h-3.5 text-primary/70 shrink-0" />
-              <span className="truncate">{shift.board_name}</span>
+              {shift.board_id
+                ? <Link href={`/boards/${shift.board_id}`} className="truncate hover:text-primary hover:underline transition-colors">{shift.board_name}</Link>
+                : <span className="truncate">{shift.board_name}</span>
+              }
             </div>
             <div className="flex items-center gap-1.5 text-xs text-text/50 shrink-0">
               <User className="w-3.5 h-3.5 text-primary/70 shrink-0" />

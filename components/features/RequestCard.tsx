@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { LayoutGrid, User, Flag, Pencil, Trash2, Mail, Clock, ChevronDown } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
@@ -105,7 +106,10 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-1.5 text-xs text-text/50 min-w-0">
               <LayoutGrid className="w-3.5 h-3.5 text-accent/70 shrink-0" />
-              <span className="truncate">{request.board_name}</span>
+              {request.board_id
+                ? <Link href={`/boards/${request.board_id}`} className="truncate hover:text-primary hover:underline transition-colors">{request.board_name}</Link>
+                : <span className="truncate">{request.board_name}</span>
+              }
             </div>
             <div className="flex items-center gap-1.5 text-xs text-text/50 shrink-0">
               <User className="w-3.5 h-3.5 text-accent/70 shrink-0" />

@@ -1,17 +1,18 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
   lookupBoardByCode, confirmJoinBoard, createBoard,
   updateBoardName, toggleInviteCode, regenerateInviteCode,
-  deleteBoard, leaveBoard, updateUserBoardRole, transferBoardOwnership,
+  deleteBoard, leaveBoard,
 } from '@/app/actions/boards'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import {
   LayoutGrid, Plus, X, Pencil, Key, Trash2, Check, Copy,
-  RefreshCw, Users, Crown, MoreVertical,
+  RefreshCw, Users, MoreVertical,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { BoardRole } from '@/lib/database.types'
@@ -26,12 +27,6 @@ interface BoardEntry {
   invite_code_enabled: boolean
 }
 
-interface MemberEntry {
-  userBoardId: string
-  userId: string
-  displayName: string | null
-  role: BoardRole
-}
 
 interface MyBoardsSectionProps {
   userId: string
@@ -81,15 +76,6 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
   // Leave confirm
   const [leaveId, setLeaveId] = useState<string | null>(null)
   const [leaveLoading, setLeaveLoading] = useState(false)
-
-  // Members modal
-  const [membersBoard, setMembersBoard] = useState<BoardEntry | null>(null)
-  const [members, setMembers] = useState<MemberEntry[]>([])
-  const [membersLoading, setMembersLoading] = useState(false)
-  const [membersError, setMembersError] = useState<string | null>(null)
-  const [roleUpdating, setRoleUpdating] = useState<string | null>(null)
-  const [transferTarget, setTransferTarget] = useState<MemberEntry | null>(null)
-  const [transferLoading, setTransferLoading] = useState(false)
 
   // Mobile board action menu
   const [menuBoard, setMenuBoard] = useState<BoardEntry | null>(null)
@@ -241,58 +227,6 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
     await loadBoards()
   }
 
-  // ── Members modal ─────────────────────────────────────────────────────────
-
-  const openMembers = async (board: BoardEntry) => {
-    setMembersBoard(board)
-    setMembersLoading(true)
-    setMembersError(null)
-    setMembers([])
-    setTransferTarget(null)
-
-    const { data, error: fetchErr } = await supabase
-      .from('user_boards')
-      .select('id, user_id, role, users!user_id(display_name)')
-      .eq('board_id', board.board_id)
-      .eq('is_approved', true)
-      .order('role', { ascending: true }) // Leader < Mod < User alphabetically
-
-    if (fetchErr) {
-      setMembersError(fetchErr.message)
-    } else {
-      setMembers((data ?? []).map((row: Record<string, unknown>) => ({
-        userBoardId: row.id as string,
-        userId:      row.user_id as string,
-        displayName: (row.users as { display_name: string | null } | null)?.display_name ?? null,
-        role:        row.role as BoardRole,
-      })))
-    }
-    setMembersLoading(false)
-  }
-
-  const handleRoleChange = async (member: MemberEntry, newRole: 'User' | 'Mod') => {
-    setRoleUpdating(member.userBoardId)
-    setMembersError(null)
-    const result = await updateUserBoardRole(member.userBoardId, newRole)
-    setRoleUpdating(null)
-    if (result.error) { setMembersError(result.error); return }
-    setMembers(prev => prev.map(m =>
-      m.userBoardId === member.userBoardId ? { ...m, role: newRole } : m
-    ))
-  }
-
-  const handleTransfer = async () => {
-    if (!transferTarget || !membersBoard) return
-    setTransferLoading(true)
-    setMembersError(null)
-    const result = await transferBoardOwnership(membersBoard.board_id, transferTarget.userId)
-    setTransferLoading(false)
-    if (result.error) { setMembersError(result.error); return }
-    setTransferTarget(null)
-    setMembersBoard(null)
-    await loadBoards()
-  }
-
   const openBoardMenu = (board: BoardEntry, e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
@@ -354,13 +288,14 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                   <td className="px-3 py-2.5 align-top">
                     {/* Desktop: icon row */}
                     <div className="hidden sm:flex items-center justify-end gap-0.5">
+                      {/* Members — visible to all roles */}
+                      <Link href={`/boards/${board.board_id}`} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0 inline-flex" title="View members" aria-label="View members">
+                        <Users className="w-3.5 h-3.5" />
+                      </Link>
                       {editingId !== board.board_id && board.role === 'Leader' && (
                         <>
                           <button onClick={() => startEdit(board)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Rename" aria-label="Rename board">
                             <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => openMembers(board)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Members" aria-label="View members">
-                            <Users className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => { setCodeBoard(board); setCodeCopied(false) }} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Invite code" aria-label="Manage invite code">
                             <Key className="w-3.5 h-3.5" />
@@ -490,12 +425,13 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                 >
                   <Pencil className="w-3.5 h-3.5 shrink-0" /> Rename
                 </button>
-                <button
-                  onClick={() => { openMembers(menuBoard); closeBoardMenu() }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20 text-left"
+                <Link
+                  href={`/boards/${menuBoard.board_id}`}
+                  onClick={closeBoardMenu}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20"
                 >
                   <Users className="w-3.5 h-3.5 shrink-0" /> Members
-                </button>
+                </Link>
                 <button
                   onClick={() => { setCodeBoard(menuBoard); setCodeCopied(false); closeBoardMenu() }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20 text-left"
@@ -623,106 +559,6 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
               Regenerate Code
             </button>
             <Button variant="outline" size="sm" onClick={() => setCodeBoard(null)}>Close</Button>
-          </div>
-        </Modal>
-      )}
-
-      {/* ── Members Modal (Leader) ───────────────────────────────────────── */}
-      {membersBoard && (
-        <Modal onClose={() => { setMembersBoard(null); setTransferTarget(null) }}>
-          <h3 className="font-accent font-bold text-text text-lg mb-1">{membersBoard.name}</h3>
-          <p className="text-xs text-text/50 mb-4">Board Members</p>
-
-          {membersError && (
-            <p className="mb-3 text-xs text-warning">{membersError}</p>
-          )}
-
-          {/* Transfer ownership confirmation */}
-          {transferTarget && (
-            <div className="mb-4 p-3 rounded-lg bg-warning/10 border border-warning/20 space-y-2">
-              <p className="text-sm font-medium text-text flex items-center gap-1.5">
-                <Crown className="w-4 h-4 text-warning" />
-                Transfer ownership to <strong>{transferTarget.displayName ?? 'this member'}</strong>?
-              </p>
-              <p className="text-xs text-text/60">
-                They will become the new Leader. You will be demoted to Mod.
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setTransferTarget(null)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  loading={transferLoading}
-                  onClick={handleTransfer}
-                  className="flex-1 gap-1 bg-warning text-white hover:bg-warning/90"
-                >
-                  <Crown className="w-3.5 h-3.5" /> Confirm Transfer
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {membersLoading ? (
-            <div className="flex justify-center py-6">
-              <span className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
-            </div>
-          ) : members.length === 0 ? (
-            <p className="text-sm text-text/50 text-center py-4">No members found.</p>
-          ) : (
-            <ul className="space-y-2 max-h-72 overflow-y-auto -mx-1 px-1">
-              {members.map(member => {
-                const isMe = member.userId === userId
-                const isLeader = member.role === 'Leader'
-                return (
-                  <li
-                    key={member.userBoardId}
-                    className="flex items-center gap-3 py-2 border-b border-border last:border-0"
-                  >
-                    <span className="flex-1 text-sm font-medium text-text truncate min-w-0">
-                      {member.displayName ?? <span className="italic text-text/40">No name</span>}
-                      {isMe && <span className="ml-1.5 text-xs text-text/40">(you)</span>}
-                    </span>
-
-                    {isLeader ? (
-                      <Badge variant="leader" className="text-xs shrink-0">Leader</Badge>
-                    ) : (
-                      <>
-                        <select
-                          value={member.role}
-                          disabled={roleUpdating === member.userBoardId}
-                          onChange={e => handleRoleChange(member, e.target.value as 'User' | 'Mod')}
-                          className="input text-xs h-8 py-0 px-2 w-24 shrink-0"
-                        >
-                          <option value="User">User</option>
-                          <option value="Mod">Mod</option>
-                        </select>
-                        <button
-                          onClick={() => setTransferTarget(member)}
-                          disabled={!!transferTarget}
-                          className="p-1 text-text/30 hover:text-warning transition-colors min-h-0 min-w-0 shrink-0"
-                          title="Transfer ownership to this member"
-                          aria-label="Transfer ownership"
-                        >
-                          <Crown className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-
-          <div className="flex justify-end mt-4">
-            <Button variant="outline" size="sm" onClick={() => { setMembersBoard(null); setTransferTarget(null) }}>
-              Close
-            </Button>
           </div>
         </Modal>
       )}
