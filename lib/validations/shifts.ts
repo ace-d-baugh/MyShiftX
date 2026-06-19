@@ -12,9 +12,6 @@ export const shiftSchema = z.object({
 }).refine(data => new Date(data.end_time) > new Date(data.start_time), {
   message: 'End time must be after start time',
   path: ['end_time'],
-}).refine(data => data.is_trade || data.is_giveaway, {
-  message: 'Must select Trade or Giveaway (or both)',
-  path: ['is_trade'],
 })
 
 export const requestSchema = z.object({

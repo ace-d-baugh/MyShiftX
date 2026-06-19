@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
+import { getSettings } from '@/lib/settings'
 import { Clock, LayoutGrid, User, Flag, Pencil, Trash2, Mail, ChevronDown } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -12,7 +13,6 @@ import { FlagModal } from '@/components/features/FlagModal'
 import { CommentSection } from '@/components/features/CommentSection'
 import { cn } from '@/lib/utils'
 
-const ET = 'America/New_York'
 
 export interface ShiftData {
   id: string
@@ -48,6 +48,9 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
   const [detailsOpen, setDetailsOpen] = useState(false)
 
   const isOwner = currentUserId && shift.user_id === currentUserId
+  const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>('12h')
+  const [tz, setTz] = useState('America/New_York')
+  useEffect(() => { const s = getSettings(); setTimeFormat(s.timeFormat); setTz(s.timezone) }, [])
 
   const duration = () => {
     const start = parseISO(shift.start_time)
@@ -58,8 +61,9 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
   }
 
-  const startTime = formatInTimeZone(parseISO(shift.start_time), ET, 'h:mm a')
-  const endTime   = formatInTimeZone(parseISO(shift.end_time),   ET, 'h:mm a zzz')
+  const timePat   = timeFormat === '24h' ? 'HH:mm' : 'h:mm a'
+  const startTime = formatInTimeZone(parseISO(shift.start_time), tz, timePat)
+  const endTime   = formatInTimeZone(parseISO(shift.end_time),   tz, timePat)
 
   return (
     <>

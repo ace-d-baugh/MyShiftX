@@ -231,9 +231,8 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
 
       {/* Type checkboxes */}
       <div>
-        <p className="text-sm font-medium text-text mb-2">
-          Shift Type <span className="text-warning">*</span>
-        </p>
+        <p className="text-sm font-medium text-text mb-1">Post to Wall <span className="text-text/40 font-normal">(optional)</span></p>
+        <p className="text-xs text-text/40 mb-2">Leave unchecked to add to your calendar only.</p>
         <div className="flex flex-wrap gap-4">
           <label className="flex items-center gap-2 cursor-pointer min-h-0">
             <Checkbox name="is_giveaway" checked={form.is_giveaway} onChange={handleChange} />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -15,11 +15,9 @@ import {
   Menu,
   X,
   ChevronDown,
-  Moon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import { applyTheme, getStoredTheme } from '@/lib/theme'
 import type { GlobalRole } from '@/lib/database.types'
 
 interface NavbarProps {
@@ -44,9 +42,6 @@ export function Navbar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false)
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
-  const [darkMode, setDarkMode] = useState(false)
-
-  useEffect(() => { setDarkMode(getStoredTheme() === 'dark') }, [])
 
   const isAdmin = userRole === 'Admin'
   const showModItems = isBoardModerator || isAdmin
@@ -57,12 +52,6 @@ export function Navbar({
   const handleLogout = async () => {
     await supabase.auth.signOut()
     window.location.href = '/login'
-  }
-
-  const toggleDarkMode = () => {
-    const next = !darkMode
-    setDarkMode(next)
-    applyTheme(next ? 'dark' : 'light')
   }
 
   // Mobile menu open/close with exit animation
@@ -136,8 +125,6 @@ export function Navbar({
                 >
                   <DropdownContent
                     items={dropdownItems}
-                    darkMode={darkMode}
-                    toggleDarkMode={toggleDarkMode}
                     handleLogout={handleLogout}
                     onNavigate={() => setAccountMenuOpen(false)}
                   />
@@ -165,11 +152,19 @@ export function Navbar({
                 The Wall
               </Link>
 
-              {/* The Calendar — coming soon */}
-              <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-text/30 cursor-not-allowed select-none" title="Coming soon">
+              {/* My Calendar */}
+              <Link
+                href="/calendar"
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors min-h-0 min-w-0',
+                  isActive('/calendar')
+                    ? 'bg-primary-light text-primary'
+                    : 'text-text/60 hover:text-text hover:bg-primary-light/50'
+                )}
+              >
                 <CalendarDays className="w-4 h-4" />
-                The Calendar
-              </span>
+                My Calendar
+              </Link>
             </nav>
           </div>
         </div>
@@ -190,18 +185,21 @@ export function Navbar({
           </Link>
 
           <div className="flex items-center gap-2">
-            {/* Notification dot for mobile */}
-            {hasUnresolved && (
-              <span className="w-2 h-2 rounded-full bg-warning" />
-            )}
             <button
               onClick={toggleMobileMenu}
-              className="p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
+              className="relative p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen && !mobileMenuClosing
                 ? <X className="w-5 h-5" />
-                : <Menu className="w-5 h-5" />}
+                : (
+                  <span className="relative inline-block">
+                    <Menu className="w-5 h-5" />
+                    {hasUnresolved && (
+                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-warning ring-2 ring-card" />
+                    )}
+                  </span>
+                )}
             </button>
           </div>
         </div>
@@ -219,8 +217,6 @@ export function Navbar({
             <nav className="py-1.5">
               <DropdownContent
                 items={dropdownItems}
-                darkMode={darkMode}
-                toggleDarkMode={toggleDarkMode}
                 handleLogout={handleLogout}
                 onNavigate={closeMobileMenu}
                 mobile
@@ -245,11 +241,17 @@ export function Navbar({
             <span className="text-[10px]">The Wall</span>
           </Link>
 
-          {/* The Calendar — coming soon */}
-          <span className="flex flex-1 flex-col items-center justify-center py-2 gap-1 text-xs font-medium text-text/25 cursor-not-allowed min-h-[56px] select-none">
+          {/* My Calendar */}
+          <Link
+            href="/calendar"
+            className={cn(
+              'flex flex-1 flex-col items-center justify-center py-2 gap-1 text-xs font-medium transition-colors min-h-[56px]',
+              isActive('/calendar') ? 'text-primary bg-primary-light/50' : 'text-text/50 hover:text-text'
+            )}
+          >
             <CalendarDays className="w-5 h-5" />
             <span className="text-[10px]">Calendar</span>
-          </span>
+          </Link>
         </div>
       </nav>
     </>
@@ -313,11 +315,9 @@ function buildDropdownItems({
 // ── Shared dropdown renderer ──────────────────────────────────────────────────
 
 function DropdownContent({
-  items, darkMode, toggleDarkMode, handleLogout, onNavigate, mobile = false,
+  items, handleLogout, onNavigate, mobile = false,
 }: {
   items: DropdownItemDef[]
-  darkMode: boolean
-  toggleDarkMode: () => void
   handleLogout: () => void
   onNavigate: () => void
   mobile?: boolean
@@ -350,28 +350,6 @@ function DropdownContent({
           </Link>
         )
       })}
-
-      {/* Dark mode toggle */}
-      <div className="my-1 border-t border-border" />
-      <div className={cn(base, 'text-text/80 cursor-default')}>
-        <Moon className="w-4 h-4 shrink-0" />
-        <span className="flex-1">Dark Mode</span>
-        <button
-          onClick={toggleDarkMode}
-          role="switch"
-          aria-checked={darkMode}
-          aria-label="Toggle dark mode"
-          className={cn(
-            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 cursor-pointer',
-            darkMode ? 'bg-primary' : 'bg-border'
-          )}
-        >
-          <span className={cn(
-            'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform',
-            darkMode ? 'translate-x-5' : 'translate-x-0.5'
-          )} />
-        </button>
-      </div>
 
       {/* Log out */}
       <div className="my-1 border-t border-border" />

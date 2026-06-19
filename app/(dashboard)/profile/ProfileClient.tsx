@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Bell, LayoutDashboard, Trash2, Save, CheckCircle, Plus } from 'lucide-react'
+import { User, Bell, LayoutDashboard, Trash2, Save, CheckCircle, Plus, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
+import { getSettings, saveSettings, type UserSettings, type WeekStart, type DateFormat, type TimeFormat, DEFAULT_SETTINGS } from '@/lib/settings'
+import { getStoredTheme, applyTheme } from '@/lib/theme'
 import type { GlobalRole } from '@/lib/database.types'
 
 interface UserProfile {
@@ -42,6 +44,24 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
   const [nameError, setNameError] = useState<string | null>(null)
   const [deactivateConfirm, setDeactivateConfirm] = useState(false)
   const [createBoardOpen, setCreateBoardOpen] = useState(false)
+
+  // Site settings (localStorage)
+  const [siteSettings, setSiteSettings] = useState<UserSettings | null>(null)
+  const [darkMode, setDarkMode] = useState(false)
+  useEffect(() => {
+    setSiteSettings(getSettings())
+    setDarkMode(getStoredTheme() === 'dark')
+  }, [])
+
+  const updateSetting = <K extends keyof UserSettings>(key: K, val: UserSettings[K]) => {
+    const next = saveSettings({ [key]: val })
+    setSiteSettings(next)
+  }
+  const toggleDarkMode = () => {
+    const next = !darkMode
+    setDarkMode(next)
+    applyTheme(next ? 'dark' : 'light')
+  }
 
   // Track whether a valid display name has been saved
   const [hasDisplayNameSaved, setHasDisplayNameSaved] = useState(
@@ -228,6 +248,110 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
           createOpen={createBoardOpen}
           onCreateOpenChange={setCreateBoardOpen}
         />
+      </div>
+
+      {/* Site Settings */}
+      <div className="card shadow-sm">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+            <Settings className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h2 className="font-accent font-bold text-text">Site Settings</h2>
+            <p className="text-xs text-text/50">Calendar and display preferences</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {/* Dark Mode */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-text">Dark Mode</p>
+              <p className="text-xs text-text/50">Switch between light and dark theme</p>
+            </div>
+            <button
+              onClick={toggleDarkMode}
+              role="switch"
+              aria-checked={darkMode}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${darkMode ? 'bg-primary' : 'bg-border'}`}
+            >
+              <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${darkMode ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+
+          {/* Week Start */}
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-text">Week Starts On</p>
+              <p className="text-xs text-text/50">First day shown in calendar</p>
+            </div>
+            <select
+              value={siteSettings?.weekStart ?? 0}
+              onChange={e => updateSetting('weekStart', Number(e.target.value) as WeekStart)}
+              className="input text-sm h-9 py-0 w-32 shrink-0"
+            >
+              <option value={0}>Sunday</option>
+              <option value={1}>Monday</option>
+              <option value={6}>Saturday</option>
+            </select>
+          </div>
+
+          {/* Date Format */}
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-text">Date Format</p>
+              <p className="text-xs text-text/50">How dates are displayed</p>
+            </div>
+            <select
+              value={siteSettings?.dateFormat ?? 'mdy'}
+              onChange={e => updateSetting('dateFormat', e.target.value as DateFormat)}
+              className="input text-sm h-9 py-0 w-32 shrink-0"
+            >
+              <option value="mdy">MM/DD/YYYY</option>
+              <option value="dmy">DD/MM/YYYY</option>
+            </select>
+          </div>
+
+          {/* Time Format */}
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-text">Time Format</p>
+              <p className="text-xs text-text/50">12-hour or 24-hour clock</p>
+            </div>
+            <select
+              value={siteSettings?.timeFormat ?? '12h'}
+              onChange={e => updateSetting('timeFormat', e.target.value as TimeFormat)}
+              className="input text-sm h-9 py-0 w-32 shrink-0"
+            >
+              <option value="12h">12-hour</option>
+              <option value="24h">24-hour</option>
+            </select>
+          </div>
+
+          {/* Timezone */}
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-text">Timezone</p>
+              <p className="text-xs text-text/50">Used for shift times across the app</p>
+            </div>
+            <select
+              value={siteSettings?.timezone ?? DEFAULT_SETTINGS.timezone}
+              onChange={e => updateSetting('timezone', e.target.value)}
+              className="input text-sm h-9 py-0 w-48 shrink-0"
+            >
+              <option value="America/New_York">Eastern (ET)</option>
+              <option value="America/Chicago">Central (CT)</option>
+              <option value="America/Denver">Mountain (MT)</option>
+              <option value="America/Los_Angeles">Pacific (PT)</option>
+              <option value="America/Anchorage">Alaska (AKT)</option>
+              <option value="Pacific/Honolulu">Hawaii (HT)</option>
+              <option value="Europe/London">London (GMT/BST)</option>
+              <option value="Europe/Paris">Central Europe (CET)</option>
+              <option value="Asia/Tokyo">Japan (JST)</option>
+              <option value="Australia/Sydney">Sydney (AEST)</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Danger Zone */}

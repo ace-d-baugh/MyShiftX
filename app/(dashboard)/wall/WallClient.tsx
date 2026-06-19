@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { parseISO } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
-import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown } from 'lucide-react'
+import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { deactivateShift, deactivateRequest } from '@/app/actions/posts'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
@@ -23,18 +23,19 @@ interface WallClientProps {
   boards: Board[]
   hasBoards: boolean
   initialTab?: Tab
+  initialDate?: string
 }
 
 type Tab = 'offers' | 'requests'
 
-export function WallClient({ userId, displayName, boards, hasBoards, initialTab = 'offers' }: WallClientProps) {
+export function WallClient({ userId, displayName, boards, hasBoards, initialTab = 'offers', initialDate = '' }: WallClientProps) {
   const supabase = useMemo(() => createClient(), [])
   const [tab, setTab] = useState<Tab>(initialTab)
   const [shifts, setShifts] = useState<ShiftData[]>([])
   const [requests, setRequests] = useState<RequestData[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [dateFilter, setDateFilter] = useState('')
+  const [dateFilter, setDateFilter] = useState(initialDate)
   const [boardFilter, setBoardFilter] = useState('')
   const [myPostsOnly, setMyPostsOnly] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -106,6 +107,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
         `)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
+        .or('is_trade.eq.true,is_giveaway.eq.true')
         .order('start_time', { ascending: true })
 
       if (error) throw error
@@ -377,12 +379,24 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-text/60 mb-1">Date</label>
-                  <input
-                    type="date"
-                    className="input text-sm h-9"
-                    value={dateFilter}
-                    onChange={e => setDateFilter(e.target.value)}
-                  />
+                  <div className="relative">
+                    <input
+                      type="date"
+                      className="input text-sm h-9 pr-8"
+                      value={dateFilter}
+                      onChange={e => setDateFilter(e.target.value)}
+                    />
+                    {dateFilter && (
+                      <button
+                        type="button"
+                        onClick={() => setDateFilter('')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-text/40 hover:text-text min-h-0 min-w-0 p-0.5"
+                        aria-label="Clear date"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-end pb-1">
                   <label className="flex items-center gap-2 cursor-pointer min-h-0">
@@ -397,11 +411,21 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
                 <input
-                  className="input pl-9 text-sm"
+                  className="input pl-9 pr-8 text-sm"
                   placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                 />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-text/40 hover:text-text min-h-0 min-w-0 p-0.5"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           )}
