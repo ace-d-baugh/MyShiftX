@@ -273,8 +273,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Reviews ── */}
-      <section className="py-20 px-4 bg-background">
+      {/* ── Reviews — hidden until real user reviews are collected ── */}
+      <section className="hidden py-20 px-4 bg-background">
         <div className="max-w-6xl mx-auto">
 
           <AnimateIn className="text-center mb-14">
