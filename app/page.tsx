@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, RefreshCw, Gift, Clock, Shield, Users, Zap, Star, Quote } from 'lucide-react'
 import { AnimateIn } from '@/components/landing/AnimateIn'
+import { LandingHeader } from '@/components/landing/LandingHeader'
+import { createServerClient } from '@/lib/supabase/server'
 
 export const metadata = {
   title: 'MyShiftX – Shift Trading for Shift Workers',
@@ -121,34 +123,21 @@ const placeholderReviews = [
   },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  let displayName: string | null = null
+  if (user) {
+    const { data: profile } = await supabase
+      .from('users').select('display_name').eq('id', user.id).single()
+    displayName = profile?.display_name ?? user.email ?? 'Account'
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-50 bg-background/90 backdrop-blur border-b border-border animate-slide-down">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between">
-          <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
-            <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">My</h1>
-            <Image
-              src="/logos/ShiftX-logo.svg"
-              alt="MyShiftX Logo"
-              width={1560}
-              height={500}
-              priority
-              className="h-10 w-auto"
-            />
-          </Link>
-          <nav className="flex items-center gap-3">
-            <Link href="/login" className="btn btn-outline text-sm px-4 py-2 min-h-0 h-10">
-              Log In
-            </Link>
-            <Link href="/register" className="btn btn-primary text-sm px-4 py-2 min-h-0 h-10">
-              Get Started
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <LandingHeader displayName={displayName} />
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary-light via-background to-background pt-20 pb-24 px-4">

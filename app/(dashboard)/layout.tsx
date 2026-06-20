@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
+import { SessionTimeout } from '@/components/features/SessionTimeout'
 import type { GlobalRole } from '@/lib/database.types'
 
 type UserProfileRow = { id: string; display_name: string | null; role: GlobalRole; is_active: boolean } | null
@@ -77,6 +78,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SessionTimeout />
       <Navbar
         userRole={userRole}
         displayName={displayName}

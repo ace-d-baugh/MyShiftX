@@ -1,17 +1,36 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, LogIn } from 'lucide-react'
+import { Eye, EyeOff, LogIn, Clock, AlertTriangle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { loginSchema } from '@/lib/validations/auth'
+
+const REASON_MESSAGES: Record<string, { icon: typeof Clock; text: string; style: string }> = {
+  session_expired: {
+    icon: Clock,
+    text: 'Your session expired after 8 hours of inactivity. Please log in again.',
+    style: 'bg-info/10 border-info/20 text-info',
+  },
+  deactivated: {
+    icon: AlertTriangle,
+    text: 'Your account has been deactivated. Please contact a board administrator.',
+    style: 'bg-warning/10 border-warning/20 text-warning',
+  },
+}
 
 export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [reason, setReason] = useState<string | null>(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setReason(params.get('reason'))
+  }, [])
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [form, setForm] = useState({ email: '', password: '' })
@@ -61,6 +80,16 @@ export default function LoginPage() {
     <div className="card shadow-lg animate-auth-card-in">
       <h1 className="font-accent text-2xl font-bold text-text mb-1">Welcome Back</h1>
       <p className="text-text/60 text-sm mb-6">Log in to access the shift board.</p>
+
+      {reason && REASON_MESSAGES[reason] && (() => {
+        const { icon: Icon, text, style } = REASON_MESSAGES[reason]
+        return (
+          <div className={`mb-4 p-3 rounded-md border text-sm flex items-start gap-2 ${style}`}>
+            <Icon className="w-4 h-4 shrink-0 mt-0.5" />
+            {text}
+          </div>
+        )
+      })()}
 
       {serverError && (
         <div key={serverError} className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm animate-shake">
