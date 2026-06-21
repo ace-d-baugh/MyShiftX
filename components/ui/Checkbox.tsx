@@ -30,7 +30,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             fill="currentColor"
             strokeWidth={0}
             className={cn(
-              'h-3.5 w-3.5 rotate-[-30deg] text-accent transition-opacity',
+              'h-3.5 w-3.5 rotate-[-30deg] text-[#FFEA80] transition-opacity',
               checked ? 'opacity-100' : 'opacity-0'
             )}
           />

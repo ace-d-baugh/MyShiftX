@@ -254,15 +254,15 @@ export function CommentSection({
             className={cn(
               'badge inline-flex items-center gap-1 transition-colors shrink-0',
               isOwner
-                ? 'bg-primary/20 text-primary hover:bg-primary/30 cursor-pointer'
+                ? 'bg-secondary-accent/20 text-text hover:bg-secondary-accent/30 cursor-pointer'
                 : myInterest
-                  ? 'bg-primary/20 text-primary cursor-default'
+                  ? 'bg-secondary-accent/20 text-text cursor-default'
                   : currentUserId
                     ? 'bg-text/10 text-text/60 hover:bg-primary-light cursor-pointer'
                     : 'bg-text/10 text-text/50 cursor-default'
             )}
           >
-            <Star className={cn('w-3.5 h-3.5', (displayInterestedCount > 0 || myInterest) && 'fill-current')} />
+            <Star className={cn('w-3.5 h-3.5', (displayInterestedCount > 0 || myInterest) ? 'fill-current text-secondary-accent' : '')} />
             <span className="hidden sm:inline">Interested </span>({displayInterestedCount})
             {isOwner && <ChevronDown className={cn('w-3 h-3 transition-transform', interestedOpen && 'rotate-180')} />}
           </button>
@@ -286,7 +286,7 @@ export function CommentSection({
             <ul className="space-y-1.5">
               {interestedUsers.map(u => (
                 <li key={u.user_id} className="flex items-center gap-2 text-sm text-text">
-                  <Star className="w-3.5 h-3.5 text-primary fill-current shrink-0" />
+                  <Star className="w-3.5 h-3.5 text-secondary-accent fill-current shrink-0" />
                   {u.display_name}
                   <span className="text-xs text-text/40">{formatDistanceToNow(parseISO(u.created_at), { addSuffix: true })}</span>
                 </li>
@@ -328,10 +328,10 @@ export function CommentSection({
                     onClick={() => setIsInterested(v => !v)}
                     className={cn(
                       'badge inline-flex items-center gap-1 cursor-pointer transition-colors',
-                      isInterested ? 'bg-primary text-white' : 'bg-text/10 text-text/60'
+                      isInterested ? 'bg-secondary-accent/30 text-text' : 'bg-text/10 text-text/60'
                     )}
                   >
-                    <Star className={cn('w-3 h-3', isInterested && 'fill-current')} /> Interested?
+                    <Star className={cn('w-3 h-3', isInterested ? 'fill-current text-secondary-accent' : '')} /> Interested?
                   </button>
                 ) : <span />}
                 <Button
@@ -361,7 +361,7 @@ export function CommentSection({
                       <span className="font-medium text-text">{c.display_name}</span>
                       {c.is_interested && (
                         <span className="inline-flex items-center gap-0.5 text-primary">
-                          <Star className="w-3 h-3 fill-current" /> Interested
+                          <Star className="w-3 h-3 fill-current text-secondary-accent" /> Interested
                         </span>
                       )}
                       <span>&bull; {formatDistanceToNow(parseISO(c.created_at), { addSuffix: true })}</span>

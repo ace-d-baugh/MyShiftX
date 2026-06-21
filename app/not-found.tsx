@@ -12,6 +12,7 @@ interface FallingStar {
   duration: number
   delay: number
   opacity: number
+  color: 'text-accent' | 'text-[#FFEA80]'
 }
 
 // Must match the translateX magnitude in the `starFall` keyframe (tailwind.config.ts).
@@ -64,7 +65,8 @@ export default function NotFound() {
           // looks like it's been falling the whole time, not just kicking off.
           delay: -(Math.random() * duration),
           opacity: 0.5 + Math.random() * 0.5,
-        }
+          color: Math.random() < 0.5 ? 'text-accent' : 'text-[#FFEA80]',
+        } as FallingStar
       })
     )
   }, [])
@@ -90,7 +92,7 @@ export default function NotFound() {
         {stars.map(star => (
           <Star
             key={star.id}
-            className="falling-star animate-star-fall absolute top-0 text-accent fill-current"
+            className={`falling-star animate-star-fall absolute top-0 ${star.color} fill-current`}
             style={{
               left: `${star.left}%`,
               width: star.size,

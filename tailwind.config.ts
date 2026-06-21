@@ -46,6 +46,7 @@ const config: Config = {
         success: 'hsl(var(--color-success) / <alpha-value>)',
         info: 'hsl(var(--color-info) / <alpha-value>)',
         warning: 'hsl(var(--color-warning) / <alpha-value>)',
+        'secondary-accent': 'hsl(var(--color-secondary-accent) / <alpha-value>)',
         destructive: {
           DEFAULT: 'hsl(var(--color-warning) / <alpha-value>)',
           foreground: '#ffffff',

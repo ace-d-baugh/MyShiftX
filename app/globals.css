@@ -8,7 +8,8 @@
     --color-primary: 269 100% 75%; /* #BD80FF */
     --color-primary-light: 269 100% 95%; /* #F2E6FF */
     --color-secondary: 269 100% 87%; /* #DEBFFF */
-    --color-accent: 28 95% 65%; /* #F5912E – warm orange */
+    --color-accent: 28 95% 65%; /* #F5912E - warm orange */
+    --color-secondary-accent: 50 100% 75%; /* #FFEA80 - Star Yellow */
     --color-text: 269 35% 22%; /* #2F2040 */
     --color-success: 99 70% 67%; /* #9BE673 */
     --color-info: 200 100% 75%; /* #80D4FF */
@@ -106,7 +107,8 @@
   }
 
   .badge-ot {
-    @apply bg-yellow-300 text-text;
+    background-color: #ffea80; /* secondary-accent yellow */
+    color: #2f2040; /* text */
   }
 
   /* Card component */
@@ -143,7 +145,11 @@
   }
 
   .btn-outline {
-    @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground;
+    @apply border border-input bg-background;
+  }
+  .btn-outline:hover:not(:disabled) {
+    background-color: #ffea80; /* secondary-accent */
+    color: #2f2040;             /* text */
   }
 }
 
