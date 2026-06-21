@@ -89,7 +89,6 @@ export function Navbar({
         {/* Top bar: Logo + account button */}
         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
           <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
-            <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">My</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="MyShiftX Logo"
@@ -174,7 +173,6 @@ export function Navbar({
       <header className="md:hidden sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         <div className="px-4 flex items-center justify-between h-14">
           <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
-            <h1 className="font-accent text-4xl font-bold text-primary leading-tight align-middle">My</h1>
             <Image
               src="/logos/ShiftX-logo.svg"
               alt="MyShiftX Logo"

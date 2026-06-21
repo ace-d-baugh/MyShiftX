@@ -332,7 +332,6 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-row items-center gap-0 align-baseline">
-              <span className="font-accent text-5xl font-bold text-white/60 leading-tight align-middle">My</span>
               <Image
                 src="/logos/ShiftX-new.svg"
                 alt="MyShiftX"

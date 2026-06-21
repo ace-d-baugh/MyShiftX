@@ -109,7 +109,6 @@ export default function NotFound() {
       {/* Brand lockup */}
       <header className="relative z-10 px-4 py-6 animate-slide-down">
         <Link href="/" className="inline-flex items-center gap-0 align-baseline">
-          <span className="font-accent text-3xl font-bold text-primary leading-tight align-middle">My</span>
           <Image
             src="/logos/ShiftX-logo.svg"
             alt="MyShiftX Logo"

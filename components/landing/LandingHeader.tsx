@@ -26,7 +26,6 @@ export function LandingHeader({ displayName }: LandingHeaderProps) {
     <header className="sticky top-0 z-50 bg-background/90 backdrop-blur border-b border-border animate-slide-down">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href={isLoggedIn ? '/wall' : '/'} className="flex flex-row items-center gap-0 align-baseline">
-          <h1 className="font-accent text-5xl font-bold text-primary leading-tight align-middle">My</h1>
           <Image
             src="/logos/ShiftX-logo.svg"
             alt="MyShiftX Logo"
