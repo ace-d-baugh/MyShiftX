@@ -69,7 +69,7 @@ Tasks are ordered by impact. Each has a **🤖 Claude handles** section (code I 
 - ✅ Enabled Realtime replication for `shifts` and `requests` tables in Supabase dashboard
 
 **👤 Still needed:**
-- [ ] Test with two browser tabs open — post a shift in one, confirm it appears in the other without refreshing
+- ✅ Tested with two browser tabs — live updates confirmed working
 
 ---
 

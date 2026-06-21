@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback, useRef, useMemo } from 'react'
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import { formatDistanceToNow, parseISO } from 'date-fns'
-import { MessageSquare, Star, ChevronDown, User, Edit, Trash2, Flag, X } from 'lucide-react'
+import { MessageSquare, Star, ChevronDown, User, Edit, Trash2, Flag, X, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { Modal } from '@/components/ui/Modal'
@@ -33,6 +33,9 @@ interface CommentSectionProps {
   interestedCount: number
   boardId?: string
   actions?: React.ReactNode
+  showContactDisabled?: boolean
+  openCommentsTick?: number
+  interestTick?: number
 }
 
 export function CommentSection({
@@ -44,6 +47,9 @@ export function CommentSection({
   interestedCount,
   boardId,
   actions,
+  showContactDisabled,
+  openCommentsTick,
+  interestTick,
 }: CommentSectionProps) {
   const supabase = useMemo(() => createClient(), [])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -93,6 +99,12 @@ export function CommentSection({
       setLoading(false)
     }
   }, [supabase, postType, postId, comments])
+
+  // External triggers from the three-dot card menu
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (openCommentsTick) { setCommentsOpen(true); if (comments === null) fetchComments() } }, [openCommentsTick])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (interestTick && !isOwner && currentUserId && !posting) handleInterestedPillClick() }, [interestTick])
 
   const toggleComments = () => {
     setCommentsOpen(prev => {
@@ -262,13 +274,23 @@ export function CommentSection({
                     : 'bg-text/10 text-text/50 cursor-default'
             )}
           >
-            <Star className={cn('w-3.5 h-3.5', (displayInterestedCount > 0 || myInterest) ? 'fill-current text-secondary-accent' : '')} />
+            {(displayInterestedCount > 0 || myInterest)
+              ? <Star className="w-3.5 h-3.5 rotate-[-30deg] text-secondary-accent" fill="#ffea80" strokeWidth={0} />
+              : <Star className="w-3.5 h-3.5 rotate-[-30deg]" />}
             <span className="hidden sm:inline">Interested </span>({displayInterestedCount})
             {isOwner && <ChevronDown className={cn('w-3 h-3 transition-transform', interestedOpen && 'rotate-180')} />}
           </button>
+          {showContactDisabled && !isOwner && (
+            <span
+              className="badge bg-text/5 text-text/20 inline-flex items-center gap-1 cursor-not-allowed shrink-0"
+              title="Contact — coming soon"
+            >
+              <Mail className="w-3.5 h-3.5" />
+            </span>
+          )}
         </div>
         {actions && (
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             {actions}
           </div>
         )}
@@ -286,7 +308,7 @@ export function CommentSection({
             <ul className="space-y-1.5">
               {interestedUsers.map(u => (
                 <li key={u.user_id} className="flex items-center gap-2 text-sm text-text">
-                  <Star className="w-3.5 h-3.5 text-secondary-accent fill-current shrink-0" />
+                  <Star className="w-3.5 h-3.5 rotate-[-30deg] text-secondary-accent shrink-0" fill="#ffea80" strokeWidth={0} />
                   {u.display_name}
                   <span className="text-xs text-text/40">{formatDistanceToNow(parseISO(u.created_at), { addSuffix: true })}</span>
                 </li>
@@ -331,7 +353,9 @@ export function CommentSection({
                       isInterested ? 'bg-secondary-accent/30 text-text' : 'bg-text/10 text-text/60'
                     )}
                   >
-                    <Star className={cn('w-3 h-3', isInterested ? 'fill-current text-secondary-accent' : '')} /> Interested?
+                    {isInterested
+                      ? <Star className="w-3 h-3 rotate-[-30deg] text-secondary-accent" fill="#ffea80" strokeWidth={0} />
+                      : <Star className="w-3 h-3 rotate-[-30deg]" />} Interested?
                   </button>
                 ) : <span />}
                 <Button
@@ -361,7 +385,7 @@ export function CommentSection({
                       <span className="font-medium text-text">{c.display_name}</span>
                       {c.is_interested && (
                         <span className="inline-flex items-center gap-0.5 text-primary">
-                          <Star className="w-3 h-3 fill-current text-secondary-accent" /> Interested
+                          <Star className="w-3 h-3 rotate-[-30deg] text-secondary-accent" fill="#ffea80" strokeWidth={0} /> Interested
                         </span>
                       )}
                       <span>&bull; {formatDistanceToNow(parseISO(c.created_at), { addSuffix: true })}</span>

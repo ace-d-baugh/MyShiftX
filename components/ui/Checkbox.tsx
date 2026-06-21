@@ -27,7 +27,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           )}
         >
           <Star
-            fill="currentColor"
+            fill="#ffea80"
             strokeWidth={0}
             className={cn(
               'h-3.5 w-3.5 rotate-[-30deg] text-[#FFEA80] transition-opacity',
