@@ -73,15 +73,16 @@ Tasks are ordered by impact. Each has a **🤖 Claude handles** section (code I 
 
 ---
 
-### 2 — Interest Notification Email `HIGH`
+### 2 — Interest Notification Email ✅ DONE
 
 **Why second:** When someone marks interest on your shift, you currently have no idea unless you manually check. This closes the most critical communication loop in the app.
 
-**🤖 Claude handles:**
-- [ ] Add a server action (or extend `posts.ts`) that fires when a comment with `is_interested = true` is created
-- [ ] Look up the shift/request owner's email and their `notify_via_email` preference
-- [ ] Call `/api/send` with a pre-built "Someone is interested in your shift" email using the existing email template helper
-- [ ] Write the email template variant for interest notifications (person's name, post title, link to the wall)
+**🤖 Claude handled:**
+- ✅ Created `app/actions/notifications.ts` — `notifyInterest()` server action using service-role Supabase client
+- ✅ Reads owner's email and `notify_via_email` pref before sending (respects opt-out)
+- ✅ Calls Resend directly (no intermediate `/api/send` hop needed)
+- ✅ Added `interestedHtml()` template to `email-template.tsx` with matching header/footer style
+- ✅ Hooked into `CommentSection.tsx` — fires on both the quick-star pill and the comment form when "Interested?" is checked; fire-and-forget so it never blocks the UI
 
 **👤 You handle:**
 - [ ] Confirm `RESEND_API_KEY` is set in your Vercel environment variables (Dashboard → Settings → Environment Variables)

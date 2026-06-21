@@ -10,6 +10,7 @@ import { FlagModal } from '@/components/features/FlagModal'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { CommentPostType } from '@/lib/database.types'
+import { notifyInterest } from '@/app/actions/notifications'
 
 const QUICK_INTEREST_BODY = "I'm interested!"
 
@@ -153,6 +154,8 @@ export function CommentSection({
       } as any)
       if (error) throw error
       await fetchComments()
+      // Fire-and-forget — notify the post owner without blocking the UI
+      notifyInterest({ postId, postType, commenterName: currentUserName ?? 'Someone' })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to mark interested.')
     } finally {
@@ -192,10 +195,15 @@ export function CommentSection({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       if (error) throw error
+      const wasInterested = !isOwner && isInterested
       setBody('')
       setIsInterested(false)
       setReplyToName(null)
       await fetchComments()
+      // Fire-and-forget — notify the post owner if this comment marked interest
+      if (wasInterested && currentUserName) {
+        notifyInterest({ postId, postType, commenterName: currentUserName })
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to post comment.')
     } finally {
