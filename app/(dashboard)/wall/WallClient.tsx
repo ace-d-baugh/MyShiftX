@@ -92,9 +92,9 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
     }))
   }, [supabase])
 
-  const loadShifts = useCallback(async () => {
-    if (!hasBoards) { setLoading(false); return }
-    setLoading(true)
+  const loadShifts = useCallback(async (silent = false) => {
+    if (!hasBoards) { if (!silent) setLoading(false); return }
+    if (!silent) setLoading(true)
     try {
       const { data, error } = await supabase
         .from('shifts')
@@ -136,13 +136,13 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       })
       setShifts(await attachCommentCounts(mapped, 'shift'))
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [hasBoards, attachCommentCounts, supabase])
 
-  const loadRequests = useCallback(async () => {
-    if (!hasBoards) { setLoading(false); return }
-    setLoading(true)
+  const loadRequests = useCallback(async (silent = false) => {
+    if (!hasBoards) { if (!silent) setLoading(false); return }
+    if (!silent) setLoading(true)
     try {
       const { data, error } = await supabase
         .from('requests')
@@ -178,7 +178,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       })
       setRequests(await attachCommentCounts(mapped, 'request'))
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [hasBoards, attachCommentCounts, supabase])
 
@@ -186,15 +186,57 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
-      // Load both tabs in parallel on mount so both counts are accurate immediately
       loadShifts()
       loadRequests()
       return
     }
-    // On subsequent tab switches, only reload the newly active tab
     if (tab === 'offers') loadShifts()
     else loadRequests()
   }, [tab, loadShifts, loadRequests])
+
+  // Realtime subscriptions — silently refresh when posts are added, changed, or removed
+  useEffect(() => {
+    if (!hasBoards) return
+
+    const shiftsChannel = supabase
+      .channel('realtime:shifts')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'shifts' },
+        (payload) => {
+          if (payload.eventType === 'DELETE') {
+            setShifts(prev => prev.filter(s => s.id !== (payload.old as { id: string }).id))
+          } else if (payload.eventType === 'UPDATE' && !(payload.new as { is_active: boolean }).is_active) {
+            setShifts(prev => prev.filter(s => s.id !== (payload.new as { id: string }).id))
+          } else {
+            loadShifts(true)
+          }
+        }
+      )
+      .subscribe()
+
+    const requestsChannel = supabase
+      .channel('realtime:requests')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'requests' },
+        (payload) => {
+          if (payload.eventType === 'DELETE') {
+            setRequests(prev => prev.filter(r => r.id !== (payload.old as { id: string }).id))
+          } else if (payload.eventType === 'UPDATE' && !(payload.new as { is_active: boolean }).is_active) {
+            setRequests(prev => prev.filter(r => r.id !== (payload.new as { id: string }).id))
+          } else {
+            loadRequests(true)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(shiftsChannel)
+      supabase.removeChannel(requestsChannel)
+    }
+  }, [hasBoards, supabase, loadShifts, loadRequests])
 
   const handleDeactivateShift = async (id: string) => {
     setDeactivateError(null)
