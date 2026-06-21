@@ -94,7 +94,7 @@ export function Navbar({
               alt="MyShiftX Logo"
               width={1560} height={500}
               priority
-              className="h-10 w-auto"
+              className="h-12 w-auto"
             />
           </Link>
 
@@ -178,7 +178,7 @@ export function Navbar({
               alt="MyShiftX Logo"
               width={1560} height={500}
               priority
-              className="h-7 w-auto"
+              className="h-10 w-auto"
             />
           </Link>
 

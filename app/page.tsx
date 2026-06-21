@@ -337,7 +337,7 @@ export default async function HomePage() {
                 alt="MyShiftX"
                 width={1337}
                 height={429}
-                className="h-8 w-auto brightness-0 invert opacity-60"
+                className="h-12 w-auto brightness-0 invert opacity-60"
               />
             </div>
             <div className="flex gap-6 text-sm">

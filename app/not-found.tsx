@@ -114,7 +114,7 @@ export default function NotFound() {
             alt="MyShiftX Logo"
             width={1560}
             height={500}
-            className="h-7 w-auto"
+            className="h-12 w-auto"
           />
         </Link>
       </header>

@@ -32,7 +32,7 @@ export function LandingHeader({ displayName }: LandingHeaderProps) {
             width={1560}
             height={500}
             priority
-            className="h-10 w-auto"
+            className="h-14 w-auto"
           />
         </Link>
 
