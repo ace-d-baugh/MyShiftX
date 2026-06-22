@@ -103,7 +103,7 @@ export function CalendarClient({ today, myShifts, boardShifts, boardRequests }: 
           <CalendarDays className="w-6 h-6 text-primary" />
           <h1 className="font-accent text-2xl font-bold text-text">My Calendar</h1>
         </div>
-        <Link href="/wall/new-shift" className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
+        <Link href="/wall/new-shift?from=calendar" className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
           <Plus className="w-4 h-4" /> Add Shift
         </Link>
       </div>

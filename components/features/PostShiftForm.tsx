@@ -6,10 +6,27 @@ import { createClient } from '@/lib/supabase/client'
 import { shiftSchema } from '@/lib/validations/shifts'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
-import { Plus, Save } from 'lucide-react'
+import { Plus, Save, X, ArrowLeft, ChevronDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { notifyShiftPosted } from '@/app/actions/notifications'
 
 interface Board { id: string; name: string }
+
+type ShiftForm = {
+  board_id: string
+  shift_title: string
+  start_time: string
+  end_time: string
+  is_trade: boolean
+  is_giveaway: boolean
+  is_overtime_approved: boolean
+  details: string
+}
+
+const blank = (board_id = ''): ShiftForm => ({
+  board_id, shift_title: '', start_time: '', end_time: '',
+  is_trade: false, is_giveaway: false, is_overtime_approved: false, details: '',
+})
 
 export interface ShiftInitialData {
   board_id: string | null
@@ -28,121 +45,139 @@ interface PostShiftFormProps {
   onSuccess?: () => void
   shiftId?: string
   initialData?: ShiftInitialData
+  wallExpanded?: boolean   // true = wall open by default, false (calendar) = collapsed
 }
 
-function toLocalDatetimeInput(iso: string): string {
+function toLocal(iso: string): string {
   const d = new Date(iso)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
 }
 
-export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initialData }: PostShiftFormProps) {
+function isTouched(f: ShiftForm) {
+  return !!f.shift_title || !!f.start_time || !!f.end_time ||
+    f.is_trade || f.is_giveaway || f.is_overtime_approved || !!f.details
+}
+
+export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initialData, wallExpanded = true }: PostShiftFormProps) {
   const router = useRouter()
   const supabase = createClient()
   const isEdit = !!shiftId
 
   const [boards, setBoards] = useState<Board[]>([])
-  const [loading, setLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
-  const [form, setForm] = useState({
-    board_id:              initialData?.board_id              ?? '',
-    shift_title:           initialData?.shift_title           ?? '',
-    start_time:            initialData ? toLocalDatetimeInput(initialData.start_time) : '',
-    end_time:              initialData ? toLocalDatetimeInput(initialData.end_time)   : '',
-    is_trade:              initialData?.is_trade              ?? false,
-    is_giveaway:           initialData?.is_giveaway           ?? false,
-    is_overtime_approved:  initialData?.is_overtime_approved  ?? false,
-    details:               initialData?.details               ?? '',
-  })
+  const firstForm: ShiftForm = initialData ? {
+    board_id:             initialData.board_id ?? '',
+    shift_title:          initialData.shift_title,
+    start_time:           toLocal(initialData.start_time),
+    end_time:             toLocal(initialData.end_time),
+    is_trade:             initialData.is_trade,
+    is_giveaway:          initialData.is_giveaway,
+    is_overtime_approved: initialData.is_overtime_approved,
+    details:              initialData.details ?? '',
+  } : blank()
+
+  const [forms, setForms] = useState<ShiftForm[]>([firstForm])
+  const [formErrors, setFormErrors] = useState<Record<string, string | undefined>[]>([{}])
+  const [wallOpen, setWallOpen] = useState<boolean[]>([isEdit ? true : wallExpanded])
 
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase
-        .from('user_boards')
-        .select('board_id, boards(id, name)')
-        .eq('user_id', userId)
-        .eq('is_approved', true)
-
-      const boardList = (data ?? [])
+        .from('user_boards').select('board_id, boards(id, name)')
+        .eq('user_id', userId).eq('is_approved', true)
+      const list = (data ?? [])
         .map((ub: { board_id: string; boards: Board | null }) => ub.boards)
         .filter((b): b is Board => !!b)
         .sort((a, b) => a.name.localeCompare(b.name))
-
-      setBoards(boardList)
-      if (!isEdit && boardList.length === 1) {
-        setForm(prev => ({ ...prev, board_id: boardList[0].id }))
+      setBoards(list)
+      if (!isEdit && list.length === 1) {
+        setForms(prev => prev.map(f => f.board_id ? f : { ...f, board_id: list[0].id }))
       }
       setDataLoading(false)
     }
     load()
-  }, [userId, isEdit])
+  }, [userId, isEdit]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target
-    const checked = (e.target as HTMLInputElement).checked
-    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
-    setErrors(prev => ({ ...prev, [name]: '' }))
+  const setField = (i: number, name: string, value: unknown) => {
+    setForms(prev => prev.map((f, idx) => idx === i ? { ...f, [name]: value } : f))
+    setFormErrors(prev => prev.map((e, idx) => idx === i ? { ...e, [name]: undefined } : e))
   }
+
+  const onChange = (i: number) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target
+    setField(i, name, type === 'checkbox' ? (e.target as HTMLInputElement).checked : value)
+  }
+
+  const addForm = () => {
+    setForms(prev => [...prev, blank(prev[prev.length - 1].board_id)])
+    setFormErrors(prev => [...prev, {}])
+    setWallOpen(prev => [...prev, prev[prev.length - 1]])  // inherit last form's state
+  }
+
+  const removeForm = (i: number) => {
+    setForms(prev => prev.filter((_, idx) => idx !== i))
+    setFormErrors(prev => prev.filter((_, idx) => idx !== i))
+    setWallOpen(prev => prev.filter((_, idx) => idx !== i))
+  }
+
+  const toggleWall = (i: number) =>
+    setWallOpen(prev => prev.map((v, idx) => idx === i ? !v : v))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setServerError(null)
 
-    const startUTC = form.start_time ? new Date(form.start_time).toISOString() : ''
-    const endUTC   = form.end_time   ? new Date(form.end_time).toISOString()   : ''
+    // Validate each form (skip completely blank subsequent ones)
+    const newErrors: Record<string, string | undefined>[] = forms.map(() => ({}))
+    let hasErrors = false
 
-    const result = shiftSchema.safeParse({ ...form, start_time: startUTC, end_time: endUTC })
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {}
-      result.error.errors.forEach(err => { fieldErrors[err.path[0] as string] = err.message })
-      setErrors(fieldErrors)
-      return
-    }
+    forms.forEach((f, i) => {
+      if (i > 0 && !isTouched(f)) return
+      const startUTC = f.start_time ? new Date(f.start_time).toISOString() : ''
+      const endUTC   = f.end_time   ? new Date(f.end_time).toISOString()   : ''
+      const result = shiftSchema.safeParse({ ...f, start_time: startUTC, end_time: endUTC })
+      if (!result.success) {
+        result.error.errors.forEach(err => {
+          const field = err.path[0] as string
+          if (!newErrors[i][field]) newErrors[i][field] = err.message
+        })
+        hasErrors = true
+      }
+    })
+
+    if (hasErrors) { setFormErrors(newErrors); return }
 
     setLoading(true)
     try {
       if (isEdit) {
-        const { error } = await supabase
-          .from('shifts')
-          .update({
-            board_id:             form.board_id,
-            shift_title:          form.shift_title,
-            start_time:           startUTC,
-            end_time:             endUTC,
-            is_trade:             form.is_trade,
-            is_giveaway:          form.is_giveaway,
-            is_overtime_approved: form.is_overtime_approved,
-            details:              form.details || null,
-          })
-          .eq('id', shiftId)
-          .eq('user_id', userId)
+        const f = forms[0]
+        const startUTC = f.start_time ? new Date(f.start_time).toISOString() : ''
+        const endUTC   = f.end_time   ? new Date(f.end_time).toISOString()   : ''
+        const { error } = await supabase.from('shifts').update({
+          board_id: f.board_id, shift_title: f.shift_title,
+          start_time: startUTC, end_time: endUTC,
+          is_trade: f.is_trade, is_giveaway: f.is_giveaway,
+          is_overtime_approved: f.is_overtime_approved, details: f.details || null,
+        }).eq('id', shiftId!).eq('user_id', userId)
         if (error) throw error
       } else {
-        const { error } = await supabase.from('shifts').insert({
-          created_by:           displayName,
-          user_id:              userId,
-          board_id:             form.board_id,
-          shift_title:          form.shift_title,
-          start_time:           startUTC,
-          end_time:             endUTC,
-          is_trade:             form.is_trade,
-          is_giveaway:          form.is_giveaway,
-          is_overtime_approved: form.is_overtime_approved,
-          details:              form.details || null,
-          is_active:            true,
-        })
-        if (error) throw error
-        // Fire-and-forget — notify both parties if a matching request already exists
-        notifyShiftPosted({
-          boardId:      form.board_id,
-          startTimeIso: startUTC,
-          shiftTitle:   form.shift_title,
-          posterName:   displayName,
-          posterUserId: userId,
-        })
+        for (const [i, f] of forms.entries()) {
+          if (i > 0 && !isTouched(f)) continue
+          const startUTC = f.start_time ? new Date(f.start_time).toISOString() : ''
+          const endUTC   = f.end_time   ? new Date(f.end_time).toISOString()   : ''
+          const { error } = await supabase.from('shifts').insert({
+            created_by: displayName, user_id: userId, board_id: f.board_id,
+            shift_title: f.shift_title, start_time: startUTC, end_time: endUTC,
+            is_trade: f.is_trade, is_giveaway: f.is_giveaway,
+            is_overtime_approved: f.is_overtime_approved, details: f.details || null, is_active: true,
+          })
+          if (error) throw error
+          notifyShiftPosted({ boardId: f.board_id, startTimeIso: startUTC, shiftTitle: f.shift_title, posterName: displayName, posterUserId: userId })
+        }
       }
       onSuccess?.()
       router.push('/wall')
@@ -153,128 +188,163 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
     }
   }
 
-  if (dataLoading) {
-    return <div className="flex items-center justify-center py-12 text-text/50">Loading form...</div>
-  }
+  if (dataLoading) return <div className="card shadow-sm flex items-center justify-center py-12 text-text/50">Loading...</div>
 
-  if (boards.length === 0) {
-    return (
-      <div className="py-8 text-center text-sm text-text/60">
-        You haven&apos;t joined any boards yet.{' '}
-        <a href="/profile" className="text-primary underline">Join or create a board</a> before posting a shift.
-      </div>
-    )
-  }
+  if (boards.length === 0) return (
+    <div className="card shadow-sm py-8 text-center text-sm text-text/60">
+      You haven&apos;t joined any boards yet.{' '}
+      <a href="/profile" className="text-primary underline">Join or create a board</a> first.
+    </div>
+  )
+
+  const submitCount = forms.filter((f, i) => i === 0 || isTouched(f)).length
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {serverError && (
-        <div className="p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm">
-          {serverError}
-        </div>
+        <div className="p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm">{serverError}</div>
       )}
 
-      {/* Board */}
-      <div>
-        <label className="block text-sm font-medium text-text mb-1">
-          Board <span className="text-warning">*</span>
-        </label>
-        <select
-          name="board_id"
-          className={`input ${errors.board_id ? 'border-warning' : ''}`}
-          value={form.board_id}
-          onChange={handleChange}
-        >
-          <option value="">Select board...</option>
-          {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-        </select>
-        {errors.board_id && <p className="mt-1 text-xs text-warning">{errors.board_id}</p>}
-      </div>
+      {forms.map((f, i) => {
+        const errs = formErrors[i] ?? {}
+        const partial = i > 0 && isTouched(f) && Object.keys(errs).some(k => errs[k])
 
-      {/* Shift Title */}
-      <div>
-        <label className="block text-sm font-medium text-text mb-1">
-          Shift Title <span className="text-warning">*</span>
-        </label>
-        <input
-          name="shift_title"
-          type="text"
-          className={`input placeholder:text-text/30 ${errors.shift_title ? 'border-warning' : ''}`}
-          placeholder="e.g., Morning Opening Shift"
-          value={form.shift_title}
-          onChange={handleChange}
-        />
-        <p className="mt-1 text-xs text-text/40">Use the exact title as it appears on your schedule.</p>
-        {errors.shift_title && <p className="mt-1 text-xs text-warning">{errors.shift_title}</p>}
-      </div>
+        return (
+          <div key={i} className="card shadow-sm">
+            {/* Card header — only when there's more than one form or in edit mode */}
+            {(forms.length > 1 || isEdit) && (
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
+                <span className="text-sm font-semibold text-text">
+                  {isEdit ? 'Shift Details' : `Shift ${i + 1}`}
+                </span>
+                {i > 0 && (
+                  <button type="button" onClick={() => removeForm(i)}
+                    className="flex items-center gap-1 text-xs text-warning hover:text-warning/80 min-h-0 min-w-0 transition-colors">
+                    <X className="w-3.5 h-3.5" /> Remove
+                  </button>
+                )}
+              </div>
+            )}
 
-      {/* Start / End Time */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-text mb-1">
-            Start Time <span className="text-warning">*</span>
-          </label>
-          <input
-            name="start_time"
-            type="datetime-local"
-            className={`input ${errors.start_time ? 'border-warning' : ''}`}
-            value={form.start_time}
-            onChange={handleChange}
-          />
-          {errors.start_time && <p className="mt-1 text-xs text-warning">{errors.start_time}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-text mb-1">
-            End Time <span className="text-warning">*</span>
-          </label>
-          <input
-            name="end_time"
-            type="datetime-local"
-            className={`input ${errors.end_time ? 'border-warning' : ''}`}
-            value={form.end_time}
-            onChange={handleChange}
-          />
-          {errors.end_time && <p className="mt-1 text-xs text-warning">{errors.end_time}</p>}
-        </div>
-      </div>
+            {partial && (
+              <div className="mb-3 p-2.5 rounded-md bg-warning/10 border border-warning/20 text-warning text-xs">
+                Please complete all required fields or remove this shift.
+              </div>
+            )}
 
-      {/* Type checkboxes */}
-      <div>
-        <p className="text-sm font-medium text-text mb-1">Post to Wall <span className="text-text/40 font-normal">(optional)</span></p>
-        <p className="text-xs text-text/40 mb-2">Leave unchecked to add to your calendar only.</p>
-        <div className="flex flex-wrap gap-4">
-          <label className="flex items-center gap-2 cursor-pointer min-h-0">
-            <Checkbox name="is_giveaway" checked={form.is_giveaway} onChange={handleChange} />
-            <span className="text-sm text-text">Giveaway</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer min-h-0">
-            <Checkbox name="is_trade" checked={form.is_trade} onChange={handleChange} />
-            <span className="text-sm text-text">Trade</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer min-h-0">
-            <Checkbox name="is_overtime_approved" checked={form.is_overtime_approved} onChange={handleChange} />
-            <span className="text-sm text-text">OT Approved</span>
-          </label>
-        </div>
-        {errors.is_trade && <p className="mt-1 text-xs text-warning">{errors.is_trade}</p>}
-      </div>
+            <div className="space-y-4">
+              {/* Board — hidden when user belongs to only one board (auto-selected) */}
+              {boards.length > 1 && (
+                <div>
+                  <label className="block text-sm font-medium text-text mb-1">Board <span className="text-warning">*</span></label>
+                  <select name="board_id" value={f.board_id} onChange={onChange(i)}
+                    className={`input ${errs.board_id ? 'border-warning' : ''}`}>
+                    <option value="">Select board...</option>
+                    {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                  {errs.board_id && <p className="mt-1 text-xs text-warning">{errs.board_id}</p>}
+                </div>
+              )}
 
-      {/* Details */}
-      <div>
-        <label className="block text-sm font-medium text-text mb-1">Details (optional)</label>
-        <textarea
-          name="details"
-          className="input h-20 resize-none"
-          placeholder="Any additional details..."
-          value={form.details}
-          onChange={handleChange}
-          maxLength={500}
-        />
-      </div>
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-text mb-1">Shift Title <span className="text-warning">*</span></label>
+                <input name="shift_title" type="text" value={f.shift_title} onChange={onChange(i)}
+                  className={`input placeholder:text-text/30 ${errs.shift_title ? 'border-warning' : ''}`}
+                  placeholder="e.g., Morning Opening Shift" />
+                <p className="mt-1 text-xs text-text/40">Use the exact title as it appears on your schedule.</p>
+                {errs.shift_title && <p className="mt-1 text-xs text-warning">{errs.shift_title}</p>}
+              </div>
 
-      <Button type="submit" loading={loading} className="w-full gap-2">
-        {isEdit ? <><Save className="w-4 h-4" /> Update Shift</> : <><Plus className="w-4 h-4" /> Post Shift</>}
-      </Button>
+              {/* Times */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-text mb-1">Start Time <span className="text-warning">*</span></label>
+                  <input name="start_time" type="datetime-local" value={f.start_time} onChange={onChange(i)}
+                    className={`input ${errs.start_time ? 'border-warning' : ''}`} />
+                  {errs.start_time && <p className="mt-1 text-xs text-warning">{errs.start_time}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-text mb-1">End Time <span className="text-warning">*</span></label>
+                  <input name="end_time" type="datetime-local" value={f.end_time} onChange={onChange(i)}
+                    className={`input ${errs.end_time ? 'border-warning' : ''}`} />
+                  {errs.end_time && <p className="mt-1 text-xs text-warning">{errs.end_time}</p>}
+                </div>
+              </div>
+
+              {/* Post to Wall + Details — accordion */}
+              <div className="rounded-lg border border-border overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleWall(i)}
+                  className="w-full flex items-center justify-between px-3 py-2.5 bg-primary-light/20 hover:bg-primary-light/40 transition-colors min-h-0 text-left"
+                >
+                  <span className="text-sm font-medium text-text">
+                    Post to Wall
+                    {(f.is_trade || f.is_giveaway) && (
+                      <span className="ml-2 text-xs text-primary font-normal">
+                        ({[f.is_giveaway && 'Giveaway', f.is_trade && 'Trade'].filter(Boolean).join(' + ')})
+                      </span>
+                    )}
+                  </span>
+                  <ChevronDown className={cn('w-4 h-4 text-text/40 transition-transform duration-200 shrink-0', (wallOpen[i] ?? wallExpanded) && 'rotate-180')} />
+                </button>
+
+                {(wallOpen[i] ?? wallExpanded) && (
+                  <div className="px-3 pt-3 pb-3 space-y-4 border-t border-border">
+                    <div>
+                      <p className="text-xs text-text/50 mb-2">Leave unchecked to add to your calendar only.</p>
+                      <div className="flex flex-wrap gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                          <Checkbox name="is_giveaway" checked={f.is_giveaway} onChange={onChange(i)} />
+                          <span className="text-sm text-text">Giveaway</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                          <Checkbox name="is_trade" checked={f.is_trade} onChange={onChange(i)} />
+                          <span className="text-sm text-text">Trade</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                          <Checkbox name="is_overtime_approved" checked={f.is_overtime_approved} onChange={onChange(i)} />
+                          <span className="text-sm text-text">OT Approved</span>
+                        </label>
+                      </div>
+                      {errs.is_trade && <p className="mt-1 text-xs text-warning">{errs.is_trade}</p>}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-text/70 mb-1">Details (optional)</label>
+                      <textarea name="details" value={f.details} onChange={onChange(i)}
+                        className="input h-20 resize-none text-sm" placeholder="Any additional details..." maxLength={500} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })}
+
+      {/* Add another (create mode only) */}
+      {!isEdit && (
+        <button type="button" onClick={addForm}
+          className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/70 transition-colors min-h-0">
+          <Plus className="w-4 h-4" /> Add Another Shift
+        </button>
+      )}
+
+      {/* Cancel + Submit */}
+      <div className="flex gap-2 pt-1">
+        <Button type="button" variant="danger-outline" onClick={() => router.back()} className="gap-1.5 shrink-0">
+          <ArrowLeft className="w-4 h-4" /> Cancel
+        </Button>
+        <Button type="submit" loading={loading} className="flex-1 gap-1.5">
+          {isEdit
+            ? <><Save className="w-4 h-4" /> Update Shift</>
+            : submitCount > 1
+              ? <><Plus className="w-4 h-4" /> Post {submitCount} Shifts</>
+              : <><Plus className="w-4 h-4" /> Post Shift</>}
+        </Button>
+      </div>
     </form>
   )
 }

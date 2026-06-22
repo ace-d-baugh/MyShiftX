@@ -1,6 +1,4 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { PostShiftForm } from '@/components/features/PostShiftForm'
 
@@ -10,7 +8,7 @@ export const metadata = {
   title: 'Post a Shift – MyShiftX',
 }
 
-export default async function NewShiftPage() {
+export default async function NewShiftPage({ searchParams }: { searchParams: { from?: string } }) {
   const supabase = createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -23,19 +21,15 @@ export default async function NewShiftPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <Link href="/wall" className="inline-flex items-center gap-1.5 text-sm text-text/60 hover:text-text mb-6 min-h-0 min-w-0">
-        <ArrowLeft className="w-4 h-4" /> Back to The Wall
-      </Link>
       <div className="mb-6">
         <h1 className="font-accent text-2xl font-bold text-text">Post a Shift</h1>
-        <p className="text-sm text-text/60">Offer your shift for trade or giveaway</p>
+        <p className="text-sm text-text/60">Add one or more shifts to your calendar</p>
       </div>
-      <div className="card shadow-sm">
-        <PostShiftForm
-          userId={user.id}
-          displayName={userProfile?.display_name ?? 'User'}
-        />
-      </div>
+      <PostShiftForm
+        userId={user.id}
+        displayName={userProfile?.display_name ?? 'User'}
+        wallExpanded={searchParams.from !== 'calendar'}
+      />
     </div>
   )
 }

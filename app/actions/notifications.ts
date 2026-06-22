@@ -226,8 +226,8 @@ export async function notifyShiftPosted(opts: {
       const prefs = req.preferred_times as PreferredTime[]
       if (!shiftMatchesPreferences(opts.startTimeIso, prefs)) continue
 
-      const requester = req.users as { email: string; display_name: string | null; notify_via_email: boolean } | null
-      const board     = req.boards as { name: string } | null
+      const requester = (req.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean } | null
+      const board     = (req.boards as unknown) as { name: string } | null
 
       await sendMatchEmails({
         shiftTitle:        opts.shiftTitle,
@@ -290,8 +290,8 @@ export async function notifyRequestPosted(opts: {
       if (getETDate(startIso) !== opts.requestedDate) continue
       if (!shiftMatchesPreferences(startIso, opts.preferredTimes)) continue
 
-      const poster = shift.users as { email: string; display_name: string | null; notify_via_email: boolean } | null
-      const board  = shift.boards as { name: string } | null
+      const poster = (shift.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean } | null
+      const board  = (shift.boards as unknown) as { name: string } | null
 
       await sendMatchEmails({
         shiftTitle:        shift.shift_title as string,

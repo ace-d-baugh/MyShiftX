@@ -1,6 +1,4 @@
 import { redirect, notFound } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { PostShiftForm } from '@/components/features/PostShiftForm'
 
@@ -33,18 +31,11 @@ export default async function EditShiftPage({ params }: PageProps) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <Link
-        href="/wall"
-        className="inline-flex items-center gap-1.5 text-sm text-text/60 hover:text-text mb-6 min-h-0 min-w-0"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to The Wall
-      </Link>
       <div className="mb-6">
         <h1 className="font-accent text-2xl font-bold text-text">Edit Shift</h1>
         <p className="text-sm text-text/60">Update your shift offer</p>
       </div>
-      <div className="card shadow-sm">
-        <PostShiftForm
+      <PostShiftForm
           userId={user.id}
           displayName={userProfile?.display_name ?? 'User'}
           shiftId={shift.id}
@@ -58,8 +49,7 @@ export default async function EditShiftPage({ params }: PageProps) {
             is_overtime_approved: shift.is_overtime_approved,
             details:              shift.details,
           }}
-        />
-      </div>
+      />
     </div>
   )
 }
