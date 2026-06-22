@@ -44,6 +44,7 @@ export function CommentSection({
   postId,
   isOwner,
   currentUserId,
+  currentUserName,
   commentCount,
   interestedCount,
   boardId,
@@ -101,11 +102,18 @@ export function CommentSection({
     }
   }, [supabase, postType, postId, comments])
 
-  // External triggers from the three-dot card menu
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (openCommentsTick) { setCommentsOpen(true); if (comments === null) fetchComments() } }, [openCommentsTick])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (interestTick && !isOwner && currentUserId && !posting) handleInterestedPillClick() }, [interestTick])
+  // External triggers from the three-dot card menu.
+  // Deps are intentionally minimal — we only want these to fire when the tick
+  // increments, not on every re-render of the other values they read.
+  useEffect(() => {
+    if (!openCommentsTick) return
+    setCommentsOpen(true)
+    if (comments === null) fetchComments() // eslint-disable-line react-hooks/exhaustive-deps
+  }, [openCommentsTick]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (interestTick && !isOwner && currentUserId && !posting) handleInterestedPillClick() // eslint-disable-line react-hooks/exhaustive-deps
+  }, [interestTick]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleComments = () => {
     setCommentsOpen(prev => {

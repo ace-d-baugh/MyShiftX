@@ -53,7 +53,7 @@ export async function notifyInterest(opts: {
       if (error) { console.error('[notifyInterest] shift query error:', error.message); return }
       if (!data) { console.error('[notifyInterest] shift not found:', opts.postId); return }
 
-      const owner = data.users as { email: string; notify_via_email: boolean } | null
+      const owner = (data.users as unknown) as { email: string; notify_via_email: boolean } | null
       if (!owner) { console.error('[notifyInterest] no owner found for shift:', opts.postId); return }
       if (!owner.notify_via_email) { console.log('[notifyInterest] owner has email notifications off — skipping'); return }
 
@@ -70,7 +70,7 @@ export async function notifyInterest(opts: {
       if (error) { console.error('[notifyInterest] request query error:', error.message); return }
       if (!data) { console.error('[notifyInterest] request not found:', opts.postId); return }
 
-      const owner = data.users as { email: string; notify_via_email: boolean } | null
+      const owner = (data.users as unknown) as { email: string; notify_via_email: boolean } | null
       if (!owner) { console.error('[notifyInterest] no owner found for request:', opts.postId); return }
       if (!owner.notify_via_email) { console.log('[notifyInterest] owner has email notifications off — skipping'); return }
 

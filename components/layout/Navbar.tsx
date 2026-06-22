@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import {
   CalendarDays,
@@ -267,10 +267,10 @@ interface DropdownItemDef {
 }
 
 function buildDropdownItems({
-  isAdmin, showModItems, isLeader,
+  isAdmin: _isAdmin, showModItems, isLeader,
   pendingApprovalsCount, pendingFlagsCount, fmt,
 }: {
-  isAdmin: boolean
+  isAdmin: boolean  // reserved for future role-specific items
   showModItems: boolean
   isLeader: boolean
   pendingApprovalsCount: number
