@@ -37,7 +37,7 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
   const [displayName, setDisplayName] = useState(user?.display_name ?? '')
   const [phoneNumber, setPhoneNumber] = useState(user?.phone_number ?? '')
   const [notifyEmail, setNotifyEmail] = useState(user?.notify_via_email ?? false)
-  const [notifySms, setNotifySms] = useState(user?.notify_via_sms ?? false)
+  const [notifySms] = useState(user?.notify_via_sms ?? false)
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -202,16 +202,7 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
               onChange={e => setNotifyEmail(e.target.checked)}
             />
           </label>
-          <label className="flex items-center justify-between gap-4 cursor-pointer min-h-0">
-            <div>
-              <p className="text-sm font-medium text-text">SMS Notifications</p>
-              <p className="text-xs text-text/50">Receive text message alerts</p>
-            </div>
-            <Checkbox
-              checked={notifySms}
-              onChange={e => setNotifySms(e.target.checked)}
-            />
-          </label>
+          {/* SMS toggle — hidden until SMS provider is configured */}
         </div>
         <div className="mt-4 pt-4 border-t border-border">
           <Button onClick={handleSave as unknown as React.MouseEventHandler} loading={saving} size="sm" variant="outline" className="gap-1.5">

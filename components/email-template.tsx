@@ -38,9 +38,13 @@ const shell = (body: string) => `
                   padding:32px 24px;
                   text-align:center;
                 ">
-              <p style="margin:0;font-family:'Philosopher',Georgia,'Times New Roman',serif;font-size:38px;font-weight:700;color:#BD80FF;letter-spacing:-0.5px;line-height:1;">
-                My<span style="font-size:32px;">ShiftX</span>
-              </p>
+              <img
+                src="https://myshiftx.com/logos/ShiftX-logo-sm.png"
+                alt="MyShiftX"
+                width="200"
+                height="50"
+                style="display:block;border:0;margin:0 auto;"
+              />
             </td>
           </tr>
 

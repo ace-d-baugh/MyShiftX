@@ -84,10 +84,10 @@ Tasks are ordered by impact. Each has a **🤖 Claude handles** section (code I 
 - ✅ Added `interestedHtml()` template to `email-template.tsx` with matching header/footer style
 - ✅ Hooked into `CommentSection.tsx` — fires on both the quick-star pill and the comment form when "Interested?" is checked; fire-and-forget so it never blocks the UI
 
-**👤 You handle:**
-- [ ] Confirm `RESEND_API_KEY` is set in your Vercel environment variables (Dashboard → Settings → Environment Variables)
-- [ ] Confirm your sending domain (`noreply@myshiftx.com`) is verified in Resend (Resend Dashboard → Domains)
-- [ ] Test by marking interest on one of your own posts from a second account and checking the inbox
+**👤 You handled:**
+- ✅ `RESEND_API_KEY` confirmed in Vercel environment variables
+- ✅ Sending domain `noreply@myshiftx.com` verified in Resend
+- ✅ Tested — email received successfully
 
 ---
 
