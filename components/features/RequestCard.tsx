@@ -32,6 +32,7 @@ export interface RequestData {
   user_id: string | null
   board_id: string | null
   board_name: string
+  request_title: string
   preferred_times: PreferredTime[]
   requested_date: string
   details: string | null
@@ -80,7 +81,7 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
         {/* Row 1: Title | Poster name + ⋮ menu */}
         <div className="flex items-start justify-between gap-2 mb-1">
           <h3 className="font-accent font-bold text-accent text-lg leading-tight flex-1 min-w-0">
-            Shift Wanted
+            {request.request_title}
           </h3>
           <div className="flex items-center gap-1 shrink-0">
             <span className="text-xs text-text/50 flex items-center gap-1 whitespace-nowrap">

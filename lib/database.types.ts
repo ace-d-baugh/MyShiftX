@@ -247,6 +247,7 @@ export interface Database {
           created_by: string
           user_id: string | null
           board_id: string | null
+          request_title: string
           preferred_times: PreferredTime[]
           requested_date: string
           details: string | null
@@ -259,6 +260,7 @@ export interface Database {
           created_by: string
           user_id?: string | null
           board_id?: string | null
+          request_title?: string
           preferred_times: PreferredTime[]
           requested_date: string
           details?: string | null
@@ -270,6 +272,7 @@ export interface Database {
           created_by?: string
           user_id?: string | null
           board_id?: string | null
+          request_title?: string
           preferred_times?: PreferredTime[]
           requested_date?: string
           details?: string | null

@@ -7,6 +7,7 @@ import { requestSchema } from '@/lib/validations/shifts'
 import { Button } from '@/components/ui/Button'
 import { Plus, Save } from 'lucide-react'
 import type { PreferredTime } from '@/lib/database.types'
+import { notifyRequestPosted } from '@/app/actions/notifications'
 
 const TIME_OPTIONS: { value: PreferredTime; label: string; desc: string }[] = [
   { value: 'morning',   label: 'Morning',    desc: '6am–12pm'  },
@@ -18,6 +19,7 @@ const TIME_OPTIONS: { value: PreferredTime; label: string; desc: string }[] = [
 interface Board { id: string; name: string }
 
 export interface RequestInitialData {
+  request_title: string
   board_id: string | null
   requested_date: string
   preferred_times: PreferredTime[]
@@ -44,6 +46,7 @@ export function PostRequestForm({ userId, displayName, onSuccess, requestId, ini
   const [serverError, setServerError] = useState<string | null>(null)
 
   const [form, setForm] = useState({
+    request_title:   initialData?.request_title   ?? 'Shift Wanted',
     board_id:        initialData?.board_id        ?? '',
     requested_date:  initialData?.requested_date  ?? '',
     preferred_times: initialData?.preferred_times ?? ([] as PreferredTime[]),
@@ -106,6 +109,7 @@ export function PostRequestForm({ userId, displayName, onSuccess, requestId, ini
         const { error } = await supabase
           .from('requests')
           .update({
+            request_title:   form.request_title,
             board_id:        form.board_id,
             requested_date:  form.requested_date,
             preferred_times: form.preferred_times,
@@ -118,6 +122,7 @@ export function PostRequestForm({ userId, displayName, onSuccess, requestId, ini
         const { error } = await supabase.from('requests').insert({
           created_by:      displayName,
           user_id:         userId,
+          request_title:   form.request_title,
           board_id:        form.board_id,
           requested_date:  form.requested_date,
           preferred_times: form.preferred_times,
@@ -125,6 +130,15 @@ export function PostRequestForm({ userId, displayName, onSuccess, requestId, ini
           is_active:       true,
         })
         if (error) throw error
+        // Fire-and-forget — notify both parties if a matching shift already exists
+        notifyRequestPosted({
+          boardId:        form.board_id,
+          requestedDate:  form.requested_date,
+          preferredTimes: form.preferred_times,
+          requestTitle:   form.request_title,
+          requesterName:  displayName,
+          requesterUserId: userId,
+        })
       }
       onSuccess?.()
       router.push('/wall?tab=requests')
@@ -155,6 +169,23 @@ export function PostRequestForm({ userId, displayName, onSuccess, requestId, ini
           {serverError}
         </div>
       )}
+
+      {/* Title */}
+      <div>
+        <label className="block text-sm font-medium text-text mb-1">
+          Title <span className="text-warning">*</span>
+        </label>
+        <input
+          name="request_title"
+          type="text"
+          className={`input ${errors.request_title ? 'border-warning' : ''}`}
+          value={form.request_title}
+          onChange={handleChange}
+          maxLength={100}
+          placeholder="Shift Wanted"
+        />
+        {errors.request_title && <p className="mt-1 text-xs text-warning">{errors.request_title}</p>}
+      </div>
 
       {/* Board */}
       <div>

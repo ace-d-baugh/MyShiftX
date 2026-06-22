@@ -147,7 +147,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       const { data, error } = await supabase
         .from('requests')
         .select(`
-          id, created_by, user_id, board_id, preferred_times, requested_date,
+          id, created_by, user_id, board_id, request_title, preferred_times, requested_date,
           details, is_active, expires_at, created_at,
           boards(name),
           users!user_id(notify_via_email, notify_via_sms, phone_number)
@@ -166,6 +166,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
           user_id: r.user_id as string | null,
           board_id: r.board_id as string | null,
           board_name: (r.boards as { name: string } | null)?.name ?? '',
+          request_title: (r.request_title as string | null) ?? 'Shift Wanted',
           preferred_times: r.preferred_times as import('@/lib/database.types').PreferredTime[],
           requested_date: r.requested_date as string,
           details: r.details as string | null,

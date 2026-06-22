@@ -18,7 +18,7 @@ export default async function EditRequestPage({ params }: PageProps) {
 
   const { data: request } = await supabase
     .from('requests')
-    .select('id, board_id, requested_date, preferred_times, details, user_id')
+    .select('id, board_id, request_title, requested_date, preferred_times, details, user_id')
     .eq('id', params.id)
     .eq('user_id', user.id)
     .single()
@@ -49,6 +49,7 @@ export default async function EditRequestPage({ params }: PageProps) {
           displayName={userProfile?.display_name ?? 'User'}
           requestId={request.id}
           initialData={{
+            request_title:   request.request_title ?? 'Shift Wanted',
             board_id:        request.board_id,
             requested_date:  request.requested_date,
             preferred_times: request.preferred_times,

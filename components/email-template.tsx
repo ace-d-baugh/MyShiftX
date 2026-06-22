@@ -144,6 +144,54 @@ export const interestedHtml = (opts: {
     ${muted('You can turn off email notifications in your profile settings.')}
   `)
 
+/** Sent to both parties when a shift and request on the same board may match */
+export const shiftMatchHtml = (opts: {
+  recipientRole: 'shift-poster' | 'requester'
+  otherPartyName: string
+  ownPostTitle: string
+  otherPostTitle: string
+  boardName: string
+  shiftDate: string
+  wallUrl: string
+}) => {
+  const isShiftPoster = opts.recipientRole === 'shift-poster'
+  const heading = isShiftPoster
+    ? 'Your shift may match a request! ⭐'
+    : 'A shift may match your request! ⭐'
+  const line1 = isShiftPoster
+    ? `<strong>${opts.otherPartyName}</strong> has a shift request on <strong>${opts.boardName}</strong> that may match your shift offer:`
+    : `<strong>${opts.otherPartyName}</strong> just posted a shift offer on <strong>${opts.boardName}</strong> that may match your request:`
+  const ownLabel  = isShiftPoster ? 'Your shift offer:' : 'Your request:'
+  const otherLabel = isShiftPoster ? 'Their request:' : 'Their shift offer:'
+  return shell(`
+    ${h1(heading)}
+    ${p(line1)}
+    <table cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 24px;">
+      <tr>
+        <td style="padding:0 0 8px;">
+          <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9b8ab4;text-transform:uppercase;letter-spacing:0.5px;">${ownLabel}</span><br/>
+          <span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:600;color:#2f2040;">${opts.ownPostTitle}</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:0 0 8px;">
+          <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9b8ab4;text-transform:uppercase;letter-spacing:0.5px;">${otherLabel}</span><br/>
+          <span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:600;color:#2f2040;">${opts.otherPostTitle}</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:0 0 8px;">
+          <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9b8ab4;text-transform:uppercase;letter-spacing:0.5px;">Date:</span><br/>
+          <span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:600;color:#2f2040;">${opts.shiftDate}</span>
+        </td>
+      </tr>
+    </table>
+    ${p('Head to The Wall to reach out and coordinate directly.')}
+    ${btn(opts.wallUrl, 'Go to The Wall')}
+    ${muted('You can turn off email notifications in your profile settings.')}
+  `)
+}
+
 /** Generic notification — available for future use */
 export const notificationHtml = (opts: {
   title: string

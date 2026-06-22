@@ -7,6 +7,7 @@ import { shiftSchema } from '@/lib/validations/shifts'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { Plus, Save } from 'lucide-react'
+import { notifyShiftPosted } from '@/app/actions/notifications'
 
 interface Board { id: string; name: string }
 
@@ -134,6 +135,14 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
           is_active:            true,
         })
         if (error) throw error
+        // Fire-and-forget — notify both parties if a matching request already exists
+        notifyShiftPosted({
+          boardId:      form.board_id,
+          startTimeIso: startUTC,
+          shiftTitle:   form.shift_title,
+          posterName:   displayName,
+          posterUserId: userId,
+        })
       }
       onSuccess?.()
       router.push('/wall')
