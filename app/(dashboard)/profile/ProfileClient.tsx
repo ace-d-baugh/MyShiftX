@@ -183,8 +183,8 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
         </form>
       </div>
 
-      {/* Notifications — hidden until contact/notification feature is ready */}
-      <div className="hidden">
+      {/* Notifications */}
+      <div className="card shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-info/10 rounded-full flex items-center justify-center">
             <Bell className="w-5 h-5 text-info" />
