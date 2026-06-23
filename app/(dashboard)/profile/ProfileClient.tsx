@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { User, Bell, LayoutDashboard, Trash2, Save, CheckCircle, Plus, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -33,6 +33,8 @@ interface ProfileClientProps {
 export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
   const supabase = createClient()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isNewOAuthUser = searchParams.get('oauth') === '1'
 
   const [displayName, setDisplayName] = useState(user?.display_name ?? '')
   const [phoneNumber, setPhoneNumber] = useState(user?.phone_number ?? '')
@@ -128,6 +130,12 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
         <h1 className="font-accent text-2xl font-bold text-text">My Profile</h1>
         <p className="text-sm text-text/60">Manage your account settings and boards</p>
       </div>
+
+      {isNewOAuthUser && (
+        <div className="p-3 rounded-md bg-info/10 border border-info/20 text-info text-sm">
+          Welcome! Set a display name below before posting or joining boards.
+        </div>
+      )}
 
       {/* Account Info */}
       <div className="card shadow-sm">

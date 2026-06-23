@@ -7,6 +7,7 @@ import { Eye, EyeOff, UserPlus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { registerSchema, type RegisterInput } from '@/lib/validations/auth'
+import { OAuthButtons } from '@/components/ui/OAuthButtons'
 
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>
 
@@ -92,7 +93,9 @@ export default function RegisterPage() {
         </div>
       )}
 
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <OAuthButtons mode="register" />
+
+      <form onSubmit={onSubmit} className="space-y-4 mt-4" noValidate>
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-text mb-1">

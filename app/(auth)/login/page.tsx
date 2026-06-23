@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, LogIn, Clock, AlertTriangle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { loginSchema } from '@/lib/validations/auth'
+import { OAuthButtons } from '@/components/ui/OAuthButtons'
 
 const REASON_MESSAGES: Record<string, { icon: typeof Clock; text: string; style: string }> = {
   session_expired: {
@@ -97,7 +98,9 @@ export default function LoginPage() {
         </div>
       )}
 
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <OAuthButtons mode="login" />
+
+      <form onSubmit={onSubmit} className="space-y-4 mt-4" noValidate>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-text mb-1">
             Email Address

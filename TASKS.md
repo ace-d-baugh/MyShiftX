@@ -91,66 +91,73 @@ Tasks are ordered by impact. Each has a **🤖 Claude handles** section (code I 
 
 ---
 
-### 3 — Shift Match Notifications `HIGH`
+### 3 — Shift Match Notifications ✅ DONE
 
-**Why third:** Users post requests saying "I need a shift on Thursday evening." When a matching shift offer is posted, they should be told immediately. This is a core promise of the app.
+**🤖 Claude handled:**
+- ✅ Matching logic: same board + same date (ET) + shift start time falls within preferred time window
+- ✅ `notifyShiftPosted()` — finds active requests that match and emails both parties
+- ✅ `notifyRequestPosted()` — finds active shifts that match and emails both parties
+- ✅ `shiftMatchHtml()` email template with role-aware copy for each recipient
+- ✅ Deduplication by user ID prevents double emails from duplicate DB records
+- ✅ Added `request_title` field to request form and card
 
-**Dependencies:** Task 2 must be done first (email infra confirmed working).
-
-**🤖 Claude handles:**
-- ✅ Write a matching function: when a new shift is posted, query all active requests on the same board that overlap in date and preferred time slot
-- ✅ For each matched request owner: check `notify_via_email` and send a "A shift matching your request was just posted" email
-- ✅ Write the email template for match notifications (shift details, direct link to the wall)
-- ✅ Add the match-check call to the `createShift` server action so it runs on every new post
-
-**👤 You handle:**
-- ✅ Decide on match strictness: should it match on date only, or also try to match preferred time slots vs. shift start time? (Tell me and I'll implement accordingly)
-- ✅ Test the end-to-end flow: post a request, then post a matching shift from a second account, verify email arrives
+**👤 You handled:**
+- ✅ Added `request_title` column to `requests` table in Supabase
+- ✅ Tested both directions — emails confirmed working
 
 ---
 
-### 4 — SMS Notifications `MEDIUM`
+### 4 — SMS Notifications *(Skipped — deferred)*
 
-**Why fourth:** Some users prefer texts. Phone number and `notify_via_sms` fields are already in the database — the infrastructure just needs wiring.
-
-**Dependencies:** Tasks 2 and 3 (so SMS can reuse the same trigger points as email).
-
-**🤖 Claude handles:**
-- [ ] Add a `sendSms(to, message)` helper that calls your SMS provider's API
-- [ ] Extend the interest notification trigger (Task 2) to also send SMS if `notify_via_sms = true`
-- [ ] Extend the match notification trigger (Task 3) to also send SMS
-- [ ] Keep messages short and include a direct link
-
-**👤 You handle:**
-- [ ] Choose an SMS provider — **Twilio** is the standard choice; **Resend does not do SMS**
-  - Create a Twilio account at twilio.com
-  - Get a phone number (~$1/month) and note your Account SID and Auth Token
-- [ ] Add `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_NUMBER` to Vercel environment variables
-- [ ] Install the Twilio SDK: `npm install twilio`
-- [ ] Test by adding your phone number to a dev account and triggering an interest notification
+Revisit after OAuth and other higher-value features ship.
 
 ---
 
-### 5 — OAuth Login (Google + Apple) `MEDIUM`
+### 5 — OAuth Login (Google + Facebook + LinkedIn) `IN PROGRESS`
 
-**Why fifth:** New users drop off at registration forms. Google and Apple sign-in reduce that friction significantly. Facebook and LinkedIn are lower priority for a hospitality/shift-trading audience.
+**🤖 Claude handled:**
+- ✅ `OAuthButtons` component — branded Google, Facebook, LinkedIn buttons with SVG icons
+- ✅ Buttons added to login and register pages with a divider
+- ✅ `/auth/callback` route — exchanges code, sends new OAuth users to profile to set display name
+- ✅ Profile page welcome banner for first-time OAuth arrivals
 
-**🤖 Claude handles:**
-- [ ] Add "Continue with Google" and "Continue with Apple" buttons to the login page
-- [ ] Add the same buttons to the register page
-- [ ] Handle the OAuth callback — on first login, redirect to a "complete your profile" step to set display name (required for posting)
-- [ ] Ensure the existing display name validation and board-join flow still works for OAuth users
+**👤 You handle — complete each provider below, then test:**
 
-**👤 You handle:**
-**Google:**
-- [ ] Go to Google Cloud Console → APIs & Services → Credentials → Create OAuth 2.0 Client ID
-- [ ] Set authorized redirect URI to: `https://<your-supabase-project>.supabase.co/auth/v1/callback`
-- [ ] Copy Client ID and Client Secret into Supabase Dashboard → Auth → Providers → Google
+#### Google
+- [ ] Go to **console.cloud.google.com** → select or create a project
+- [ ] APIs & Services → **OAuth consent screen** → External → fill in App name, support email, developer email → Save & Continue through all steps
+- [ ] APIs & Services → **Credentials** → Create Credentials → **OAuth client ID**
+  - Application type: **Web application**
+  - Authorized redirect URIs → Add: `https://<your-supabase-ref>.supabase.co/auth/v1/callback`
+  - *(your ref is the subdomain part of your Supabase project URL — find it in Supabase → Settings → General)*
+- [ ] Copy **Client ID** and **Client Secret**
+- [ ] Supabase Dashboard → **Authentication → Providers → Google** → Enable → paste both → Save
+- [ ] Test: click Google on the login page, sign in, verify you land on profile or wall
 
-**Apple:**
-- [ ] Requires an Apple Developer account ($99/year) — decide if this is worth it now or defer
-- [ ] If yes: create a Services ID, configure Sign In with Apple, get the Key ID and private key
-- [ ] Add credentials to Supabase Dashboard → Auth → Providers → Apple
+#### Facebook
+- [ ] Go to **developers.facebook.com** → My Apps → **Create App**
+  - Use case: **Authenticate and request data from users** → Next
+  - App name: `MyShiftX` → Create app
+- [ ] On the app dashboard: Add product → **Facebook Login** → **Web**
+  - Site URL: `https://myshiftx.com` → Save
+- [ ] Left sidebar: Facebook Login → **Settings**
+  - Valid OAuth Redirect URIs → Add: `https://<your-supabase-ref>.supabase.co/auth/v1/callback` → Save
+- [ ] Left sidebar: **App Settings → Basic** → copy **App ID** and **App Secret**
+- [ ] Supabase Dashboard → **Authentication → Providers → Facebook** → Enable → paste both → Save
+- [ ] To test in Development mode: **App Roles → Roles → Add Testers** → add your personal Facebook account
+- [ ] When ready for public users: complete **App Review** and switch Mode from Development to **Live**
+- [ ] Test: click Facebook on the login page
+
+#### LinkedIn
+- [ ] Go to **linkedin.com/developers** → **Create app**
+  - App name: `MyShiftX`, LinkedIn Page: create/use a company page (required by LinkedIn), upload logo
+- [ ] **Auth** tab → OAuth 2.0 settings → Authorized redirect URLs → **Add URL**:
+  `https://<your-supabase-ref>.supabase.co/auth/v1/callback` → Update
+- [ ] **Products** tab → **Sign In with LinkedIn using OpenID Connect** → **Request access** (usually instant)
+- [ ] **Auth** tab → copy **Client ID** and **Client Secret**
+- [ ] Supabase Dashboard → **Authentication → Providers → LinkedIn (OIDC)** → Enable → paste both → Save
+  *(Use the **OIDC** provider specifically — not the older plain LinkedIn OAuth provider)*
+- [ ] Test: click LinkedIn on the login page
 
 ---
 
