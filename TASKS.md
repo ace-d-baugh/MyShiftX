@@ -124,14 +124,14 @@ Revisit after OAuth and other higher-value features ship.
 **👤 You handle — complete each provider below, then test:**
 
 #### Google
-- [ ] Go to **console.cloud.google.com** → select or create a project
-- [ ] APIs & Services → **OAuth consent screen** → External → fill in App name, support email, developer email → Save & Continue through all steps
-- [ ] APIs & Services → **Credentials** → Create Credentials → **OAuth client ID**
+- ✅ Go to **console.cloud.google.com** → select or create a project
+- ✅ APIs & Services → **OAuth consent screen** → External → fill in App name, support email, developer email → Save & Continue through all steps
+- ✅ APIs & Services → **Credentials** → Create Credentials → **OAuth client ID**
   - Application type: **Web application**
   - Authorized redirect URIs → Add: `https://<your-supabase-ref>.supabase.co/auth/v1/callback`
   - *(your ref is the subdomain part of your Supabase project URL — find it in Supabase → Settings → General)*
-- [ ] Copy **Client ID** and **Client Secret**
-- [ ] Supabase Dashboard → **Authentication → Providers → Google** → Enable → paste both → Save
+- ✅ Copy **Client ID** and **Client Secret**
+- ✅ Supabase Dashboard → **Authentication → Providers → Google** → Enable → paste both → Save
 - [ ] Test: click Google on the login page, sign in, verify you land on profile or wall
 
 #### Facebook

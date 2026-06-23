@@ -24,7 +24,12 @@ export function LandingHeader({ displayName }: LandingHeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 bg-background/90 backdrop-blur border-b border-border animate-slide-down">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div className={cn(
+          'max-w-6xl mx-auto px-4 py-3',
+          isLoggedIn
+            ? 'flex items-center justify-between'
+            : 'flex flex-col sm:flex-row items-center gap-2 sm:justify-between'
+        )}>
         <Link href={isLoggedIn ? '/wall' : '/'} className="flex flex-row items-center gap-0 align-baseline">
           <Image
             src="/logos/ShiftX-logo.svg"
@@ -36,7 +41,10 @@ export function LandingHeader({ displayName }: LandingHeaderProps) {
           />
         </Link>
 
-        <nav className="flex items-center gap-3">
+        <nav className={cn(
+            'flex items-center gap-3',
+            !isLoggedIn && 'w-full justify-center sm:w-auto sm:justify-end'
+          )}>
           {isLoggedIn ? (
             <div className="relative">
               <button
