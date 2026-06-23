@@ -189,11 +189,16 @@ export default function RegisterPage() {
             I agree to the{' '}
             <Link href="/terms" target="_blank" className="text-primary hover:underline min-h-0 min-w-0">
               Terms &amp; Conditions
-            </Link>{' '}
-            and{' '}
+            </Link>
+            ,{' '}
             <Link href="/privacy" target="_blank" className="text-primary hover:underline min-h-0 min-w-0">
               Privacy Policy
             </Link>
+            , and{' '}
+            <Link href="/data-deletion" target="_blank" className="text-primary hover:underline min-h-0 min-w-0">
+              Data Deletion Policy
+            </Link>
+            . I understand how my data is stored and how to request its deletion.
           </label>
         </div>
         {errors.terms_accepted && (
