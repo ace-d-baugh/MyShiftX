@@ -7,7 +7,7 @@ type Provider = 'google' | 'facebook' | 'linkedin_oidc'
 
 // Set to true once each provider's app credentials are configured in Supabase
 const ENABLED: Record<Provider, boolean> = {
-  google:        true,
+  google:        false,   // re-enable once OAuth client is configured
   facebook:      false,   // configure Meta app first
   linkedin_oidc: false,   // configure LinkedIn app first
 }
@@ -54,6 +54,9 @@ export function OAuthButtons({ mode }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  const enabledProviders = PROVIDERS.filter(({ id }) => ENABLED[id])
+  if (enabledProviders.length === 0) return null
+
   const handleOAuth = async (provider: Provider) => {
     setError(null)
     setLoadingProvider(provider)
@@ -85,7 +88,7 @@ export function OAuthButtons({ mode }: OAuthButtonsProps) {
       )}
 
       <div className={`grid gap-2 ${Object.values(ENABLED).filter(Boolean).length === 1 ? 'grid-cols-1' : Object.values(ENABLED).filter(Boolean).length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
-        {PROVIDERS.filter(({ id }) => ENABLED[id]).map(({ id, label, icon }) => (
+        {enabledProviders.map(({ id, label, icon }) => (
           <button
             key={id}
             type="button"
