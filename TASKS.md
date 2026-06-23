@@ -98,14 +98,14 @@ Tasks are ordered by impact. Each has a **🤖 Claude handles** section (code I 
 **Dependencies:** Task 2 must be done first (email infra confirmed working).
 
 **🤖 Claude handles:**
-- [ ] Write a matching function: when a new shift is posted, query all active requests on the same board that overlap in date and preferred time slot
-- [ ] For each matched request owner: check `notify_via_email` and send a "A shift matching your request was just posted" email
-- [ ] Write the email template for match notifications (shift details, direct link to the wall)
-- [ ] Add the match-check call to the `createShift` server action so it runs on every new post
+- ✅ Write a matching function: when a new shift is posted, query all active requests on the same board that overlap in date and preferred time slot
+- ✅ For each matched request owner: check `notify_via_email` and send a "A shift matching your request was just posted" email
+- ✅ Write the email template for match notifications (shift details, direct link to the wall)
+- ✅ Add the match-check call to the `createShift` server action so it runs on every new post
 
 **👤 You handle:**
-- [ ] Decide on match strictness: should it match on date only, or also try to match preferred time slots vs. shift start time? (Tell me and I'll implement accordingly)
-- [ ] Test the end-to-end flow: post a request, then post a matching shift from a second account, verify email arrives
+- ✅ Decide on match strictness: should it match on date only, or also try to match preferred time slots vs. shift start time? (Tell me and I'll implement accordingly)
+- ✅ Test the end-to-end flow: post a request, then post a matching shift from a second account, verify email arrives
 
 ---
 

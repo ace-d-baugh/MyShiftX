@@ -224,6 +224,15 @@ export function Navbar({
         )}
       </header>
 
+      {/* Backdrop — closes the mobile menu when tapping outside the header */}
+      {mobileMenuOpen && !mobileMenuClosing && (
+        <div
+          className="fixed inset-0 z-[49] md:hidden"
+          onClick={closeMobileMenu}
+          aria-hidden="true"
+        />
+      )}
+
       {/* ── Mobile bottom nav (Wall + Calendar only) ─────────────────────── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
         <div className="flex items-stretch">
