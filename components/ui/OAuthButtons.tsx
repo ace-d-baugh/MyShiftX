@@ -5,6 +5,13 @@ import { createClient } from '@/lib/supabase/client'
 
 type Provider = 'google' | 'facebook' | 'linkedin_oidc'
 
+// Set to true once each provider's app credentials are configured in Supabase
+const ENABLED: Record<Provider, boolean> = {
+  google:        true,
+  facebook:      false,   // configure Meta app first
+  linkedin_oidc: false,   // configure LinkedIn app first
+}
+
 const PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
   {
     id: 'google',
@@ -77,8 +84,8 @@ export function OAuthButtons({ mode }: OAuthButtonsProps) {
         <p className="text-xs text-warning text-center">{error}</p>
       )}
 
-      <div className="grid grid-cols-3 gap-2">
-        {PROVIDERS.map(({ id, label, icon }) => (
+      <div className={`grid gap-2 ${Object.values(ENABLED).filter(Boolean).length === 1 ? 'grid-cols-1' : Object.values(ENABLED).filter(Boolean).length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+        {PROVIDERS.filter(({ id }) => ENABLED[id]).map(({ id, label, icon }) => (
           <button
             key={id}
             type="button"
