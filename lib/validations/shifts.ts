@@ -15,7 +15,7 @@ export const shiftSchema = z.object({
 })
 
 export const requestSchema = z.object({
-  request_title: z.string().min(1, 'Title is required').max(100, 'Title must be 100 characters or less'),
+  request_title: z.string().min(1, 'Title is required').max(35, 'Title must be 35 characters or less'),
   board_id: z.string().uuid('Please select a board'),
   requested_date: z.string().min(1, 'Date is required'),
   preferred_times: z.array(z.enum(['morning', 'afternoon', 'evening', 'late'])).min(1, 'Select at least one time preference'),

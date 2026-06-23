@@ -63,6 +63,11 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
 
   const isOwner = currentUserId && request.user_id === currentUserId
 
+  const TIME_ORDER: PreferredTime[] = ['morning', 'afternoon', 'evening', 'late']
+  const sortedTimes = [...request.preferred_times].sort(
+    (a, b) => TIME_ORDER.indexOf(a) - TIME_ORDER.indexOf(b)
+  )
+
   const openMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const W = 192 // w-48
@@ -113,7 +118,7 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
         <div className="flex items-center gap-1.5 mb-3">
           <Clock className="w-3.5 h-3.5 text-accent shrink-0" />
           <div className="flex flex-wrap gap-1.5">
-            {request.preferred_times.map(t => (
+            {sortedTimes.map(t => (
               <span key={t} className={cn('badge text-sm', timeBadgeVariant[t])}>
                 <span className="sm:hidden">{timeLabelsShort[t]}</span>
                 <span className="hidden sm:inline">{timeLabels[t]}</span>

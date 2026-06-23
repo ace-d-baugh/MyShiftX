@@ -221,16 +221,28 @@ export function PostRequestForm({ userId, displayName, onSuccess, requestId, ini
             )}
 
             <div className="space-y-4">
-              {/* Board */}
+              {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-text mb-1">Board <span className="text-warning">*</span></label>
-                <select name="board_id" value={f.board_id} onChange={onChange(i)}
-                  className={`input ${errs.board_id ? 'border-warning' : ''}`}>
-                  <option value="">Select board...</option>
-                  {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                </select>
-                {errs.board_id && <p className="mt-1 text-xs text-warning">{errs.board_id}</p>}
+                <label className="block text-sm font-medium text-text mb-1">Title <span className="text-warning">*</span></label>
+                <input name="request_title" type="text" value={f.request_title} onChange={onChange(i)}
+                  maxLength={35}
+                  className={`input placeholder:text-text/30 ${errs.request_title ? 'border-warning' : ''}`}
+                  placeholder="Shift Wanted" />
+                {errs.request_title && <p className="mt-1 text-xs text-warning">{errs.request_title}</p>}
               </div>
+
+              {/* Board — hidden when user has only one board (auto-selected) */}
+              {boards.length > 1 && (
+                <div>
+                  <label className="block text-sm font-medium text-text mb-1">Board <span className="text-warning">*</span></label>
+                  <select name="board_id" value={f.board_id} onChange={onChange(i)}
+                    className={`input ${errs.board_id ? 'border-warning' : ''}`}>
+                    <option value="">Select board...</option>
+                    {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                  {errs.board_id && <p className="mt-1 text-xs text-warning">{errs.board_id}</p>}
+                </div>
+              )}
 
               {/* Date */}
               <div>
