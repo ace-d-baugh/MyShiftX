@@ -264,8 +264,8 @@ export function CommentSection({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-2 pt-3 mt-3 border-t border-border">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 pt-3 mt-3 border-t border-border">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={toggleComments}
@@ -306,7 +306,7 @@ export function CommentSection({
           )}
         </div>
         {actions && (
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1">
             {actions}
           </div>
         )}

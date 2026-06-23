@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const shiftSchema = z.object({
   board_id: z.string().uuid('Please select a board'),
-  shift_title: z.string().min(1, 'Shift title is required'),
+  shift_title: z.string().min(1, 'Shift title is required').max(35, 'Title must be 35 characters or less'),
   start_time: z.string().min(1, 'Start time is required'),
   end_time: z.string().min(1, 'End time is required'),
   is_trade: z.boolean().default(false),

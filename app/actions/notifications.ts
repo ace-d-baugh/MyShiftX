@@ -222,10 +222,16 @@ export async function notifyShiftPosted(opts: {
 
     if (error) { console.error('[notifyShiftPosted] query error:', error.message); return }
 
+    // Deduplicate by requester user_id — same person may have multiple matching requests
+    const seenRequesters = new Set<string>()
     for (const req of (requests ?? [])) {
+      const uid = req.user_id as string | null
+      if (!uid || seenRequesters.has(uid)) continue
+
       const prefs = req.preferred_times as PreferredTime[]
       if (!shiftMatchesPreferences(opts.startTimeIso, prefs)) continue
 
+      seenRequesters.add(uid)
       const requester = (req.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean } | null
       const board     = (req.boards as unknown) as { name: string } | null
 
@@ -272,24 +278,31 @@ export async function notifyRequestPosted(opts: {
       .eq('id', opts.requesterUserId)
       .single()
 
-    // Fetch active shifts on the same board for the same date
+    // Fetch all active shifts on the same board — filter by ET date + time preference in JS
+    // (No UTC date range filter: timezone conversion makes UTC ranges fragile;
+    //  getETDate() does the correct ET date comparison instead.)
     const { data: shifts, error } = await db
       .from('shifts')
       .select('shift_title, start_time, user_id, users!user_id(email, display_name, notify_via_email), boards!board_id(name)')
       .eq('board_id', opts.boardId)
       .eq('is_active', true)
-      .gte('start_time', `${opts.requestedDate}T00:00:00.000Z`)
-      .lt('start_time',  `${opts.requestedDate}T23:59:59.999Z`)
+      .gt('expires_at', new Date().toISOString())
       .neq('user_id', opts.requesterUserId)
 
     if (error) { console.error('[notifyRequestPosted] query error:', error.message); return }
+    console.log(`[notifyRequestPosted] found ${(shifts ?? []).length} active shifts to check for board ${opts.boardId} on ${opts.requestedDate}`)
 
-    // The date range above is UTC — filter to ET date + time preference in JS
+    // Deduplicate by shift poster user_id — same person may have multiple matching shifts
+    const seenPosters = new Set<string>()
     for (const shift of (shifts ?? [])) {
+      const uid = shift.user_id as string | null
+      if (!uid || seenPosters.has(uid)) continue
+
       const startIso = shift.start_time as string
       if (getETDate(startIso) !== opts.requestedDate) continue
       if (!shiftMatchesPreferences(startIso, opts.preferredTimes)) continue
 
+      seenPosters.add(uid)
       const poster = (shift.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean } | null
       const board  = (shift.boards as unknown) as { name: string } | null
 

@@ -200,7 +200,6 @@ Tasks are ordered by impact. Each has a **🤖 Claude handles** section (code I 
 | Accessibility audit (WCAG 2.1 AA) | 🤖 Claude | Can audit and fix after core features are stable |
 | Rate limiting on post/flag endpoints | 🤖 Claude | Add after real users are on the platform |
 | User acceptance testing with a pilot group | 👤 You | Pick 5–10 coworkers to test before wider rollout |
-| Export MyShiftX logo as PNG for email header | 👤 You | Export at 400×84px (2×), place in `public/logos/myshiftx-logo.png`, update email template URL |
 
 ---
 

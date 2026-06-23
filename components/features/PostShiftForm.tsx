@@ -251,7 +251,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
                 <label className="block text-sm font-medium text-text mb-1">Shift Title <span className="text-warning">*</span></label>
                 <input name="shift_title" type="text" value={f.shift_title} onChange={onChange(i)}
                   className={`input placeholder:text-text/30 ${errs.shift_title ? 'border-warning' : ''}`}
-                  placeholder="e.g., Morning Opening Shift" />
+                  placeholder="e.g., Morning Opening" maxLength={35} />
                 <p className="mt-1 text-xs text-text/40">Use the exact title as it appears on your schedule.</p>
                 {errs.shift_title && <p className="mt-1 text-xs text-warning">{errs.shift_title}</p>}
               </div>

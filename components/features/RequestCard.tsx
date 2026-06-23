@@ -76,25 +76,36 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
 
   return (
     <>
-      <div className="card border-l-4 border-l-accent transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+      <div className={cn('card border-l-4 border-l-accent transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5', isOwner && 'bg-primary-light/30')}>
 
-        {/* Row 1: Title | Poster name + ⋮ menu */}
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-accent font-bold text-accent text-lg leading-tight flex-1 min-w-0">
-            {request.request_title}
-          </h3>
-          <div className="flex items-center gap-1 shrink-0">
-            <span className="text-xs text-text/50 flex items-center gap-1 whitespace-nowrap">
-              <User className="w-3 h-3 shrink-0 text-accent" />
-              {request.created_by}
-            </span>
-            <button
-              onClick={openMenu}
-              className="p-1 rounded text-text/40 hover:text-text hover:bg-primary-light/50 transition-colors min-h-0 min-w-0 ml-0.5"
-              aria-label="More options"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
+        {/* Row 1: Title (full-width on mobile) | Poster name + ⋮ on sm+ */}
+        <div className="mb-1">
+          <div className="flex items-start gap-2">
+            <h3 className="font-accent font-bold text-accent text-lg leading-snug flex-1 min-w-0 break-words hyphens-auto">
+              {request.request_title}
+            </h3>
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="hidden sm:flex text-xs text-text/50 items-center gap-1.5 whitespace-nowrap">
+                <User className="w-3 h-3 shrink-0 text-accent" />
+                {request.created_by}
+                {isOwner && (
+                  <span className="text-[10px] font-semibold bg-primary/15 text-primary px-1.5 py-0.5 rounded-full leading-none">you</span>
+                )}
+              </span>
+              <button onClick={openMenu}
+                className="p-1 rounded text-text/40 hover:text-text hover:bg-primary-light/50 transition-colors min-h-0 min-w-0 ml-0.5"
+                aria-label="More options">
+                <MoreVertical className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          {/* Mobile-only: poster name below title */}
+          <div className="sm:hidden flex items-center gap-1.5 mt-0.5 text-xs text-text/50">
+            <User className="w-3 h-3 shrink-0 text-accent" />
+            {request.created_by}
+            {isOwner && (
+              <span className="text-[10px] font-semibold bg-primary/15 text-primary px-1.5 py-0.5 rounded-full leading-none">you</span>
+            )}
           </div>
         </div>
 
