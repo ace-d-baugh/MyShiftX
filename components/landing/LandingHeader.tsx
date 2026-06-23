@@ -83,11 +83,11 @@ export function LandingHeader({ displayName }: LandingHeaderProps) {
             </div>
           ) : (
             <>
-              <Link href="/login" className="text-sm px-4 py-2 min-h-0 h-10">
+              <Link href="/login" className="btn btn-outline text-sm px-4 py-2 min-h-0 h-10">
                 Log In
               </Link>
               <Link href="/register" className="btn btn-primary text-sm px-4 py-2 min-h-0 h-10">
-                Register
+                Get Started
               </Link>
             </>
           )}
