@@ -7,7 +7,7 @@ type Provider = 'google' | 'facebook' | 'linkedin_oidc'
 
 // Set to true once each provider's app credentials are configured in Supabase
 const ENABLED: Record<Provider, boolean> = {
-  google:        false,   // re-enable once OAuth client is configured
+  google:        true,
   facebook:      false,   // configure Meta app first
   linkedin_oidc: false,   // configure LinkedIn app first
 }
