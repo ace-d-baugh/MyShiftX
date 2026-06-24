@@ -165,6 +165,88 @@
   100% { opacity: 0; transform: translateY(-12px); }
 }
 
+/* ── Skeleton shimmer ─────────────────────────────────────────────────────── */
+@keyframes shimmer-diagonal {
+  0%   { background-position: 200% 200%; }
+  100% { background-position: -200% -200%; }
+}
+
+.skeleton,
+.skeleton-strong,
+.skeleton-soft {
+  background-size: 300% 300%;
+  animation: shimmer-diagonal 1.8s ease-in-out infinite;
+}
+
+/* medium – time rows, icon placeholders */
+.skeleton {
+  background-image: linear-gradient(
+    135deg,
+    hsl(269 65% 93%) 0%,
+    hsl(269 45% 89%) 35%,
+    hsl(269 100% 97%) 50%,
+    hsl(269 45% 89%) 65%,
+    hsl(269 65% 93%) 100%
+  );
+}
+
+/* darker – title blocks */
+.skeleton-strong {
+  background-image: linear-gradient(
+    135deg,
+    hsl(269 65% 88%) 0%,
+    hsl(269 55% 84%) 35%,
+    hsl(269 75% 92%) 50%,
+    hsl(269 55% 84%) 65%,
+    hsl(269 65% 88%) 100%
+  );
+}
+
+/* lightest – small pills, icon shapes */
+.skeleton-soft {
+  background-image: linear-gradient(
+    135deg,
+    hsl(269 50% 95%) 0%,
+    hsl(269 35% 92%) 35%,
+    hsl(269 100% 98%) 50%,
+    hsl(269 35% 92%) 65%,
+    hsl(269 50% 95%) 100%
+  );
+}
+
+.dark .skeleton {
+  background-image: linear-gradient(
+    135deg,
+    hsl(269 30% 18%) 0%,
+    hsl(269 45% 24%) 35%,
+    hsl(269 35% 29%) 50%,
+    hsl(269 45% 24%) 65%,
+    hsl(269 30% 18%) 100%
+  );
+}
+
+.dark .skeleton-strong {
+  background-image: linear-gradient(
+    135deg,
+    hsl(269 35% 22%) 0%,
+    hsl(269 50% 29%) 35%,
+    hsl(269 40% 34%) 50%,
+    hsl(269 50% 29%) 65%,
+    hsl(269 35% 22%) 100%
+  );
+}
+
+.dark .skeleton-soft {
+  background-image: linear-gradient(
+    135deg,
+    hsl(269 25% 15%) 0%,
+    hsl(269 35% 20%) 35%,
+    hsl(269 25% 24%) 50%,
+    hsl(269 35% 20%) 65%,
+    hsl(269 25% 15%) 100%
+  );
+}
+
 @layer utilities {
   /* Honour reduced-motion preferences */
   @media (prefers-reduced-motion: reduce) {
@@ -177,7 +259,10 @@
     .animate-shake,
     .animate-pop-in,
     .animate-float,
-    .animate-card-in {
+    .animate-card-in,
+    .skeleton,
+    .skeleton-strong,
+    .skeleton-soft {
       animation: none !important;
       opacity: 1 !important;
       width: 100% !important;

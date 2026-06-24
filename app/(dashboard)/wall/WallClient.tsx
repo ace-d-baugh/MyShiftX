@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { deactivateShift, deactivateRequest } from '@/app/actions/posts'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
 import { RequestCard, type RequestData } from '@/components/features/RequestCard'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { WallSkeleton } from '@/components/ui/WallSkeleton'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { cn } from '@/lib/utils'
 
@@ -477,9 +477,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
 
       {/* Content */}
       {loading ? (
-        <div className="flex justify-center py-16">
-          <LoadingSpinner size="lg" />
-        </div>
+        <WallSkeleton tab={tab} />
       ) : tab === 'offers' ? (
         shifts.length === 0 ? (
           <EmptyState
