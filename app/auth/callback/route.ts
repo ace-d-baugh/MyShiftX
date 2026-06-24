@@ -3,19 +3,38 @@ import { createServerClient } from '@/lib/supabase/server'
 import { displayNameRegex } from '@/lib/validations/auth'
 
 function formatGoogleDisplayName(meta: Record<string, unknown>): string | null {
-  const given  = typeof meta.given_name  === 'string' ? meta.given_name.trim()  : ''
-  const family = typeof meta.family_name === 'string' ? meta.family_name.trim() : ''
-  if (!given || !family) return null
+  const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
 
-  // Capitalise each word, preserving spaces and hyphens (e.g. "Mary Ann", "Jean-Pierre")
-  const firstName = given
+  let firstPart = ''
+  let lastInitial = ''
+
+  const given  = str(meta.given_name)
+  const family = str(meta.family_name)
+
+  if (given && family) {
+    firstPart   = given
+    lastInitial = family.charAt(0).toUpperCase()
+  } else {
+    // Fall back to full_name or name ("Tyrell Erfunden" → "Tyrell" + "E")
+    const full = str(meta.full_name) || str(meta.name)
+    if (!full) return null
+    const lastSpace = full.lastIndexOf(' ')
+    if (lastSpace === -1) return null
+    firstPart   = full.slice(0, lastSpace)
+    lastInitial = full.charAt(lastSpace + 1).toUpperCase()
+  }
+
+  if (!firstPart || !lastInitial) return null
+
+  // Capitalise each word, preserving hyphens (e.g. "Mary Ann", "Jean-Pierre")
+  const formattedFirst = firstPart
     .split(' ')
     .map(part =>
       part.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('-')
     )
     .join(' ')
 
-  return `${firstName} ${family.charAt(0).toUpperCase()}.`
+  return `${formattedFirst} ${lastInitial}.`
 }
 
 export async function GET(request: Request) {
