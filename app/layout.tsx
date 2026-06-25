@@ -44,7 +44,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${lato.variable} ${philosopher.variable}`} suppressHydrationWarning>
       <head>
-        <meta property="fb:app_id" content={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID} />
+        {process.env.FACEBOOK_APP_ID && (
+          <meta property="fb:app_id" content={process.env.FACEBOOK_APP_ID} />
+        )}
         <script
           dangerouslySetInnerHTML={{
             __html: `try{if(localStorage.getItem('myshiftx-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
