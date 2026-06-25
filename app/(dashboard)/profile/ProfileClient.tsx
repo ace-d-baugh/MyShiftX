@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
 import { getSettings, saveSettings, type UserSettings, type WeekStart, type DateFormat, type TimeFormat, DEFAULT_SETTINGS } from '@/lib/settings'
 import { getStoredTheme, applyTheme } from '@/lib/theme'
+import { upsertUserPreferences } from '@/app/actions/preferences'
 import type { GlobalRole } from '@/lib/database.types'
 
 interface UserProfile {
@@ -55,14 +56,21 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
     setDarkMode(getStoredTheme() === 'dark')
   }, [])
 
+  const syncToDB = (settings: UserSettings, theme: boolean) => {
+    upsertUserPreferences({ ...settings, theme: theme ? 'dark' : 'light' })
+  }
+
   const updateSetting = <K extends keyof UserSettings>(key: K, val: UserSettings[K]) => {
     const next = saveSettings({ [key]: val })
     setSiteSettings(next)
+    syncToDB(next, darkMode)
   }
+
   const toggleDarkMode = () => {
     const next = !darkMode
     setDarkMode(next)
     applyTheme(next ? 'dark' : 'light')
+    syncToDB(siteSettings, next)
   }
 
   // Track whether a valid display name has been saved
