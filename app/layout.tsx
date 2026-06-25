@@ -13,12 +13,17 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://myshiftx.com'),
   openGraph: {
     siteName: 'MyShiftX',
+    url: 'https://myshiftx.com',
+    type: 'website',
     images: [
       {
         url: '/logos/ShiftX-logo-lg.png',
         alt: 'MyShiftX',
       },
     ],
+  },
+  other: {
+    'fb:app_id': process.env.NEXT_PUBLIC_FACEBOOK_APP_ID ?? '',
   },
 }
 

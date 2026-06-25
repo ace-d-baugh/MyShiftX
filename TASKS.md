@@ -135,10 +135,10 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 - ✅ Test: click Google on the login page, sign in, verify you land on profile or wall
 
 #### Facebook
-- [ ] Go to **developers.facebook.com** → My Apps → **Create App**
+- ✅ Go to **developers.facebook.com** → My Apps → **Create App**
   - Use case: **Authenticate and request data from users** → Next
   - App name: `MyShiftX` → Create app
-- [ ] On the app dashboard: Add product → **Facebook Login** → **Web**
+- ✅ On the app dashboard: Add product → **Facebook Login** → **Web**
   - Site URL: `https://myshiftx.com` → Save
 - [ ] Left sidebar: Facebook Login → **Settings**
   - Valid OAuth Redirect URIs → Add: `https://<your-supabase-ref>.supabase.co/auth/v1/callback` → Save
