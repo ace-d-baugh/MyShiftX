@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     })
 
     // Expire shifts where expires_at <= NOW()
-    const { data: shiftsData, error: shiftsError } = await supabase.rpc('expire_shifts')
+    const { error: shiftsError } = await supabase.rpc('expire_shifts')
     if (shiftsError) throw shiftsError
 
     // Expire requests where expires_at <= NOW()
