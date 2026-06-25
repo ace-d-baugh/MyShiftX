@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Trash2, Mail, Clock, CheckCircle } from 'lucide-react'
+import { Trash2, Mail, Clock, CheckCircle, ArrowLeft } from 'lucide-react'
 
 export const metadata = {
   title: 'Data Deletion Instructions – MyShiftX',
@@ -10,6 +10,10 @@ export default function DataDeletionPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto px-4 py-12">
+
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-text/60 hover:text-text mb-8 min-h-0 min-w-0">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </Link>
 
         {/* Header */}
         <div className="mb-10">

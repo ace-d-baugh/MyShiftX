@@ -5,7 +5,7 @@ export const metadata = { title: 'Terms & Conditions – MyShiftX' }
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 py-12">
         <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-text/60 hover:text-text mb-8 min-h-0 min-w-0">
           <ArrowLeft className="w-4 h-4" /> Back
