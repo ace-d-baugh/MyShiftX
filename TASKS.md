@@ -132,7 +132,7 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
   - *(your ref is the subdomain part of your Supabase project URL — find it in Supabase → Settings → General)*
 - ✅ Copy **Client ID** and **Client Secret**
 - ✅ Supabase Dashboard → **Authentication → Providers → Google** → Enable → paste both → Save
-- [ ] Test: click Google on the login page, sign in, verify you land on profile or wall
+- ✅ Test: click Google on the login page, sign in, verify you land on profile or wall
 
 #### Facebook
 - [ ] Go to **developers.facebook.com** → My Apps → **Create App**
