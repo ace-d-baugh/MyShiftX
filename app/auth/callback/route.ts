@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { displayNameRegex } from '@/lib/validations/auth'
 
-function formatGoogleDisplayName(meta: Record<string, unknown>): string | null {
+function formatOAuthDisplayName(meta: Record<string, unknown>): string | null {
   const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
 
   let firstPart = ''
@@ -61,10 +61,11 @@ export async function GET(request: Request) {
           displayNameRegex.test(profile.display_name)
         )
 
-        // If no valid display name yet, try to derive one from Google metadata
-        if (!hasName && user.app_metadata?.provider === 'google') {
+        // If no valid display name yet, try to derive one from OAuth metadata
+        const oauthProviders = ['google', 'facebook']
+        if (!hasName && oauthProviders.includes(user.app_metadata?.provider ?? '')) {
           const meta = (user.user_metadata ?? {}) as Record<string, unknown>
-          const derived = formatGoogleDisplayName(meta)
+          const derived = formatOAuthDisplayName(meta)
 
           if (derived && displayNameRegex.test(derived)) {
             // Upsert so this works for both new and existing users

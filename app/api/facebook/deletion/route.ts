@@ -25,6 +25,10 @@ function verifySignedRequest(signedRequest: string, appSecret: string): { user_i
   }
 }
 
+export async function GET() {
+  return NextResponse.json({ status: 'ok' })
+}
+
 export async function POST(req: NextRequest) {
   const appSecret = process.env.FACEBOOK_APP_SECRET
   if (!appSecret) {
