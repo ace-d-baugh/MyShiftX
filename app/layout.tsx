@@ -2,7 +2,8 @@
 
 import type { Metadata } from 'next'
 import { Lato, Philosopher } from 'next/font/google'
-// @ts-ignore: CSS module type declarations are handled by Next.js
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error: CSS import resolved by Next.js
 import './globals.css'
 
 export const metadata: Metadata = {

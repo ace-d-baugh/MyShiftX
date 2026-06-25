@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     if (shiftsError) throw shiftsError
 
     // Expire requests where expires_at <= NOW()
-    const { data: requestsData, error: requestsError } = await supabase.rpc('expire_requests')
+    const { error: requestsError } = await supabase.rpc('expire_requests')
     if (requestsError) throw requestsError
 
     return NextResponse.json({
@@ -30,10 +30,11 @@ export async function GET(req: NextRequest) {
       message: 'Expirations processed successfully',
       timestamp: new Date().toISOString()
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Expiration cron error:', error)
+    const message = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to process expirations', details: error.message },
+      { error: 'Failed to process expirations', details: message },
       { status: 500 }
     )
   }

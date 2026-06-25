@@ -52,6 +52,7 @@ export function FlagModal({ open, onClose, targetType, targetId, boardId }: Flag
     setLoading(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: insertError } = await (supabase as any).from('flags').insert({
         flagged_by_user_id: user?.id ?? null,
         target_type: targetType,
@@ -59,8 +60,7 @@ export function FlagModal({ open, onClose, targetType, targetId, boardId }: Flag
         board_id: boardId ?? null,
         reason: finalReason,
         status: 'pending',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       if (insertError) throw insertError
       setSuccess(true)
     } catch (err: unknown) {

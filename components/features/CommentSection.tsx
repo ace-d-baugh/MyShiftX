@@ -152,14 +152,14 @@ export function CommentSection({
         setConfirmRemoveId(existing.id)
         return
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any).from('comments').insert({
         post_type: postType,
         post_id: postId,
         user_id: currentUserId,
         body: QUICK_INTEREST_BODY,
         is_interested: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       if (error) throw error
       await fetchComments()
       // Fire-and-forget — notify the post owner without blocking the UI
@@ -194,14 +194,14 @@ export function CommentSection({
     setPosting(true)
     setError(null)
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (supabase as any).from('comments').insert({
         post_type: postType,
         post_id: postId,
         user_id: currentUserId,
         body: body.trim(),
         is_interested: isOwner ? false : isInterested,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       if (error) throw error
       const wasInterested = !isOwner && isInterested
       setBody('')
@@ -224,7 +224,8 @@ export function CommentSection({
     setPosting(true)
     setError(null)
     try {
-      const { error } = await (supabase as any).from('comments').update({ body: editBody.trim() } as any).eq('id', id)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).from('comments').update({ body: editBody.trim() }).eq('id', id)
       if (error) throw error
       setEditingId(null)
       await fetchComments()
@@ -238,7 +239,8 @@ export function CommentSection({
   const handleDelete = async (id: string) => {
     setPosting(true)
     try {
-      await (supabase as any).from('comments').update({ is_active: false } as any).eq('id', id)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('comments').update({ is_active: false }).eq('id', id)
       await fetchComments()
     } finally {
       setPosting(false)

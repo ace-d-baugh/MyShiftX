@@ -60,12 +60,13 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
   useEffect(() => { const s = getSettings(); setTimeFormat(s.timeFormat); setTz(s.timezone) }, [])
 
   // Close menu on any scroll
+  const menuOpen = !!menuPos
   useEffect(() => {
-    if (!menuPos) return
+    if (!menuOpen) return
     const close = () => setMenuPos(null)
     document.addEventListener('scroll', close, { passive: true, capture: true })
     return () => document.removeEventListener('scroll', close, { capture: true })
-  }, [!!menuPos])
+  }, [menuOpen])
 
   const openMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
