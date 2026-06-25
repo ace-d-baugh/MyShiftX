@@ -9,7 +9,7 @@ type Provider = 'google' | 'facebook' | 'linkedin_oidc'
 const ENABLED: Record<Provider, boolean> = {
   google:        true,
   facebook:      false,  // configure Meta app first
-  linkedin_oidc: false,   // configure LinkedIn app first
+  linkedin_oidc: true,
 }
 
 const PROVIDERS: { id: Provider; label: string; icon: React.ReactNode }[] = [
