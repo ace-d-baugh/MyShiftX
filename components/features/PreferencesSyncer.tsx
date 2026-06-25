@@ -1,17 +1,21 @@
 'use client'
 
 import { useEffect } from 'react'
-import { fetchUserPreferences } from '@/app/actions/preferences'
+import { createClient } from '@/lib/supabase/client'
+import { fetchPreferences } from '@/lib/preferences'
 import { saveSettings } from '@/lib/settings'
 import { applyTheme } from '@/lib/theme'
 
-// Mounted once in the dashboard layout. On login it pulls the user's saved
-// preferences from the DB and writes them into localStorage so every device
-// starts with the correct theme, time format, timezone, etc.
 export function PreferencesSyncer() {
   useEffect(() => {
-    fetchUserPreferences().then(prefs => {
+    async function sync() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const prefs = await fetchPreferences(user.id)
       if (!prefs) return
+
       saveSettings({
         timeFormat: prefs.timeFormat,
         dateFormat: prefs.dateFormat,
@@ -19,7 +23,8 @@ export function PreferencesSyncer() {
         timezone:   prefs.timezone,
       })
       applyTheme(prefs.theme)
-    })
+    }
+    sync()
   }, [])
 
   return null
