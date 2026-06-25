@@ -1,7 +1,26 @@
 // app/layout.tsx
 
+import type { Metadata } from 'next'
 import { Lato, Philosopher } from 'next/font/google'
 import './globals.css'
+
+export const metadata: Metadata = {
+  title: {
+    default: 'MyShiftX',
+    template: '%s – MyShiftX',
+  },
+  description: 'The shift swap board for cast members.',
+  metadataBase: new URL('https://myshiftx.com'),
+  openGraph: {
+    siteName: 'MyShiftX',
+    images: [
+      {
+        url: '/logos/ShiftX-logo-lg.png',
+        alt: 'MyShiftX',
+      },
+    ],
+  },
+}
 
 const lato = Lato({
   weight: ['400', '700'],
