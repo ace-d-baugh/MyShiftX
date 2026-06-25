@@ -22,9 +22,6 @@ export const metadata: Metadata = {
       },
     ],
   },
-  other: {
-    'fb:app_id': process.env.NEXT_PUBLIC_FACEBOOK_APP_ID ?? '',
-  },
 }
 
 const lato = Lato({
@@ -47,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${lato.variable} ${philosopher.variable}`} suppressHydrationWarning>
       <head>
+        <meta property="fb:app_id" content={process.env.NEXT_PUBLIC_FACEBOOK_APP_ID} />
         <script
           dangerouslySetInnerHTML={{
             __html: `try{if(localStorage.getItem('myshiftx-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
