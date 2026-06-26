@@ -149,15 +149,15 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 - [ ] Test: click Facebook on the login page
 
 #### LinkedIn
-- [ ] Go to **linkedin.com/developers** → **Create app**
+- ✅ Go to **linkedin.com/developers** → **Create app**
   - App name: `MyShiftX`, LinkedIn Page: create/use a company page (required by LinkedIn), upload logo
-- [ ] **Auth** tab → OAuth 2.0 settings → Authorized redirect URLs → **Add URL**:
+- ✅ **Auth** tab → OAuth 2.0 settings → Authorized redirect URLs → **Add URL**:
   `https://<your-supabase-ref>.supabase.co/auth/v1/callback` → Update
-- [ ] **Products** tab → **Sign In with LinkedIn using OpenID Connect** → **Request access** (usually instant)
-- [ ] **Auth** tab → copy **Client ID** and **Client Secret**
-- [ ] Supabase Dashboard → **Authentication → Providers → LinkedIn (OIDC)** → Enable → paste both → Save
+- ✅ **Products** tab → **Sign In with LinkedIn using OpenID Connect** → **Request access** (usually instant)
+- ✅ **Auth** tab → copy **Client ID** and **Client Secret**
+- ✅ Supabase Dashboard → **Authentication → Providers → LinkedIn (OIDC)** → Enable → paste both → Save
   *(Use the **OIDC** provider specifically — not the older plain LinkedIn OAuth provider)*
-- [ ] Test: click LinkedIn on the login page
+- ✅ Test: click LinkedIn on the login page
 
 ---
 

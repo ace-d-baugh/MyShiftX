@@ -1,6 +1,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type GlobalRole  = 'Guest' | 'User' | 'Admin'
+export type Membership  = 'Basic' | 'Pro' | 'Trial'
 export type BoardRole   = 'User' | 'Mod' | 'Leader'
 export type FlagStatus      = 'pending' | 'resolved' | 'dismissed'
 export type FlagTargetType  = 'post' | 'user' | 'comment' | 'board'
@@ -21,6 +22,9 @@ export interface Database {
           notify_via_email: boolean
           notify_via_sms: boolean
           role: GlobalRole
+          membership: Membership
+          trial_ends_at: string | null
+          trial_used: boolean
           is_active: boolean
           last_login_at: string | null
           created_at: string
@@ -35,6 +39,9 @@ export interface Database {
           notify_via_email?: boolean
           notify_via_sms?: boolean
           role?: GlobalRole
+          membership?: Membership
+          trial_ends_at?: string | null
+          trial_used?: boolean
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -49,6 +56,9 @@ export interface Database {
           notify_via_email?: boolean
           notify_via_sms?: boolean
           role?: GlobalRole
+          membership?: Membership
+          trial_ends_at?: string | null
+          trial_used?: boolean
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
