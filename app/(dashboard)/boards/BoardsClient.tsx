@@ -430,12 +430,18 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
         {deleteConfirm && (
           <div className="space-y-4">
             <p className="text-sm text-text/70">
-              Permanently delete <strong>{deleteConfirm.boardName}</strong>? All posts and memberships will be removed. This cannot be undone.
+              You are about to permanently delete <strong>{deleteConfirm.boardName}</strong>.
             </p>
+            <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 space-y-1.5">
+              <p className="text-sm font-semibold text-warning">Every member loses access immediately.</p>
+              <p className="text-xs text-text/70">
+                The board, all its posts, and all comments disappear for everyone — not just you. This cannot be undone.
+              </p>
+            </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="flex-1" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
               <Button variant="danger" size="sm" className="flex-1 gap-1" loading={actionLoading === 'delete'} onClick={handleDeleteBoard}>
-                <Trash2 className="w-3.5 h-3.5" /> Delete
+                <Trash2 className="w-3.5 h-3.5" /> Delete for Everyone
               </Button>
             </div>
           </div>

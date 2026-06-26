@@ -75,6 +75,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
 
   // Leave confirm
   const [leaveId, setLeaveId] = useState<string | null>(null)
+  const [leaveName, setLeaveName] = useState<string>('')
   const [leaveLoading, setLeaveLoading] = useState(false)
 
   // Mobile board action menu
@@ -307,37 +308,21 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                           <span className="w-px h-4 bg-border mx-1" />
                         </>
                       )}
-                      {leaveId === board.board_id ? (
-                        <span className="flex items-center gap-1 text-xs whitespace-nowrap">
-                          <span className="text-text/50">Leave?</span>
-                          <button onClick={handleLeave} disabled={leaveLoading} className="text-warning font-medium hover:underline">Yes</button>
-                          <button onClick={() => setLeaveId(null)} className="text-text/40 hover:underline">No</button>
-                        </span>
-                      ) : (
-                        <button onClick={() => setLeaveId(board.board_id)} className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0" title="Leave board" aria-label="Leave board">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                      <button onClick={() => { setLeaveId(board.board_id); setLeaveName(board.name) }} className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0" title="Leave board" aria-label="Leave board">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     </div>
 
                     {/* Mobile: three-dot menu */}
                     {editingId !== board.board_id && (
                       <div className="sm:hidden flex items-center justify-end">
-                        {leaveId === board.board_id ? (
-                          <span className="flex items-center gap-1 text-xs whitespace-nowrap">
-                            <span className="text-text/50">Leave?</span>
-                            <button onClick={handleLeave} disabled={leaveLoading} className="text-warning font-medium hover:underline">Yes</button>
-                            <button onClick={() => setLeaveId(null)} className="text-text/40 hover:underline">No</button>
-                          </span>
-                        ) : (
-                          <button
-                            onClick={e => openBoardMenu(board, e)}
-                            className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0"
-                            aria-label="Board actions"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-                        )}
+                        <button
+                          onClick={e => openBoardMenu(board, e)}
+                          className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0"
+                          aria-label="Board actions"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
                       </div>
                     )}
                   </td>
@@ -359,19 +344,13 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                 <span className="flex-1 truncate">{board.name}</span>
                 <Badge variant="pending" className="text-xs">Pending</Badge>
                 <button
-                  onClick={() => setLeaveId(board.board_id)}
+                  onClick={() => { setLeaveId(board.board_id); setLeaveName(board.name) }}
                   className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0"
                   aria-label="Withdraw request"
                   title="Withdraw request"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
-                {leaveId === board.board_id && (
-                  <span className="flex items-center gap-1 text-xs">
-                    <button onClick={handleLeave} disabled={leaveLoading} className="text-warning font-medium hover:underline">Withdraw</button>
-                    <button onClick={() => setLeaveId(null)} className="text-text/40 hover:underline">Cancel</button>
-                  </span>
-                )}
               </li>
             ))}
           </ul>
@@ -449,7 +428,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
               </>
             )}
             <button
-              onClick={() => { setLeaveId(menuBoard.board_id); closeBoardMenu() }}
+              onClick={() => { setLeaveId(menuBoard.board_id); setLeaveName(menuBoard.name); closeBoardMenu() }}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-warning hover:bg-warning/10 text-left"
             >
               <X className="w-3.5 h-3.5 shrink-0" /> Leave Board
@@ -564,25 +543,62 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
         </Modal>
       )}
 
+      {/* ── Leave Board Confirmation Modal ──────────────────────────────── */}
+      {leaveId && (
+        <Modal onClose={() => setLeaveId(null)}>
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+              <X className="w-5 h-5 text-warning" />
+            </div>
+            <div>
+              <h3 className="font-accent font-bold text-text text-lg">Leave Board?</h3>
+              <p className="text-sm text-text/70 mt-1">
+                Are you sure you want to leave <strong>{leaveName}</strong>?
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-text/50 mb-4">
+            If you are the only Leader, you must transfer ownership to another member before leaving.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => setLeaveId(null)}>Cancel</Button>
+            <Button variant="danger" size="sm" loading={leaveLoading} onClick={handleLeave} className="gap-1.5">
+              Leave Board
+            </Button>
+          </div>
+        </Modal>
+      )}
+
       {/* ── Delete Confirmation Modal ────────────────────────────────────── */}
       {deleteId && (
         <Modal onClose={() => setDeleteId(null)}>
           <div className="flex items-start gap-3 mb-4">
-            <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center shrink-0 mt-0.5">
               <Trash2 className="w-5 h-5 text-warning" />
             </div>
             <div>
               <h3 className="font-accent font-bold text-text text-lg">Delete Board?</h3>
-              <p className="text-sm text-text/60 mt-1">
-                This will permanently delete the board, all posts, and all comments.
-                Members will not be deleted. This cannot be undone.
+              <p className="text-sm text-text/70 mt-1">
+                This permanently deletes the board, all posts, and all comments.
               </p>
             </div>
           </div>
+          <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 space-y-1.5 mb-4">
+            <p className="text-sm font-semibold text-warning">Every member loses access immediately.</p>
+            <p className="text-xs text-text/70">
+              This is not just for you — the board disappears for everyone on it. If you no longer
+              want to run it, consider{' '}
+              <Link href={`/boards/${deleteId}`} className="text-primary underline hover:text-primary/80" onClick={() => setDeleteId(null)}>
+                transferring leadership
+              </Link>{' '}
+              to someone else instead.
+            </p>
+          </div>
+          <p className="text-xs text-text/40 font-medium mb-4">This cannot be undone.</p>
           <div className="flex justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button variant="danger" size="sm" loading={deleteLoading} onClick={handleDelete} className="gap-1.5">
-              <Trash2 className="w-4 h-4" /> Delete Board
+              <Trash2 className="w-4 h-4" /> Delete for Everyone
             </Button>
           </div>
         </Modal>

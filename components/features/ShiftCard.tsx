@@ -14,6 +14,7 @@ import {
 import { Badge } from '@/components/ui/Badge'
 import { FlagModal } from '@/components/features/FlagModal'
 import { CommentSection } from '@/components/features/CommentSection'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { cn } from '@/lib/utils'
 
 export interface ShiftData {
@@ -49,6 +50,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
   const [flagOpen, setFlagOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null)
+  const [confirmRemove, setConfirmRemove] = useState(false)
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   const [openCommentsTick, setOpenCommentsTick] = useState(0)
@@ -242,7 +244,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
                 <button className={menuItemCls} onClick={() => { router.push(`/wall/edit-shift/${shift.id}`); setMenuPos(null) }}>
                   <Pencil className="w-3.5 h-3.5 shrink-0" /> Edit
                 </button>
-                <button className={menuDangerCls} onClick={() => { onDeactivate?.(shift.id); setMenuPos(null) }}>
+                <button className={menuDangerCls} onClick={() => { setConfirmRemove(true); setMenuPos(null) }}>
                   <Trash2 className="w-3.5 h-3.5 shrink-0" /> Remove
                 </button>
               </>
@@ -258,6 +260,15 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
         targetType="post"
         targetId={shift.id}
         boardId={shift.board_id ?? undefined}
+      />
+
+      <ConfirmDialog
+        open={confirmRemove}
+        title="Remove Post"
+        message="Are you sure you want to remove this shift? This cannot be undone."
+        confirmLabel="Remove"
+        onConfirm={() => { onDeactivate?.(shift.id); setConfirmRemove(false) }}
+        onCancel={() => setConfirmRemove(false)}
       />
     </>
   )
