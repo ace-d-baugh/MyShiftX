@@ -288,7 +288,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
   const filteredShifts = useMemo(() => {
     let list = shifts
     if (myPostsOnly)        list = list.filter(s => s.user_id === userId)
-    if (boardFilters.size)  list = list.filter(s => boardFilters.has(s.board_id))
+    if (boardFilters.size)  list = list.filter(s => s.board_id != null && boardFilters.has(s.board_id))
     if (dateFilter)         list = list.filter(s => formatInTimeZone(parseISO(s.start_time), ET, 'yyyy-MM-dd') === dateFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -305,7 +305,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
   const filteredRequests = useMemo(() => {
     let list = requests
     if (myPostsOnly)        list = list.filter(r => r.user_id === userId)
-    if (boardFilters.size)  list = list.filter(r => boardFilters.has(r.board_id))
+    if (boardFilters.size)  list = list.filter(r => r.board_id != null && boardFilters.has(r.board_id))
     if (dateFilter)         list = list.filter(r => r.requested_date === dateFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
