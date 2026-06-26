@@ -247,6 +247,9 @@
   );
 }
 
+/* Hide the native calendar icon when a date value is present so only the custom X shows */
+input[type="date"].date-has-value::-webkit-calendar-picker-indicator { display: none; }
+
 @layer utilities {
   /* Honour reduced-motion preferences */
   @media (prefers-reduced-motion: reduce) {
