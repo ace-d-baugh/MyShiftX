@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { parseISO } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
-import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown, X } from 'lucide-react'
+import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown, X, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { deactivateShift, deactivateRequest } from '@/app/actions/posts'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
@@ -36,7 +36,9 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [dateFilter, setDateFilter] = useState(initialDate)
-  const [boardFilter, setBoardFilter] = useState('')
+  const [boardFilters, setBoardFilters] = useState<Set<string>>(new Set())
+  const [boardDropdownOpen, setBoardDropdownOpen] = useState(false)
+  const boardDropdownRef = useRef<HTMLDivElement>(null)
   const [myPostsOnly, setMyPostsOnly] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [deactivateError, setDeactivateError] = useState<string | null>(null)
@@ -259,6 +261,25 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
     }
   }
 
+  const toggleBoard = (id: string) => {
+    setBoardFilters(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (boardDropdownRef.current && !boardDropdownRef.current.contains(e.target as Node)) {
+        setBoardDropdownOpen(false)
+      }
+    }
+    if (boardDropdownOpen) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [boardDropdownOpen])
+
   const refresh = () => {
     if (tab === 'offers') loadShifts()
     else loadRequests()
@@ -266,9 +287,9 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
 
   const filteredShifts = useMemo(() => {
     let list = shifts
-    if (myPostsOnly) list = list.filter(s => s.user_id === userId)
-    if (boardFilter)  list = list.filter(s => s.board_id === boardFilter)
-    if (dateFilter)   list = list.filter(s => formatInTimeZone(parseISO(s.start_time), ET, 'yyyy-MM-dd') === dateFilter)
+    if (myPostsOnly)        list = list.filter(s => s.user_id === userId)
+    if (boardFilters.size)  list = list.filter(s => boardFilters.has(s.board_id))
+    if (dateFilter)         list = list.filter(s => formatInTimeZone(parseISO(s.start_time), ET, 'yyyy-MM-dd') === dateFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(s =>
@@ -279,13 +300,13 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       )
     }
     return list
-  }, [shifts, search, dateFilter, boardFilter, myPostsOnly, userId])
+  }, [shifts, search, dateFilter, boardFilters, myPostsOnly, userId])
 
   const filteredRequests = useMemo(() => {
     let list = requests
-    if (myPostsOnly) list = list.filter(r => r.user_id === userId)
-    if (boardFilter)  list = list.filter(r => r.board_id === boardFilter)
-    if (dateFilter)   list = list.filter(r => r.requested_date === dateFilter)
+    if (myPostsOnly)        list = list.filter(r => r.user_id === userId)
+    if (boardFilters.size)  list = list.filter(r => boardFilters.has(r.board_id))
+    if (dateFilter)         list = list.filter(r => r.requested_date === dateFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(r =>
@@ -295,7 +316,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       )
     }
     return list
-  }, [requests, search, dateFilter, boardFilter, myPostsOnly, userId])
+  }, [requests, search, dateFilter, boardFilters, myPostsOnly, userId])
 
   // Group shifts by their start date in ET
   const shiftDayGroups = useMemo(() => {
@@ -409,17 +430,67 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
           {filtersOpen && (
             <div className="mb-6 p-4 bg-primary-light/40 rounded-lg space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
+                {/* Board multi-select dropdown */}
+                <div ref={boardDropdownRef} className="relative">
                   <label className="block text-xs font-medium text-text/60 mb-1">Board</label>
-                  <select
-                    className="input text-sm h-9"
-                    value={boardFilter}
-                    onChange={e => setBoardFilter(e.target.value)}
+                  <button
+                    type="button"
+                    onClick={() => setBoardDropdownOpen(o => !o)}
+                    className="input text-sm h-9 w-full flex items-center justify-between gap-2 cursor-pointer"
                   >
-                    <option value="">All Boards</option>
-                    {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                  </select>
+                    <span className="truncate text-left">
+                      {boardFilters.size === 0
+                        ? 'All Boards'
+                        : boardFilters.size === 1
+                          ? (boards.find(b => boardFilters.has(b.id))?.name ?? '1 Board')
+                          : `${boardFilters.size} Boards`}
+                    </span>
+                    <ChevronDown className={cn('w-4 h-4 shrink-0 text-text/40 transition-transform', boardDropdownOpen && 'rotate-180')} />
+                  </button>
+
+                  {boardDropdownOpen && (
+                    <div className="absolute z-50 top-full left-0 mt-1 w-full min-w-[180px] bg-card border border-border rounded-lg shadow-lg py-1 max-h-60 overflow-y-auto">
+                      <button
+                        type="button"
+                        onClick={() => setBoardFilters(new Set())}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-primary-light/40 transition-colors min-h-0 min-w-0"
+                      >
+                        <span className={cn('w-4 h-4 rounded border shrink-0 flex items-center justify-center', boardFilters.size === 0 ? 'bg-primary border-primary' : 'border-border bg-background')}>
+                          {boardFilters.size === 0 && <Check className="w-2.5 h-2.5 text-white" />}
+                        </span>
+                        <span className="font-medium">All Boards</span>
+                      </button>
+
+                      {boardFilters.size > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setBoardFilters(new Set())}
+                          className="w-full flex items-center px-3 py-1 text-xs text-primary hover:text-primary/70 transition-colors min-h-0 min-w-0"
+                        >
+                          Clear selection
+                        </button>
+                      )}
+
+                      <div className="h-px bg-border mx-2 my-1" />
+
+                      {boards.map(b => (
+                        <button
+                          key={b.id}
+                          type="button"
+                          onClick={() => toggleBoard(b.id)}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-primary-light/40 transition-colors min-h-0 min-w-0"
+                        >
+                          <span className={cn('w-4 h-4 rounded border shrink-0 flex items-center justify-center', boardFilters.has(b.id) ? 'bg-primary border-primary' : 'border-border bg-background')}>
+                            {boardFilters.has(b.id) && <Check className="w-2.5 h-2.5 text-white" />}
+                          </span>
+                          <span className="truncate">{b.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Date */}
                 <div>
                   <label className="block text-xs font-medium text-text/60 mb-1">Date</label>
                   <div className="relative">
@@ -441,6 +512,8 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
                     )}
                   </div>
                 </div>
+
+                {/* My posts only */}
                 <div className="flex items-end pb-1">
                   <label className="flex items-center gap-2 cursor-pointer min-h-0">
                     <Checkbox

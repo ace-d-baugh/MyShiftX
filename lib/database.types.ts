@@ -114,6 +114,7 @@ export interface Database {
           board_id: string
           role: BoardRole
           is_approved: boolean
+          is_hidden: boolean
           approved_by_user_id: string | null
           approved_at: string | null
           requested_at: string
@@ -124,6 +125,7 @@ export interface Database {
           board_id: string
           role: BoardRole
           is_approved?: boolean
+          is_hidden?: boolean
           approved_by_user_id?: string | null
           approved_at?: string | null
           requested_at?: string
@@ -134,6 +136,7 @@ export interface Database {
           board_id?: string
           role?: BoardRole
           is_approved?: boolean
+          is_hidden?: boolean
           approved_by_user_id?: string | null
           approved_at?: string | null
           requested_at?: string

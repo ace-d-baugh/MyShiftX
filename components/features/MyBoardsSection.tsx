@@ -87,6 +87,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
       .from('user_boards')
       .select('id, board_id, role, is_approved, boards(id, name, invite_code, invite_code_enabled)')
       .eq('user_id', userId)
+      .eq('is_hidden', false)
       .order('requested_at', { ascending: true })
 
     const list = (data ?? []).map((row: {
@@ -387,7 +388,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
             <div className="flex gap-2">
               <input
                 type="text"
-                className="input text-sm uppercase tracking-widest flex-1 h-9"
+                className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9"
                 placeholder="XXXXXXX"
                 maxLength={7}
                 value={joinCode}

@@ -344,6 +344,8 @@ export async function updateUserBoardRole(
 ): Promise<{ error?: string }> {
   try {
     const { supabase } = await getSession()
+    const { data: existing } = await supabase.from('user_boards').select('is_hidden').eq('id', userBoardId).single()
+    if (existing?.is_hidden) return { error: 'Cannot modify a hidden membership.' }
     const { error } = await supabase.from('user_boards').update({ role: newRole }).eq('id', userBoardId)
     if (error) return { error: error.message }
     revalidatePath('/leader/approvals')
@@ -405,6 +407,8 @@ export async function transferBoardOwnership(
 export async function removeUserFromBoard(userBoardId: string): Promise<{ error?: string }> {
   try {
     const { supabase } = await getSession()
+    const { data: existing } = await supabase.from('user_boards').select('is_hidden').eq('id', userBoardId).single()
+    if (existing?.is_hidden) return { error: 'Cannot remove a hidden membership.' }
     const { error } = await supabase.from('user_boards').delete().eq('id', userBoardId)
     if (error) return { error: error.message }
     revalidatePath('/leader/approvals')

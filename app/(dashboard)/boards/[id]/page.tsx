@@ -43,7 +43,7 @@ export default async function BoardPage({ params }: Props) {
   const { data: memberRows } = await supabase
     .from('user_boards')
     .select('id, user_id, board_id, role, users!user_id(display_name)')
-    .eq('board_id', params.id).eq('is_approved', true).order('role', { ascending: true })
+    .eq('board_id', params.id).eq('is_approved', true).eq('is_hidden', false).order('role', { ascending: true })
 
   const membersByBoard = groupMembersByBoard(memberRows)
 

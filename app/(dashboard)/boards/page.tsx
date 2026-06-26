@@ -27,7 +27,7 @@ export default async function BoardsPage() {
       ? await supabase
           .from('user_boards')
           .select('id, user_id, board_id, role, users!user_id(display_name)')
-          .in('board_id', boardIds).eq('is_approved', true).order('role', { ascending: true })
+          .in('board_id', boardIds).eq('is_approved', true).eq('is_hidden', false).order('role', { ascending: true })
       : { data: [] }
 
     const membersByBoard = groupMembersByBoard(memberRows)
@@ -49,7 +49,7 @@ export default async function BoardsPage() {
       ? await supabase
           .from('user_boards')
           .select('id, user_id, board_id, role, users!user_id(display_name)')
-          .in('board_id', boardIds).eq('is_approved', true).order('role', { ascending: true })
+          .in('board_id', boardIds).eq('is_approved', true).eq('is_hidden', false).order('role', { ascending: true })
       : { data: [] }
 
     const membersByBoard = groupMembersByBoard(memberRows)
