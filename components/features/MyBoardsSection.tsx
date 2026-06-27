@@ -21,6 +21,7 @@ interface BoardEntry {
   userBoardId: string
   board_id: string
   name: string
+  slug: string
   role: BoardRole
   is_approved: boolean
   invite_code: string
@@ -86,18 +87,19 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
     setLoading(true)
     const { data } = await supabase
       .from('user_boards')
-      .select('id, board_id, role, is_approved, boards(id, name, invite_code, invite_code_enabled)')
+      .select('id, board_id, role, is_approved, boards(id, name, slug, invite_code, invite_code_enabled)')
       .eq('user_id', userId)
       .eq('is_hidden', false)
       .order('requested_at', { ascending: true })
 
     const list = (data ?? []).map((row: {
       id: string; board_id: string; role: BoardRole; is_approved: boolean;
-      boards: { id: string; name: string; invite_code: string; invite_code_enabled: boolean } | null
+      boards: { id: string; name: string; slug: string; invite_code: string; invite_code_enabled: boolean } | null
     }) => ({
       userBoardId: row.id,
       board_id: row.board_id,
       name: row.boards?.name ?? '',
+      slug: row.boards?.slug ?? '',
       role: row.role,
       is_approved: row.is_approved,
       invite_code: row.boards?.invite_code ?? '',
@@ -280,7 +282,9 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                     ) : (
                       <div className="flex items-start gap-2 min-w-0">
                         <LayoutGrid className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                        <span className="font-medium text-text flex-1">{board.name}</span>
+                        <Link href={`/boards/${board.slug}`} className="font-medium text-text flex-1 hover:text-primary hover:underline transition-colors min-h-0 min-w-0 truncate">
+                          {board.name}
+                        </Link>
                         <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{board.role}</Badge>
                       </div>
                     )}
@@ -291,7 +295,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                     {/* Desktop: icon row */}
                     <div className="hidden sm:flex items-center justify-end gap-0.5">
                       {/* Members — visible to all roles */}
-                      <Link href={`/boards/${board.board_id}`} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0 inline-flex" title="View members" aria-label="View members">
+                      <Link href={`/boards/${board.slug}`} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0 inline-flex" title="View members" aria-label="View members">
                         <Users className="w-3.5 h-3.5" />
                       </Link>
                       {editingId !== board.board_id && board.role === 'Leader' && (
@@ -406,7 +410,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                   <Pencil className="w-3.5 h-3.5 shrink-0" /> Rename
                 </button>
                 <Link
-                  href={`/boards/${menuBoard.board_id}`}
+                  href={`/boards/${menuBoard.slug}`}
                   onClick={closeBoardMenu}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20"
                 >
@@ -588,7 +592,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
             <p className="text-xs text-text/70">
               This is not just for you — the board disappears for everyone on it. If you no longer
               want to run it, consider{' '}
-              <Link href={`/boards/${deleteId}`} className="text-primary underline hover:text-primary/80" onClick={() => setDeleteId(null)}>
+              <Link href={`/boards/${boards.find(b => b.board_id === deleteId)?.slug ?? deleteId}`} className="text-primary underline hover:text-primary/80" onClick={() => setDeleteId(null)}>
                 transferring leadership
               </Link>{' '}
               to someone else instead.

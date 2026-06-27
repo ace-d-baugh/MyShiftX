@@ -40,6 +40,7 @@ function formatOAuthDisplayName(meta: Record<string, unknown>): string | null {
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const next = searchParams.get('next') ?? ''
 
   if (code) {
     const supabase = createServerClient()
@@ -82,7 +83,8 @@ export async function GET(request: Request) {
           }
         }
 
-        return NextResponse.redirect(hasName ? `${origin}/wall` : `${origin}/profile?oauth=1`)
+        const destination = hasName ? (next || `${origin}/wall`) : `${origin}/profile?oauth=1`
+        return NextResponse.redirect(destination.startsWith('http') ? destination : `${origin}${destination}`)
       }
     }
   }

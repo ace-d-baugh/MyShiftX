@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { notifyBoardApproved } from '@/app/actions/notifications'
+import { slugify } from '@/lib/slug'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -46,9 +47,18 @@ export async function createBoard(name: string): Promise<{ error?: string; board
     }
     if (!invite_code) return { error: 'Failed to generate a unique invite code. Please try again.' }
 
+    // Generate a unique slug from the board name
+    const baseSlug = slugify(name.trim())
+    let slug = baseSlug
+    for (let i = 2; i <= 10; i++) {
+      const { data: existing } = await supabase.from('boards').select('id').eq('slug', slug).single()
+      if (!existing) break
+      slug = `${baseSlug}-${i}`
+    }
+
     const { data: board, error: boardErr } = await supabase
       .from('boards')
-      .insert({ name: name.trim(), invite_code, created_by: userId })
+      .insert({ name: name.trim(), slug, invite_code, created_by: userId })
       .select('id')
       .single()
 
@@ -262,7 +272,8 @@ export async function updateBoardName(boardId: string, name: string): Promise<{ 
     if (trimmed.length < 2) return { error: 'Board name must be at least 2 characters.' }
     if (trimmed.length > 32) return { error: 'Board name must be 32 characters or fewer.' }
     const { supabase } = await getSession()
-    const { error } = await supabase.from('boards').update({ name: trimmed }).eq('id', boardId)
+    const newSlug = slugify(trimmed)
+    const { error } = await supabase.from('boards').update({ name: trimmed, slug: newSlug }).eq('id', boardId)
 
     if (error) {
       if (error.code === '23505') return { error: 'A board with that name already exists.' }

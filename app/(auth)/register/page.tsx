@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, UserPlus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Checkbox } from '@/components/ui/Checkbox'
@@ -13,6 +13,8 @@ type FieldErrors = Partial<Record<keyof RegisterInput, string>>
 
 export default function RegisterPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get('redirect') ?? ''
   const supabase = createClient()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -57,12 +59,15 @@ export default function RegisterPage() {
     setLoading(true)
     try {
       // The public.users profile row is created automatically by a DB trigger on auth.users.
+      const verifyBase = `${window.location.origin}/verify-email`
+      const emailRedirectTo = redirect
+        ? `${verifyBase}?redirect=${encodeURIComponent(redirect)}`
+        : verifyBase
+
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/verify-email`,
-        },
+        options: { emailRedirectTo },
       })
 
       if (error) {
@@ -70,10 +75,14 @@ export default function RegisterPage() {
         return
       }
 
+      const verifyPath = redirect
+        ? `/verify-email?redirect=${encodeURIComponent(redirect)}`
+        : '/verify-email'
+
       if (data.user && !data.session) {
-        router.push('/verify-email')
+        router.push(verifyPath)
       } else {
-        router.push('/wall')
+        router.push(redirect || '/wall')
       }
     } catch {
       setServerError('An unexpected error occurred. Please try again.')

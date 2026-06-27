@@ -389,4 +389,4 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 | Analytics dashboard for Leaders | Defer until post-launch |
 | Automated DB backups | Supabase handles this automatically on paid plans |
 | Unit tests | Defer until the feature set stabilizes |
-| Facebook / LinkedIn OAuth | Lower priority for this audience; add if users request it |
+| Facebook OAuth | Lower priority for this audience; add if users request it |

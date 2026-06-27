@@ -70,6 +70,7 @@ export interface Database {
         Row: {
           id: string
           name: string
+          slug: string
           invite_code: string
           invite_code_enabled: boolean
           created_by: string | null
@@ -80,6 +81,7 @@ export interface Database {
         Insert: {
           id?: string
           name: string
+          slug: string
           invite_code: string
           invite_code_enabled?: boolean
           created_by?: string | null

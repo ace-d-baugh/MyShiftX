@@ -2,11 +2,13 @@
 import Link from 'next/link'
 import { Mail } from 'lucide-react'
 import { useEffect, useRef, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function VerifyEmailPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/wall'
   const supabase = useMemo(() => createClient(), [])
   const hasNavigated = useRef(false)
 
@@ -14,7 +16,7 @@ export default function VerifyEmailPage() {
     const navigate = () => {
       if (hasNavigated.current) return
       hasNavigated.current = true
-      router.push('/wall')
+      router.push(redirectTo)
     }
 
     // Check immediately in case the user already verified before landing here
@@ -28,7 +30,7 @@ export default function VerifyEmailPage() {
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [redirectTo])
 
   return (
     <div className="card shadow-lg text-center animate-auth-card-in">

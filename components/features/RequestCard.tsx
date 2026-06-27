@@ -9,6 +9,7 @@ import {
   MoreVertical, MessageSquare, Star, Mail, Clock, ChevronDown,
 } from 'lucide-react'
 import { FlagModal } from '@/components/features/FlagModal'
+import { slugify } from '@/lib/slug'
 import { CommentSection } from '@/components/features/CommentSection'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { cn } from '@/lib/utils'
@@ -146,7 +147,7 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
           <div className="flex items-center gap-1.5 text-xs text-text/50 mb-3 min-w-0">
             <LayoutGrid className="w-3.5 h-3.5 text-accent/70 shrink-0" />
             {request.board_id
-              ? <Link href={`/boards/${request.board_id}`} className="truncate hover:text-primary hover:underline transition-colors">{request.board_name}</Link>
+              ? <Link href={`/boards/${slugify(request.board_name)}`} className="truncate hover:text-primary hover:underline transition-colors">{request.board_name}</Link>
               : <span className="truncate">{request.board_name}</span>
             }
           </div>
