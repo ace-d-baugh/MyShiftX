@@ -340,7 +340,7 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
       .single()
 
     if (!ub) return
-    const boardName = (ub.boards as { name: string } | null)?.name
+    const boardName = (ub.boards as unknown as { name: string } | null)?.name
     if (!boardName) return
 
     const { data: user } = await db
