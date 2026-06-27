@@ -82,7 +82,7 @@ export function ApprovalsClient({ pendingRequests: initial, approverId }: Approv
                   </p>
                   <p className="text-xs text-text/50 flex items-center gap-1 mt-0.5">
                     <LayoutGrid className="w-3 h-3" />
-                    wants to join <strong className="text-text/70">{req.boards?.name ?? 'Unknown Board'}</strong>
+                    <strong className="text-text/70">{req.boards?.name ?? 'Unknown Board'}</strong>
                   </p>
                 </div>
                 <div className="flex gap-2 shrink-0">
