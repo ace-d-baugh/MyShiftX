@@ -1,6 +1,6 @@
   'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, UserPlus } from 'lucide-react'
@@ -12,6 +12,10 @@ import { OAuthButtons } from '@/components/ui/OAuthButtons'
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>
 
 export default function RegisterPage() {
+  return <Suspense><RegisterForm /></Suspense>
+}
+
+function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') ?? ''

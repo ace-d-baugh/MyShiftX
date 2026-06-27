@@ -1,11 +1,15 @@
 'use client'
 import Link from 'next/link'
 import { Mail } from 'lucide-react'
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function VerifyEmailPage() {
+  return <Suspense><VerifyEmailContent /></Suspense>
+}
+
+function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/wall'
