@@ -92,6 +92,7 @@ export interface Database {
         Update: {
           id?: string
           name?: string
+          slug?: string
           invite_code?: string
           invite_code_enabled?: boolean
           created_by?: string | null

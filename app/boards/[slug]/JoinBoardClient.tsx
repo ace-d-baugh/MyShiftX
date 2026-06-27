@@ -13,7 +13,7 @@ interface JoinBoardClientProps {
   initialCode: string
 }
 
-export function JoinBoardClient({ boardId, boardName, boardSlug, initialCode }: JoinBoardClientProps) {
+export function JoinBoardClient({ boardName, initialCode }: JoinBoardClientProps) {
   const router = useRouter()
   const [code, setCode] = useState(initialCode.toUpperCase())
   const [step, setStep] = useState<'input' | 'confirm'>('input')
@@ -73,7 +73,7 @@ export function JoinBoardClient({ boardId, boardName, boardSlug, initialCode }: 
         ) : (
           <div className="card space-y-4">
             <div>
-              <label className="block text-sm font-medium text-text mb-1.5 flex items-center gap-1.5">
+              <label className="flex items-center gap-1.5 text-sm font-medium text-text mb-1.5">
                 <Key className="w-3.5 h-3.5 text-primary" /> Invite Code
               </label>
               <input
