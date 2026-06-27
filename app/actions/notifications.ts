@@ -2,7 +2,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { interestedHtml, shiftMatchHtml } from '@/components/email-template'
+import { boardApprovedHtml, interestedHtml, shiftMatchHtml } from '@/components/email-template'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
 import type { PreferredTime } from '@/lib/database.types'
@@ -321,5 +321,47 @@ export async function notifyRequestPosted(opts: {
     }
   } catch (err) {
     console.error('[notifyRequestPosted] unexpected error:', err)
+  }
+}
+
+/**
+ * Fire-and-forget: email the user when their board join request is approved.
+ * Uses service-role client to read the approving user's email without RLS restrictions.
+ * Sent unconditionally — this is a transactional response to the user's own action.
+ */
+export async function notifyBoardApproved(userBoardId: string): Promise<void> {
+  try {
+    const db = adminDb()
+
+    const { data: ub } = await db
+      .from('user_boards')
+      .select('user_id, boards(name)')
+      .eq('id', userBoardId)
+      .single()
+
+    if (!ub) return
+    const boardName = (ub.boards as { name: string } | null)?.name
+    if (!boardName) return
+
+    const { data: user } = await db
+      .from('users')
+      .select('email, display_name')
+      .eq('id', ub.user_id)
+      .single()
+
+    if (!user?.email) return
+
+    await resend.emails.send({
+      from: 'noreply@myshiftx.com',
+      to: user.email,
+      subject: `You've been accepted to ${boardName}!`,
+      html: boardApprovedHtml({
+        displayName: user.display_name ?? undefined,
+        boardName,
+        wallUrl: `${BASE_URL}/wall`,
+      }),
+    })
+  } catch (err) {
+    console.error('[notifyBoardApproved] failed:', err)
   }
 }

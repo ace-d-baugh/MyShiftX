@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const createBoardSchema = z.object({
-  name: z.string().min(2, 'Board name must be at least 2 characters').max(60, 'Board name must be 60 characters or fewer').trim(),
+  name: z.string().min(2, 'Board name must be at least 2 characters').max(32, 'Board name must be 32 characters or fewer').trim(),
 })
 
 export const joinBoardSchema = z.object({

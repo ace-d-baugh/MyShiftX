@@ -468,7 +468,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                 className="input placeholder:text-text/50 text-sm"
                 placeholder="e.g., Night Crew"
                 value={createName}
-                maxLength={60}
+                maxLength={32}
                 onChange={e => { setCreateName(e.target.value); setCreateError(null) }}
                 onKeyDown={e => { if (e.key === 'Enter') handleCreate() }}
                 autoFocus

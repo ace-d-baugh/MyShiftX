@@ -128,6 +128,22 @@ export const resetPasswordHtml = (resetUrl: string) =>
     ${muted("This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.")}
   `)
 
+/** Sent when a user's board join request is approved */
+export const boardApprovedHtml = (opts: {
+  displayName?: string
+  boardName: string
+  wallUrl: string
+}) =>
+  shell(`
+    ${h1('You\'re in! 🎉')}
+    ${p(`Hi${opts.displayName ? ` ${opts.displayName}` : ''},`)}
+    ${p(`Congratulations — your request to join has been approved!`)}
+    ${highlight(opts.boardName)}
+    ${p('Head over to the wall to start browsing shift offers and requests from your new board.')}
+    ${btn(opts.wallUrl, 'Go to the Wall')}
+    ${muted('You received this because you requested to join a board on MyShiftX.')}
+  `)
+
 /** Sent to a post owner when someone marks interest on their shift or request */
 export const interestedHtml = (opts: {
   commenterName: string

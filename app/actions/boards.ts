@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
+import { notifyBoardApproved } from '@/app/actions/notifications'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -257,8 +258,12 @@ export async function deleteBoard(boardId: string): Promise<{ error?: string }> 
 
 export async function updateBoardName(boardId: string, name: string): Promise<{ error?: string }> {
   try {
+    const trimmed = name.trim()
+    if (trimmed.length < 2) return { error: 'Board name must be at least 2 characters.' }
+    if (trimmed.length > 32) return { error: 'Board name must be 32 characters or fewer.' }
     const { supabase } = await getSession()
-    const { error } = await supabase.from('boards').update({ name: name.trim() }).eq('id', boardId)
+    const { error } = await supabase.from('boards').update({ name: trimmed }).eq('id', boardId)
+
     if (error) {
       if (error.code === '23505') return { error: 'A board with that name already exists.' }
       return { error: error.message }
@@ -318,6 +323,8 @@ export async function approveUserBoard(userBoardId: string, approverId: string):
       .eq('id', userBoardId)
     if (error) return { error: error.message }
     revalidatePath('/leader/approvals')
+    // Fire-and-forget — never blocks the approval action
+    notifyBoardApproved(userBoardId)
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
