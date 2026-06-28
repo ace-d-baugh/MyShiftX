@@ -1,14 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef } from 'react'
 import { useRouter } from 'next/navigation'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 import { createClient } from '@/lib/supabase/client'
 import { shiftSchema } from '@/lib/validations/shifts'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
-import { Plus, Save, X, ArrowLeft, ChevronDown } from 'lucide-react'
+import { Plus, Save, X, ArrowLeft, ChevronDown, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { notifyShiftPosted } from '@/app/actions/notifications'
+import { getSettings } from '@/lib/settings'
 
 interface Board { id: string; name: string }
 
@@ -53,6 +56,53 @@ function toLocal(iso: string): string {
   const p = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
 }
+
+function toDate(dt: string): Date | null {
+  return dt ? new Date(dt) : null
+}
+
+function isActualToday(date: Date): boolean {
+  const t = new Date()
+  return date.getFullYear() === t.getFullYear() &&
+    date.getMonth()    === t.getMonth()    &&
+    date.getDate()     === t.getDate()
+}
+
+function fromDate(d: Date | null): string {
+  if (!d) return ''
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+}
+
+function buildDateFormat(dateFormat: 'mdy' | 'dmy', timeFormat: '12h' | '24h'): string {
+  return `${dateFormat === 'dmy' ? 'dd/MM/yyyy' : 'MM/dd/yyyy'} ${timeFormat === '24h' ? 'HH:mm' : 'h:mm aa'}`
+}
+
+interface DateInputProps {
+  value?: string
+  onClick?: () => void
+  placeholder?: string
+  hasError?: boolean
+  onClear?: () => void
+}
+const DateTimeInput = forwardRef<HTMLInputElement, DateInputProps>(
+  ({ value, onClick, placeholder, hasError, onClear }, ref) => (
+    <div className="relative">
+      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 dark:text-primary pointer-events-none z-10" />
+      <input ref={ref} readOnly value={value ?? ''} onClick={onClick}
+        placeholder={placeholder ?? 'Select date & time'}
+        className={`input pl-9 ${value ? 'pr-8' : ''} cursor-pointer ${hasError ? 'border-warning' : ''}`} />
+      {value && onClear && (
+        <button type="button" onClick={e => { e.stopPropagation(); onClear() }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-text/40 hover:text-text min-h-0 min-w-0 z-10"
+          aria-label="Clear date">
+          <X className="w-3.5 h-3.5" />
+        </button>
+      )}
+    </div>
+  )
+)
+DateTimeInput.displayName = 'DateTimeInput'
 
 function isTouched(f: ShiftForm) {
   return !!f.shift_title || !!f.start_time || !!f.end_time ||
@@ -127,6 +177,11 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
   const toggleWall = (i: number) =>
     setWallOpen(prev => prev.map((v, idx) => idx === i ? !v : v))
 
+  const settings = getSettings()
+  const dateFormat = buildDateFormat(settings.dateFormat, settings.timeFormat)
+  const timeFormat = settings.timeFormat === '24h' ? 'HH:mm' : 'h:mm aa'
+  const minDate = new Date(new Date().setHours(0, 0, 0, 0))
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setServerError(null)
@@ -199,6 +254,19 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
 
   const submitCount = forms.filter((f, i) => i === 0 || isTouched(f)).length
 
+  const isFormComplete = (f: ShiftForm) =>
+    (boards.length <= 1 || !!f.board_id) &&
+    !!f.shift_title.trim() &&
+    !!f.start_time &&
+    !!f.end_time
+
+  const hasTimeConflict = forms.some(f =>
+    f.start_time && f.end_time && new Date(f.end_time) <= new Date(f.start_time)
+  )
+
+  const canSubmit = !hasTimeConflict &&
+    forms.every((f, i) => i === 0 ? isFormComplete(f) : !isTouched(f) || isFormComplete(f))
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {serverError && (
@@ -257,20 +325,54 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
               </div>
 
               {/* Times */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-text mb-1">Start Time <span className="text-warning">*</span></label>
-                  <input name="start_time" type="datetime-local" value={f.start_time} onChange={onChange(i)}
-                    className={`input ${errs.start_time ? 'border-warning' : ''}`} />
-                  {errs.start_time && <p className="mt-1 text-xs text-warning">{errs.start_time}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text mb-1">End Time <span className="text-warning">*</span></label>
-                  <input name="end_time" type="datetime-local" value={f.end_time} onChange={onChange(i)}
-                    className={`input ${errs.end_time ? 'border-warning' : ''}`} />
-                  {errs.end_time && <p className="mt-1 text-xs text-warning">{errs.end_time}</p>}
-                </div>
-              </div>
+              {(() => {
+                const endBeforeStart = !!(f.start_time && f.end_time &&
+                  new Date(f.end_time) <= new Date(f.start_time))
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-text mb-1">Start Time <span className="text-warning">*</span></label>
+                      <DatePicker
+                        selected={toDate(f.start_time)}
+                        onChange={(d: Date | null) => setField(i, 'start_time', fromDate(d))}
+                        showTimeSelect
+                        timeIntervals={5}
+                        timeFormat={timeFormat}
+                        dateFormat={dateFormat}
+                        calendarStartDay={settings.weekStart as 0 | 1 | 2 | 3 | 4 | 5 | 6}
+                        minDate={minDate}
+                        dayClassName={d => isActualToday(d) ? 'rdp-today' : ''}
+                        placeholderText="Select date & time"
+                        customInput={<DateTimeInput hasError={!!errs.start_time} onClear={() => setField(i, 'start_time', '')} />}
+                        popperPlacement="bottom-start"
+                        wrapperClassName="w-full"
+                      />
+                      {errs.start_time && <p className="mt-1 text-xs text-warning">{errs.start_time}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-text mb-1">End Time <span className="text-warning">*</span></label>
+                      <DatePicker
+                        selected={toDate(f.end_time)}
+                        onChange={(d: Date | null) => setField(i, 'end_time', fromDate(d))}
+                        showTimeSelect
+                        timeIntervals={5}
+                        timeFormat={timeFormat}
+                        dateFormat={dateFormat}
+                        calendarStartDay={settings.weekStart as 0 | 1 | 2 | 3 | 4 | 5 | 6}
+                        minDate={toDate(f.start_time) ?? minDate}
+                        dayClassName={d => isActualToday(d) ? 'rdp-today' : ''}
+                        placeholderText="Select date & time"
+                        customInput={<DateTimeInput hasError={!!errs.end_time || endBeforeStart} onClear={() => setField(i, 'end_time', '')} />}
+                        popperPlacement="bottom-start"
+                        wrapperClassName="w-full"
+                      />
+                      {endBeforeStart
+                        ? <p className="mt-1 text-xs text-warning">End time must be after start time.</p>
+                        : errs.end_time && <p className="mt-1 text-xs text-warning">{errs.end_time}</p>}
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* Post to Wall + Details — accordion */}
               <div className="rounded-lg border border-border overflow-hidden">
@@ -337,7 +439,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
         <Button type="button" variant="danger-outline" onClick={() => router.back()} className="gap-1.5 shrink-0">
           <ArrowLeft className="w-4 h-4" /> Cancel
         </Button>
-        <Button type="submit" loading={loading} className="flex-1 gap-1.5">
+        <Button type="submit" loading={loading} disabled={!canSubmit} className="flex-1 gap-1.5">
           {isEdit
             ? <><Save className="w-4 h-4" /> Update Shift</>
             : submitCount > 1

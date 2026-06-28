@@ -498,6 +498,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
                       type="date"
                       className={`input text-sm h-9 pr-8${dateFilter ? ' date-has-value' : ''}`}
                       value={dateFilter}
+                      min={new Date().toLocaleDateString('en-CA')}
                       onChange={e => setDateFilter(e.target.value)}
                     />
                     {dateFilter && (
