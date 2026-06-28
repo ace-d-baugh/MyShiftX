@@ -20,19 +20,23 @@ export default async function BoardsPage() {
 
   if (isAdmin) {
     const { data: allBoards } = await supabase
-      .from('boards').select('id, name').eq('is_active', true).order('name')
+      .from('boards').select('id, name, slug, invite_code, invite_code_enabled').eq('is_active', true).order('name')
 
     const boardIds = (allBoards ?? []).map(b => b.id)
     const { data: memberRows } = boardIds.length
       ? await supabase
           .from('user_boards')
-          .select('id, user_id, board_id, role, users!user_id(display_name)')
+          .select('id, user_id, board_id, role, users!user_id(display_name), approver:users!approved_by_user_id(display_name)')
           .in('board_id', boardIds).eq('is_approved', true).eq('is_hidden', false).order('role', { ascending: true })
       : { data: [] }
 
     const membersByBoard = groupMembersByBoard(memberRows)
     managedBoards = (allBoards ?? []).map(b => ({
-      boardId: b.id, boardName: b.name,
+      boardId: b.id,
+      boardName: b.name,
+      boardSlug: b.slug,
+      inviteCode: b.invite_code,
+      inviteCodeEnabled: b.invite_code_enabled,
       myRole: 'Leader' as BoardRole,
       members: membersByBoard.get(b.id) ?? [],
     }))
@@ -40,7 +44,7 @@ export default async function BoardsPage() {
     // All approved memberships regardless of role
     const { data: myBoards } = await supabase
       .from('user_boards')
-      .select('id, board_id, role, boards(id, name)')
+      .select('id, board_id, role, boards(id, name, slug, invite_code, invite_code_enabled)')
       .eq('user_id', user.id).eq('is_approved', true)
       .order('requested_at', { ascending: true })
 
@@ -48,17 +52,23 @@ export default async function BoardsPage() {
     const { data: memberRows } = boardIds.length
       ? await supabase
           .from('user_boards')
-          .select('id, user_id, board_id, role, users!user_id(display_name)')
+          .select('id, user_id, board_id, role, users!user_id(display_name), approver:users!approved_by_user_id(display_name)')
           .in('board_id', boardIds).eq('is_approved', true).eq('is_hidden', false).order('role', { ascending: true })
       : { data: [] }
 
     const membersByBoard = groupMembersByBoard(memberRows)
-    managedBoards = (myBoards ?? []).map((b: Record<string, unknown>) => ({
-      boardId:   b.board_id as string,
-      boardName: (b.boards as { name: string } | null)?.name ?? '',
-      myRole:    b.role as BoardRole,
-      members:   membersByBoard.get(b.board_id as string) ?? [],
-    }))
+    managedBoards = (myBoards ?? []).map((b: Record<string, unknown>) => {
+      const bd = b.boards as { id: string; name: string; slug: string; invite_code: string; invite_code_enabled: boolean } | null
+      return {
+        boardId:            b.board_id as string,
+        boardName:          bd?.name ?? '',
+        boardSlug:          bd?.slug ?? '',
+        inviteCode:         bd?.invite_code ?? '',
+        inviteCodeEnabled:  bd?.invite_code_enabled ?? false,
+        myRole:             b.role as BoardRole,
+        members:            membersByBoard.get(b.board_id as string) ?? [],
+      }
+    })
   }
 
   return (

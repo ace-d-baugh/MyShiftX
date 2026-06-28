@@ -50,7 +50,7 @@ export default async function BoardSlugPage({ params, searchParams }: Props) {
   // Look up board by slug
   const { data: board } = await supabase
     .from('boards')
-    .select('id, name, slug')
+    .select('id, name, slug, invite_code, invite_code_enabled')
     .eq('slug', params.slug)
     .eq('is_active', true)
     .single()
@@ -116,7 +116,7 @@ export default async function BoardSlugPage({ params, searchParams }: Props) {
   // Member or admin: show board management
   const { data: memberRows } = await supabase
     .from('user_boards')
-    .select('id, user_id, board_id, role, users!user_id(display_name)')
+    .select('id, user_id, board_id, role, users!user_id(display_name), approver:users!approved_by_user_id(display_name)')
     .eq('board_id', board.id)
     .eq('is_approved', true)
     .eq('is_hidden', false)
@@ -132,10 +132,13 @@ export default async function BoardSlugPage({ params, searchParams }: Props) {
   }
 
   const managedBoards: ManagedBoard[] = [{
-    boardId:   board.id,
-    boardName: board.name,
+    boardId:           board.id,
+    boardName:         board.name,
+    boardSlug:         board.slug,
+    inviteCode:        board.invite_code,
+    inviteCodeEnabled: board.invite_code_enabled,
     myRole,
-    members:   membersByBoard.get(board.id) ?? [],
+    members:           membersByBoard.get(board.id) ?? [],
   }]
 
   return (

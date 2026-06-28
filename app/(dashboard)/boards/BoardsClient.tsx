@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import {
   Users, Crown, LayoutGrid, ChevronDown, MoreHorizontal,
   Pencil, Trash2, Check, X,
-  LogOut, UserMinus, Flag, UserCog,
+  LogOut, UserMinus, Flag, UserCog, UserPlus, Copy, Download, AlertTriangle, QrCode,
 } from 'lucide-react'
+import { QRCodeCanvas } from 'qrcode.react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -14,10 +15,12 @@ import { cn } from '@/lib/utils'
 import {
   updateUserBoardRole, transferBoardOwnership,
   removeUserFromBoard, leaveBoard,
-  updateBoardName, deleteBoard,
+  updateBoardName, deleteBoard, regenerateInviteCode,
 } from '@/app/actions/boards'
 import type { BoardRole } from '@/lib/database.types'
 import type { ManagedBoard, BoardMember } from './types'
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://myshiftx.com'
 
 const roleVariant: Record<BoardRole, 'user' | 'mod' | 'leader'> = {
   User: 'user', Mod: 'mod', Leader: 'leader',
@@ -51,6 +54,12 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null)
   const [editBoardName, setEditBoardName] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<Confirm | null>(null)
+
+  // Invite modal
+  const [inviteBoard, setInviteBoard] = useState<ManagedBoard | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [regenConfirm, setRegenConfirm] = useState(false)
+  const qrRef = useRef<HTMLCanvasElement | null>(null)
 
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -146,9 +155,39 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
     const result = await updateBoardName(boardId, editBoardName)
     setActionLoading(null)
     if (result.error) { setError(result.error); return }
-    setBoards(prev => prev.map(b => b.boardId === boardId ? { ...b, boardName: editBoardName.trim() } : b))
+    // Slug changes with name — update local state so invite URL stays correct
+    const newSlug = editBoardName.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+    setBoards(prev => prev.map(b => b.boardId === boardId ? { ...b, boardName: editBoardName.trim(), boardSlug: newSlug } : b))
     setEditingBoardId(null)
   }
+
+  const handleRegenCode = async () => {
+    if (!inviteBoard) return
+    setActionLoading('regen')
+    const result = await regenerateInviteCode(inviteBoard.boardId)
+    setActionLoading(null)
+    if (result.error) { setError(result.error); return }
+    const newCode = result.code!
+    setBoards(prev => prev.map(b => b.boardId === inviteBoard.boardId ? { ...b, inviteCode: newCode } : b))
+    setInviteBoard(prev => prev ? { ...prev, inviteCode: newCode } : null)
+    setRegenConfirm(false)
+  }
+
+  const copyInviteUrl = useCallback((url: string) => {
+    navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [])
+
+  const downloadQR = useCallback(() => {
+    const canvas = document.getElementById('invite-qr-canvas') as HTMLCanvasElement | null
+    if (!canvas) return
+    const url = canvas.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${inviteBoard?.boardName ?? 'board'}-invite.png`
+    a.click()
+  }, [inviteBoard?.boardName])
 
   const handleDeleteBoard = async () => {
     if (!deleteConfirm) return
@@ -209,39 +248,59 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
 
                   {/* Board name / inline rename */}
                   {isRenaming ? (
-                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                      <input
-                        className="input text-sm h-8 flex-1"
-                        value={editBoardName}
-                        onChange={e => setEditBoardName(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') handleRenameBoard(board.boardId)
-                          if (e.key === 'Escape') setEditingBoardId(null)
-                        }}
-                        autoFocus
-                      />
-                      <button onClick={() => handleRenameBoard(board.boardId)} disabled={actionLoading === 'rename-' + board.boardId} className="p-1 text-success hover:text-success/80 min-h-0 min-w-0"><Check className="w-4 h-4" /></button>
-                      <button onClick={() => setEditingBoardId(null)} className="p-1 text-text/40 hover:text-text min-h-0 min-w-0"><X className="w-4 h-4" /></button>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          className="input text-sm h-8 flex-1"
+                          value={editBoardName}
+                          onChange={e => setEditBoardName(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') handleRenameBoard(board.boardId)
+                            if (e.key === 'Escape') setEditingBoardId(null)
+                          }}
+                          autoFocus
+                        />
+                        <button onClick={() => handleRenameBoard(board.boardId)} disabled={actionLoading === 'rename-' + board.boardId} className="p-1 text-success hover:text-success/80 min-h-0 min-w-0"><Check className="w-4 h-4" /></button>
+                        <button onClick={() => setEditingBoardId(null)} className="p-1 text-text/40 hover:text-text min-h-0 min-w-0"><X className="w-4 h-4" /></button>
+                      </div>
+                      {board.inviteCodeEnabled && (
+                        <p className="text-[11px] text-warning flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3 shrink-0" />
+                          Renaming invalidates existing invite links — get a new link after saving.
+                        </p>
+                      )}
                     </div>
                   ) : (
-                    <span className="font-accent font-bold text-text text-sm truncate flex-1 min-w-0">{board.boardName}</span>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span className="font-accent font-bold text-text text-sm truncate">{board.boardName}</span>
+                      {/* Member count pill */}
+                      <span className="text-[11px] font-semibold bg-primary/15 text-primary px-2 py-0.5 rounded-full shrink-0 leading-none">
+                        {board.members.length}
+                      </span>
+                    </div>
                   )}
 
-                  {/* Member count pill */}
+                  {/* Right side controls */}
                   {!isRenaming && (
-                    <span className="text-[11px] font-semibold bg-primary/15 text-primary px-2 py-0.5 rounded-full shrink-0 leading-none">
-                      {board.members.length}
-                    </span>
-                  )}
-
-                  {/* Right side: role badge (non-admin) or admin controls */}
-                  {isAdmin ? (
-                    <div className="flex items-center gap-0.5 ml-auto shrink-0">
-                      <button onClick={() => startEditBoard(board.boardId, board.boardName)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Rename board"><Pencil className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => setDeleteConfirm({ boardId: board.boardId, boardName: board.boardName })} className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0" title="Delete board"><Trash2 className="w-3.5 h-3.5" /></button>
+                    <div className="flex items-center gap-1.5 ml-auto shrink-0">
+                      {/* Invite pill — Leaders and Admin */}
+                      {(board.myRole === 'Leader' || isAdmin) && (
+                        <button
+                          onClick={() => { setInviteBoard(board); setRegenConfirm(false); setCopied(false) }}
+                          className="flex items-center gap-1.5 text-[11px] font-bold bg-info text-text dark:text-[#2F2040] px-3.5 py-1.5 rounded-full leading-none hover:bg-info/80 transition-colors min-h-0 min-w-0"
+                          title="Invite link & QR code"
+                        >
+                          <UserPlus className="w-3 h-3" /> Invite
+                        </button>
+                      )}
+                      {/* Admin board controls */}
+                      {isAdmin && (
+                        <>
+                          <button onClick={() => startEditBoard(board.boardId, board.boardName)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Rename board"><Pencil className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => setDeleteConfirm({ boardId: board.boardId, boardName: board.boardName })} className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0" title="Delete board"><Trash2 className="w-3.5 h-3.5" /></button>
+                        </>
+                      )}
                     </div>
-                  ) : (
-                    <Badge variant={roleVariant[board.myRole]} className="text-xs shrink-0 ml-auto">{board.myRole}</Badge>
                   )}
 
                   {/* Collapse chevron */}
@@ -263,7 +322,13 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
                   <div className="overflow-hidden">
                     <table className="w-full text-sm">
                       <tbody>
-                        {board.members.map((member, rowIdx) => {
+                        {[...board.members]
+                          .sort((a, b) => {
+                            if (a.userId === currentUserId) return -1
+                            if (b.userId === currentUserId) return 1
+                            return (a.displayName ?? '').localeCompare(b.displayName ?? '')
+                          })
+                          .map((member, rowIdx) => {
                           const isMe = member.userId === currentUserId
                           const myRole = board.myRole
                           const canChangeRole = !isMe && (myRole === 'Leader' || myRole === 'Mod' || isAdmin) && member.role !== 'Leader'
@@ -287,6 +352,13 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
                                 </span>
                                 {isMe && <span className="ml-1.5 text-xs text-text/40">(you)</span>}
                               </td>
+
+                              {/* Approved by — Leaders and Admins only */}
+                              {(myRole === 'Leader' || isAdmin) && (
+                                <td className="px-3 py-2.5 text-xs text-text/40 whitespace-nowrap hidden sm:table-cell">
+                                  {member.approvedBy ?? <span className="italic">—</span>}
+                                </td>
+                              )}
 
                               {/* Role pill — far right before menu */}
                               <td className="px-3 py-2.5 w-px whitespace-nowrap text-right">
@@ -503,6 +575,97 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
         targetId={flagTarget?.userId ?? ''}
         boardId={flagTarget?.boardId}
       />
+
+      {/* ── Invite Link & QR Code Modal ──────────────────────────────────────── */}
+      <Modal
+        open={!!inviteBoard}
+        onClose={() => { setInviteBoard(null); setRegenConfirm(false) }}
+        title="Invite to Board"
+        size="sm"
+      >
+        {inviteBoard && (() => {
+          const inviteUrl = `${BASE_URL}/boards/${inviteBoard.boardSlug}?c=${inviteBoard.inviteCode}`
+          return (
+            <div className="space-y-4">
+              {!inviteBoard.inviteCodeEnabled && (
+                <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning flex items-start gap-2">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  The invite code for this board is currently paused. Links below will not work until you re-enable it from the board settings.
+                </div>
+              )}
+
+              {/* QR code */}
+              <div className="flex flex-col items-center gap-3 pt-1">
+                <div className="p-3 bg-white rounded-lg shadow-sm border border-border">
+                  <QRCodeCanvas
+                    id="invite-qr-canvas"
+                    value={inviteUrl}
+                    size={160}
+                    marginSize={1}
+                  />
+                </div>
+                <button
+                  onClick={downloadQR}
+                  className="flex items-center gap-1.5 text-xs text-text/60 hover:text-primary transition-colors min-h-0 min-w-0"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download QR Code
+                </button>
+              </div>
+
+              {/* Invite URL */}
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={inviteUrl}
+                  className="input text-xs flex-1 text-text/70 bg-background"
+                  onClick={e => (e.target as HTMLInputElement).select()}
+                />
+                <Button
+                  size="sm"
+                  variant={copied ? 'secondary' : 'outline'}
+                  className="shrink-0 gap-1.5"
+                  onClick={() => copyInviteUrl(inviteUrl)}
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  {copied ? 'Copied!' : 'Copy'}
+                </Button>
+              </div>
+
+              {/* Instructions */}
+              <div className="p-3 rounded-lg bg-primary-light/40 space-y-1.5 text-xs text-text/70">
+                <p className="font-semibold text-text">How to share:</p>
+                <p>• Copy the link above and send it directly to the person.</p>
+                <p>• Or download the QR code and share it — they can scan it to join.</p>
+                <p className="font-semibold text-warning mt-2">⚠ Only share with people you know and trust. Anyone with this link can request to join your board.</p>
+              </div>
+
+              {/* Regenerate code */}
+              {!regenConfirm ? (
+                <button
+                  onClick={() => setRegenConfirm(true)}
+                  className="text-xs text-text/40 hover:text-warning transition-colors min-h-0 min-w-0"
+                >
+                  Generate a new code (invalidates this link & QR)
+                </button>
+              ) : (
+                <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 space-y-2">
+                  <p className="text-xs text-warning font-semibold flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                    This will invalidate the current link and QR code.
+                  </p>
+                  <p className="text-xs text-text/60">Anyone who has already saved the old link will no longer be able to use it. You will need to share the new link and QR code.</p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => setRegenConfirm(false)}>Cancel</Button>
+                    <Button variant="danger" size="sm" className="flex-1" loading={actionLoading === 'regen'} onClick={handleRegenCode}>
+                      Generate New Code
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })()}
+      </Modal>
     </div>
   )
 }

@@ -5,11 +5,15 @@ export interface BoardMember {
   userId: string
   displayName: string | null
   role: BoardRole
+  approvedBy: string | null
 }
 
 export interface ManagedBoard {
   boardId: string
   boardName: string
+  boardSlug: string
+  inviteCode: string
+  inviteCodeEnabled: boolean
   myRole: BoardRole
   members: BoardMember[]
 }
