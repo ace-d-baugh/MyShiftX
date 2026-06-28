@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  HelpCircle,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -98,11 +99,25 @@ export function Navbar({
             />
           </Link>
 
+          {/* Help + Account */}
+          <div className="flex items-center gap-0.5">
+            <Link
+              href="/help"
+              className={cn(
+                'p-1.5 rounded-md transition-colors min-h-0 min-w-0',
+                isActive('/help') ? 'text-primary bg-primary-light' : 'text-text/40 hover:text-primary hover:bg-primary-light/50'
+              )}
+              aria-label="Help & Support"
+              title="Help & Support"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </Link>
+
           {/* Account dropdown */}
           <div className="relative">
             <button
               onClick={() => setAccountMenuOpen(o => !o)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-text/60 hover:text-text hover:bg-primary-light/50 transition-colors min-h-0 min-w-0"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-text/60 hover:text-text hover:bg-primary-light/50 transition-colors min-h-0 min-w-0"
               aria-haspopup="menu"
               aria-expanded={accountMenuOpen}
             >
@@ -131,6 +146,7 @@ export function Navbar({
               </>
             )}
           </div>
+          </div>{/* end help+account wrapper */}
         </div>
 
         {/* Sub-nav: tabs */}
@@ -182,7 +198,17 @@ export function Navbar({
             />
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Link
+              href="/help"
+              className={cn(
+                'p-2 rounded-md transition-colors min-h-0 min-w-0',
+                isActive('/help') ? 'text-primary bg-primary-light' : 'text-text/40 hover:text-primary hover:bg-primary-light/50'
+              )}
+              aria-label="Help & Support"
+            >
+              <HelpCircle className="w-5 h-5" />
+            </Link>
             <button
               onClick={toggleMobileMenu}
               className="relative p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
@@ -288,6 +314,7 @@ function buildDropdownItems({
 }): DropdownItemDef[] {
   const items: DropdownItemDef[] = [
     { type: 'link', href: '/profile', label: 'Profile', icon: User },
+    { type: 'link', href: '/help',    label: 'Help & Support', icon: HelpCircle },
   ]
 
   if (showModItems) {
