@@ -187,9 +187,9 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 **👤 You handle (do these first):**
 - [ ] Create a Stripe account at **stripe.com** (use your business email)
 - [ ] In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro`
-  - Add price: **$5.99 / month** (recurring, monthly)
-  - Add price: **$30.00 / 6 months** (recurring, every 6 months)
-  - Add price: **$50.00 / year** (recurring, yearly)
+  - Add price: **$5.99 / month** (recurring, monthly) "Pro Monthly" Badge: None (or "Best for Flexibility")
+  - Add price: **$31.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $4."
+  - Add price: **$53.99 / year** (recurring, yearly) "Pro Annual" Badge: BEST VALUE or 3 MONTHS FREE "Billed annually. Saves you $18 compared to monthly."
   - Note the **Price IDs** for each (format: `price_xxxxx`) — Claude needs these
 - [ ] In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro Trial`
   - Add price: **$0.00** (one-time or 14-day free trial on the monthly price — your call on duration)
@@ -331,39 +331,65 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 
 ### 13 — Business Entity & Legal Protection `PARALLEL`
 
-**When to do this:** Start this now — it runs parallel to the technical work. You want the LLC in place before you take any real money. None of these steps require Claude; all are 👤 You handle. Consult a business attorney or CPA for advice specific to your situation.
+**Structure:** The LLC is **Digital Elegance LLC** (parent company). MyShiftX operates as a registered **DBA (fictitious name)**. All revenue, contracts, and bank accounts go under Digital Elegance LLC d/b/a MyShiftX. This is Florida-based — steps and links reflect Florida law.
 
-**👤 You handle — Formation:**
-- [ ] **Pick a state to form in** — most solo founders forming in their home state is simplest and cheapest. Delaware/Wyoming are popular for outside investment but add a foreign-registration fee if you live elsewhere. Decide before filing.
-- [ ] **Check name availability** — search your state's Secretary of State business name database for "MyShiftX LLC." Also check **USPTO TESS** (trademarks) and confirm the domain and social handles are yours.
-- [ ] **Appoint a Registered Agent** — required by every state. Options: yourself (if you're comfortable listing your address publicly), a local attorney, or a service like **Northwest Registered Agent** (~$125/yr) or **Registered Agents Inc.**
-- [ ] **File Articles of Organization** — submit through your state's Secretary of State website. Fee is typically $50–$200 depending on state. Processing can be same-day (online) or a few weeks (by mail). Keep the stamped copy.
-- [ ] **Draft an Operating Agreement** — not always legally required, but strongly recommended. Defines ownership, how decisions are made, and what happens if you bring on a partner. Many states have free templates; LegalZoom or a local attorney can formalize it.
-- [ ] **Get an EIN** — free from the IRS at **irs.gov/EIN** (takes 5 minutes online). You'll need this to open a business bank account and eventually pay taxes as a business.
-- [ ] **Open a dedicated business bank account** — keep all revenue (Stripe payouts) and business expenses completely separate from personal accounts. Mixing funds can pierce the LLC's liability protection. Most major banks or online banks (Mercury, Relay) work well for this.
+Complete in order — each step unlocks the next.
 
-**👤 You handle — Intellectual Property:**
-- [ ] **Federal trademark — name** — file an application with the **USPTO** (uspto.gov → TEAS) for "MyShiftX" in Class 38 (telecommunications/communications services) and/or Class 42 (software as a service). Filing fee ~$250–$350 per class. Processing takes 8–14 months but protection dates back to your filing date.
-- [ ] **Federal trademark — logo** — file a separate application for the logo/mark if distinct from the name. Same process.
-- [ ] **Copyright your original content** — the code and unique creative content (email templates, custom copy) are automatically copyrighted to you upon creation, but registering with the **US Copyright Office** (copyright.gov) for ~$65 strengthens enforcement options.
-- [ ] **Register a DMCA agent** — required under the DMCA safe harbor. Register at **dmca.copyright.gov** (~$6/3 years). Add a DMCA notice to your Terms of Service and designate an email (e.g., `dmca@myshiftx.com`) for takedown requests.
+---
 
-**👤 You handle — Legal Documents on the Site:**
-- [ ] **Terms of Service** — covers acceptable use, account termination, limitation of liability, dispute resolution. Claude can draft a starting point; have an attorney review before launch.
-- [ ] **Privacy Policy** — required by law if you collect any personal data (you do). Must cover what you collect, how you use it, how users can delete it, and third-party sharing (Stripe, Resend, Twilio, Google AdSense). Must comply with CCPA (California) at minimum. Claude can draft; attorney review recommended.
-- [ ] **Refund / Cancellation Policy** — required for Stripe. Spell out your policy: e.g., cancel anytime, no prorated refunds, trial terms.
-- [ ] **Cookie Policy** — required under GDPR/CCPA if you serve EU users or California residents (Google AdSense will set cookies). Can be combined with the Privacy Policy.
-- [ ] **Add legal page links to the footer** — Terms, Privacy, Refund/Cancellation, Cookie Policy, DMCA.
+#### 👤 Formation (do these first, in order) — one-time cost ~$175
 
-**🤖 Claude handles:**
-- [ ] Draft initial **Terms of Service**, **Privacy Policy**, **Refund Policy**, and **Cookie Policy** pages for your review — these go in `/app/legal/` and link from the footer. *(Flag for attorney review before going live.)*
-- [ ] Add a **cookie consent banner** (for GDPR compliance) that appears on first visit, accepts/rejects non-essential cookies, and stores the preference — required once Google AdSense is live
+- [ ] **1. Get your EIN** — free, instant at **irs.gov** → Apply for EIN Online. Do this before anything else; you need it for the bank account. Takes 5 minutes.
+- [ ] **2. File LLC Articles of Organization** — **sunbiz.org** → File Online → LLC Articles. Fee: **$100** + $25 registered agent. Processing: 2–3 business days online. Keep the stamped copy.
+  - Registered agent: you can serve as your own agent using your Florida business address — free. No need to pay a registered agent service.
+- [ ] **3. File MyShiftX fictitious name (DBA)** — **sunbiz.org** → File Online → Fictitious Name. Fee: **$50**. Renew every 5 years. File simultaneously with or right after the Articles.
+- [ ] **4. Open a dedicated business bank account** — **Mercury** (mercury.com) or **Relay** recommended — both are free, online-first, and built for small businesses. Do NOT use a personal account. Mixing funds can pierce the LLC's liability protection.
+- [ ] **5. Draft an Operating Agreement** — not required in FL but strongly recommended. AI-drafted is sufficient at launch. Have an attorney review once revenue is consistent. Defines ownership, decision-making, and what happens if you bring in a partner.
 
-**👤 You handle — Ongoing Compliance:**
-- [ ] **File annual reports** — most states require an annual report + fee to keep the LLC in good standing. Calendar a reminder for your state's due date.
-- [ ] **Pay estimated quarterly taxes** — as a sole-member LLC your income passes through to your personal return. Set aside ~25–30% of net revenue and pay quarterly estimated taxes to the IRS (Form 1040-ES) to avoid penalties.
-- [ ] **Consider S-Corp election** — once the business is profitably generating consistent income (rough threshold: ~$40k+ net/year), an S-Corp election can reduce self-employment tax. Talk to a CPA when you get there.
-- [ ] **Business insurance** — consider a **General Liability** policy and a **Technology E&O (Errors & Omissions)** policy. Hiscox, Next Insurance, and CoverWallet offer online quotes for small SaaS businesses.
+---
+
+#### 👤 IP & Legal — one-time cost ~$421
+
+- [ ] **6. Post Privacy Policy, Terms of Service & DMCA notice** — required before launch. Claude drafts these (see below). Flag for attorney review once shift-trading employment nuances matter (FL + Disney are non-trivial). Cost: $0 if AI-drafted.
+- [ ] **7. Register DMCA designated agent** — **dmca.copyright.gov** → Register. Fee: **$6 / 3 years**. Post the DMCA policy page on the site at the same time. Copyright Office emails a renewal reminder before expiration.
+- [ ] **8. Register Twilio 10DLC brand + campaign** — required by carriers to send A2P SMS (the Pro-tier match notifications). In Twilio Console: **Messaging → Regulatory → 10DLC**. Cost: **~$16 one-time** (~$4.50 brand registration + ~$11.50 campaign vetting). Do this before launching SMS features.
+- [ ] **9. File USPTO trademark — MyShiftX (Class 42)** — **USPTO Trademark Center** → TEAS Plus. **Class 42** = Software as a Service. Fee: **$350**. Use the ID Manual dropdown to select the exact description — this avoids the $200 surcharge for non-standard descriptions. Processing: 8–14 months, but protection dates back to your filing date. Can file after launch.
+- [ ] **10. Register copyright — MyShiftX code & UI** — **copyright.gov** → Register → Online Registration. Fee: **~$65**. File as a "collection" — covers all original code, email templates, and UI copy in one filing. Can file after launch.
+
+---
+
+#### 🤖 Claude handles — Legal Documents
+
+- [ ] Draft **Terms of Service**, **Privacy Policy**, **Refund & Cancellation Policy**, and **Cookie Policy** pages — rendered in the app at `/terms`, `/privacy`, etc. and linked from the footer. *(Flag for attorney review before charging real money.)*
+- [ ] Add a **cookie consent banner** — required for GDPR/CCPA compliance once Google AdSense is live. Appears on first visit, stores accept/reject preference.
+
+---
+
+#### 👤 Ongoing Compliance — annual
+
+- [ ] **Florida LLC annual report** — due **May 1** every year at **sunbiz.org**. Fee: **$138.75**. Late filing penalty: **+$400**. Set a calendar reminder for April 15 so you don't miss it.
+- [ ] **Quarterly estimated federal taxes** — due **Apr 15, Jun 15, Sep 15, Jan 15** (IRS Form 1040-ES). Florida has no state income tax, so federal only. Set aside ~25–30% of net revenue each quarter.
+- [ ] **DMCA agent renewal** — every 3 years at dmca.copyright.gov (~$6). Copyright Office will email a reminder.
+- [ ] **USPTO trademark maintenance** — Section 8 declaration due between **years 5–6** of registration. USPTO will NOT remind you — calendar it now.
+- [ ] **S-Corp election** — once net profit consistently exceeds ~$40k/year, an S-Corp election reduces self-employment tax. Talk to a CPA at that point.
+- [ ] **Business insurance** — General Liability + Tech E&O (Errors & Omissions) once revenue starts. Hiscox, Next Insurance, and CoverWallet offer online quotes.
+
+---
+
+#### 💰 Monthly Infrastructure Costs (Reference)
+
+| Service | Cost | Notes |
+|---------|------|-------|
+| RackNerd VPS (digitalelegance.com) | $10/mo | Existing VPS, 1 TB transfer |
+| Vercel Pro | $20/mo | 1 seat, includes 1M edge requests |
+| Supabase Pro | $35/mo | $25 base + usage; budget $35–$60/mo at launch |
+| Claude Pro (dev) | $20/mo | Includes Claude Code |
+| Domains (myshiftx + digitalelegance) | $3/mo | ~$15–$20/yr each, amortized |
+| Stripe | Per transaction | 2.9% + $0.30 flat fee; no monthly fee |
+| Twilio SMS (paid users only) | ~$0.37/paid user/mo | At 30 SMS/user; base + carrier cost |
+| **Floor total (excl. Twilio + Stripe)** | **$88/mo** | Scales with paid users beyond this |
+
+**Year 1 estimated total:** ~$175 formation + $421 IP/legal + ($88 × 12 infra) = **~$2,652 all-in before Stripe/Twilio variable costs.**
 
 ---
 
