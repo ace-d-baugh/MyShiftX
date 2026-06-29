@@ -190,7 +190,6 @@ This is the canonical Free vs Pro feature list. Use this when building the upgra
 | **Unlimited photo schedule imports** | 🆕 |
 | **Calendar export & sync** (Google Calendar, Apple iCal) | 🆕 |
 | **Trade preferences** — set preferred shift types, time of day, etc. for smarter matching | 🆕 |
-| **Direct messaging outside your boards** | 🆕 |
 | **Bulk shift import** — CSV upload or multi-week photo scan | 🆕 |
 
 #### 🆕 New features not yet in the roadmap
@@ -198,11 +197,11 @@ This is the canonical Free vs Pro feature list. Use this when building the upgra
 The following Pro and Free features have not been scoped yet and will need dedicated tasks before launch or shortly after:
 
 - **Photo schedule import (OCR)** — user photographs their paper or on-screen schedule; OCR reads it and populates shifts automatically. This is the highest-value Free feature and the biggest differentiator from manual entry. Needs an OCR service (Google Vision API or similar) + a shift-parsing pipeline. High complexity — scope separately.
-- **In-app messaging** — replaces the current email mailto: contact button with a real in-app thread between two users. Free tier: within shared boards only. Pro tier: message anyone regardless of shared board. Needs a `messages` table, read receipts, and a message UI. High complexity — scope separately.
+- **In-app messaging** — replaces the current email mailto: contact button with a real in-app thread between two users. Needs a `messages` table, read receipts, and a message UI. High complexity — scope separately.
 - **In-app push notifications** — browser-native web push (PWA-style) using the Push API and a service worker. Free tier. Works on desktop Chrome/Edge/Firefox and Android Chrome. Not available on iOS Safari (they have limited support). Supplements or replaces email for non-SMS users. Medium complexity.
 - **Calendar export/sync** — export shifts to `.ics` (works with Google Calendar, Apple Calendar, Outlook) or connect a live Google Calendar feed. Pro only. Medium complexity.
 - **Trade preferences** — users set preferred shift types, days of week, and time windows; the matching engine factors these in when firing notifications. Extends the existing `notifyShiftPosted`/`notifyRequestPosted` logic. Medium complexity.
-- **Direct messaging outside boards** — Pro users can initiate a message thread with any registered user, not just shared board members. Extends in-app messaging. Builds on top of the in-app messaging feature above.
+- ~~**Direct messaging outside boards**~~ — Removed. Messaging is board-member only for all tiers.
 - **Bulk shift import (CSV / multi-week photo)** — upload a CSV of shifts or scan multiple weeks of a schedule at once. Pro only. Extends the photo OCR feature above.
 
 ---
@@ -386,11 +385,11 @@ Complete in order — each step unlocks the next.
 #### 👤 Formation (do these first, in order) — one-time cost ~$175
 
 - [ ] **1. Get your EIN** — free, instant at **irs.gov** → Apply for EIN Online. Do this before anything else; you need it for the bank account. Takes 5 minutes.
-- [ ] **2. File LLC Articles of Organization** — **sunbiz.org** → File Online → LLC Articles. Fee: **$100** + $25 registered agent. Processing: 2–3 business days online. Keep the stamped copy.
+- ✅ **2. File LLC Articles of Organization** — **sunbiz.org** → File Online → LLC Articles. Fee: **$100** + $25 registered agent. Processing: 2–3 business days online. Keep the stamped copy.
   - Registered agent: you can serve as your own agent using your Florida business address — free. No need to pay a registered agent service.
-- [ ] **3. File MyShiftX fictitious name (DBA)** — **sunbiz.org** → File Online → Fictitious Name. Fee: **$50**. Renew every 5 years. File simultaneously with or right after the Articles.
+- ✅ **3. File MyShiftX fictitious name (DBA)** — **sunbiz.org** → File Online → Fictitious Name. Fee: **$50**. Renew every 5 years. File simultaneously with or right after the Articles.
 - [ ] **4. Open a dedicated business bank account** — **Mercury** (mercury.com) or **Relay** recommended — both are free, online-first, and built for small businesses. Do NOT use a personal account. Mixing funds can pierce the LLC's liability protection.
-- [ ] **5. Draft an Operating Agreement** — not required in FL but strongly recommended. AI-drafted is sufficient at launch. Have an attorney review once revenue is consistent. Defines ownership, decision-making, and what happens if you bring in a partner.
+- ✅ **5. Draft an Operating Agreement** — not required in FL but strongly recommended. AI-drafted is sufficient at launch. Have an attorney review once revenue is consistent. Defines ownership, decision-making, and what happens if you bring in a partner.
 
 ---
 
@@ -507,6 +506,199 @@ Because the existing codebase is React/TypeScript, Expo is the natural path — 
 | Google Play Developer | $25 one-time | Already paid at enrollment |
 | Firebase (FCM) | Free | Up to 10,000 subscribers free; scales cheaply beyond that |
 | Expo EAS Build | ~$0–$99/mo | Free tier handles early stage; paid tier for faster builds |
+
+---
+
+### 15 — Photo Schedule Import (Local LLM on VPS) `POST-LAUNCH`
+
+**Tier:** Free = 4 imports/month · Pro = unlimited
+**Why it matters:** The single biggest UX unlock for Cast Members. Instead of manually entering each shift, they photograph their paper or screen schedule and MyShiftX reads it automatically.
+
+**Architecture overview:**
+```
+Browser → /api/schedule-import (Next.js) → Ollama on VPS → parsed JSON → confirmation UI → Supabase
+```
+
+The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over HTTP with the image. The VPS never stores images — processes and discards.
+
+---
+
+**👤 You handle — VPS setup (one-time):**
+- [ ] **Check VPS RAM** — multimodal LLM models require at minimum 4 GB RAM to run a quantized model; 8 GB is comfortable. Check your RackNerd plan specs and upgrade if needed (~$20–$25/mo for 4 GB tier).
+- [ ] **Install Ollama** on the VPS:
+  ```bash
+  curl -fsSL https://ollama.com/install.sh | sh
+  ```
+- [ ] **Pull a multimodal model** — recommended options (pick one):
+  - `ollama pull llava` — 7B, good accuracy, ~4 GB RAM
+  - `ollama pull llama3.2-vision` — Meta's official vision model, excellent accuracy, ~8 GB RAM
+  - `ollama pull moondream` — very small (1.8B), ~2 GB RAM, less accurate but works on low-RAM VPS
+- [ ] **Expose Ollama securely** — by default Ollama listens on `localhost:11434`. For Next.js on Vercel to reach it, either:
+  - Option A (recommended): Add a **Nginx reverse proxy** on the VPS at a path like `/ollama/` with HTTP Basic Auth or a secret header check, then expose via HTTPS using your existing SSL cert on the VPS
+  - Option B: Open port 11434 in the VPS firewall and protect with a secret key checked in the Next.js API route
+- [ ] **Add `VPS_OLLAMA_URL` and `VPS_OLLAMA_SECRET` to Vercel environment variables** (e.g., `https://vps.digitalelegance.com/ollama` + a long random secret)
+
+**🤖 Claude handles:**
+- [ ] Add `schedule_import_count` (integer, default 0) and `import_count_reset_date` (timestamptz) columns to `users` table — reset to 0 on the 1st of each month (same pattern as SMS counter)
+- [ ] Create `/api/schedule-import/route.ts`:
+  - Verify auth and check quota (Basic: ≤4, Pro: unlimited)
+  - Accept image upload (multipart form data)
+  - Send base64 image + structured prompt to Ollama endpoint on VPS
+  - Parse Ollama's JSON response into an array of `{ date, start_time, end_time, title }`
+  - Increment `schedule_import_count`
+  - Return parsed shifts to client for review
+- [ ] **Prompt engineering** — the prompt sent to Ollama is critical for accuracy:
+  ```
+  "You are reading a work schedule. Extract every shift shown.
+   Return ONLY a JSON array with no other text:
+   [{ "date": "YYYY-MM-DD", "start_time": "HH:MM", "end_time": "HH:MM", "title": "Shift title or role" }]
+   If a date shows no year, assume the nearest upcoming occurrence.
+   If a time is missing, omit that shift. Return [] if no shifts found."
+  ```
+- [ ] Create `ScheduleImportModal` client component:
+  - Camera/file upload button (accepts image/*)
+  - Loading state while VPS processes ("Reading your schedule…")
+  - Review table: each parsed shift shown with editable fields (date, start, end, title, board selector)
+  - "Add to Calendar" confirms and bulk-inserts approved shifts
+  - Shows remaining imports this month for Basic users
+- [ ] Add import button to the Calendar page and the "+" Post menu
+- [ ] Add monthly import counter reset to the existing nightly cron (`/api/cron/expirations`)
+
+---
+
+### 16 — In-App Push Notifications (Web Push) `POST-LAUNCH`
+
+**Tier:** Free (Basic and Pro both get push)
+**Why it matters:** Silent real-time alerts without SMS cost. Works on desktop and Android Chrome; limited on iOS Safari (supported since iOS 16.4 via PWA install).
+
+**Architecture:** Browser Push API + VAPID keys. Next.js stores push subscriptions in Supabase. When a match or interest fires, the notification action also sends a web push to subscribed devices.
+
+**🤖 Claude handles:**
+- [ ] Generate VAPID key pair — add `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` to Vercel env vars
+- [ ] Create `push_subscriptions` table:
+  ```sql
+  CREATE TABLE push_subscriptions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    endpoint text NOT NULL,
+    p256dh text NOT NULL,
+    auth text NOT NULL,
+    created_at timestamptz DEFAULT now(),
+    UNIQUE(user_id, endpoint)
+  );
+  ```
+- [ ] Create `/api/push/subscribe` and `/api/push/unsubscribe` API routes
+- [ ] Register a service worker (`/public/sw.js`) that handles `push` events and shows a notification
+- [ ] Add `sendPushNotification(userId, title, body, url)` helper to `notifications.ts` — called alongside the existing email/SMS sends
+- [ ] Add "Enable Notifications" toggle to Profile → Notifications settings with browser permission flow
+- [ ] Show a one-time prompt banner on the Wall for users who haven't enabled push yet
+
+**👤 You handle:**
+- [ ] Test on desktop Chrome, Android Chrome, and iOS Safari (requires "Add to Home Screen" first on iOS)
+
+---
+
+### 17 — Calendar Export & Sync (iCal / Google Calendar) `WITH PRO LAUNCH`
+
+**Tier:** Pro only
+**Why:** Users want their shift calendar to live in their native calendar app, not just in MyShiftX. A live-sync iCal feed means it updates automatically when shifts change.
+
+**Architecture:** Generate a secret per-user iCal feed URL. Calendar apps (Google Calendar, Apple Calendar, Outlook) subscribe to it and refresh periodically. No OAuth required — the URL is the authentication.
+
+**🤖 Claude handles:**
+- [ ] Add `ical_token` column to `users` (UUID, unique, generated on first use, nullable)
+- [ ] Create `/api/calendar/[token].ics` route — returns a valid `.ics` file of all the user's active and upcoming shifts. Only accessible to Pro/Trial users. Invalid token returns 404.
+- [ ] Create `/api/calendar/reset-token` route — lets the user rotate their feed URL (invalidates old one)
+- [ ] Add Calendar Sync section to Profile for Pro users:
+  - "Your personal feed URL" (copyable)
+  - Step-by-step instructions for Google Calendar, Apple Calendar, and Outlook
+  - "Reset feed URL" button with warning that existing subscriptions will break
+- [ ] One-click `.ics` download button (exports all current shifts as a static file, no subscription)
+
+**👤 You handle:**
+- [ ] Test subscription flow in Google Calendar (Settings → Other calendars → From URL) and Apple Calendar
+
+---
+
+### 18 — Trade Preferences (Smart Matching) `WITH PRO LAUNCH`
+
+**Tier:** Pro only
+**Why:** Extends the shift matching system so Pro users only get notified for shifts that actually fit their preferences — reducing notification fatigue.
+
+**🤖 Claude handles:**
+- [ ] Add `trade_preferences` JSONB column to `users` (nullable):
+  ```json
+  {
+    "preferred_types": ["trade", "giveaway"],
+    "preferred_times": ["morning", "afternoon"],
+    "preferred_days": [1, 2, 3, 4, 5]
+  }
+  ```
+- [ ] Add Trade Preferences section to Profile → Notifications for Pro users:
+  - Preferred shift types (Trade / Giveaway / Either)
+  - Preferred time of day (Morning / Afternoon / Evening / Late Night / Any)
+  - Preferred days of week (multi-select Mon–Sun)
+- [ ] Update `notifyShiftPosted()` and `notifyRequestPosted()` — before sending match notifications, check if the recipient has trade preferences set and whether the shift/request satisfies them. If preferences are set and the match doesn't fit, skip the notification.
+
+---
+
+### 19 — In-App Messaging (Within Boards — All Tiers) `YEAR 1 POST-LAUNCH`
+
+**Tier:** Free and Pro — available to all users, within shared boards only. Direct messaging outside of boards is not permitted.
+**Why:** Replaces the current email mailto: contact button with a real in-app conversation thread. Keeps communication on the platform and creates network stickiness.
+
+**Database:**
+```sql
+CREATE TABLE conversations (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE conversation_participants (
+  conversation_id uuid REFERENCES conversations(id) ON DELETE CASCADE,
+  user_id         uuid REFERENCES users(id) ON DELETE CASCADE,
+  last_read_at    timestamptz,
+  PRIMARY KEY (conversation_id, user_id)
+);
+
+CREATE TABLE messages (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id uuid REFERENCES conversations(id) ON DELETE CASCADE,
+  sender_id       uuid REFERENCES users(id),
+  body            text NOT NULL CHECK (char_length(body) <= 1000),
+  created_at      timestamptz DEFAULT now()
+);
+```
+
+**🤖 Claude handles:**
+- [ ] Create the tables above with RLS: participants can only read conversations they belong to; only the sender can insert their own messages
+- [ ] Create real-time message subscription using Supabase Realtime on the `messages` table
+- [ ] Build `/messages` page — conversation list with unread count badges, sorted by most recent
+- [ ] Build `/messages/[conversationId]` page — scrollable thread with send box (max 1000 chars)
+- [ ] Add unread message badge to Navbar (next to existing notification indicators)
+- [ ] Replace the "Contact" email button on ShiftCards with a "Message" button that opens or creates a conversation thread
+- [ ] Before creating a conversation, verify both users share at least one approved board (query `user_boards` for overlap). If not, block with "You can only message members of your boards."
+- [ ] Add push notification trigger when a new message arrives
+
+---
+
+### 20 — Bulk Shift Import (CSV + Multi-Week Photo) `YEAR 1 POST-LAUNCH`
+
+**Tier:** Pro only — extends Task 15 (Photo Import)
+**Why:** Power users with multi-week schedules don't want to import one photo at a time. CSV gives IT-minded users a clean path; multi-photo handles paper schedules.
+
+**🤖 Claude handles:**
+
+**CSV import:**
+- [ ] Create a CSV template for download: `date, start_time, end_time, title, type`
+- [ ] Build CSV upload UI — parse client-side with PapaParse, show preview table, validate each row (past dates, valid times, required fields), then bulk-insert approved rows
+- [ ] Handle errors gracefully: flag individual bad rows and let user fix or skip before importing
+
+**Multi-week photo import:**
+- [ ] Allow uploading up to 4 photos in a single import session (one per schedule week)
+- [ ] Batch the images to Ollama sequentially — collect all returned shifts, deduplicate by date, then show a unified review table
+- [ ] Add a "This is a multi-week schedule" toggle to the import modal (Task 15) that enables multi-photo mode for Pro users
 
 ---
 
