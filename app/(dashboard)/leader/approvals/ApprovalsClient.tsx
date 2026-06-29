@@ -15,10 +15,9 @@ interface PendingRequest {
 
 interface ApprovalsClientProps {
   pendingRequests: PendingRequest[]
-  approverId: string
 }
 
-export function ApprovalsClient({ pendingRequests: initial, approverId }: ApprovalsClientProps) {
+export function ApprovalsClient({ pendingRequests: initial }: ApprovalsClientProps) {
   const [requests, setRequests] = useState(initial)
   const [processing, setProcessing] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +25,7 @@ export function ApprovalsClient({ pendingRequests: initial, approverId }: Approv
   const handleApprove = async (id: string) => {
     setProcessing(id)
     setError(null)
-    const result = await approveUserBoard(id, approverId)
+    const result = await approveUserBoard(id)
     if (result.error) {
       setError(result.error)
     } else {

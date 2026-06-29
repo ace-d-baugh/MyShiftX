@@ -47,7 +47,6 @@ export default async function ApprovalsPage() {
   return (
     <ApprovalsClient
       pendingRequests={pendingRequests}
-      approverId={user.id}
     />
   )
 }

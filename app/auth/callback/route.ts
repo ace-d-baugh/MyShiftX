@@ -83,8 +83,11 @@ export async function GET(request: Request) {
           }
         }
 
-        const destination = hasName ? (next || `${origin}/wall`) : `${origin}/profile?oauth=1`
-        return NextResponse.redirect(destination.startsWith('http') ? destination : `${origin}${destination}`)
+        // Only allow relative paths starting with / to prevent open-redirect attacks.
+        // Reject protocol-relative URLs (//evil.com), absolute URLs, and empty strings.
+        const safePath = next && /^\/[^/]/.test(next) ? next : '/wall'
+        const destination = hasName ? `${origin}${safePath}` : `${origin}/profile?oauth=1`
+        return NextResponse.redirect(destination)
       }
     }
   }

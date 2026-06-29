@@ -325,12 +325,12 @@ export async function regenerateInviteCode(boardId: string): Promise<{ error?: s
 
 // ── Approve / reject a join request (Mod / Leader) ───────────────────────────
 
-export async function approveUserBoard(userBoardId: string, approverId: string): Promise<{ error?: string }> {
+export async function approveUserBoard(userBoardId: string): Promise<{ error?: string }> {
   try {
-    const { supabase } = await getSession()
+    const { supabase, userId } = await getSession()
     const { error } = await supabase
       .from('user_boards')
-      .update({ is_approved: true, approved_by_user_id: approverId, approved_at: new Date().toISOString() })
+      .update({ is_approved: true, approved_by_user_id: userId, approved_at: new Date().toISOString() })
       .eq('id', userBoardId)
     if (error) return { error: error.message }
     revalidatePath('/leader/approvals')

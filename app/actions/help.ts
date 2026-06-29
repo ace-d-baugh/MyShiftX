@@ -15,12 +15,19 @@ export async function sendSupportMessage(opts: {
     return { error: 'Subject and message are required.' }
   }
 
+  // Strip newlines/carriage-returns from subject to prevent email header injection
+  const safeSubject = subject.trim().replace(/[\r\n]+/g, ' ').slice(0, 200)
+
+  // Validate replyTo is a plausible email address before including in headers
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const safeReplyTo = emailRegex.test(fromEmail) ? fromEmail : undefined
+
   try {
     const { error } = await resend.emails.send({
       from: 'noreply@myshiftx.com',
       to: 'support@myshiftx.com',
-      replyTo: fromEmail,
-      subject: `[Support] ${subject.trim()}`,
+      replyTo: safeReplyTo,
+      subject: `[Support] ${safeSubject}`,
       html: `
         <p><strong>From:</strong> ${fromEmail}</p>
         <p><strong>Subject:</strong> ${subject.trim()}</p>
