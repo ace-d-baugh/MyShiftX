@@ -393,6 +393,77 @@ Complete in order — each step unlocks the next.
 
 ---
 
+### 14 — Dedicated Mobile App (React Native / Expo) `YEAR 2+`
+
+**When to start:** Not during beta. The right trigger is **three conditions met simultaneously:**
+1. The web app is feature-stable (most tasks above are complete)
+2. You have consistent paid users — roughly **50+ active Pro subscribers** justifies the investment
+3. You are ready to expand beyond the first park/employer (Year 2 in the financial model: WDW + Universal)
+
+Building the app before these conditions wastes development time on a moving target. The web app handles 100% of use cases until then.
+
+---
+
+**Why a dedicated app matters at scale:**
+
+- **Native push notifications (FCM/APNs)** — free via Firebase, works on Android and iOS without requiring SMS. At scale this replaces or dramatically reduces the Twilio SMS cost (~$0.012/message) while delivering a better user experience
+- **Home screen presence** — app icon on a Cast Member's phone vs. a browser bookmark is a significant engagement difference
+- **Faster interactions** — native navigation, haptic feedback, and background sync feel noticeably better than a mobile browser
+- **App Store discoverability** — users searching for shift swap tools can find MyShiftX organically
+
+---
+
+**Technology recommendation: Expo (React Native)**
+
+Because the existing codebase is React/TypeScript, Expo is the natural path — business logic, TypeScript types, Zod schemas, and Supabase client calls can all be shared with the web app. The app mirrors the web rather than duplicating it.
+
+**What the app includes (mirrors the web):**
+- The Wall (shift offers and requests, with real-time updates)
+- Post/edit shift and request forms
+- Board management and member list
+- Profile and notification settings
+- Calendar view
+- Native push notifications for shift matches (replacing SMS for in-app users)
+
+**What stays web-only:**
+- Admin tools and moderation pages (not worth building for the small admin audience)
+- Legal pages (Terms, Privacy, Data Deletion) — link to myshiftx.com
+- The upgrade/subscription sales page — Apple takes 30% on in-app purchases; link to web checkout instead
+
+---
+
+**👤 You handle — Before Development:**
+- [ ] **Apple Developer Program** — enroll at developer.apple.com. Fee: **$99/year**. Required to publish to the App Store and test on real iOS devices. Takes 24–48 hrs to approve.
+- [ ] **Google Play Developer account** — enroll at play.google.com/console. Fee: **$25 one-time**. Required to publish to the Play Store. Takes 1–3 days to verify.
+- [ ] **Firebase project** — create a Firebase project (free) for FCM push notifications. One project covers both iOS and Android.
+- [ ] **App Store listing assets** — icon (1024×1024), screenshots at required sizes for iPhone and iPad, short and long description, keywords, privacy policy URL, support URL
+- [ ] **Decide subscription model for App Store** — Apple takes 30% (15% after year 1) on in-app purchases. Recommended: gate subscription purchase behind a web link to avoid Apple's cut. Users subscribe at myshiftx.com, app detects Pro status via Supabase.
+- [ ] **Trademark** — confirm USPTO trademark for MyShiftX is filed before App Store submission (prevents another party from filing a takedown on your listing)
+
+**🤖 Claude handles:**
+- [ ] Scaffold Expo project with shared TypeScript types from the web codebase
+- [ ] Set up Supabase auth in the app (same session system, supports OAuth and email/password)
+- [ ] Build the Wall screen with real-time Supabase subscription (same logic as WallClient)
+- [ ] Build post/edit forms (reuse validation schemas from `lib/validations/`)
+- [ ] Implement FCM/APNs push notification registration and handlers
+- [ ] Build profile and settings screens
+- [ ] App Store and Play Store submission configuration (app.json, EAS Build)
+
+**👤 You handle — Submission:**
+- [ ] **Apple App Review** — 1–7 day review process. Common rejection reasons: missing privacy policy, incomplete app, metadata mismatch. Submit early.
+- [ ] **Google Play Review** — typically 1–3 days for new apps. Less strict than Apple but requires a privacy policy URL in the listing.
+- [ ] **App Store Connect setup** — pricing, age rating (likely 12+ or 17+), primary category (Business or Productivity), territories
+
+**💰 Additional costs once live:**
+| Item | Cost | Notes |
+|------|------|-------|
+| Apple Developer Program | $99/yr | Required to stay on the App Store |
+| Google Play Developer | $25 one-time | Already paid at enrollment |
+| Firebase (FCM) | Free | Up to 10,000 subscribers free; scales cheaply beyond that |
+| Expo EAS Build | ~$0–$99/mo | Free tier handles early stage; paid tier for faster builds |
+
+---
+
 ## Ongoing / Maintenance
 
 | Task | Who | Notes |
