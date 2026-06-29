@@ -161,6 +161,52 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 
 ---
 
+### Feature Tier Reference 🗂️
+
+This is the canonical Free vs Pro feature list. Use this when building the upgrade funnel (Task 8), feature gating (Task 10), and the ad system (Task 12). Emoji key: ✅ already built · 🔲 planned in task list · 🆕 new — not yet in roadmap
+
+#### 🆓 Free (Basic) — $0
+
+| Feature | Status |
+|---|---|
+| Account creation & profile | ✅ |
+| Join unlimited boards (invite-only) | ✅ |
+| Post shift offers and requests to board wall | ✅ |
+| Mark interest in shifts (actual trade completed via company system) | ✅ |
+| Manual shift entry & calendar view | ✅ |
+| In-app comments & flagging | ✅ |
+| In-app messaging with anyone in the same board | 🆕 |
+| In-app push notifications (web push / PWA) | 🆕 |
+| 4 photo schedule imports per month (OCR → auto-creates shifts) | 🆕 |
+| Ads displayed (right sidebar on desktop, every 5th post on mobile) | 🔲 Task 12 |
+
+#### ⭐ Pro — $4.99/mo · $26.99/6 mo · $47.99/year
+
+| Feature | Status |
+|---|---|
+| Everything in Free | — |
+| **Ad-free experience** | 🔲 Task 10 |
+| **SMS notifications** for shift matches (up to 30/mo) | 🔲 Task 11 |
+| **Unlimited photo schedule imports** | 🆕 |
+| **Calendar export & sync** (Google Calendar, Apple iCal) | 🆕 |
+| **Trade preferences** — set preferred shift types, time of day, etc. for smarter matching | 🆕 |
+| **Direct messaging outside your boards** | 🆕 |
+| **Bulk shift import** — CSV upload or multi-week photo scan | 🆕 |
+
+#### 🆕 New features not yet in the roadmap
+
+The following Pro and Free features have not been scoped yet and will need dedicated tasks before launch or shortly after:
+
+- **Photo schedule import (OCR)** — user photographs their paper or on-screen schedule; OCR reads it and populates shifts automatically. This is the highest-value Free feature and the biggest differentiator from manual entry. Needs an OCR service (Google Vision API or similar) + a shift-parsing pipeline. High complexity — scope separately.
+- **In-app messaging** — replaces the current email mailto: contact button with a real in-app thread between two users. Free tier: within shared boards only. Pro tier: message anyone regardless of shared board. Needs a `messages` table, read receipts, and a message UI. High complexity — scope separately.
+- **In-app push notifications** — browser-native web push (PWA-style) using the Push API and a service worker. Free tier. Works on desktop Chrome/Edge/Firefox and Android Chrome. Not available on iOS Safari (they have limited support). Supplements or replaces email for non-SMS users. Medium complexity.
+- **Calendar export/sync** — export shifts to `.ics` (works with Google Calendar, Apple Calendar, Outlook) or connect a live Google Calendar feed. Pro only. Medium complexity.
+- **Trade preferences** — users set preferred shift types, days of week, and time windows; the matching engine factors these in when firing notifications. Extends the existing `notifyShiftPosted`/`notifyRequestPosted` logic. Medium complexity.
+- **Direct messaging outside boards** — Pro users can initiate a message thread with any registered user, not just shared board members. Extends in-app messaging. Builds on top of the in-app messaging feature above.
+- **Bulk shift import (CSV / multi-week photo)** — upload a CSV of shifts or scan multiple weeks of a schedule at once. Pro only. Extends the photo OCR feature above.
+
+---
+
 ### 6 — Membership Schema (Database) `NEXT`
 
 **Why first:** Everything else — Stripe, feature gating, ads — depends on knowing a user's membership tier.
@@ -187,9 +233,9 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 **👤 You handle (do these first):**
 - [ ] Create a Stripe account at **stripe.com** (use your business email)
 - [ ] In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro`
-  - Add price: **$5.99 / month** (recurring, monthly) "Pro Monthly" Badge: None (or "Best for Flexibility")
-  - Add price: **$31.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $4."
-  - Add price: **$53.99 / year** (recurring, yearly) "Pro Annual" Badge: BEST VALUE or 3 MONTHS FREE "Billed annually. Saves you $18 compared to monthly."
+  - Add price: **$4.99 / month** (recurring, monthly) "Pro Monthly" Badge: None (or "Best for Flexibility")
+  - Add price: **$26.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $3."
+  - Add price: **$47.99 / year** (recurring, yearly) "Pro Annual" Badge: SAVE 20% BEST VALUE or 2 MONTHS FREE "Billed annually. Saves you $12 compared to monthly."
   - Note the **Price IDs** for each (format: `price_xxxxx`) — Claude needs these
 - [ ] In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro Trial`
   - Add price: **$0.00** (one-time or 14-day free trial on the monthly price — your call on duration)
@@ -231,7 +277,7 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 - [ ] Create `/upgrade` page — full sales funnel with:
   - **Hero section**: headline targeting the pain ("Stop refreshing. Start swapping."), subheadline, and primary CTA button
   - **Pain points section**: 3–4 cards calling out frustrations of the free experience (missing shifts, constant manual checking, information overload)
-  - **Feature comparison table**: Basic vs Pro side-by-side with checkmarks/Xs for each feature
+  - **Feature comparison table**: Basic vs Pro side-by-side — use the Feature Tier Reference table above for the exact feature list and copy
   - **Pricing toggle**: Monthly / 6-Month / Yearly — active state shows selected price with savings badge on 6-mo and yearly
   - **Trial callout**: "Try Pro free for 14 days — no credit card required" (if offering a trial)
   - **FAQ accordion**: common cancellation, billing, and upgrade questions
