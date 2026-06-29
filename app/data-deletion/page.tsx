@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Trash2, Mail, Clock, CheckCircle, ArrowLeft } from 'lucide-react'
+import { Trash2, Mail, Clock, CheckCircle, AlertTriangle, ArrowLeft } from 'lucide-react'
 
 export const metadata = {
   title: 'Data Deletion Instructions – MyShiftX',
@@ -34,25 +34,27 @@ export default function DataDeletionPage() {
           {/* Overview */}
           <section>
             <p className="text-base">
-              MyShiftX is committed to your privacy. If you signed up using Facebook Login (or any
-              other method) and would like your account and personal data permanently deleted, this
-              page explains exactly how to do that.
+              MyShiftX (operated by Digital Elegance LLC) is committed to your privacy. Whether you
+              signed up with an email address or through Google, Facebook, or LinkedIn, this page
+              explains exactly how to delete your account and personal data.
             </p>
           </section>
 
-          {/* What data we hold */}
+          {/* What data we store */}
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">What Data We Store</h2>
-            <p className="mb-3">When you create a MyShiftX account (via Facebook or email), we store:</p>
+            <p className="mb-3 text-sm">When you create a MyShiftX account, we store:</p>
             <ul className="space-y-1.5 list-none pl-0">
               {[
                 'Your email address',
                 'Your display name (set by you)',
                 'Your phone number (optional, if provided)',
-                'Shift and request posts you have made',
-                'Board memberships',
+                'Shift offers and requests you have posted',
+                'Board memberships and your role on each board',
                 'Comments and interest marks on posts',
-                'Notification preferences',
+                'Notification and display preferences (time zone, date format, dark mode)',
+                'OAuth connection record if you signed in via Google, Facebook, or LinkedIn',
+                'Subscription status and billing history (Pro accounts)',
               ].map(item => (
                 <li key={item} className="flex items-start gap-2 text-sm">
                   <CheckCircle className="w-4 h-4 text-success shrink-0 mt-0.5" />
@@ -61,9 +63,26 @@ export default function DataDeletionPage() {
               ))}
             </ul>
             <p className="mt-3 text-sm text-text/60">
-              We do <strong>not</strong> store your Facebook password, payment details, or any data
-              beyond what is listed above.
+              We do <strong>not</strong> store your passwords in readable form (only a cryptographic
+              hash), your full payment card numbers, CVV codes, or banking credentials — those are
+              handled entirely by Stripe and never reach our servers.
             </p>
+          </section>
+
+          {/* Pro subscription warning */}
+          <section className="card shadow-sm border-l-4 border-l-warning bg-warning/5">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+              <div className="space-y-1 text-sm">
+                <p className="font-semibold text-text">Pro subscribers: cancel before deleting</p>
+                <p className="text-text/70">
+                  If you have an active Pro subscription, please cancel it first through your
+                  Profile → Account Settings before requesting deletion. Deleting your account
+                  does not automatically cancel an active Stripe subscription, and you may continue
+                  to be billed until it is cancelled separately.
+                </p>
+              </div>
+            </div>
           </section>
 
           {/* Option 1 — Self-service */}
@@ -74,7 +93,7 @@ export default function DataDeletionPage() {
             <p className="text-sm mb-3">
               The fastest way is to deactivate your account directly from within the app:
             </p>
-            <ol className="space-y-2 text-sm list-none pl-0 counter-reset">
+            <ol className="space-y-2 text-sm list-none pl-0">
               {[
                 'Log in to MyShiftX',
                 'Go to your Profile page',
@@ -102,7 +121,7 @@ export default function DataDeletionPage() {
             </h2>
             <p className="text-sm mb-3">
               If you no longer have access to your account, email us and we will delete your data
-              manually within <strong>30 days</strong>.
+              within <strong>30 days</strong>.
             </p>
             <a
               href="mailto:support@myshiftx.com?subject=Data%20Deletion%20Request&body=Please%20delete%20all%20data%20associated%20with%20my%20account.%0A%0AEmail%20address%20used%20to%20register%3A%20"
@@ -112,7 +131,8 @@ export default function DataDeletionPage() {
               support@myshiftx.com
             </a>
             <p className="text-xs text-text/50 mt-3">
-              Please include the email address associated with your account so we can locate your data.
+              Please include the email address associated with your account so we can locate your
+              data. We may ask you to verify your identity before processing the request.
             </p>
           </section>
 
@@ -123,19 +143,79 @@ export default function DataDeletionPage() {
               <Clock className="w-4 h-4 text-text/40 shrink-0 mt-0.5" />
               <p>
                 Once a deletion request is received or initiated, all personal data is permanently
-                removed from our systems within <strong>30 days</strong>. Anonymised, aggregated
-                data (e.g., total post counts) may be retained for analytics but cannot be linked
-                back to you.
+                removed from our systems within <strong>30 days</strong>. Anonymized, aggregated
+                data (e.g., total post counts) that cannot be linked back to you may be retained
+                for analytics purposes.
               </p>
             </div>
           </section>
 
-          {/* Facebook specific */}
+          {/* What cannot be deleted */}
+          <section>
+            <h2 className="font-accent text-xl font-bold text-text mb-3">What Cannot Be Deleted</h2>
+            <p className="text-sm mb-3">
+              Certain records must be retained even after a deletion request due to legal obligations:
+            </p>
+            <ul className="space-y-1.5 list-none pl-0">
+              <li className="flex items-start gap-2 text-sm">
+                <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                <span>
+                  <strong>Billing and transaction records</strong> — retained for up to 7 years
+                  to comply with U.S. tax and financial record-keeping requirements. These records
+                  do not include your payment card details (managed by Stripe).
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-sm">
+                <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                <span>
+                  <strong>Server log files</strong> — retained for up to 90 days for security
+                  and fraud prevention purposes, then automatically purged.
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-sm">
+                <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                <span>
+                  <strong>Data required by law enforcement</strong> — if we are under a legal
+                  hold or have received a valid court order, we may be required to preserve
+                  certain data until the legal matter is resolved.
+                </span>
+              </li>
+            </ul>
+          </section>
+
+          {/* OAuth revocation — Google */}
+          <section>
+            <h2 className="font-accent text-xl font-bold text-text mb-3">Google Login Users</h2>
+            <p className="text-sm mb-3">
+              If you registered with Google Sign-In, you can revoke MyShiftX&apos;s access directly
+              from your Google account:
+            </p>
+            <ol className="space-y-2 text-sm list-none pl-0">
+              {[
+                'Go to myaccount.google.com → Security',
+                'Scroll to "Third-party apps & services"',
+                'Find MyShiftX and click "Remove Access"',
+              ].map((step, i) => (
+                <li key={step} className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-success/15 text-success text-xs font-bold shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+            <p className="text-xs text-text/50 mt-3">
+              Revoking Google access prevents future sign-ins but does not delete your MyShiftX
+              account data. Follow Option 1 or Option 2 above to delete your data.
+            </p>
+          </section>
+
+          {/* OAuth revocation — Facebook */}
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">Facebook Login Users</h2>
             <p className="text-sm mb-3">
-              If you registered with Facebook Login, you can also revoke MyShiftX&apos;s access
-              directly from Facebook without contacting us:
+              If you registered with Facebook Login, you can revoke MyShiftX&apos;s access directly
+              from Facebook:
             </p>
             <ol className="space-y-2 text-sm list-none pl-0">
               {[
@@ -152,8 +232,35 @@ export default function DataDeletionPage() {
               ))}
             </ol>
             <p className="text-xs text-text/50 mt-3">
-              Revoking Facebook access prevents future logins but does not automatically delete your
-              MyShiftX account data. To fully delete your data, follow Option 1 or Option 2 above.
+              Revoking Facebook access prevents future sign-ins but does not delete your MyShiftX
+              account data. Follow Option 1 or Option 2 above to delete your data.
+            </p>
+          </section>
+
+          {/* OAuth revocation — LinkedIn */}
+          <section>
+            <h2 className="font-accent text-xl font-bold text-text mb-3">LinkedIn Login Users</h2>
+            <p className="text-sm mb-3">
+              If you registered with LinkedIn, you can revoke MyShiftX&apos;s access from your
+              LinkedIn settings:
+            </p>
+            <ol className="space-y-2 text-sm list-none pl-0">
+              {[
+                'Go to linkedin.com → Settings & Privacy',
+                'Click "Data Privacy" → "Permitted Services"',
+                'Find MyShiftX and click "Remove"',
+              ].map((step, i) => (
+                <li key={step} className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/15 text-primary text-xs font-bold shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+            <p className="text-xs text-text/50 mt-3">
+              Revoking LinkedIn access prevents future sign-ins but does not delete your MyShiftX
+              account data. Follow Option 1 or Option 2 above to delete your data.
             </p>
           </section>
 
