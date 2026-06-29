@@ -178,7 +178,7 @@ This is the canonical Free vs Pro feature list. Use this when building the upgra
 | In-app messaging with anyone in the same board | 🆕 |
 | In-app push notifications (web push / PWA) | 🆕 |
 | 4 photo schedule imports per month (OCR → auto-creates shifts) | 🆕 |
-| Ads displayed (right sidebar on desktop, every 5th post on mobile) | 🔲 Task 12 |
+| Ads displayed (right sidebar on desktop, static at bottom of screen on mobile) | 🔲 Task 12 |
 
 #### ⭐ Pro — $4.99/mo · $26.99/6 mo · $47.99/year
 
