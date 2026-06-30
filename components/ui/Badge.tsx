@@ -18,7 +18,7 @@ export function Badge({ variant, children, className }: BadgeProps) {
     guest: 'badge bg-text/10 text-text/60',
     user: 'badge bg-secondary/40 text-text',
     mod: 'badge bg-info/20 text-info',
-    leader: 'badge bg-primary/20 text-primary',
+    leader: 'badge bg-secondary-accent text-text dark:text-secondary',
     admin: 'badge bg-warning/20 text-warning',
   }
   return <span className={cn(variants[variant], className)}>{children}</span>
