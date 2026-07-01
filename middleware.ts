@@ -2,6 +2,14 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { env } from '@/lib/env'
 
+// EEA member states + UK + Switzerland — the regions Google's ad-consent
+// requirements (and our own CookieConsentBanner suppression) target.
+const EEA_UK_CH_COUNTRIES = new Set([
+  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IS', 'IE', 'IT',
+  'LV', 'LI', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
+  'GB', 'CH',
+])
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -52,6 +60,15 @@ export async function middleware(request: NextRequest) {
     url.search = ''
     return NextResponse.redirect(url)
   }
+
+  // Vercel populates this header at the edge — no geo-IP service needed.
+  // Used to defer to Google's ad-consent CMP for EEA/UK/CH visitors instead
+  // of showing our own generic cookie banner to them too.
+  const country = request.headers.get('x-vercel-ip-country') ?? ''
+  supabaseResponse.cookies.set('myshiftx-region', EEA_UK_CH_COUNTRIES.has(country) ? 'eea' : 'other', {
+    path: '/',
+    maxAge: 60 * 60 * 24,
+  })
 
   return supabaseResponse
 }

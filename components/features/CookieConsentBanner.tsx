@@ -13,11 +13,18 @@ const COOKIE_BANNER_ENABLED = Boolean(process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_
 
 const STORAGE_KEY = 'myshiftx-cookie-consent'
 
+function isEeaUkChVisitor(): boolean {
+  return document.cookie.split('; ').some(c => c === 'myshiftx-region=eea')
+}
+
 export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     if (!COOKIE_BANNER_ENABLED) return
+    // Google's ad-consent CMP handles EEA/UK/CH visitors instead — showing
+    // both would mean two consent prompts for the same person.
+    if (isEeaUkChVisitor()) return
     if (!localStorage.getItem(STORAGE_KEY)) setVisible(true)
   }, [])
 

@@ -377,13 +377,17 @@ The following Pro and Free features have not been scoped yet and will need dedic
 - ✅ `2026-07-01`: Ads suppressed for Pro/Trial — `getShowAds()` in `lib/auth/session.ts` reads membership via the existing `get_own_membership()` RPC (defaults to **no ads** if the lookup ever fails, so an error can't accidentally show ads to a paying member)
 - ✅ `2026-07-01`: AdSense account script wired into the root layout via `next/script`, gated on `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID` being set
 - ✅ `2026-07-01`: Cookie consent banner (built earlier, disabled) now tied to the same `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID` env var instead of a separate flag — activates automatically now that the AdSense script is live
+- ✅ `2026-07-01`: `public/ads.txt`, `google-adsense-account` meta tag, `app/robots.ts`, `app/sitemap.ts` added — none of these existed before (site had zero SEO/crawl config)
+- ✅ `2026-07-01`: Google-certified CMP (Funding Choices) wired in — 3-choice consent message (Consent / Do Not Consent / Manage) for EEA/UK/Switzerland. `middleware.ts` reads Vercel's `x-vercel-ip-country` edge header (no geo-IP service needed) and sets a `myshiftx-region` cookie; the custom `CookieConsentBanner` reads it and suppresses itself for EEA/UK/CH visitors so they don't get two consent prompts — Google's CMP handles that region instead
 - [ ] Still placeholder-only — no real `data-ad-slot` IDs wired into any `<AdSlot>` usage yet (see below)
 
 **👤 You handle:**
 - ✅ Publisher ID confirmed: `ca-pub-4865817496577079` (added to `.env.local`; **still needs adding to Vercel env vars** for production)
 - ✅ Sign up for **Google AdSense** at **adsense.google.com** if not already approved (requires a live site with content)
+- [ ] **Create the actual consent message** in AdSense → Privacy & messaging → choose the 3-choice GDPR message type, target EEA + UK + Switzerland, publish it (this is a hosted wizard in your Google account — nothing to hand to Claude for this part, the code integration is already live and will pick up whatever message you publish)
 - [ ] Once approved: create an ad unit per placement in the AdSense dashboard and give Claude each `data-ad-slot` ID to wire into the corresponding `<AdSlot>` usage
 - [ ] Review the placeholder layout — confirm sizing/placement (300×600 desktop rail, mobile bar above the bottom nav) feels right before real ad units go live
+- [ ] Google flagged crawl trouble — check whether **Vercel Deployment Protection** is enabled on the production domain (would block Googlebot entirely); also note that Wall/Calendar/Profile/etc. are behind login so Google can never crawl the actual ad-bearing pages, only the public marketing/legal pages
 
 ### 13 — Business Entity & Legal Protection `PARALLEL`
 
