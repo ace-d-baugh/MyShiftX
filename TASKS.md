@@ -381,7 +381,7 @@ The following Pro and Free features have not been scoped yet and will need dedic
 
 **👤 You handle:**
 - ✅ Publisher ID confirmed: `ca-pub-4865817496577079` (added to `.env.local`; **still needs adding to Vercel env vars** for production)
-- [ ] Sign up for **Google AdSense** at **adsense.google.com** if not already approved (requires a live site with content)
+- ✅ Sign up for **Google AdSense** at **adsense.google.com** if not already approved (requires a live site with content)
 - [ ] Once approved: create an ad unit per placement in the AdSense dashboard and give Claude each `data-ad-slot` ID to wire into the corresponding `<AdSlot>` usage
 - [ ] Review the placeholder layout — confirm sizing/placement (300×600 desktop rail, mobile bar above the bottom nav) feels right before real ad units go live
 

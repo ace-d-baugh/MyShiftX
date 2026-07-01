@@ -26,6 +26,9 @@ export const metadata: Metadata = {
       },
     ],
   },
+  ...(ADSENSE_PUBLISHER_ID && {
+    other: { 'google-adsense-account': ADSENSE_PUBLISHER_ID },
+  }),
 }
 
 const lato = Lato({
