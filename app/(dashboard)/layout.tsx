@@ -1,10 +1,11 @@
 import { unstable_noStore as noStore } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { requireUser } from '@/lib/auth/session'
+import { requireUser, getShowAds } from '@/lib/auth/session'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { SessionTimeout } from '@/components/features/SessionTimeout'
 import { PreferencesSyncer } from '@/components/features/PreferencesSyncer'
+import { AdRail } from '@/components/features/AdRail'
 import type { GlobalRole } from '@/lib/database.types'
 
 type UserProfileRow = { id: string; display_name: string | null; role: GlobalRole; is_active: boolean } | null
@@ -37,7 +38,10 @@ export default async function DashboardLayout({
   const isAdmin = userRole === 'Admin'
 
   // Check if user is a board moderator (Mod or Leader of any board)
-  const { data: isMod } = await supabase.rpc('is_any_board_moderator')
+  const [{ data: isMod }, showAds] = await Promise.all([
+    supabase.rpc('is_any_board_moderator'),
+    getShowAds(supabase),
+  ])
   const isBoardModerator = (isMod ?? false) as boolean
 
   let pendingApprovalsCount = 0
@@ -81,7 +85,7 @@ export default async function DashboardLayout({
         pendingFlagsCount={pendingFlagsCount}
       />
       <main className="flex-1 pb-20 md:pb-0">
-        {children}
+        <AdRail showAds={showAds}>{children}</AdRail>
       </main>
       <Footer />
     </div>

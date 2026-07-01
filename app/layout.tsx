@@ -1,9 +1,12 @@
 // app/layout.tsx
 
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Lato, Philosopher } from 'next/font/google'
 import { CookieConsentBanner } from '@/components/features/CookieConsentBanner'
 import './globals.css'
+
+const ADSENSE_PUBLISHER_ID = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID
 
 export const metadata: Metadata = {
   title: {
@@ -53,6 +56,14 @@ export default function RootLayout({
             __html: `try{if(localStorage.getItem('myshiftx-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
           }}
         />
+        {ADSENSE_PUBLISHER_ID && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_PUBLISHER_ID}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
       </head>
       <body className="font-sans text-text" suppressHydrationWarning>
         {children}

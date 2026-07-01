@@ -57,3 +57,15 @@ export async function requireModeratorOrAdmin() {
   if (!isAdmin && !isMod) redirect('/wall')
   return { supabase, user, isAdmin, isMod }
 }
+
+/**
+ * Whether ads should be shown to the current session user (Basic/Free tier
+ * only — Pro and Trial members never see ads). Uses get_own_membership()
+ * since membership/trial columns are column-locked from direct SELECT.
+ * Defaults to false (no ads) if the lookup fails, so an error never
+ * accidentally shows ads to a paying member.
+ */
+export async function getShowAds(supabase: Supabase): Promise<boolean> {
+  const { data } = await supabase.rpc('get_own_membership').single()
+  return data?.membership === 'Basic'
+}

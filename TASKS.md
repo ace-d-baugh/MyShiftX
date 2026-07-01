@@ -365,22 +365,25 @@ The following Pro and Free features have not been scoped yet and will need dedic
 
 ---
 
-### 12 — Ad System (Placeholders + Google AdSense) `FUTURE`
+### 12 — Ad System (Placeholders + Google AdSense) `IN PROGRESS`
 
 **Why last:** Ads are a Basic-tier experience. Get subscriptions shipping first; then monetize the free tier.
 
+**Placement (as of 2026-07-01):** Wall, My Calendar, Profile, individual Board (Members) page, Approvals, Flags, Archive, Help & Support. Sticky right rail on desktop/tablet (≥ 1024px, reserves real layout space so it never overlaps page content), sticky bar just above the mobile bottom nav on phones. No ads on the landing/marketing pages or any auth/OAuth page.
+
 **🤖 Claude handles:**
-- [ ] Create `<AdSlot>` component — renders a styled placeholder box (grey dashed border, "Advertisement" label) when AdSense is not yet configured; swaps to the AdSense `<ins>` tag once the client code is available
-- [ ] **Large screen layout** (tablet landscape + desktop, ≥ 1024 px): add a right-side column to the Wall layout — fixed-width (`~300 px`), sticky — that holds one or more `<AdSlot>` components alongside the shift/request cards
-- [ ] **Small screen layout** (< 1024 px): inject an `<AdSlot>` as a full-width card after every 5th post in the Wall list
-- [ ] Suppress all `<AdSlot>` renders when `membership === 'Pro'` or `'Trial'` (no ads ever for Pro users)
-- [ ] Wire the AdSense publisher ID and slot IDs from environment variables so they can be swapped in without a code change
+- ✅ `2026-07-01`: `<AdSlot>` component (`components/features/AdSlot.tsx`) — styled placeholder ("Advertisement", dashed border) when no `data-ad-slot` ID is wired for a placement yet; swaps to a real AdSense `<ins>` unit once one is added
+- ✅ `2026-07-01`: `<AdRail>` wrapper (`components/features/AdRail.tsx`) — path-gated, renders the sticky desktop rail + mobile bottom bar only on the 8 pages listed above
+- ✅ `2026-07-01`: Ads suppressed for Pro/Trial — `getShowAds()` in `lib/auth/session.ts` reads membership via the existing `get_own_membership()` RPC (defaults to **no ads** if the lookup ever fails, so an error can't accidentally show ads to a paying member)
+- ✅ `2026-07-01`: AdSense account script wired into the root layout via `next/script`, gated on `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID` being set
+- ✅ `2026-07-01`: Cookie consent banner (built earlier, disabled) now tied to the same `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID` env var instead of a separate flag — activates automatically now that the AdSense script is live
+- [ ] Still placeholder-only — no real `data-ad-slot` IDs wired into any `<AdSlot>` usage yet (see below)
 
 **👤 You handle:**
-- [ ] Sign up for **Google AdSense** at **adsense.google.com** (requires a live site with content — apply after launch)
-- [ ] Once approved: copy your **Publisher ID** (`ca-pub-xxxxxxxxxxxxxxxx`) and create ad units in the AdSense dashboard
-- [ ] Add to Vercel environment variables: `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID` and slot IDs for each ad unit size
-- [ ] Review the placeholder layout Claude builds — confirm sizing and placement feel right before going live with real ads
+- ✅ Publisher ID confirmed: `ca-pub-4865817496577079` (added to `.env.local`; **still needs adding to Vercel env vars** for production)
+- [ ] Sign up for **Google AdSense** at **adsense.google.com** if not already approved (requires a live site with content)
+- [ ] Once approved: create an ad unit per placement in the AdSense dashboard and give Claude each `data-ad-slot` ID to wire into the corresponding `<AdSlot>` usage
+- [ ] Review the placeholder layout — confirm sizing/placement (300×600 desktop rail, mobile bar above the bottom nav) feels right before real ad units go live
 
 ### 13 — Business Entity & Legal Protection `PARALLEL`
 
