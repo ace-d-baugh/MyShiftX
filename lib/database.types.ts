@@ -8,6 +8,7 @@ export type FlagTargetType  = 'post' | 'user' | 'comment' | 'board'
 export type PreferredTime   = 'morning' | 'afternoon' | 'evening' | 'late'
 export type CommentPostType = 'shift' | 'request'
 export type JoinOutcome     = 'invalid_code' | 'user_declined' | 'success'
+export type RoadmapColumn   = 'done' | 'in_progress' | 'next' | 'backlog' | 'deferred'
 
 export interface Database {
   public: {
@@ -499,6 +500,36 @@ export interface Database {
           bugs_feedback?: string | null
           nps?: string | null
           open_feedback?: string | null
+        }
+        Relationships: []
+      }
+      roadmap_cards: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          column_key: RoadmapColumn
+          position: number
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          column_key: RoadmapColumn
+          position?: number
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          column_key?: RoadmapColumn
+          position?: number
+          created_at?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

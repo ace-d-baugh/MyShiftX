@@ -16,6 +16,8 @@ import {
   X,
   ChevronDown,
   HelpCircle,
+  Settings,
+  Kanban,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -302,10 +304,10 @@ interface DropdownItemDef {
 }
 
 function buildDropdownItems({
-  isAdmin: _isAdmin, showModItems, isLeader,
+  isAdmin, showModItems, isLeader,
   pendingApprovalsCount, pendingFlagsCount, fmt,
 }: {
-  isAdmin: boolean  // reserved for future role-specific items
+  isAdmin: boolean
   showModItems: boolean
   isLeader: boolean
   pendingApprovalsCount: number
@@ -341,6 +343,12 @@ function buildDropdownItems({
         icon: Archive,
       })
     }
+  }
+
+  if (isAdmin) {
+    items.push({ type: 'separator' })
+    items.push({ type: 'link', href: '/admin',  label: 'Admin Panel', icon: Settings })
+    items.push({ type: 'link', href: '/kanban', label: 'Roadmap',     icon: Kanban })
   }
 
   return items
