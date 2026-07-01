@@ -9,6 +9,7 @@ export type PreferredTime   = 'morning' | 'afternoon' | 'evening' | 'late'
 export type CommentPostType = 'shift' | 'request'
 export type JoinOutcome     = 'invalid_code' | 'user_declined' | 'success'
 export type RoadmapColumn   = 'done' | 'in_progress' | 'next' | 'backlog' | 'deferred'
+export type RemovedReason   = 'expired' | 'leader_removed' | 'user_removed'
 
 export interface Database {
   public: {
@@ -210,6 +211,8 @@ export interface Database {
           is_active: boolean
           created_at: string
           expires_at: string
+          removed_reason: RemovedReason | null
+          removed_by_user_id: string | null
         }
         Insert: {
           id?: string
@@ -225,6 +228,8 @@ export interface Database {
           details?: string | null
           is_active?: boolean
           created_at?: string
+          removed_reason?: RemovedReason | null
+          removed_by_user_id?: string | null
         }
         Update: {
           id?: string
@@ -240,6 +245,8 @@ export interface Database {
           details?: string | null
           is_active?: boolean
           created_at?: string
+          removed_reason?: RemovedReason | null
+          removed_by_user_id?: string | null
         }
         Relationships: [
           {
@@ -254,6 +261,13 @@ export interface Database {
             columns: ["board_id"]
             isOneToOne: false
             referencedRelation: "boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_removed_by_user_id_fkey"
+            columns: ["removed_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]
@@ -271,6 +285,8 @@ export interface Database {
           is_active: boolean
           created_at: string
           expires_at: string
+          removed_reason: RemovedReason | null
+          removed_by_user_id: string | null
         }
         Insert: {
           id?: string
@@ -283,6 +299,8 @@ export interface Database {
           details?: string | null
           is_active?: boolean
           created_at?: string
+          removed_reason?: RemovedReason | null
+          removed_by_user_id?: string | null
         }
         Update: {
           id?: string
@@ -295,6 +313,8 @@ export interface Database {
           details?: string | null
           is_active?: boolean
           created_at?: string
+          removed_reason?: RemovedReason | null
+          removed_by_user_id?: string | null
         }
         Relationships: [
           {
@@ -309,6 +329,13 @@ export interface Database {
             columns: ["board_id"]
             isOneToOne: false
             referencedRelation: "boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requests_removed_by_user_id_fkey"
+            columns: ["removed_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]

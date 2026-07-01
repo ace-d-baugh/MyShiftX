@@ -31,6 +31,29 @@ export async function resolveFlag(
       if (commentErr) return { error: commentErr.message }
     }
 
+    if (action === 'resolved' && flag.target_type === 'post') {
+      // target_id could be a shift or a request — try shifts first, then requests.
+      const { data: shift } = await supabase
+        .from('shifts')
+        .select('id')
+        .eq('id', flag.target_id)
+        .maybeSingle()
+
+      if (shift) {
+        const { error: shiftErr } = await supabase
+          .from('shifts')
+          .update({ is_active: false, removed_reason: 'leader_removed', removed_by_user_id: userId })
+          .eq('id', flag.target_id)
+        if (shiftErr) return { error: shiftErr.message }
+      } else {
+        const { error: requestErr } = await supabase
+          .from('requests')
+          .update({ is_active: false, removed_reason: 'leader_removed', removed_by_user_id: userId })
+          .eq('id', flag.target_id)
+        if (requestErr) return { error: requestErr.message }
+      }
+    }
+
     const { error } = await supabase
       .from('flags')
       .update({ status: action, resolved_by_user_id: userId })

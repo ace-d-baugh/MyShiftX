@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { GripVertical, LayoutGrid } from 'lucide-react'
+import { GripVertical, LayoutGrid, Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { reorderRoadmapCards } from '@/app/actions/roadmap'
+import { Button } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
+import { reorderRoadmapCards, createRoadmapCard, updateRoadmapCard, deleteRoadmapCard } from '@/app/actions/roadmap'
 import type { RoadmapColumn } from '@/lib/database.types'
 
 interface CardItem {
@@ -51,6 +53,19 @@ export function KanbanClient({ initialCards }: KanbanClientProps) {
   const [dragOverColumn, setDragOverColumn] = useState<RoadmapColumn | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState<Set<RoadmapColumn>>(new Set())
+
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editSaving, setEditSaving] = useState(false)
+
+  const [addingColumn, setAddingColumn] = useState<RoadmapColumn | null>(null)
+  const [newTitle, setNewTitle] = useState('')
+  const [newDescription, setNewDescription] = useState('')
+  const [addSaving, setAddSaving] = useState(false)
+
+  const [deleteTarget, setDeleteTarget] = useState<CardItem | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const toggleCollapse = (key: RoadmapColumn) => {
     setCollapsed(prev => {
@@ -143,6 +158,89 @@ export function KanbanClient({ initialCards }: KanbanClientProps) {
     setDragOverColumn(null)
   }
 
+  // ── Create ───────────────────────────────────────────────────────────────
+
+  const startAdd = (columnKey: RoadmapColumn) => {
+    setAddingColumn(columnKey)
+    setNewTitle('')
+    setNewDescription('')
+  }
+
+  const cancelAdd = () => {
+    setAddingColumn(null)
+    setNewTitle('')
+    setNewDescription('')
+  }
+
+  const saveAdd = async () => {
+    if (!addingColumn || !newTitle.trim()) return
+    setAddSaving(true)
+    setError(null)
+    const { error: e, card } = await createRoadmapCard(addingColumn, newTitle, newDescription)
+    setAddSaving(false)
+    if (e || !card) {
+      setError(e ?? 'Failed to create card.')
+      return
+    }
+    setColumns(prev => ({ ...prev, [addingColumn]: [...prev[addingColumn], card] }))
+    cancelAdd()
+  }
+
+  // ── Update ───────────────────────────────────────────────────────────────
+
+  const startEdit = (card: CardItem) => {
+    setEditingId(card.id)
+    setEditTitle(card.title)
+    setEditDescription(card.description ?? '')
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditTitle('')
+    setEditDescription('')
+  }
+
+  const saveEdit = async () => {
+    if (!editingId || !editTitle.trim()) return
+    setEditSaving(true)
+    setError(null)
+    const { error: e } = await updateRoadmapCard(editingId, editTitle, editDescription)
+    setEditSaving(false)
+    if (e) {
+      setError(e)
+      return
+    }
+    const trimmedTitle = editTitle.trim()
+    const trimmedDescription = editDescription.trim() || null
+    setColumns(prev => {
+      const next = { ...prev }
+      for (const key of Object.keys(next) as RoadmapColumn[]) {
+        next[key] = next[key].map(c => c.id === editingId ? { ...c, title: trimmedTitle, description: trimmedDescription } : c)
+      }
+      return next
+    })
+    cancelEdit()
+  }
+
+  // ── Delete ───────────────────────────────────────────────────────────────
+
+  const doDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    setError(null)
+    const { error: e } = await deleteRoadmapCard(deleteTarget.id)
+    setDeleting(false)
+    setDeleteTarget(null)
+    if (e) {
+      setError(e)
+      return
+    }
+    setColumns(prev => ({
+      ...prev,
+      [deleteTarget.column_key]: prev[deleteTarget.column_key].filter(c => c.id !== deleteTarget.id),
+    }))
+  }
+
   return (
     <div className="max-w-[1600px] mx-auto px-4 py-6">
       <div className="mb-6">
@@ -211,37 +309,144 @@ export function KanbanClient({ initialCards }: KanbanClientProps) {
 
               {!isCollapsed && (
                 <div className="flex-1 p-2 space-y-2 min-h-[120px] animate-fade-in">
-                  {columns[col.key].map(card => (
-                    <div
-                      key={card.id}
-                      draggable
-                      onDragStart={e => onDragStart(e, card.id)}
-                      onDragEnd={onDragEnd}
-                      onDragOver={e => onCardDragOver(e, col.key)}
-                      onDrop={e => onDropOnCard(e, col.key, card)}
-                      className={cn(
-                        'card border-l-4 cursor-grab active:cursor-grabbing select-none',
-                        col.border,
-                        draggingId === card.id && 'opacity-40'
-                      )}
-                    >
-                      <div className="flex items-start gap-2">
-                        <GripVertical className="w-4 h-4 text-text/30 shrink-0 mt-0.5" />
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-text leading-snug">{card.title}</p>
-                          {card.description && (
-                            <p className="text-xs text-text/50 mt-1 leading-relaxed">{card.description}</p>
-                          )}
-                        </div>
+                  {columns[col.key].map(card => {
+                    const isEditing = editingId === card.id
+                    return (
+                      <div
+                        key={card.id}
+                        draggable={!isEditing}
+                        onDragStart={e => onDragStart(e, card.id)}
+                        onDragEnd={onDragEnd}
+                        onDragOver={e => onCardDragOver(e, col.key)}
+                        onDrop={e => onDropOnCard(e, col.key, card)}
+                        className={cn(
+                          'card border-l-4 select-none',
+                          col.border,
+                          !isEditing && 'cursor-grab active:cursor-grabbing',
+                          draggingId === card.id && 'opacity-40'
+                        )}
+                      >
+                        {isEditing ? (
+                          <div className="space-y-2">
+                            <input
+                              autoFocus
+                              className="input text-sm h-8"
+                              value={editTitle}
+                              onChange={e => setEditTitle(e.target.value)}
+                              placeholder="Title"
+                            />
+                            <textarea
+                              className="input text-xs min-h-[60px] py-1.5"
+                              value={editDescription}
+                              onChange={e => setEditDescription(e.target.value)}
+                              placeholder="Description (optional)"
+                            />
+                            <div className="flex justify-end gap-1.5">
+                              <button
+                                onClick={cancelEdit}
+                                className="p-1.5 rounded-md text-text/40 hover:text-text hover:bg-primary-light/50 transition-colors min-h-0 min-w-0"
+                                aria-label="Cancel"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={saveEdit}
+                                disabled={editSaving || !editTitle.trim()}
+                                className="p-1.5 rounded-md text-success hover:bg-success/10 transition-colors min-h-0 min-w-0 disabled:opacity-40"
+                                aria-label="Save"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-start gap-2">
+                            <GripVertical className="w-4 h-4 text-text/30 shrink-0 mt-0.5" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-text leading-snug">{card.title}</p>
+                              {card.description && (
+                                <p className="text-xs text-text/50 mt-1 leading-relaxed">{card.description}</p>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-0.5 shrink-0">
+                              <button
+                                onClick={() => startEdit(card)}
+                                className="p-1 rounded-md text-text/30 hover:text-primary hover:bg-primary-light/50 transition-colors min-h-0 min-w-0"
+                                aria-label={`Edit ${card.title}`}
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setDeleteTarget(card)}
+                                className="p-1 rounded-md text-text/30 hover:text-warning hover:bg-warning/10 transition-colors min-h-0 min-w-0"
+                                aria-label={`Delete ${card.title}`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+
+                  {addingColumn === col.key ? (
+                    <div className="card border-l-4 border-l-border space-y-2">
+                      <input
+                        autoFocus
+                        className="input text-sm h-8"
+                        value={newTitle}
+                        onChange={e => setNewTitle(e.target.value)}
+                        placeholder="Title"
+                      />
+                      <textarea
+                        className="input text-xs min-h-[60px] py-1.5"
+                        value={newDescription}
+                        onChange={e => setNewDescription(e.target.value)}
+                        placeholder="Description (optional)"
+                      />
+                      <div className="flex justify-end gap-1.5">
+                        <button
+                          onClick={cancelAdd}
+                          className="p-1.5 rounded-md text-text/40 hover:text-text hover:bg-primary-light/50 transition-colors min-h-0 min-w-0"
+                          aria-label="Cancel"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={saveAdd}
+                          disabled={addSaving || !newTitle.trim()}
+                          className="p-1.5 rounded-md text-success hover:bg-success/10 transition-colors min-h-0 min-w-0 disabled:opacity-40"
+                          aria-label="Add card"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
-                  ))}
+                  ) : (
+                    <button
+                      onClick={() => startAdd(col.key)}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-medium text-text/40 hover:text-text hover:bg-primary-light/40 transition-colors min-h-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add card
+                    </button>
+                  )}
                 </div>
               )}
             </div>
           )
         })}
       </div>
+
+      <Modal open={deleteTarget !== null} onClose={() => setDeleteTarget(null)} title="Delete card" size="sm">
+        <p className="text-sm text-text/70 mb-4">
+          Delete &ldquo;{deleteTarget?.title}&rdquo;? This can&apos;t be undone.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button variant="danger" size="sm" loading={deleting} onClick={doDelete}>Delete</Button>
+        </div>
+      </Modal>
     </div>
   )
 }

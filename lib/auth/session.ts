@@ -29,6 +29,14 @@ export async function getUserRole(supabase: Supabase, userId: string): Promise<G
   return (data?.role as GlobalRole | undefined) ?? null
 }
 
+/** For use in server actions: requires the session user to be a global Admin, or throws. */
+export async function requireAdminAction() {
+  const { supabase, userId } = await getActionSession()
+  const role = await getUserRole(supabase, userId)
+  if (role !== 'Admin') throw new Error('Not authorized.')
+  return { supabase, userId }
+}
+
 /** Require the session user to be a global Admin; redirects to /wall otherwise. */
 export async function requireAdmin() {
   const { supabase, user } = await requireUser()
