@@ -7,6 +7,9 @@ const CRON_SECRET = process.env.CRON_SECRET!
 
 export async function GET(req: NextRequest) {
   // Verify the cron secret to prevent unauthorized access
+  if (!CRON_SECRET) {
+    return NextResponse.json({ error: 'CRON_SECRET is not configured' }, { status: 500 })
+  }
   const authHeader = req.headers.get('authorization')
   if (authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

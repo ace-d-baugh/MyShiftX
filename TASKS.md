@@ -7,7 +7,7 @@
 - ✅ Email verification flow (Supabase + custom HTML template)
 - ✅ Login page with session management
 - ✅ Forgot password + reset password pages (full flow)
-- ✅ Role-based access control (User → Mod → Leader → Admin)
+- ✅ Role-based access control — global roles (Guest → User → Admin) plus independent per-board roles (User → Mod → Leader)
 - ✅ Account deactivation flow
 
 ### Boards
@@ -25,8 +25,8 @@
 - ✅ Wall filtered by board, date, and post type tabs (Offers / Requests)
 - ✅ ShiftCard and RequestCard with collapsible details, compact mobile layout
 - ✅ Interest marking (one-tap star with confirmation to remove)
-- ✅ Comment system with reply, edit, delete, and flagging
-- ✅ Contact button (email mailto) for non-owners; disabled state when contact not set up
+- ✅ Comment system with edit, delete, and flagging; "reply" is an @mention text prefill, not threaded replies
+- 🔲 Contact button — currently a permanently-disabled "Coming soon" placeholder on ShiftCard/RequestCard; will become functional once Task 19 (in-app messaging) ships, opening a chat with that user instead of a mailto link
 
 ### Moderation & Leadership
 - ✅ Join request approvals queue
@@ -37,7 +37,7 @@
 ### Infrastructure
 - ✅ Shift and request auto-expiration via Vercel cron (`/api/cron/expirations`, runs 3 AM daily)
 - ✅ Expiration cron secured with `CRON_SECRET` header
-- ✅ Email delivery infrastructure: Resend SDK wired up at `/api/send`
+- ✅ Email delivery infrastructure: Resend SDK called directly from `app/actions/notifications.ts` (no `/api/send` route — server actions call Resend inline)
 - ✅ Transactional email templates (verify email, password reset, generic notification)
 - ✅ Supabase Row-Level Security on all tables
 - ✅ Form validation (client + server) across auth, shifts, and boards
@@ -206,22 +206,30 @@ The following Pro and Free features have not been scoped yet and will need dedic
 
 ---
 
-### 6 — Membership Schema (Database) `NEXT`
+### 6 — Membership Schema (Database) ✅ DONE
 
 **Why first:** Everything else — Stripe, feature gating, ads — depends on knowing a user's membership tier.
 
 **🤖 Claude handles:**
-- [ ] Add `membership` column (`text`, default `'Basic'`, values: `'Basic'` | `'Pro'` | `'Trial'`) to the `users` table migration
-- [ ] Add `trial_ends_at` column (`timestamptz`, nullable) — set when a Trial starts, checked on each login/request
-- [ ] Add `trial_used` column (`boolean`, default `false`) — prevents a second trial on the same account even if they cancel and re-register (tracked by email)
-- [ ] Update TypeScript types (regenerate from Supabase or update `types/supabase.ts` manually)
-- [ ] Write a Supabase cron/Edge Function that runs nightly to flip `membership` from `'Trial'` to `'Basic'` when `trial_ends_at` has passed
-- [ ] Update RLS policies: `membership` is readable by the owner only; writable only by service role (Stripe webhook)
+- ✅ Add `membership` column (`text`, default `'Basic'`, values: `'Basic'` | `'Pro'` | `'Trial'`) to the `users` table migration
+- ✅ Add `trial_ends_at` column (`timestamptz`, nullable) — set when a Trial starts, checked on each login/request
+- ✅ Add `trial_used` column (`boolean`, default `false`) — prevents a second trial on the same account even if they cancel and re-register (tracked by email)
+- ✅ Update TypeScript types (`lib/database.types.ts` matches the live schema)
+- ✅ Nightly downgrade job — folded into the existing `/api/cron/expirations` Vercel cron (runs 3 AM daily) rather than a separate Supabase Edge Function; flips `Trial` → `Basic` and clears `trial_ends_at` once it has passed
+- ✅ RLS/write protection: a `BEFORE UPDATE` trigger (`enforce_membership_protection`) silently reverts any change to `membership`/`trial_ends_at`/`trial_used` made by the `authenticated` role — only the service role (Stripe webhook) can actually change them
+- ✅ RLS/read protection: `2026-07-01` — found that `membership`/`trial_ends_at`/`trial_used` were readable by *any* logged-in user (not just the owner) via the broad `users_select_authenticated` policy. Fixed by revoking column-level `SELECT` on those three columns from `anon`/`authenticated` and adding a `get_own_membership()` RPC that returns only the caller's own values (`SECURITY DEFINER`, filtered by `auth.uid()`). Verified: selecting `membership` as the `authenticated` role now fails with "permission denied for table users"; all other columns (`display_name`, `email`, `role`, etc.) remain readable as before, so comments/board-member/admin/mod features are unaffected. Migrations: `20260701152617_membership_schema_backfill.sql`, `20260701152628_restrict_membership_column_access.sql`, `20260701152710_fix_membership_column_grant_precedence.sql`
 
 **👤 You handle:**
-- [ ] In Supabase dashboard → **Table Editor → users** → run the migration SQL that Claude provides (or use **SQL Editor**)
-- [ ] Confirm columns appear correctly in the dashboard
-- [ ] Enable the scheduled Edge Function (if using Supabase cron)
+- ✅ Migration SQL already run directly in Supabase — columns are live in the `users` table
+- ✅ Confirmed columns appear correctly (verified via Supabase schema inspection)
+- ✅ N/A — used the existing Vercel cron instead of a separate Supabase Edge Function; already enabled
+
+**Note:** these schema changes existed live in Supabase but had no corresponding migration file in the repo (applied via SQL Editor directly). Backfilled as `20260701152617_membership_schema_backfill.sql` so a fresh DB restore from the repo stays in sync. Two unrelated migrations (`handle_new_user_google_display_name`, `handle_new_user_fullname_fallback` — from the OAuth display-name work) were *also* live but missing from the repo; backfilled as `20260624224803_handle_new_user_google_display_name.sql` and `20260624225745_handle_new_user_fullname_fallback.sql` so the full migration history (30 files) now matches production exactly.
+
+**Follow-up hardening (2026-07-01):** ran the Supabase security advisor as a broader check and fixed two more real issues, both applied + backfilled as migrations:
+- `protect_membership_fields()` (the trigger from this task) and five other trigger functions were missing a pinned `search_path`, a standard SECURITY DEFINER hardening measure — fixed in `20260701153736_harden_trigger_functions.sql`.
+- `protect_membership_fields`, `auto_add_admins_to_board`, `handle_new_user`, and `handle_email_verified` are trigger-only functions but were directly callable via PostgREST RPC (`/rest/v1/rpc/...`) by any signed-in or anonymous user — revoked `EXECUTE` from `anon`/`authenticated` on all four in the same migration.
+- Still open (dashboard setting, not a migration): Supabase's "Leaked Password Protection" (HaveIBeenPwned check) is disabled — recommend enabling it under Authentication → Policies.
 
 ---
 
@@ -384,7 +392,7 @@ Complete in order — each step unlocks the next.
 
 #### 👤 Formation (do these first, in order) — one-time cost ~$175
 
-- [ ] **1. Get your EIN** — free, instant at **irs.gov** → Apply for EIN Online. Do this before anything else; you need it for the bank account. Takes 5 minutes.
+- ✅ **1. Get your EIN** — free, instant at **irs.gov** → Apply for EIN Online. Do this before anything else; you need it for the bank account. Takes 5 minutes.
 - ✅ **2. File LLC Articles of Organization** — **sunbiz.org** → File Online → LLC Articles. Fee: **$100** + $25 registered agent. Processing: 2–3 business days online. Keep the stamped copy.
   - Registered agent: you can serve as your own agent using your Florida business address — free. No need to pay a registered agent service.
 - ✅ **3. File MyShiftX fictitious name (DBA)** — **sunbiz.org** → File Online → Fictitious Name. Fee: **$50**. Renew every 5 years. File simultaneously with or right after the Articles.
@@ -642,15 +650,28 @@ The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over 
 
 ---
 
-### 19 — In-App Messaging (Within Boards — All Tiers) `YEAR 1 POST-LAUNCH`
+### 19 — In-App Messaging / Chat (Within Boards — All Tiers) `YEAR 1 POST-LAUNCH`
 
 **Tier:** Free and Pro — available to all users, within shared boards only. Direct messaging outside of boards is not permitted.
-**Why:** Replaces the current email mailto: contact button with a real in-app conversation thread. Keeps communication on the platform and creates network stickiness.
+**Why:** Replaces the current disabled "Contact" placeholder on ShiftCard/RequestCard with a real in-app chat. Keeps communication on the platform and creates network stickiness.
 
-**Database:**
+**Layout & UX (per product spec):**
+- New **"Chat"** nav tab, placed next to "My Calendar"
+- Chat page: list of open chats on the **left**, active thread on the right, message input pinned to the **bottom**
+- Message order: **newest at the bottom, oldest at the top** (standard chat convention)
+- Two ways to start a new chat:
+  1. The **"Contact" button** on a user's shift/request post (ShiftCard/RequestCard) — opens (or creates) a chat with that post's owner
+  2. A **"Start new chat"** button on the Chat page — opens a list of all users in the current board, with a **search bar** to find someone quickly
+- **Quick emoji reactions** on individual messages
+- **Close a chat**: hides the conversation from that user's list (does not affect the other participant's copy — messages are shared rows, so one person closing/deleting shouldn't erase the other's history)
+- **Delete messages**: separate, more destructive action — purges the transcript. Recommend allowing full deletion only once *all* participants have closed the conversation, so one side can't unilaterally wipe the other's copy
+- **Group chats are explicitly deferred** to a later task — out of scope for this build
+
+**Database (illustrative — refine at build time):**
 ```sql
 CREATE TABLE conversations (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  board_id   uuid REFERENCES boards(id) ON DELETE CASCADE,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -659,6 +680,7 @@ CREATE TABLE conversation_participants (
   conversation_id uuid REFERENCES conversations(id) ON DELETE CASCADE,
   user_id         uuid REFERENCES users(id) ON DELETE CASCADE,
   last_read_at    timestamptz,
+  closed_at       timestamptz,  -- set when this user closes the chat; null = active/visible in their list
   PRIMARY KEY (conversation_id, user_id)
 );
 
@@ -669,17 +691,29 @@ CREATE TABLE messages (
   body            text NOT NULL CHECK (char_length(body) <= 1000),
   created_at      timestamptz DEFAULT now()
 );
+
+CREATE TABLE message_reactions (
+  message_id uuid REFERENCES messages(id) ON DELETE CASCADE,
+  user_id    uuid REFERENCES users(id) ON DELETE CASCADE,
+  emoji      text NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  PRIMARY KEY (message_id, user_id)
+);
 ```
 
 **🤖 Claude handles:**
-- [ ] Create the tables above with RLS: participants can only read conversations they belong to; only the sender can insert their own messages
-- [ ] Create real-time message subscription using Supabase Realtime on the `messages` table
-- [ ] Build `/messages` page — conversation list with unread count badges, sorted by most recent
-- [ ] Build `/messages/[conversationId]` page — scrollable thread with send box (max 1000 chars)
+- [ ] Create the tables above with RLS: participants can only read conversations/messages they belong to; only the sender can insert their own messages; only the reacting user can insert/delete their own reaction row
+- [ ] Create real-time message subscription using Supabase Realtime on the `messages` table (and `message_reactions` for live reaction updates)
+- [ ] Add "Chat" tab to the main nav, next to "My Calendar"
+- [ ] Build the Chat page: left-side list of open (non-closed) conversations sorted by most recent activity, with unread badges; right-side thread view with newest-at-bottom ordering and a bottom-pinned message input (max 1000 chars)
+- [ ] "Start new chat" button on the Chat page → modal/list of all users in the current board + search bar to filter by name
+- [ ] Replace the disabled "Contact" button on ShiftCard/RequestCard with a working button that opens or creates a conversation with that post's owner and navigates to the Chat page
+- [ ] Emoji quick-reaction picker on each message; store in `message_reactions`, render reaction counts inline
+- [ ] "Close chat" action — sets `closed_at` for the current user only, removes it from their list; if the other participant already closed it too, offer/trigger full deletion of the conversation + its messages
 - [ ] Add unread message badge to Navbar (next to existing notification indicators)
-- [ ] Replace the "Contact" email button on ShiftCards with a "Message" button that opens or creates a conversation thread
 - [ ] Before creating a conversation, verify both users share at least one approved board (query `user_boards` for overlap). If not, block with "You can only message members of your boards."
 - [ ] Add push notification trigger when a new message arrives
+- [ ] Group chats — explicitly out of scope for this task; revisit as its own future task
 
 ---
 

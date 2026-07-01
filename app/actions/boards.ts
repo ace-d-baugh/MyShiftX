@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { notifyBoardApproved } from '@/app/actions/notifications'
 import { slugify } from '@/lib/slug'
+import { createBoardSchema } from '@/lib/validations/boards'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,10 @@ async function getSession() {
 
 export async function createBoard(name: string): Promise<{ error?: string; boardId?: string }> {
   try {
+    const parsed = createBoardSchema.safeParse({ name })
+    if (!parsed.success) return { error: parsed.error.issues[0].message }
+    name = parsed.data.name
+
     const { supabase, userId } = await getSession()
 
     // Verify global role is User or Admin
@@ -361,6 +366,7 @@ export async function updateUserBoardRole(
   newRole: 'User' | 'Mod'
 ): Promise<{ error?: string }> {
   try {
+    if (!['User', 'Mod'].includes(newRole)) return { error: 'Invalid role.' }
     const { supabase } = await getSession()
     const { data: existing } = await supabase.from('user_boards').select('is_hidden').eq('id', userBoardId).single()
     if (existing?.is_hidden) return { error: 'Cannot modify a hidden membership.' }
