@@ -64,15 +64,22 @@ export async function middleware(request: NextRequest) {
   // Vercel populates this header at the edge — no geo-IP service needed.
   // Used to defer to Google's ad-consent CMP for EEA/UK/CH visitors instead
   // of showing our own generic cookie banner to them too.
+  // Only set when missing or changed, so most responses carry no Set-Cookie
+  // header and stay cacheable. The 24h maxAge means it re-sets once a day.
   const country = request.headers.get('x-vercel-ip-country') ?? ''
-  supabaseResponse.cookies.set('myshiftx-region', EEA_UK_CH_COUNTRIES.has(country) ? 'eea' : 'other', {
-    path: '/',
-    maxAge: 60 * 60 * 24,
-  })
+  const region = EEA_UK_CH_COUNTRIES.has(country) ? 'eea' : 'other'
+  if (request.cookies.get('myshiftx-region')?.value !== region) {
+    supabaseResponse.cookies.set('myshiftx-region', region, {
+      path: '/',
+      maxAge: 60 * 60 * 24,
+    })
+  }
 
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|public).*)'],
+  // Skip static assets (any path with a file extension) — they don't need
+  // auth/session refresh and were previously triggering getUser() per request.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 }

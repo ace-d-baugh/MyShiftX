@@ -19,11 +19,17 @@ export default async function DashboardLayout({
 
   const { supabase, user } = await requireUser()
 
-  const { data: userProfile } = await supabase
-    .from('users')
-    .select('id, display_name, role, is_active')
-    .eq('id', user.id)
-    .single() as unknown as { data: UserProfileRow }
+  // Profile, moderator check, and ad eligibility are independent — fetch together
+  const [profileRes, { data: isMod }, showAds] = await Promise.all([
+    supabase
+      .from('users')
+      .select('id, display_name, role, is_active')
+      .eq('id', user.id)
+      .single() as unknown as Promise<{ data: UserProfileRow }>,
+    supabase.rpc('is_any_board_moderator'),
+    getShowAds(supabase),
+  ])
+  const userProfile = profileRes.data
 
   if (userProfile && !userProfile.is_active) {
     redirect('/login?reason=deactivated')
@@ -36,12 +42,6 @@ export default async function DashboardLayout({
   const userRole = userProfile?.role ?? 'User'
   const displayName = userProfile?.display_name ?? user.email ?? 'User'
   const isAdmin = userRole === 'Admin'
-
-  // Check if user is a board moderator (Mod or Leader of any board)
-  const [{ data: isMod }, showAds] = await Promise.all([
-    supabase.rpc('is_any_board_moderator'),
-    getShowAds(supabase),
-  ])
   const isBoardModerator = (isMod ?? false) as boolean
 
   let pendingApprovalsCount = 0

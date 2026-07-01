@@ -145,9 +145,10 @@ async function sendMatchEmails(opts: {
 }) {
   const wallUrl = `${BASE_URL}/wall`
   const displayDate = formatDisplayDate(opts.shiftDate)
+  const sends: Promise<void>[] = []
 
   if (opts.requesterNotify && opts.requesterEmail) {
-    const { error } = await resend.emails.send({
+    sends.push(resend.emails.send({
       from: 'MyShiftX <noreply@myshiftx.com>',
       to: opts.requesterEmail,
       subject: `A shift may match your request on ${displayDate}`,
@@ -160,13 +161,14 @@ async function sendMatchEmails(opts: {
         shiftDate: displayDate,
         wallUrl,
       }),
-    })
-    if (error) console.error('[notifyMatch] Resend error (requester):', error)
-    else console.log(`[notifyMatch] sent match email to requester for request "${opts.requestTitle}"`)
+    }).then(({ error }) => {
+      if (error) console.error('[notifyMatch] Resend error (requester):', error)
+      else console.log(`[notifyMatch] sent match email to requester for request "${opts.requestTitle}"`)
+    }))
   }
 
   if (opts.shiftPosterNotify && opts.shiftPosterEmail) {
-    const { error } = await resend.emails.send({
+    sends.push(resend.emails.send({
       from: 'MyShiftX <noreply@myshiftx.com>',
       to: opts.shiftPosterEmail,
       subject: `Your shift may match a request on ${displayDate}`,
@@ -179,10 +181,13 @@ async function sendMatchEmails(opts: {
         shiftDate: displayDate,
         wallUrl,
       }),
-    })
-    if (error) console.error('[notifyMatch] Resend error (shift poster):', error)
-    else console.log(`[notifyMatch] sent match email to shift poster for shift "${opts.shiftTitle}"`)
+    }).then(({ error }) => {
+      if (error) console.error('[notifyMatch] Resend error (shift poster):', error)
+      else console.log(`[notifyMatch] sent match email to shift poster for shift "${opts.shiftTitle}"`)
+    }))
   }
+
+  await Promise.all(sends)
 }
 
 // ── Match notifications ────────────────────────────────────────────────────────
@@ -348,7 +353,7 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
 
     const { data: ub } = await db
       .from('user_boards')
-      .select('user_id, boards(name)')
+      .select('boards(name), users!user_id(email, display_name)')
       .eq('id', userBoardId)
       .single()
 
@@ -356,12 +361,7 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
     const boardName = (ub.boards as unknown as { name: string } | null)?.name
     if (!boardName) return
 
-    const { data: user } = await db
-      .from('users')
-      .select('email, display_name')
-      .eq('id', ub.user_id)
-      .single()
-
+    const user = (ub.users as unknown) as { email: string; display_name: string | null } | null
     if (!user?.email) return
 
     await resend.emails.send({

@@ -15,18 +15,19 @@ export default async function WallPage({ searchParams }: { searchParams: { tab?:
 
   const { supabase, user } = await requireUser()
 
-  const { data: userProfile } = await supabase
-    .from('users')
-    .select('id, display_name')
-    .eq('id', user.id)
-    .single()
-
-  // Fetch user's approved boards for the filter dropdown
-  const { data: memberRows } = await supabase
-    .from('user_boards')
-    .select('board_id, boards(id, name)')
-    .eq('user_id', user.id)
-    .eq('is_approved', true)
+  const [{ data: userProfile }, { data: memberRows }] = await Promise.all([
+    supabase
+      .from('users')
+      .select('id, display_name')
+      .eq('id', user.id)
+      .single(),
+    // User's approved boards for the filter dropdown
+    supabase
+      .from('user_boards')
+      .select('board_id, boards(id, name)')
+      .eq('user_id', user.id)
+      .eq('is_approved', true),
+  ])
 
   const boards = (memberRows ?? [])
     .map((ub: { board_id: string; boards: Board | null }) => ub.boards)

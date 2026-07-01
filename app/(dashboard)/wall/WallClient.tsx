@@ -17,6 +17,68 @@ const ET = 'America/New_York'
 
 interface Board { id: string; name: string }
 
+// Shared between the full wall load and the single-row realtime upsert
+const SHIFT_SELECT = `
+  id, shift_title, created_by, user_id, board_id,
+  start_time, end_time, is_trade, is_giveaway, is_overtime_approved,
+  details, is_active, expires_at, created_at,
+  boards(name),
+  users!user_id(notify_via_email, notify_via_sms, phone_number)
+`
+
+const REQUEST_SELECT = `
+  id, created_by, user_id, board_id, request_title, preferred_times, requested_date,
+  details, is_active, expires_at, created_at,
+  boards(name),
+  users!user_id(notify_via_email, notify_via_sms, phone_number)
+`
+
+type PosterContact = { notify_via_email: boolean; notify_via_sms: boolean; phone_number: string | null } | null
+
+function posterContactReady(poster: PosterContact): boolean {
+  return (poster?.notify_via_email ?? false) ||
+         ((poster?.notify_via_sms ?? false) && !!poster?.phone_number)
+}
+
+function mapShiftRow(s: Record<string, unknown>) {
+  return {
+    id: s.id as string,
+    shift_title: s.shift_title as string,
+    created_by: s.created_by as string,
+    user_id: s.user_id as string | null,
+    board_id: s.board_id as string | null,
+    board_name: (s.boards as { name: string } | null)?.name ?? '',
+    start_time: s.start_time as string,
+    end_time: s.end_time as string,
+    is_trade: s.is_trade as boolean,
+    is_giveaway: s.is_giveaway as boolean,
+    is_overtime_approved: s.is_overtime_approved as boolean,
+    details: s.details as string | null,
+    is_active: s.is_active as boolean,
+    expires_at: s.expires_at as string,
+    created_at: s.created_at as string,
+    contactReady: posterContactReady(s.users as PosterContact),
+  }
+}
+
+function mapRequestRow(r: Record<string, unknown>) {
+  return {
+    id: r.id as string,
+    created_by: r.created_by as string,
+    user_id: r.user_id as string | null,
+    board_id: r.board_id as string | null,
+    board_name: (r.boards as { name: string } | null)?.name ?? '',
+    request_title: (r.request_title as string | null) ?? 'Shift Wanted',
+    preferred_times: r.preferred_times as import('@/lib/database.types').PreferredTime[],
+    requested_date: r.requested_date as string,
+    details: r.details as string | null,
+    is_active: r.is_active as boolean,
+    expires_at: r.expires_at as string,
+    created_at: r.created_at as string,
+    contactReady: posterContactReady(r.users as PosterContact),
+  }
+}
+
 interface WallClientProps {
   userId: string
   displayName: string
@@ -100,13 +162,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
     try {
       const { data, error } = await supabase
         .from('shifts')
-        .select(`
-          id, shift_title, created_by, user_id, board_id,
-          start_time, end_time, is_trade, is_giveaway, is_overtime_approved,
-          details, is_active, expires_at, created_at,
-          boards(name),
-          users!user_id(notify_via_email, notify_via_sms, phone_number)
-        `)
+        .select(SHIFT_SELECT)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
         .or('is_trade.eq.true,is_giveaway.eq.true')
@@ -114,28 +170,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
 
       if (error) throw error
 
-      const mapped = (data ?? []).map((s: Record<string, unknown>) => {
-        const poster = s.users as { notify_via_email: boolean; notify_via_sms: boolean; phone_number: string | null } | null
-        return {
-          id: s.id as string,
-          shift_title: s.shift_title as string,
-          created_by: s.created_by as string,
-          user_id: s.user_id as string | null,
-          board_id: s.board_id as string | null,
-          board_name: (s.boards as { name: string } | null)?.name ?? '',
-          start_time: s.start_time as string,
-          end_time: s.end_time as string,
-          is_trade: s.is_trade as boolean,
-          is_giveaway: s.is_giveaway as boolean,
-          is_overtime_approved: s.is_overtime_approved as boolean,
-          details: s.details as string | null,
-          is_active: s.is_active as boolean,
-          expires_at: s.expires_at as string,
-          created_at: s.created_at as string,
-          contactReady: (poster?.notify_via_email ?? false) ||
-                        ((poster?.notify_via_sms ?? false) && !!poster?.phone_number),
-        }
-      })
+      const mapped = (data ?? []).map((s: Record<string, unknown>) => mapShiftRow(s))
       setShifts(await attachCommentCounts(mapped, 'shift'))
     } finally {
       if (!silent) setLoading(false)
@@ -148,42 +183,68 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
     try {
       const { data, error } = await supabase
         .from('requests')
-        .select(`
-          id, created_by, user_id, board_id, request_title, preferred_times, requested_date,
-          details, is_active, expires_at, created_at,
-          boards(name),
-          users!user_id(notify_via_email, notify_via_sms, phone_number)
-        `)
+        .select(REQUEST_SELECT)
         .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
         .order('requested_date', { ascending: true })
 
       if (error) throw error
 
-      const mapped = (data ?? []).map((r: Record<string, unknown>) => {
-        const poster = r.users as { notify_via_email: boolean; notify_via_sms: boolean; phone_number: string | null } | null
-        return {
-          id: r.id as string,
-          created_by: r.created_by as string,
-          user_id: r.user_id as string | null,
-          board_id: r.board_id as string | null,
-          board_name: (r.boards as { name: string } | null)?.name ?? '',
-          request_title: (r.request_title as string | null) ?? 'Shift Wanted',
-          preferred_times: r.preferred_times as import('@/lib/database.types').PreferredTime[],
-          requested_date: r.requested_date as string,
-          details: r.details as string | null,
-          is_active: r.is_active as boolean,
-          expires_at: r.expires_at as string,
-          created_at: r.created_at as string,
-          contactReady: (poster?.notify_via_email ?? false) ||
-                        ((poster?.notify_via_sms ?? false) && !!poster?.phone_number),
-        }
-      })
+      const mapped = (data ?? []).map((r: Record<string, unknown>) => mapRequestRow(r))
       setRequests(await attachCommentCounts(mapped, 'request'))
     } finally {
       if (!silent) setLoading(false)
     }
   }, [hasBoards, attachCommentCounts, supabase])
+
+  // Realtime upserts: fetch just the changed row (with its joins and counts)
+  // instead of reloading the whole wall on every event. A row that no longer
+  // matches the wall filters (inactive, expired, or not visible under RLS)
+  // comes back null and is removed from the list.
+  const upsertShift = useCallback(async (id: string) => {
+    const { data } = await supabase
+      .from('shifts')
+      .select(SHIFT_SELECT)
+      .eq('id', id)
+      .eq('is_active', true)
+      .gt('expires_at', new Date().toISOString())
+      .or('is_trade.eq.true,is_giveaway.eq.true')
+      .maybeSingle()
+
+    if (!data) {
+      setShifts(prev => prev.filter(s => s.id !== id))
+      return
+    }
+    const [shift] = await attachCommentCounts([mapShiftRow(data as Record<string, unknown>)], 'shift')
+    setShifts(prev => {
+      const next = prev.filter(s => s.id !== id)
+      next.push(shift)
+      next.sort((a, b) => a.start_time.localeCompare(b.start_time) || a.created_at.localeCompare(b.created_at))
+      return next
+    })
+  }, [supabase, attachCommentCounts])
+
+  const upsertRequest = useCallback(async (id: string) => {
+    const { data } = await supabase
+      .from('requests')
+      .select(REQUEST_SELECT)
+      .eq('id', id)
+      .eq('is_active', true)
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle()
+
+    if (!data) {
+      setRequests(prev => prev.filter(r => r.id !== id))
+      return
+    }
+    const [request] = await attachCommentCounts([mapRequestRow(data as Record<string, unknown>)], 'request')
+    setRequests(prev => {
+      const next = prev.filter(r => r.id !== id)
+      next.push(request)
+      next.sort((a, b) => a.requested_date.localeCompare(b.requested_date) || a.created_at.localeCompare(b.created_at))
+      return next
+    })
+  }, [supabase, attachCommentCounts])
 
   const isFirstRender = useRef(true)
   useEffect(() => {
@@ -212,7 +273,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
           } else if (payload.eventType === 'UPDATE' && !(payload.new as { is_active: boolean }).is_active) {
             setShifts(prev => prev.filter(s => s.id !== (payload.new as { id: string }).id))
           } else {
-            loadShifts(true)
+            upsertShift((payload.new as { id: string }).id)
           }
         }
       )
@@ -229,7 +290,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
           } else if (payload.eventType === 'UPDATE' && !(payload.new as { is_active: boolean }).is_active) {
             setRequests(prev => prev.filter(r => r.id !== (payload.new as { id: string }).id))
           } else {
-            loadRequests(true)
+            upsertRequest((payload.new as { id: string }).id)
           }
         }
       )
@@ -239,7 +300,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       supabase.removeChannel(shiftsChannel)
       supabase.removeChannel(requestsChannel)
     }
-  }, [hasBoards, supabase, loadShifts, loadRequests])
+  }, [hasBoards, supabase, upsertShift, upsertRequest])
 
   const handleDeactivateShift = async (id: string) => {
     setDeactivateError(null)

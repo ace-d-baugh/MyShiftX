@@ -46,12 +46,13 @@ export async function createBoard(name: string): Promise<{ error?: string; board
     }
     if (!invite_code) return { error: 'Failed to generate a unique invite code. Please try again.' }
 
-    // Generate a unique slug from the board name
+    // Generate a unique slug from the board name — one query for all
+    // potentially-colliding slugs instead of a lookup per candidate
     const baseSlug = slugify(name.trim())
+    const { data: takenRows } = await supabase.from('boards').select('slug').like('slug', `${baseSlug}%`)
+    const taken = new Set((takenRows ?? []).map(r => r.slug))
     let slug = baseSlug
-    for (let i = 2; i <= 10; i++) {
-      const { data: existing } = await supabase.from('boards').select('id').eq('slug', slug).single()
-      if (!existing) break
+    for (let i = 2; taken.has(slug) && i <= 10; i++) {
       slug = `${baseSlug}-${i}`
     }
 

@@ -28,6 +28,9 @@ export async function sendSupportMessage(opts: {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   const safeReplyTo = emailRegex.test(fromEmail) ? fromEmail : undefined
 
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
   try {
     const { error } = await resend.emails.send({
       from: 'noreply@myshiftx.com',
@@ -35,10 +38,10 @@ export async function sendSupportMessage(opts: {
       replyTo: safeReplyTo,
       subject: `[Support] ${safeSubject}`,
       html: `
-        <p><strong>From:</strong> ${fromEmail}</p>
-        <p><strong>Subject:</strong> ${subject.trim()}</p>
+        <p><strong>From:</strong> ${escapeHtml(fromEmail)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(safeSubject)}</p>
         <hr style="border:none;border-top:1px solid #E0D8F7;margin:16px 0;" />
-        <p style="white-space:pre-wrap;">${message.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</p>
+        <p style="white-space:pre-wrap;">${escapeHtml(message.trim()).replace(/\n/g, '<br>')}</p>
       `,
     })
     if (error) return { error: error.message }

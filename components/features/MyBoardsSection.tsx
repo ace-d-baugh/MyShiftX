@@ -10,6 +10,7 @@ import {
 } from '@/app/actions/boards'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { Modal } from '@/components/ui/Modal'
 import {
   LayoutGrid, Plus, X, Pencil, Key, Trash2, Check, Copy,
   RefreshCw, Users, MoreVertical,
@@ -443,7 +444,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
 
       {/* ── Join Confirmation Modal ──────────────────────────────────────── */}
       {pendingJoin && (
-        <Modal onClose={() => handleConfirmJoin(false)}>
+        <Modal open onClose={() => handleConfirmJoin(false)} size="sm">
           <h3 className="font-accent font-bold text-text text-lg mb-2">Join Board?</h3>
           <p className="text-sm text-text/70 mb-6">
             Do you want to request to join <strong>&ldquo;{pendingJoin.name}&rdquo;</strong>?
@@ -462,7 +463,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
 
       {/* ── Create Board Modal ───────────────────────────────────────────── */}
       {createOpen && (
-        <Modal onClose={() => onCreateOpenChange(false)}>
+        <Modal open onClose={() => onCreateOpenChange(false)} size="sm">
           <h3 className="font-accent font-bold text-text text-lg mb-4">Create a Board</h3>
           <div className="space-y-3">
             <div>
@@ -491,7 +492,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
 
       {/* ── Code Modal (Leader) ──────────────────────────────────────────── */}
       {codeBoard && (
-        <Modal onClose={() => setCodeBoard(null)}>
+        <Modal open onClose={() => setCodeBoard(null)} size="sm">
           <h3 className="font-accent font-bold text-text text-lg mb-1">{codeBoard.name}</h3>
           <p className="text-xs text-text/50 mb-4">Invite Code</p>
 
@@ -549,7 +550,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
 
       {/* ── Leave Board Confirmation Modal ──────────────────────────────── */}
       {leaveId && (
-        <Modal onClose={() => setLeaveId(null)}>
+        <Modal open onClose={() => setLeaveId(null)} size="sm">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center shrink-0 mt-0.5">
               <X className="w-5 h-5 text-warning" />
@@ -575,7 +576,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
 
       {/* ── Delete Confirmation Modal ────────────────────────────────────── */}
       {deleteId && (
-        <Modal onClose={() => setDeleteId(null)}>
+        <Modal open onClose={() => setDeleteId(null)} size="sm">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center shrink-0 mt-0.5">
               <Trash2 className="w-5 h-5 text-warning" />
@@ -607,19 +608,6 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
           </div>
         </Modal>
       )}
-    </div>
-  )
-}
-
-// ── Simple modal overlay ───────────────────────────────────────────────────
-
-function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-card rounded-xl shadow-xl w-full max-w-sm p-6 z-10">
-        {children}
-      </div>
     </div>
   )
 }

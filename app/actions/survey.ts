@@ -50,6 +50,8 @@ export async function submitSurvey(data: SurveyPayload): Promise<{ error?: strin
       .from('beta_survey_responses')
       .insert({ user_id: userId, ...data })
 
+    // Unique-constraint hit means a concurrent submission won the race
+    if (error?.code === '23505') return { error: 'DUPLICATE' }
     if (error) return { error: error.message }
     return {}
   } catch (e) {

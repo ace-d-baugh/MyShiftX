@@ -10,13 +10,16 @@ export async function reorderRoadmapCards(
   try {
     const { supabase } = await requireAdminAction()
 
-    for (const u of updates) {
-      const { error } = await supabase
-        .from('roadmap_cards')
-        .update({ column_key: u.column_key, position: u.position })
-        .eq('id', u.id)
-      if (error) return { error: error.message }
-    }
+    const results = await Promise.all(
+      updates.map(u =>
+        supabase
+          .from('roadmap_cards')
+          .update({ column_key: u.column_key, position: u.position })
+          .eq('id', u.id)
+      )
+    )
+    const failed = results.find(r => r.error)
+    if (failed?.error) return { error: failed.error.message }
 
     revalidatePath('/kanban')
     return {}

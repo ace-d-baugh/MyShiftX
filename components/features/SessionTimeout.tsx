@@ -16,7 +16,15 @@ export function SessionTimeout() {
   const timer   = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    const stamp = () => localStorage.setItem(ACTIVITY_KEY, Date.now().toString())
+    // Throttled: mousemove/scroll fire constantly, and each stamp is a
+    // synchronous localStorage write. 30s granularity vs an 8h timeout.
+    let lastStamp = 0
+    const stamp = () => {
+      const now = Date.now()
+      if (now - lastStamp < 30_000) return
+      lastStamp = now
+      localStorage.setItem(ACTIVITY_KEY, now.toString())
+    }
 
     const check = async () => {
       const last = Number(localStorage.getItem(ACTIVITY_KEY) || 0)
