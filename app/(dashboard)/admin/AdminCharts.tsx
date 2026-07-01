@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
 import { Star } from 'lucide-react'
 import { getMembershipKey, MEMBERSHIP_OPTIONS, type UserRow, type MembershipFilterKey } from './AdminClient'
 
@@ -38,33 +38,22 @@ const MEMBERSHIP_MONTHLY_PRICE: Record<MembershipFilterKey, number> = {
 // real ad revenue data. Free-tier users are the only ones shown ads.
 const AD_REVENUE_PER_FREE_USER = 0.5
 
-const MONTH_FORMAT = new Intl.DateTimeFormat('en-US', { month: 'short', year: '2-digit' })
+const DAY_LABEL_FORMAT = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
 
-function monthKey(dateStr: string): string {
-  const d = new Date(dateStr)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+function startOfDay(d: Date): Date {
+  const copy = new Date(d)
+  copy.setHours(0, 0, 0, 0)
+  return copy
 }
 
-function monthLabel(key: string): string {
-  const [y, m] = key.split('-').map(Number)
-  return MONTH_FORMAT.format(new Date(y, m - 1, 1))
+function addDays(d: Date, days: number): Date {
+  const copy = new Date(d)
+  copy.setDate(copy.getDate() + days)
+  return copy
 }
 
-/** All month keys from the earliest to the latest signup, with no gaps. */
-function buildMonthRange(users: UserRow[]): string[] {
-  if (users.length === 0) return []
-  const keys = users.map(u => monthKey(u.created_at)).sort()
-  const [fy, fm] = keys[0].split('-').map(Number)
-  const [ly, lm] = keys[keys.length - 1].split('-').map(Number)
-
-  const range: string[] = []
-  let y = fy, m = fm
-  while (y < ly || (y === ly && m <= lm)) {
-    range.push(`${y}-${String(m).padStart(2, '0')}`)
-    m++
-    if (m > 12) { m = 1; y++ }
-  }
-  return range
+function dayKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 const money = (n: number) => `$${n.toFixed(2)}`
@@ -85,41 +74,65 @@ export function AdminCharts({ users }: AdminChartsProps) {
 
   const total = users.length
 
-  const monthlyData = useMemo(() => {
-    const counts = new Map<string, number>()
+  const dailyMemberCountData = useMemo(() => {
+    if (users.length === 0) return []
+
+    const today = startOfDay(new Date())
+    const firstDay = startOfDay(new Date(Math.min(...users.map(u => new Date(u.created_at).getTime()))))
+
+    const byDay = new Map<string, number>()
     for (const u of users) {
-      const key = monthKey(u.created_at)
-      counts.set(key, (counts.get(key) ?? 0) + 1)
+      const key = dayKey(startOfDay(new Date(u.created_at)))
+      byDay.set(key, (byDay.get(key) ?? 0) + 1)
     }
-    return buildMonthRange(users).map(key => ({ month: monthLabel(key), count: counts.get(key) ?? 0 }))
+
+    const points: { label: string; count: number }[] = []
+    let cumCount = 0
+    for (let cursor = firstDay; cursor.getTime() <= today.getTime(); cursor = addDays(cursor, 1)) {
+      cumCount += byDay.get(dayKey(cursor)) ?? 0
+      points.push({ label: DAY_LABEL_FORMAT.format(cursor), count: cumCount })
+    }
+    return points
   }, [users])
 
-  const incomeData = useMemo(() => {
-    const byMonth = new Map<string, UserRow[]>()
+  const memberCountTickInterval = Math.max(1, Math.floor(dailyMemberCountData.length / 10))
+
+  const dailyIncomeData = useMemo(() => {
+    if (users.length === 0) return []
+
+    const today = startOfDay(new Date())
+    const firstDay = startOfDay(new Date(Math.min(...users.map(u => new Date(u.created_at).getTime()))))
+
+    const byDay = new Map<string, UserRow[]>()
     for (const u of users) {
-      const key = monthKey(u.created_at)
-      if (!byMonth.has(key)) byMonth.set(key, [])
-      byMonth.get(key)!.push(u)
+      const key = dayKey(startOfDay(new Date(u.created_at)))
+      if (!byDay.has(key)) byDay.set(key, [])
+      byDay.get(key)!.push(u)
     }
+
+    const points: { label: string; memberships: number; ads: number }[] = []
 
     let cumMembership = 0
     let cumAds = 0
-    return buildMonthRange(users).map(key => {
-      for (const u of byMonth.get(key) ?? []) {
+    for (let cursor = firstDay; cursor.getTime() <= today.getTime(); cursor = addDays(cursor, 1)) {
+      for (const u of byDay.get(dayKey(cursor)) ?? []) {
         const membershipKey = getMembershipKey(u)
         cumMembership += MEMBERSHIP_MONTHLY_PRICE[membershipKey]
         if (membershipKey === 'free') cumAds += AD_REVENUE_PER_FREE_USER
       }
-      return {
-        month: monthLabel(key),
+      points.push({
+        label: DAY_LABEL_FORMAT.format(cursor),
         memberships: Math.round(cumMembership * 100) / 100,
         ads: Math.round(cumAds * 100) / 100,
-      }
-    })
+      })
+    }
+    return points
   }, [users])
 
-  const currentMembershipIncome = incomeData.at(-1)?.memberships ?? 0
-  const currentAdIncome = incomeData.at(-1)?.ads ?? 0
+  const currentMembershipIncome = dailyIncomeData.at(-1)?.memberships ?? 0
+  const currentAdIncome = dailyIncomeData.at(-1)?.ads ?? 0
+
+  const dailyTickInterval = Math.max(1, Math.floor(dailyIncomeData.length / 10))
 
   return (
     <div className="space-y-8">
@@ -176,18 +189,19 @@ export function AdminCharts({ users }: AdminChartsProps) {
         )}
       </div>
 
-      {/* Signups per month bar chart */}
+      {/* User count per day (cumulative, all users regardless of tier) */}
       <div className="card">
-        <h2 className="font-accent text-lg font-bold text-text mb-4">Sign-ups per Month</h2>
-        {monthlyData.length === 0 ? (
+        <h2 className="font-accent text-lg font-bold text-text mb-4">User Count per Day</h2>
+        {dailyMemberCountData.length === 0 ? (
           <p className="text-sm text-text/50 italic text-center py-8">No users yet.</p>
         ) : (
           <div className="w-full h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData}>
+              <AreaChart data={dailyMemberCountData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--color-border))" vertical={false} />
                 <XAxis
-                  dataKey="month"
+                  dataKey="label"
+                  interval={memberCountTickInterval}
                   tick={{ fill: 'hsl(var(--color-text) / 0.6)', fontSize: 12 }}
                   axisLine={{ stroke: 'hsl(var(--color-border))' }}
                   tickLine={false}
@@ -200,25 +214,25 @@ export function AdminCharts({ users }: AdminChartsProps) {
                   width={30}
                 />
                 <Tooltip
-                  cursor={{ fill: 'hsl(var(--color-primary) / 0.1)' }}
                   contentStyle={tooltipStyle}
                   labelStyle={{ color: 'hsl(var(--color-text))' }}
                 />
-                <Bar dataKey="count" name="Sign-ups" fill="hsl(var(--color-primary))" radius={[4, 4, 0, 0]} maxBarSize={48} />
-              </BarChart>
+                <Area type="monotone" dataKey="count" name="Users" stroke="hsl(var(--color-primary))" strokeWidth={2} fill="hsl(var(--color-primary))" fillOpacity={0.15} dot={false} />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         )}
       </div>
 
-      {/* Estimated income per month */}
+      {/* Estimated daily income, based on actual signups to date */}
       <div className="card">
-        <h2 className="font-accent text-lg font-bold text-text mb-1">Estimated Income per Month</h2>
+        <h2 className="font-accent text-lg font-bold text-text mb-1">Estimated Income</h2>
         <p className="text-xs text-text/40 italic mb-4">
-          Projected, not actual — memberships use current list pricing ($4.99/mo, $26.99/6mo, $47.99/yr) applied
-          since signup; ads assume ${AD_REVENUE_PER_FREE_USER.toFixed(2)}/mo per Free user (no AdSense data yet).
+          Based on signups to date — memberships use current list pricing ($4.99/mo, $26.99/6mo, $47.99/yr) applied
+          since signup; ads assume ${AD_REVENUE_PER_FREE_USER.toFixed(2)}/mo per Free user (no AdSense data yet). Not
+          a forecast of future signups.
         </p>
-        {incomeData.length === 0 ? (
+        {dailyIncomeData.length === 0 ? (
           <p className="text-sm text-text/50 italic text-center py-8">No users yet.</p>
         ) : (
           <>
@@ -234,16 +248,17 @@ export function AdminCharts({ users }: AdminChartsProps) {
                 <span className="font-medium text-text">{money(currentAdIncome)}/mo</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-text/70">Total:</span>
+                <span className="text-text/70">Total (as of today):</span>
                 <span className="font-bold text-text">{money(currentMembershipIncome + currentAdIncome)}/mo</span>
               </div>
             </div>
             <div className="w-full h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={incomeData}>
+                <LineChart data={dailyIncomeData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--color-border))" vertical={false} />
                   <XAxis
-                    dataKey="month"
+                    dataKey="label"
+                    interval={dailyTickInterval}
                     tick={{ fill: 'hsl(var(--color-text) / 0.6)', fontSize: 12 }}
                     axisLine={{ stroke: 'hsl(var(--color-border))' }}
                     tickLine={false}
@@ -256,15 +271,14 @@ export function AdminCharts({ users }: AdminChartsProps) {
                     width={45}
                   />
                   <Tooltip
-                    cursor={{ fill: 'hsl(var(--color-primary) / 0.1)' }}
                     contentStyle={tooltipStyle}
                     labelStyle={{ color: 'hsl(var(--color-text))' }}
                     formatter={(value) => money(Number(value))}
                   />
                   <Legend wrapperStyle={{ fontSize: '0.8rem', color: 'hsl(var(--color-text))' }} />
-                  <Bar dataKey="memberships" name="Memberships" stackId="income" fill="hsl(var(--color-success))" />
-                  <Bar dataKey="ads" name="Ads" stackId="income" fill="hsl(var(--color-accent))" radius={[4, 4, 0, 0]} maxBarSize={48} />
-                </BarChart>
+                  <Line type="monotone" dataKey="memberships" name="Memberships" stroke="hsl(var(--color-success))" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="ads" name="Ads" stroke="hsl(var(--color-accent))" strokeWidth={2} dot={false} />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </>
