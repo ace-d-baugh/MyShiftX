@@ -79,20 +79,45 @@ function RemovalBadge({ reason, remover, ownerName }: { reason: RemovedReason | 
   )
 }
 
-function CountsSummary({ counts }: { counts: Record<RemovedReason, number> }) {
+type Filter = RemovedReason | 'all'
+
+function FilterBar({ counts, filter, onChange }: { counts: Record<RemovedReason, number>; filter: Filter; onChange: (f: Filter) => void }) {
   const total = counts.expired + counts.leader_removed + counts.user_removed
-  if (total === 0) return null
+  const options: { key: Filter; label: string; icon: React.ComponentType<{ className?: string }> | null; count: number; activeClass: string }[] = [
+    { key: 'all',            label: 'All',                 icon: null,        count: total,                  activeClass: 'bg-primary text-white' },
+    { key: 'expired',        label: 'Expired',              icon: Timer,       count: counts.expired,         activeClass: 'bg-text/70 text-white' },
+    { key: 'leader_removed', label: 'Removed by leaders',   icon: ShieldCheck, count: counts.leader_removed,  activeClass: 'bg-warning text-white' },
+    { key: 'user_removed',   label: 'Removed by owners',    icon: UserX,       count: counts.user_removed,    activeClass: 'bg-info text-white' },
+  ]
   return (
     <div className="flex flex-wrap gap-2 mb-4 text-xs">
-      <span className="badge bg-text/10 text-text/60 gap-1"><Timer className="w-3 h-3" />{counts.expired} expired</span>
-      <span className="badge bg-warning/20 text-warning gap-1"><ShieldCheck className="w-3 h-3" />{counts.leader_removed} removed by leaders</span>
-      <span className="badge bg-info/20 text-info gap-1"><UserX className="w-3 h-3" />{counts.user_removed} removed by owners</span>
+      {options.map(o => {
+        const Icon = o.icon
+        const isActive = filter === o.key
+        return (
+          <button
+            key={o.key}
+            onClick={() => onChange(o.key)}
+            className={cn(
+              'badge gap-1 transition-colors cursor-pointer',
+              isActive ? o.activeClass : 'bg-text/10 text-text/60 hover:bg-text/20'
+            )}
+          >
+            {Icon && <Icon className="w-3 h-3" />}
+            {o.label} ({o.count})
+          </button>
+        )
+      })}
     </div>
   )
 }
 
 export function ArchiveClient({ archivedShifts, archivedRequests, counts }: ArchiveClientProps) {
   const [tab, setTab] = useState<Tab>('shifts')
+  const [filter, setFilter] = useState<Filter>('all')
+
+  const filteredShifts = filter === 'all' ? archivedShifts : archivedShifts.filter(s => s.removed_reason === filter)
+  const filteredRequests = filter === 'all' ? archivedRequests : archivedRequests.filter(r => r.removed_reason === filter)
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -118,14 +143,16 @@ export function ArchiveClient({ archivedShifts, archivedRequests, counts }: Arch
         ))}
       </div>
 
-      <CountsSummary counts={tab === 'shifts' ? counts.shifts : counts.requests} />
+      <FilterBar counts={tab === 'shifts' ? counts.shifts : counts.requests} filter={filter} onChange={setFilter} />
 
       {tab === 'shifts' ? (
-        archivedShifts.length === 0 ? (
-          <p className="text-sm text-text/50 italic text-center py-8">No archived shifts.</p>
+        filteredShifts.length === 0 ? (
+          <p className="text-sm text-text/50 italic text-center py-8">
+            {archivedShifts.length === 0 ? 'No archived shifts.' : 'No shifts match this filter.'}
+          </p>
         ) : (
           <div className="space-y-3">
-            {archivedShifts.map(s => (
+            {filteredShifts.map(s => (
               <div key={s.id} className="card opacity-75">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
@@ -148,11 +175,13 @@ export function ArchiveClient({ archivedShifts, archivedRequests, counts }: Arch
           </div>
         )
       ) : (
-        archivedRequests.length === 0 ? (
-          <p className="text-sm text-text/50 italic text-center py-8">No archived requests.</p>
+        filteredRequests.length === 0 ? (
+          <p className="text-sm text-text/50 italic text-center py-8">
+            {archivedRequests.length === 0 ? 'No archived requests.' : 'No requests match this filter.'}
+          </p>
         ) : (
           <div className="space-y-3">
-            {archivedRequests.map(r => (
+            {filteredRequests.map(r => (
               <div key={r.id} className="card opacity-75">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>

@@ -35,20 +35,29 @@ export async function resolveFlag(
       // target_id could be a shift or a request — try shifts first, then requests.
       const { data: shift } = await supabase
         .from('shifts')
-        .select('id')
+        .select('id, user_id')
         .eq('id', flag.target_id)
         .maybeSingle()
 
       if (shift) {
+        // A leader resolving a flag on their own post is still self-removal,
+        // not a leader action against someone else's post.
+        const reason = shift.user_id === userId ? 'user_removed' : 'leader_removed'
         const { error: shiftErr } = await supabase
           .from('shifts')
-          .update({ is_active: false, removed_reason: 'leader_removed', removed_by_user_id: userId })
+          .update({ is_active: false, removed_reason: reason, removed_by_user_id: userId })
           .eq('id', flag.target_id)
         if (shiftErr) return { error: shiftErr.message }
       } else {
+        const { data: request } = await supabase
+          .from('requests')
+          .select('id, user_id')
+          .eq('id', flag.target_id)
+          .maybeSingle()
+        const reason = request?.user_id === userId ? 'user_removed' : 'leader_removed'
         const { error: requestErr } = await supabase
           .from('requests')
-          .update({ is_active: false, removed_reason: 'leader_removed', removed_by_user_id: userId })
+          .update({ is_active: false, removed_reason: reason, removed_by_user_id: userId })
           .eq('id', flag.target_id)
         if (requestErr) return { error: requestErr.message }
       }
