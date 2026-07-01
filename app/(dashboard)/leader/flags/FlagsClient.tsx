@@ -5,6 +5,7 @@ import { Flag, CheckCircle, Trash2, Eye, Clock, LayoutGrid, User, MessageSquare,
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
 import { createClient } from '@/lib/supabase/client'
+import { resolveFlag as resolveFlagAction } from '@/app/actions/flags'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import type { PreferredTime } from '@/lib/database.types'
@@ -36,26 +37,25 @@ type FlaggedContent =
 
 interface FlagsClientProps {
   flags: FlagItem[]
-  resolverId: string
 }
 
-export function FlagsClient({ flags: initialFlags, resolverId }: FlagsClientProps) {
+export function FlagsClient({ flags: initialFlags }: FlagsClientProps) {
   const supabase = createClient()
   const [flags, setFlags] = useState(initialFlags)
   const [processing, setProcessing] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [viewContent, setViewContent] = useState<FlaggedContent | null>(null)
   const [viewLoading, setViewLoading] = useState(false)
 
   const resolveFlag = async (flag: FlagItem, action: 'resolved' | 'dismissed') => {
     setProcessing(flag.id)
-    if (action === 'resolved' && flag.target_type === 'comment') {
-      await (supabase as any).from('comments').update({ is_active: false } as any).eq('id', flag.target_id)
+    setError(null)
+    const { error: e } = await resolveFlagAction(flag.id, action)
+    if (e) {
+      setError(e)
+    } else {
+      setFlags(prev => prev.filter(f => f.id !== flag.id))
     }
-    await (supabase as any).from('flags').update({
-      status: action,
-      resolved_by_user_id: resolverId,
-    } as any).eq('id', flag.id)
-    setFlags(prev => prev.filter(f => f.id !== flag.id))
     setProcessing(null)
   }
 
@@ -187,6 +187,13 @@ export function FlagsClient({ flags: initialFlags, resolverId }: FlagsClientProp
             : `${flags.length} flag${flags.length !== 1 ? 's' : ''} pending review`}
         </p>
       </div>
+
+      {error && (
+        <div className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm">
+          {error}
+          <button className="ml-2 underline text-xs" onClick={() => setError(null)}>Dismiss</button>
+        </div>
+      )}
 
       {flags.length === 0 ? (
         <div className="text-center py-16">

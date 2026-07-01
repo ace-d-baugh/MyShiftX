@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { Settings, LayoutGrid, Users, CheckCircle, X, Search, UserCog } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { setBoardActive, setUserActive } from '@/app/actions/admin'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
@@ -40,7 +40,6 @@ const roleVariant: Record<GlobalRole, 'guest' | 'user' | 'admin'> = {
 const globalRoleOptions: GlobalRole[] = ['Guest', 'User', 'Admin']
 
 export function AdminClient({ boards: initBoards, users: initUsers, adminId }: AdminClientProps) {
-  const supabase = createClient()
   const [tab, setTab] = useState<AdminTab>('users')
   const [boards, setBoards] = useState(initBoards)
   const [users, setUsers] = useState(initUsers)
@@ -80,8 +79,8 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId }: A
 
   const toggleBoardActive = async (id: string, current: boolean) => {
     setProcessing(id)
-    const { error: e } = await supabase.from('boards').update({ is_active: !current }).eq('id', id)
-    if (e) { setError(e.message) } else {
+    const { error: e } = await setBoardActive(id, !current)
+    if (e) { setError(e) } else {
       setBoards(prev => prev.map(b => b.id === id ? { ...b, is_active: !current } : b))
       showSuccess(current ? 'Board deactivated.' : 'Board reactivated.')
     }
@@ -91,8 +90,8 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId }: A
   const toggleUserActive = async (id: string, current: boolean) => {
     if (id === adminId) return
     setProcessing(id)
-    const { error: e } = await supabase.from('users').update({ is_active: !current }).eq('id', id)
-    if (e) { setError(e.message) } else {
+    const { error: e } = await setUserActive(id, !current)
+    if (e) { setError(e) } else {
       setUsers(prev => prev.map(u => u.id === id ? { ...u, is_active: !current } : u))
       showSuccess(current ? 'User deactivated.' : 'User reactivated.')
     }

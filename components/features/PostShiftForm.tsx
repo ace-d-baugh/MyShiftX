@@ -231,7 +231,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
             is_overtime_approved: f.is_overtime_approved, details: f.details || null, is_active: true,
           })
           if (error) throw error
-          notifyShiftPosted({ boardId: f.board_id, startTimeIso: startUTC, shiftTitle: f.shift_title, posterName: displayName, posterUserId: userId })
+          notifyShiftPosted({ boardId: f.board_id, startTimeIso: startUTC, shiftTitle: f.shift_title, posterName: displayName, posterUserId: userId }).catch(() => {})
         }
       }
       onSuccess?.()

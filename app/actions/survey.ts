@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
+import { getActionSession } from '@/lib/auth/session'
 
 export type SurveyPayload = {
   heard_from:               string | null
@@ -34,38 +34,39 @@ export type SurveyPayload = {
 }
 
 export async function submitSurvey(data: SurveyPayload): Promise<{ error?: string }> {
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated.' }
+  try {
+    const { supabase, userId } = await getActionSession()
 
-  // Check for duplicate submission
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing } = await (supabase as any)
-    .from('beta_survey_responses')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
+    // Check for duplicate submission
+    const { data: existing } = await supabase
+      .from('beta_survey_responses')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
 
-  if (existing) return { error: 'DUPLICATE' }
+    if (existing) return { error: 'DUPLICATE' }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
-    .from('beta_survey_responses')
-    .insert({ user_id: user.id, ...data })
+    const { error } = await supabase
+      .from('beta_survey_responses')
+      .insert({ user_id: userId, ...data })
 
-  if (error) return { error: error.message }
-  return {}
+    if (error) return { error: error.message }
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Not authenticated.' }
+  }
 }
 
 export async function checkExistingSubmission(): Promise<boolean> {
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
-    .from('beta_survey_responses')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
-  return !!data
+  try {
+    const { supabase, userId } = await getActionSession()
+    const { data } = await supabase
+      .from('beta_survey_responses')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+    return !!data
+  } catch {
+    return false
+  }
 }

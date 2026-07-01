@@ -160,7 +160,16 @@ export function CommentSection({
         body: QUICK_INTEREST_BODY,
         is_interested: true,
       })
-      if (error) throw error
+      if (error) {
+        // A duplicate insert (double-click, or another tab already marked
+        // interest) hits the DB's unique index — treat it as already-interested
+        // rather than surfacing a raw constraint error.
+        if (error.code === '23505') {
+          await fetchComments()
+          return
+        }
+        throw error
+      }
       await fetchComments()
       // Fire-and-forget — notify the post owner without blocking the UI
       notifyInterest({ postId, postType, commenterName: currentUserName ?? 'Someone' })

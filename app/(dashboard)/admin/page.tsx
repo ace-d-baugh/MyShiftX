@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/auth/session'
 import { AdminClient } from './AdminClient'
 
 export const dynamic = 'force-dynamic'
@@ -7,14 +6,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Admin – MyShiftX' }
 
 export default async function AdminPage() {
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: userProfile } = await supabase
-    .from('users').select('role').eq('id', user.id).single()
-
-  if (!userProfile || userProfile.role !== 'Admin') redirect('/wall')
+  const { supabase, user } = await requireAdmin()
 
   const [boardsRes, usersRes] = await Promise.all([
     supabase

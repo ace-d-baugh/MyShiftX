@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { requireModeratorOrAdmin } from '@/lib/auth/session'
 import { ApprovalsClient } from './ApprovalsClient'
 
 export const dynamic = 'force-dynamic'
@@ -15,18 +14,7 @@ interface PendingRequest {
 }
 
 export default async function ApprovalsPage() {
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  // Check access: must be a board mod/leader or Admin
-  const [{ data: profile }, { data: isMod }] = await Promise.all([
-    supabase.from('users').select('role').eq('id', user.id).single(),
-    supabase.rpc('is_any_board_moderator'),
-  ])
-
-  const isAdmin = profile?.role === 'Admin'
-  if (!isAdmin && !isMod) redirect('/wall')
+  const { supabase } = await requireModeratorOrAdmin()
 
   // Use a SECURITY DEFINER RPC so the multi-table RLS interaction
   // (user_boards → boards → is_board_member → user_boards) doesn't

@@ -1,8 +1,9 @@
 'use server'
 
 import { Resend } from 'resend'
+import { optionalServerEnv } from '@/lib/env'
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
+const resend = new Resend(optionalServerEnv.RESEND_API_KEY ?? '')
 
 export async function sendSupportMessage(opts: {
   fromEmail: string
@@ -10,6 +11,11 @@ export async function sendSupportMessage(opts: {
   message: string
 }): Promise<{ error?: string }> {
   const { fromEmail, subject, message } = opts
+
+  if (!optionalServerEnv.RESEND_API_KEY) {
+    console.error('[sendSupportMessage] RESEND_API_KEY is not set — cannot send support message')
+    return { error: 'Email service is not configured. Please try again later.' }
+  }
 
   if (!subject.trim() || !message.trim()) {
     return { error: 'Subject and message are required.' }

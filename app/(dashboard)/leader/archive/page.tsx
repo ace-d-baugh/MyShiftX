@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { requireModeratorOrAdmin } from '@/lib/auth/session'
 import { ArchiveClient } from './ArchiveClient'
 
 export const dynamic = 'force-dynamic'
@@ -7,16 +6,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Archive – MyShiftX' }
 
 export default async function ArchivePage() {
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const [{ data: profile }, { data: isMod }] = await Promise.all([
-    supabase.from('users').select('role').eq('id', user.id).single(),
-    supabase.rpc('is_any_board_moderator'),
-  ])
-
-  if (!profile || (profile.role !== 'Admin' && !isMod)) redirect('/wall')
+  const { supabase } = await requireModeratorOrAdmin()
 
   const now = new Date().toISOString()
 

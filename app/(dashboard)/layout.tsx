@@ -1,6 +1,6 @@
 import { unstable_noStore as noStore } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { requireUser } from '@/lib/auth/session'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { SessionTimeout } from '@/components/features/SessionTimeout'
@@ -16,16 +16,7 @@ export default async function DashboardLayout({
 }) {
   noStore()
 
-  const supabase = createServerClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[Layout] user=${user?.email ?? 'none'} err=${error?.message ?? 'none'}`)
-  }
-
-  if (!user) {
-    redirect('/login')
-  }
+  const { supabase, user } = await requireUser()
 
   const { data: userProfile } = await supabase
     .from('users')

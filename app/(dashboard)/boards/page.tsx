@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { requireUser, getUserRole } from '@/lib/auth/session'
 import { BoardsClient } from './BoardsClient'
 import { groupMembersByBoard } from './utils'
 import type { ManagedBoard } from './types'
@@ -9,12 +8,10 @@ export const dynamic = 'force-dynamic'
 export const metadata = { title: 'My Boards – MyShiftX' }
 
 export default async function BoardsPage() {
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const { supabase, user } = await requireUser()
 
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  const isAdmin = profile?.role === 'Admin'
+  const role = await getUserRole(supabase, user.id)
+  const isAdmin = role === 'Admin'
 
   let managedBoards: ManagedBoard[] = []
 

@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const CRON_SECRET = process.env.CRON_SECRET!
+import { env, optionalServerEnv } from '@/lib/env'
 
 export async function GET(req: NextRequest) {
-  // Verify the cron secret to prevent unauthorized access
-  if (!CRON_SECRET) {
-    return NextResponse.json({ error: 'CRON_SECRET is not configured' }, { status: 500 })
+  // Verify the cron is configured before doing anything else
+  if (!optionalServerEnv.CRON_SECRET || !optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: 'Cron is not configured' }, { status: 500 })
   }
   const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${optionalServerEnv.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+    const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false }
     })
 

@@ -1,12 +1,10 @@
 'use server'
 
-import { createServerClient } from '@/lib/supabase/server'
+import { getActionSession } from '@/lib/auth/session'
 
 export async function deactivateShift(id: string): Promise<{ error?: string }> {
   try {
-    const supabase = createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: 'Not authenticated' }
+    const { supabase } = await getActionSession()
 
     const { data, error } = await supabase
       .rpc('deactivate_own_shift', { p_shift_id: id })
@@ -21,9 +19,7 @@ export async function deactivateShift(id: string): Promise<{ error?: string }> {
 
 export async function deactivateRequest(id: string): Promise<{ error?: string }> {
   try {
-    const supabase = createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: 'Not authenticated' }
+    const { supabase } = await getActionSession()
 
     const { data, error } = await supabase
       .rpc('deactivate_own_request', { p_request_id: id })

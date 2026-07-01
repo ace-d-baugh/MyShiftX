@@ -1,6 +1,5 @@
 import { unstable_noStore as noStore } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { requireUser } from '@/lib/auth/session'
 import { WallClient } from './WallClient'
 
 export const dynamic = 'force-dynamic'
@@ -14,14 +13,7 @@ interface Board { id: string; name: string }
 export default async function WallPage({ searchParams }: { searchParams: { tab?: string; date?: string } }) {
   noStore()
 
-  const supabase = createServerClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[WallPage] user=${user?.email ?? 'none'} err=${error?.message ?? 'none'}`)
-  }
-
-  if (!user) redirect('/login')
+  const { supabase, user } = await requireUser()
 
   const { data: userProfile } = await supabase
     .from('users')

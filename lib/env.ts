@@ -1,0 +1,34 @@
+function required(name: string, value: string | undefined): string {
+  if (!value) throw new Error(`Missing required environment variable: ${name}`)
+  return value
+}
+
+/**
+ * Centralized, validated access to environment variables the app cannot run
+ * without. Each getter throws a clear error on first access if unset, instead
+ * of failing deep inside unrelated code with a cryptic downstream error
+ * (e.g. a Supabase client silently constructed with `undefined`).
+ *
+ * NEXT_PUBLIC_* values are read via static `process.env.NEXT_PUBLIC_X`
+ * property access (not a dynamic lookup) so Next.js can still inline them
+ * into the client bundle.
+ */
+export const env = {
+  get NEXT_PUBLIC_SUPABASE_URL() {
+    return required('NEXT_PUBLIC_SUPABASE_URL', process.env.NEXT_PUBLIC_SUPABASE_URL)
+  },
+  get NEXT_PUBLIC_SUPABASE_ANON_KEY() {
+    return required('NEXT_PUBLIC_SUPABASE_ANON_KEY', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  },
+}
+
+/**
+ * Server-only variables that some features intentionally soft-fail without
+ * (email sending, the expirations cron) rather than crashing the request.
+ * Returns undefined if unset — callers decide how to degrade.
+ */
+export const optionalServerEnv = {
+  get SUPABASE_SERVICE_ROLE_KEY() { return process.env.SUPABASE_SERVICE_ROLE_KEY },
+  get RESEND_API_KEY() { return process.env.RESEND_API_KEY },
+  get CRON_SECRET() { return process.env.CRON_SECRET },
+}

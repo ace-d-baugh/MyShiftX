@@ -8,6 +8,10 @@ import { Button } from '@/components/ui/Button'
 import { Plus, Save, X, ArrowLeft } from 'lucide-react'
 import type { PreferredTime } from '@/lib/database.types'
 import { notifyRequestPosted } from '@/app/actions/notifications'
+import { formatInTimeZone } from 'date-fns-tz'
+
+const ET = 'America/New_York'
+const todayET = () => formatInTimeZone(new Date(), ET, 'yyyy-MM-dd')
 
 const TIME_OPTIONS: { value: PreferredTime; label: string; desc: string }[] = [
   { value: 'morning',   label: 'Morning',    desc: '6am–12pm'  },
@@ -165,7 +169,7 @@ export function PostRequestForm({ userId, displayName, onSuccess, requestId, ini
             boardId: f.board_id, requestedDate: f.requested_date,
             preferredTimes: f.preferred_times, requestTitle: f.request_title,
             requesterName: displayName, requesterUserId: userId,
-          })
+          }).catch(() => {})
         }
       }
       onSuccess?.()
@@ -248,7 +252,7 @@ export function PostRequestForm({ userId, displayName, onSuccess, requestId, ini
               <div>
                 <label className="block text-sm font-medium text-text mb-1">Date Needed <span className="text-warning">*</span></label>
                 <input name="requested_date" type="date" value={f.requested_date} onChange={onChange(i)}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={todayET()}
                   className={`input ${errs.requested_date ? 'border-warning' : ''}`} />
                 {errs.requested_date && <p className="mt-1 text-xs text-warning">{errs.requested_date}</p>}
               </div>

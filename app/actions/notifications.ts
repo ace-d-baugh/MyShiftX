@@ -6,16 +6,17 @@ import { boardApprovedHtml, interestedHtml, shiftMatchHtml } from '@/components/
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
 import type { PreferredTime } from '@/lib/database.types'
+import { env, optionalServerEnv } from '@/lib/env'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://myshiftx.com'
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
+const resend = new Resend(optionalServerEnv.RESEND_API_KEY ?? '')
 
 // Service-role client — needed to read another user's email address
 function adminDb() {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY ?? '',
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 }
@@ -32,11 +33,11 @@ export async function notifyInterest(opts: {
 }): Promise<void> {
   try {
     // Guard: fail fast with a clear message if env vars are missing
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
       console.error('[notifyInterest] SUPABASE_SERVICE_ROLE_KEY is not set — cannot send interest notification')
       return
     }
-    if (!process.env.RESEND_API_KEY) {
+    if (!optionalServerEnv.RESEND_API_KEY) {
       console.error('[notifyInterest] RESEND_API_KEY is not set — cannot send interest notification')
       return
     }
@@ -98,7 +99,7 @@ export async function notifyInterest(opts: {
     if (sendError) {
       console.error('[notifyInterest] Resend error:', sendError)
     } else {
-      console.log(`[notifyInterest] sent to ${ownerEmail} for ${opts.postType} "${postTitle}"`)
+      console.log(`[notifyInterest] sent for ${opts.postType} ${opts.postId} ("${postTitle}")`)
     }
   } catch (err) {
     console.error('[notifyInterest] unexpected error:', err)
@@ -161,7 +162,7 @@ async function sendMatchEmails(opts: {
       }),
     })
     if (error) console.error('[notifyMatch] Resend error (requester):', error)
-    else console.log(`[notifyMatch] sent match email to requester ${opts.requesterEmail}`)
+    else console.log(`[notifyMatch] sent match email to requester for request "${opts.requestTitle}"`)
   }
 
   if (opts.shiftPosterNotify && opts.shiftPosterEmail) {
@@ -180,7 +181,7 @@ async function sendMatchEmails(opts: {
       }),
     })
     if (error) console.error('[notifyMatch] Resend error (shift poster):', error)
-    else console.log(`[notifyMatch] sent match email to shift poster ${opts.shiftPosterEmail}`)
+    else console.log(`[notifyMatch] sent match email to shift poster for shift "${opts.shiftTitle}"`)
   }
 }
 
@@ -199,7 +200,10 @@ export async function notifyShiftPosted(opts: {
   posterUserId: string
 }): Promise<void> {
   try {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.RESEND_API_KEY) return
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY || !optionalServerEnv.RESEND_API_KEY) {
+      console.error('[notifyShiftPosted] SUPABASE_SERVICE_ROLE_KEY or RESEND_API_KEY is not set — skipping')
+      return
+    }
 
     const db = adminDb()
     const shiftDate = getETDate(opts.startTimeIso)
@@ -218,6 +222,7 @@ export async function notifyShiftPosted(opts: {
       .eq('board_id', opts.boardId)
       .eq('requested_date', shiftDate)
       .eq('is_active', true)
+      .gt('expires_at', new Date().toISOString())
       .neq('user_id', opts.posterUserId) // don't match your own posts
 
     if (error) { console.error('[notifyShiftPosted] query error:', error.message); return }
@@ -267,7 +272,10 @@ export async function notifyRequestPosted(opts: {
   requesterUserId: string
 }): Promise<void> {
   try {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.RESEND_API_KEY) return
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY || !optionalServerEnv.RESEND_API_KEY) {
+      console.error('[notifyRequestPosted] SUPABASE_SERVICE_ROLE_KEY or RESEND_API_KEY is not set — skipping')
+      return
+    }
 
     const db = adminDb()
 
@@ -331,6 +339,11 @@ export async function notifyRequestPosted(opts: {
  */
 export async function notifyBoardApproved(userBoardId: string): Promise<void> {
   try {
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY || !optionalServerEnv.RESEND_API_KEY) {
+      console.error('[notifyBoardApproved] SUPABASE_SERVICE_ROLE_KEY or RESEND_API_KEY is not set — skipping')
+      return
+    }
+
     const db = adminDb()
 
     const { data: ub } = await db

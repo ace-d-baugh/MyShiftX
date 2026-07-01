@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
+import { checkExistingSubmission } from '@/app/actions/survey'
 import { SurveyClient } from './SurveyClient'
 
 export const dynamic = 'force-dynamic'
@@ -10,12 +11,7 @@ export default async function SurveyPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing } = await (supabase as any)
-    .from('beta_survey_responses')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
+  const alreadySubmitted = await checkExistingSubmission()
 
   const { data: profile } = await supabase
     .from('users')
@@ -26,7 +22,7 @@ export default async function SurveyPage() {
   return (
     <SurveyClient
       displayName={profile?.display_name ?? 'there'}
-      alreadySubmitted={!!existing}
+      alreadySubmitted={alreadySubmitted}
     />
   )
 }

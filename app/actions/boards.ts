@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
+import { getActionSession } from '@/lib/auth/session'
 import { notifyBoardApproved } from '@/app/actions/notifications'
 import { slugify } from '@/lib/slug'
 import { createBoardSchema } from '@/lib/validations/boards'
@@ -17,13 +18,6 @@ function generateInviteCode(): string {
   return code
 }
 
-async function getSession() {
-  const supabase = createServerClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) throw new Error('Not authenticated')
-  return { supabase, userId: user.id }
-}
-
 // ── Create a board ────────────────────────────────────────────────────────────
 
 export async function createBoard(name: string): Promise<{ error?: string; boardId?: string }> {
@@ -32,7 +26,7 @@ export async function createBoard(name: string): Promise<{ error?: string; board
     if (!parsed.success) return { error: parsed.error.issues[0].message }
     name = parsed.data.name
 
-    const { supabase, userId } = await getSession()
+    const { supabase, userId } = await getActionSession()
 
     // Verify global role is User or Admin
     const { data: profile } = await supabase.from('users').select('role, display_name').eq('id', userId).single()
@@ -68,7 +62,11 @@ export async function createBoard(name: string): Promise<{ error?: string; board
       .single()
 
     if (boardErr) {
-      if (boardErr.code === '23505') return { error: 'A board with that name already exists.' }
+      if (boardErr.code === '23505') {
+        if (boardErr.message.includes('boards_name_key')) return { error: 'A board with that name already exists.' }
+        if (boardErr.message.includes('boards_slug_key')) return { error: 'A board with a very similar name already exists. Please try a slightly different name.' }
+        if (boardErr.message.includes('boards_invite_code_key')) return { error: 'Failed to generate a unique invite code. Please try again.' }
+      }
       return { error: boardErr.message }
     }
 
@@ -103,7 +101,7 @@ export async function lookupBoardByCode(code: string): Promise<{
   board?: { id: string; name: string }
 }> {
   try {
-    const { supabase, userId } = await getSession()
+    const { supabase, userId } = await getActionSession()
     const upperCode = code.toUpperCase()
 
     // Count failures in the last minute
@@ -157,7 +155,7 @@ export async function lookupBoardByCode(code: string): Promise<{
 
 export async function confirmJoinBoard(boardId: string, confirmed: boolean): Promise<{ error?: string }> {
   try {
-    const { supabase, userId } = await getSession()
+    const { supabase, userId } = await getActionSession()
 
     // Get the board's invite code for logging
     const { data: board } = await supabase.from('boards').select('invite_code').eq('id', boardId).single()
@@ -216,7 +214,7 @@ async function checkDeactivationThreshold(
 
 export async function leaveBoard(boardId: string): Promise<{ error?: string }> {
   try {
-    const { supabase, userId } = await getSession()
+    const { supabase, userId } = await getActionSession()
 
     // Prevent leaving if you're the only Leader
     const { data: membership } = await supabase
@@ -257,7 +255,7 @@ export async function leaveBoard(boardId: string): Promise<{ error?: string }> {
 
 export async function deleteBoard(boardId: string): Promise<{ error?: string }> {
   try {
-    const { supabase } = await getSession()
+    const { supabase } = await getActionSession()
     // RLS enforces leader-only; CASCADE handles user_boards, shifts, requests
     const { error } = await supabase.from('boards').delete().eq('id', boardId)
     if (error) return { error: error.message }
@@ -276,7 +274,7 @@ export async function updateBoardName(boardId: string, name: string): Promise<{ 
     const trimmed = name.trim()
     if (trimmed.length < 2) return { error: 'Board name must be at least 2 characters.' }
     if (trimmed.length > 32) return { error: 'Board name must be 32 characters or fewer.' }
-    const { supabase } = await getSession()
+    const { supabase } = await getActionSession()
     const newSlug = slugify(trimmed)
     const { error } = await supabase.from('boards').update({ name: trimmed, slug: newSlug }).eq('id', boardId)
 
@@ -295,7 +293,7 @@ export async function updateBoardName(boardId: string, name: string): Promise<{ 
 
 export async function toggleInviteCode(boardId: string, enabled: boolean): Promise<{ error?: string }> {
   try {
-    const { supabase } = await getSession()
+    const { supabase } = await getActionSession()
     const { error } = await supabase.from('boards').update({ invite_code_enabled: enabled }).eq('id', boardId)
     if (error) return { error: error.message }
     revalidatePath('/profile')
@@ -309,7 +307,7 @@ export async function toggleInviteCode(boardId: string, enabled: boolean): Promi
 
 export async function regenerateInviteCode(boardId: string): Promise<{ error?: string; code?: string }> {
   try {
-    const { supabase } = await getSession()
+    const { supabase } = await getActionSession()
 
     let invite_code = ''
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -332,7 +330,7 @@ export async function regenerateInviteCode(boardId: string): Promise<{ error?: s
 
 export async function approveUserBoard(userBoardId: string): Promise<{ error?: string }> {
   try {
-    const { supabase, userId } = await getSession()
+    const { supabase, userId } = await getActionSession()
     const { error } = await supabase
       .from('user_boards')
       .update({ is_approved: true, approved_by_user_id: userId, approved_at: new Date().toISOString() })
@@ -349,7 +347,7 @@ export async function approveUserBoard(userBoardId: string): Promise<{ error?: s
 
 export async function rejectUserBoard(userBoardId: string): Promise<{ error?: string }> {
   try {
-    const { supabase } = await getSession()
+    const { supabase } = await getActionSession()
     const { error } = await supabase.from('user_boards').delete().eq('id', userBoardId)
     if (error) return { error: error.message }
     revalidatePath('/leader/approvals')
@@ -367,7 +365,7 @@ export async function updateUserBoardRole(
 ): Promise<{ error?: string }> {
   try {
     if (!['User', 'Mod'].includes(newRole)) return { error: 'Invalid role.' }
-    const { supabase } = await getSession()
+    const { supabase } = await getActionSession()
     const { data: existing } = await supabase.from('user_boards').select('is_hidden').eq('id', userBoardId).single()
     if (existing?.is_hidden) return { error: 'Cannot modify a hidden membership.' }
     const { error } = await supabase.from('user_boards').update({ role: newRole }).eq('id', userBoardId)
@@ -386,7 +384,7 @@ export async function transferBoardOwnership(
   newLeaderUserId: string
 ): Promise<{ error?: string }> {
   try {
-    const { supabase, userId } = await getSession()
+    const { supabase, userId } = await getActionSession()
 
     // Confirm caller is currently a Leader of this board
     const { data: mine } = await supabase
@@ -402,14 +400,19 @@ export async function transferBoardOwnership(
     }
 
     // Promote the new leader
-    const { error: promoteErr } = await supabase
+    const { data: promoted, error: promoteErr } = await supabase
       .from('user_boards')
       .update({ role: 'Leader' })
       .eq('board_id', boardId)
       .eq('user_id', newLeaderUserId)
       .eq('is_approved', true)
+      .eq('is_hidden', false)
+      .select('id')
 
     if (promoteErr) return { error: promoteErr.message }
+    if (!promoted || promoted.length === 0) {
+      return { error: 'That user is not an approved member of this board.' }
+    }
 
     // Demote current leader to Mod
     const { error: demoteErr } = await supabase
@@ -430,7 +433,7 @@ export async function transferBoardOwnership(
 
 export async function removeUserFromBoard(userBoardId: string): Promise<{ error?: string }> {
   try {
-    const { supabase } = await getSession()
+    const { supabase } = await getActionSession()
     const { data: existing } = await supabase.from('user_boards').select('is_hidden').eq('id', userBoardId).single()
     if (existing?.is_hidden) return { error: 'Cannot remove a hidden membership.' }
     const { error } = await supabase.from('user_boards').delete().eq('id', userBoardId)

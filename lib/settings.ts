@@ -34,12 +34,6 @@ export function saveSettings(patch: Partial<UserSettings>): UserSettings {
   return next
 }
 
-/** Format "yyyy-MM-dd" → "06/19/2026" or "19/06/2026" based on user preference */
-export function formatDate(dateStr: string, fmt: DateFormat): string {
-  const [y, m, d] = dateStr.split('-')
-  return fmt === 'mdy' ? `${m}/${d}/${y}` : `${d}/${m}/${y}`
-}
-
 /** Format an ISO time string using the user's 12h/24h preference (ET) */
 export function fmtTime(iso: string, fmt: TimeFormat, tz = 'America/New_York'): string {
   // Called only client-side so dynamic import is fine
