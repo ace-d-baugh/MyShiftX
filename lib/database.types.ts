@@ -10,6 +10,7 @@ export type CommentPostType = 'shift' | 'request'
 export type JoinOutcome     = 'invalid_code' | 'user_declined' | 'success'
 export type RoadmapColumn   = 'done' | 'in_progress' | 'next' | 'backlog' | 'deferred'
 export type RemovedReason   = 'expired' | 'leader_removed' | 'user_removed'
+export type BillingCycle    = 'monthly' | 'semi_annual' | 'yearly'
 
 export interface Database {
   public: {
@@ -27,6 +28,7 @@ export interface Database {
           membership: Membership
           trial_ends_at: string | null
           trial_used: boolean
+          billing_cycle: BillingCycle | null
           is_active: boolean
           last_login_at: string | null
           created_at: string
@@ -44,6 +46,7 @@ export interface Database {
           membership?: Membership
           trial_ends_at?: string | null
           trial_used?: boolean
+          billing_cycle?: BillingCycle | null
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -61,6 +64,7 @@ export interface Database {
           membership?: Membership
           trial_ends_at?: string | null
           trial_used?: boolean
+          billing_cycle?: BillingCycle | null
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -566,6 +570,17 @@ export interface Database {
       lookup_board_by_invite_code: {
         Args: { p_code: string }
         Returns: { id: string; name: string; is_active: boolean; invite_code_enabled: boolean }[]
+      }
+      get_own_membership: {
+        Args: Record<string, never>
+        Returns: { membership: Membership; trial_ends_at: string | null; trial_used: boolean; billing_cycle: BillingCycle | null }[]
+      }
+      get_users_admin: {
+        Args: Record<string, never>
+        Returns: {
+          id: string; display_name: string | null; role: GlobalRole; is_active: boolean
+          created_at: string; membership: Membership; billing_cycle: BillingCycle | null
+        }[]
       }
       get_pending_board_requests: {
         Args: Record<string, never>
