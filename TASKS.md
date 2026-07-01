@@ -379,7 +379,8 @@ The following Pro and Free features have not been scoped yet and will need dedic
 - ✅ `2026-07-01`: Cookie consent banner (built earlier, disabled) now tied to the same `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID` env var instead of a separate flag — activates automatically now that the AdSense script is live
 - ✅ `2026-07-01`: `public/ads.txt`, `google-adsense-account` meta tag, `app/robots.ts`, `app/sitemap.ts` added — none of these existed before (site had zero SEO/crawl config)
 - ✅ `2026-07-01`: Google-certified CMP (Funding Choices) wired in — 3-choice consent message (Consent / Do Not Consent / Manage) for EEA/UK/Switzerland. `middleware.ts` reads Vercel's `x-vercel-ip-country` edge header (no geo-IP service needed) and sets a `myshiftx-region` cookie; the custom `CookieConsentBanner` reads it and suppresses itself for EEA/UK/CH visitors so they don't get two consent prompts — Google's CMP handles that region instead
-- [ ] Still placeholder-only — no real `data-ad-slot` IDs wired into any `<AdSlot>` usage yet (see below)
+- ✅ `2026-07-01`: First real ad unit live — "Sticky Desktop" (slot `2239887190`) wired into the desktop rail via `NEXT_PUBLIC_ADSENSE_SLOT_STICKY_DESKTOP`. Along the way, corrected `<AdSlot>` to mirror whatever format AdSense actually generated per-unit instead of forcing one template on every slot. Originally created as fixed 300×600; switched to auto/responsive (`display:block`, min-height 250px reserved in the sticky rail) to match the updated unit
+- ✅ `2026-07-01`: Second real ad unit live — "Sticky Mobile" (auto/responsive format, slot `5339481808`) wired into the mobile bottom bar via `NEXT_PUBLIC_ADSENSE_SLOT_STICKY_MOBILE`. Both placements from the original plan (desktop rail + mobile bar) now have real ad units — no more placeholders on either.
 
 **👤 You handle:**
 - ✅ Publisher ID confirmed: `ca-pub-4865817496577079` (added to `.env.local`; **still needs adding to Vercel env vars** for production)

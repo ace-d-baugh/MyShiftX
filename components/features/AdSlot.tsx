@@ -8,6 +8,9 @@ const PUBLISHER_ID = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID
 interface AdSlotProps {
   /** data-ad-slot ID from the AdSense dashboard. Shows a placeholder until one exists. */
   slotId?: string
+  /** Fixed pixel size, matching how the unit was created in AdSense. Omit for a responsive/auto unit. */
+  width?: number
+  height?: number
   className?: string
 }
 
@@ -22,9 +25,14 @@ declare global {
  * configured yet (no publisher ID or no slotId for this placement); swaps to
  * a real AdSense unit once both exist — no code change needed, just add the
  * slot ID here and set NEXT_PUBLIC_ADSENSE_PUBLISHER_ID.
+ *
+ * Mirrors whatever AdSense actually generated for the unit (fixed size vs.
+ * auto/responsive) rather than forcing one format, since ad units are
+ * configured per-slot in the AdSense dashboard.
  */
-export function AdSlot({ slotId, className }: AdSlotProps) {
+export function AdSlot({ slotId, width, height, className }: AdSlotProps) {
   const configured = Boolean(PUBLISHER_ID && slotId)
+  const fixedSize = width !== undefined && height !== undefined
 
   useEffect(() => {
     if (!configured) return
@@ -42,6 +50,7 @@ export function AdSlot({ slotId, className }: AdSlotProps) {
           'flex items-center justify-center border-2 border-dashed border-border rounded-lg bg-card/50 text-text/30 text-xs font-medium',
           className
         )}
+        style={fixedSize ? { width, height } : undefined}
       >
         Advertisement
       </div>
@@ -51,11 +60,10 @@ export function AdSlot({ slotId, className }: AdSlotProps) {
   return (
     <ins
       className={cn('adsbygoogle', className)}
-      style={{ display: 'block' }}
+      style={fixedSize ? { display: 'inline-block', width, height } : { display: 'block' }}
       data-ad-client={PUBLISHER_ID}
       data-ad-slot={slotId}
-      data-ad-format="auto"
-      data-full-width-responsive="true"
+      {...(!fixedSize && { 'data-ad-format': 'auto', 'data-full-width-responsive': 'true' })}
     />
   )
 }
