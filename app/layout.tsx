@@ -2,6 +2,7 @@
 
 import type { Metadata } from 'next'
 import { Lato, Philosopher } from 'next/font/google'
+import { CookieConsentBanner } from '@/components/features/CookieConsentBanner'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -53,7 +54,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans text-text" suppressHydrationWarning>{children}</body>
+      <body className="font-sans text-text" suppressHydrationWarning>
+        {children}
+        <CookieConsentBanner />
+      </body>
     </html>
   )
 }

@@ -73,6 +73,10 @@ const config: Config = {
           '0%': { opacity: '0', transform: 'translateY(-16px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         blobPulse: {
           '0%, 100%': { transform: 'translate(0, 0) scale(1)', opacity: '0.4' },
           '33%': { transform: 'translate(4%, 3%) scale(1.08)', opacity: '0.55' },
@@ -127,6 +131,7 @@ const config: Config = {
         'fade-in-up': 'fadeInUp 0.65s ease-out both',
         'fade-in': 'fadeIn 0.5s ease-out both',
         'slide-down': 'slideDown 0.5s ease-out both',
+        'slide-up': 'slideUp 0.4s ease-out both',
         'blob': 'blobPulse 9s ease-in-out infinite',
         'expand-width': 'expandWidth 0.7s ease-out both',
         'auth-card-in': 'authCardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both',

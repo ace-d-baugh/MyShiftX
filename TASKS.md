@@ -413,8 +413,8 @@ Complete in order — each step unlocks the next.
 
 #### 🤖 Claude handles — Legal Documents
 
-- [ ] Draft **Terms of Service**, **Privacy Policy**, **Refund & Cancellation Policy**, and **Cookie Policy** pages — rendered in the app at `/terms`, `/privacy`, etc. and linked from the footer. *(Flag for attorney review before charging real money.)*
-- [ ] Add a **cookie consent banner** — required for GDPR/CCPA compliance once Google AdSense is live. Appears on first visit, stores accept/reject preference.
+- ✅ **Terms of Service** (`/terms`) and **Privacy Policy** (`/privacy`, covers cookies in Section 7) exist and are substantive. **Still missing:** standalone **Refund & Cancellation Policy** and **Cookie Policy** pages. *(Flag all for attorney review before charging real money.)*
+- ✅ `2026-07-01`: Cookie consent banner built (`components/features/CookieConsentBanner.tsx`, bottom bar with Accept/Decline, stores the choice in localStorage) — but intentionally **disabled** (`COOKIE_BANNER_ENABLED = false`) until Google AdSense actually ships. Right now the only cookies MyShiftX sets are Supabase Auth session cookies, which are "strictly necessary" and exempt from GDPR/ePrivacy/CCPA consent requirements, so showing a banner today would be friction with no legal purpose. Flip the flag to `true` as part of Task 12 (Ad System).
 
 ---
 
