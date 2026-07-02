@@ -7,6 +7,7 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown, X, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { deactivateShift, deactivateRequest } from '@/app/actions/posts'
+import { PushPromptBanner } from '@/components/features/PushPromptBanner'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
 import { RequestCard, type RequestData } from '@/components/features/RequestCard'
 import { WallSkeleton } from '@/components/ui/WallSkeleton'
@@ -449,6 +450,8 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
           )}
         </div>
       </div>
+
+      <PushPromptBanner />
 
       {/* Deactivate error */}
       {deactivateError && (

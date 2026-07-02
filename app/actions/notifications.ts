@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@supabase/supabase-js'
+import webpush from 'web-push'
 import { Resend } from 'resend'
 import { boardApprovedHtml, interestedHtml, shiftMatchHtml } from '@/components/email-template'
 import { formatInTimeZone } from 'date-fns-tz'
@@ -37,19 +38,17 @@ export async function notifyInterest(opts: {
       console.error('[notifyInterest] SUPABASE_SERVICE_ROLE_KEY is not set — cannot send interest notification')
       return
     }
-    if (!optionalServerEnv.RESEND_API_KEY) {
-      console.error('[notifyInterest] RESEND_API_KEY is not set — cannot send interest notification')
-      return
-    }
 
     const db = adminDb()
+    let ownerId: string | null = null
     let ownerEmail: string | null = null
+    let ownerWantsEmail = false
     let postTitle = ''
 
     if (opts.postType === 'shift') {
       const { data, error } = await db
         .from('shifts')
-        .select('shift_title, users!user_id(email, notify_via_email)')
+        .select('shift_title, user_id, users!user_id(email, notify_via_email)')
         .eq('id', opts.postId)
         .eq('is_active', true)
         .single()
@@ -59,14 +58,15 @@ export async function notifyInterest(opts: {
 
       const owner = (data.users as unknown) as { email: string; notify_via_email: boolean } | null
       if (!owner) { console.error('[notifyInterest] no owner found for shift:', opts.postId); return }
-      if (!owner.notify_via_email) { console.log('[notifyInterest] owner has email notifications off — skipping'); return }
 
       postTitle = data.shift_title as string
+      ownerId = data.user_id as string | null
       ownerEmail = owner.email
+      ownerWantsEmail = owner.notify_via_email
     } else {
       const { data, error } = await db
         .from('requests')
-        .select('requested_date, users!user_id(email, notify_via_email)')
+        .select('requested_date, user_id, users!user_id(email, notify_via_email)')
         .eq('id', opts.postId)
         .eq('is_active', true)
         .single()
@@ -76,13 +76,30 @@ export async function notifyInterest(opts: {
 
       const owner = (data.users as unknown) as { email: string; notify_via_email: boolean } | null
       if (!owner) { console.error('[notifyInterest] no owner found for request:', opts.postId); return }
-      if (!owner.notify_via_email) { console.log('[notifyInterest] owner has email notifications off — skipping'); return }
 
       postTitle = `Shift Request — ${data.requested_date as string}`
+      ownerId = data.user_id as string | null
       ownerEmail = owner.email
+      ownerWantsEmail = owner.notify_via_email
     }
 
+    // Push and email are independent channels: push goes to whatever devices
+    // the owner has enabled; notify_via_email only gates the email.
+    if (ownerId) {
+      await sendPushNotification(
+        ownerId,
+        `${opts.commenterName} is interested`,
+        `${opts.commenterName} marked interest in "${postTitle}"`,
+        '/wall'
+      )
+    }
+
+    if (!ownerWantsEmail) { console.log('[notifyInterest] owner has email notifications off — skipping email'); return }
     if (!ownerEmail) { console.error('[notifyInterest] ownerEmail is null after lookup'); return }
+    if (!optionalServerEnv.RESEND_API_KEY) {
+      console.error('[notifyInterest] RESEND_API_KEY is not set — cannot send interest email')
+      return
+    }
 
     const { error: sendError } = await resend.emails.send({
       from: 'MyShiftX <noreply@myshiftx.com>',
@@ -103,6 +120,56 @@ export async function notifyInterest(opts: {
     }
   } catch (err) {
     console.error('[notifyInterest] unexpected error:', err)
+  }
+}
+
+// ── Web Push ──────────────────────────────────────────────────────────────────
+
+/**
+ * Send a web push to every subscribed device of a user. Fire-and-forget:
+ * soft-fails (with a log) when VAPID keys aren't configured, and prunes
+ * subscriptions the push service reports as gone (404/410 — user cleared
+ * site data or revoked permission without unsubscribing).
+ *
+ * Intentionally NOT exported: exports from a 'use server' file become
+ * client-callable actions, which would let any logged-in user push
+ * arbitrary notifications to arbitrary users.
+ */
+async function sendPushNotification(userId: string, title: string, body: string, url: string): Promise<void> {
+  try {
+    const publicKey = optionalServerEnv.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    const privateKey = optionalServerEnv.VAPID_PRIVATE_KEY
+    if (!publicKey || !privateKey || !optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) return
+
+    const db = adminDb()
+    const { data: subs, error } = await db
+      .from('push_subscriptions')
+      .select('id, endpoint, p256dh, auth')
+      .eq('user_id', userId)
+
+    if (error) { console.error('[sendPush] subscription query error:', error.message); return }
+    if (!subs || subs.length === 0) return
+
+    webpush.setVapidDetails('mailto:noreply@myshiftx.com', publicKey, privateKey)
+    const payload = JSON.stringify({ title, body, url })
+
+    await Promise.all(subs.map(async sub => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payload
+        )
+      } catch (err) {
+        const statusCode = (err as { statusCode?: number }).statusCode
+        if (statusCode === 404 || statusCode === 410) {
+          await db.from('push_subscriptions').delete().eq('id', sub.id)
+        } else {
+          console.error('[sendPush] send error:', err)
+        }
+      }
+    }))
+  } catch (err) {
+    console.error('[sendPush] unexpected error:', err)
   }
 }
 
@@ -131,14 +198,16 @@ function formatDisplayDate(isoDate: string): string {
   return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
-async function sendMatchEmails(opts: {
+async function sendMatchNotifications(opts: {
   shiftTitle: string
   requestTitle: string
   boardName: string
   shiftDate: string
+  shiftPosterUserId: string | null
   shiftPosterEmail: string | null
   shiftPosterName: string
   shiftPosterNotify: boolean
+  requesterUserId: string | null
   requesterEmail: string | null
   requesterName: string
   requesterNotify: boolean
@@ -146,6 +215,24 @@ async function sendMatchEmails(opts: {
   const wallUrl = `${BASE_URL}/wall`
   const displayDate = formatDisplayDate(opts.shiftDate)
   const sends: Promise<void>[] = []
+
+  // Web push to both parties — independent of the notify_via_email pref
+  if (opts.requesterUserId) {
+    sends.push(sendPushNotification(
+      opts.requesterUserId,
+      'Possible shift match',
+      `${opts.shiftPosterName}'s shift "${opts.shiftTitle}" on ${displayDate} may match your request`,
+      '/wall'
+    ))
+  }
+  if (opts.shiftPosterUserId) {
+    sends.push(sendPushNotification(
+      opts.shiftPosterUserId,
+      'Possible shift match',
+      `${opts.requesterName} is looking for a shift on ${displayDate} — yours may match`,
+      '/wall'
+    ))
+  }
 
   if (opts.requesterNotify && opts.requesterEmail) {
     sends.push(resend.emails.send({
@@ -205,8 +292,8 @@ export async function notifyShiftPosted(opts: {
   posterUserId: string
 }): Promise<void> {
   try {
-    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY || !optionalServerEnv.RESEND_API_KEY) {
-      console.error('[notifyShiftPosted] SUPABASE_SERVICE_ROLE_KEY or RESEND_API_KEY is not set — skipping')
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[notifyShiftPosted] SUPABASE_SERVICE_ROLE_KEY is not set — skipping')
       return
     }
 
@@ -245,14 +332,16 @@ export async function notifyShiftPosted(opts: {
       const requester = (req.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean } | null
       const board     = (req.boards as unknown) as { name: string } | null
 
-      await sendMatchEmails({
+      await sendMatchNotifications({
         shiftTitle:        opts.shiftTitle,
         requestTitle:      req.request_title as string,
         boardName:         board?.name ?? 'your board',
         shiftDate,
+        shiftPosterUserId: opts.posterUserId,
         shiftPosterEmail:  posterData?.email ?? null,
         shiftPosterName:   opts.posterName,
         shiftPosterNotify: posterData?.notify_via_email ?? false,
+        requesterUserId:   uid,
         requesterEmail:    requester?.email ?? null,
         requesterName:     requester?.display_name ?? 'Someone',
         requesterNotify:   requester?.notify_via_email ?? false,
@@ -277,8 +366,8 @@ export async function notifyRequestPosted(opts: {
   requesterUserId: string
 }): Promise<void> {
   try {
-    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY || !optionalServerEnv.RESEND_API_KEY) {
-      console.error('[notifyRequestPosted] SUPABASE_SERVICE_ROLE_KEY or RESEND_API_KEY is not set — skipping')
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[notifyRequestPosted] SUPABASE_SERVICE_ROLE_KEY is not set — skipping')
       return
     }
 
@@ -319,14 +408,16 @@ export async function notifyRequestPosted(opts: {
       const poster = (shift.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean } | null
       const board  = (shift.boards as unknown) as { name: string } | null
 
-      await sendMatchEmails({
+      await sendMatchNotifications({
         shiftTitle:        shift.shift_title as string,
         requestTitle:      opts.requestTitle,
         boardName:         board?.name ?? 'your board',
         shiftDate:         opts.requestedDate,
+        shiftPosterUserId: uid,
         shiftPosterEmail:  poster?.email ?? null,
         shiftPosterName:   poster?.display_name ?? 'Someone',
         shiftPosterNotify: poster?.notify_via_email ?? false,
+        requesterUserId:   opts.requesterUserId,
         requesterEmail:    requesterData?.email ?? null,
         requesterName:     opts.requesterName,
         requesterNotify:   requesterData?.notify_via_email ?? false,
@@ -344,8 +435,8 @@ export async function notifyRequestPosted(opts: {
  */
 export async function notifyBoardApproved(userBoardId: string): Promise<void> {
   try {
-    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY || !optionalServerEnv.RESEND_API_KEY) {
-      console.error('[notifyBoardApproved] SUPABASE_SERVICE_ROLE_KEY or RESEND_API_KEY is not set — skipping')
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[notifyBoardApproved] SUPABASE_SERVICE_ROLE_KEY is not set — skipping')
       return
     }
 
@@ -353,7 +444,7 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
 
     const { data: ub } = await db
       .from('user_boards')
-      .select('boards(name), users!user_id(email, display_name)')
+      .select('user_id, boards(name), users!user_id(email, display_name)')
       .eq('id', userBoardId)
       .single()
 
@@ -363,6 +454,21 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
 
     const user = (ub.users as unknown) as { email: string; display_name: string | null } | null
     if (!user?.email) return
+
+    const memberUserId = ub.user_id as string | null
+    if (memberUserId) {
+      await sendPushNotification(
+        memberUserId,
+        `You've been accepted to ${boardName}!`,
+        'Your join request was approved. Head to the Wall to see posts.',
+        '/wall'
+      )
+    }
+
+    if (!optionalServerEnv.RESEND_API_KEY) {
+      console.error('[notifyBoardApproved] RESEND_API_KEY is not set — skipping email')
+      return
+    }
 
     await resend.emails.send({
       from: 'noreply@myshiftx.com',

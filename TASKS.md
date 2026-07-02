@@ -582,35 +582,27 @@ The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over 
 
 ---
 
-### 16 — In-App Push Notifications (Web Push) `POST-LAUNCH`
+### 16 — In-App Push Notifications (Web Push) `CODE COMPLETE — needs Vercel env vars`
 
 **Tier:** Free (Basic and Pro both get push)
 **Why it matters:** Silent real-time alerts without SMS cost. Works on desktop and Android Chrome; limited on iOS Safari (supported since iOS 16.4 via PWA install).
 
-**Architecture:** Browser Push API + VAPID keys. Next.js stores push subscriptions in Supabase. When a match or interest fires, the notification action also sends a web push to subscribed devices.
+**Architecture:** Browser Push API + VAPID keys. Next.js stores push subscriptions in Supabase. When a match or interest fires, the notification action also sends a web push to subscribed devices. Entire feature is gated on `NEXT_PUBLIC_VAPID_PUBLIC_KEY` — all push UI stays hidden until the env vars land in Vercel, then flips on automatically.
 
-**🤖 Claude handles:**
-- [ ] Generate VAPID key pair — add `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` to Vercel env vars
-- [ ] Create `push_subscriptions` table:
-  ```sql
-  CREATE TABLE push_subscriptions (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    endpoint text NOT NULL,
-    p256dh text NOT NULL,
-    auth text NOT NULL,
-    created_at timestamptz DEFAULT now(),
-    UNIQUE(user_id, endpoint)
-  );
-  ```
-- [ ] Create `/api/push/subscribe` and `/api/push/unsubscribe` API routes
-- [ ] Register a service worker (`/public/sw.js`) that handles `push` events and shows a notification
-- [ ] Add `sendPushNotification(userId, title, body, url)` helper to `notifications.ts` — called alongside the existing email/SMS sends
-- [ ] Add "Enable Notifications" toggle to Profile → Notifications settings with browser permission flow
-- [ ] Show a one-time prompt banner on the Wall for users who haven't enabled push yet
+**🤖 Claude handled:**
+- ✅ `2026-07-01`: Generated VAPID key pair — in `.env.local`; **needs adding to Vercel** as `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY`
+- ✅ `2026-07-01`: `push_subscriptions` table created + applied live (RLS: users manage only their own rows; sending reads via service role). Migration: `20260702000000_push_subscriptions.sql`
+- ✅ `2026-07-01`: `/api/push/subscribe` (upsert on `user_id,endpoint`) and `/api/push/unsubscribe` routes with zod validation
+- ✅ `2026-07-01`: `public/sw.js` — shows notifications on `push` (graceful on non-JSON payloads), focuses/opens the target URL on click. Registered lazily from `lib/push.ts` only when a user enables push
+- ✅ `2026-07-01`: `sendPushNotification()` in `notifications.ts` — fires alongside email for interest, both match directions, and board approval; prunes dead subscriptions (410/404). Deliberately *not* exported (exports from a `'use server'` file are client-callable — would let anyone push to anyone). Push is independent of the `notify_via_email` pref; that pref now only gates email
+- ✅ `2026-07-01`: "Push Notifications" toggle in Profile → Notifications (per-device, instant, hidden on unsupported browsers) + one-time dismissible prompt banner on the Wall
+- ✅ `2026-07-01`: `app/manifest.ts` web app manifest (`display: standalone`) — required for iOS 16.4+ push via Add to Home Screen
+- ✅ `2026-07-01`: Verified end-to-end locally in Edge: subscribed against a real WNS push endpoint with the site VAPID key, sent via web-push, service worker displayed the notification (title/body/url/icon all correct); unauthenticated API calls → 401; wrong VAPID keys rejected by the push service
 
 **👤 You handle:**
-- [ ] Test on desktop Chrome, Android Chrome, and iOS Safari (requires "Add to Home Screen" first on iOS)
+- [ ] Add `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` (values in `.env.local`) to Vercel env vars — the feature is invisible in production until then
+- [ ] Test on desktop Chrome, Android Chrome, and iOS Safari (requires "Add to Home Screen" first on iOS): enable via the Wall banner or Profile toggle, then have a second account mark interest on your post
+- [ ] Someday: a square 512×512 app icon — the manifest currently uses the wide wordmark, so iOS Home Screen tiles fall back to a page screenshot
 
 ---
 

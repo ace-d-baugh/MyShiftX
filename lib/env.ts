@@ -37,4 +37,9 @@ export const optionalServerEnv = {
   get VPS_OLLAMA_SECRET() { return process.env.VPS_OLLAMA_SECRET },
   // Defaults to qwen2.5vl:3b in the route if unset.
   get OLLAMA_VISION_MODEL() { return process.env.OLLAMA_VISION_MODEL },
+  // Web Push (Task 16) — VAPID key pair. The public key is also read
+  // client-side as NEXT_PUBLIC_VAPID_PUBLIC_KEY; push features stay fully
+  // hidden until both are set.
+  get VAPID_PRIVATE_KEY() { return process.env.VAPID_PRIVATE_KEY },
+  get NEXT_PUBLIC_VAPID_PUBLIC_KEY() { return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY },
 }

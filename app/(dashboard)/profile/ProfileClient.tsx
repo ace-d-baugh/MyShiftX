@@ -6,6 +6,7 @@ import { User, Bell, LayoutDashboard, Trash2, Save, CheckCircle, Plus, Settings 
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { MyBoardsSection } from '@/components/features/MyBoardsSection'
+import { PushNotificationsToggle } from '@/components/features/PushNotificationsToggle'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
@@ -220,6 +221,8 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
             />
           </label>
           {/* SMS toggle — hidden until SMS provider is configured */}
+          {/* Applies instantly per device — not part of the Save button below */}
+          <PushNotificationsToggle />
         </div>
         <div className="mt-4 pt-4 border-t border-border">
           <Button onClick={handleSave as unknown as React.MouseEventHandler} loading={saving} size="sm" variant="outline" className="gap-1.5">
