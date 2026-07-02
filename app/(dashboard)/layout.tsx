@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/Footer'
 import { SessionTimeout } from '@/components/features/SessionTimeout'
 import { PreferencesSyncer } from '@/components/features/PreferencesSyncer'
 import { AdRail } from '@/components/features/AdRail'
+import { MessageToast } from '@/components/features/MessageToast'
 import type { GlobalRole } from '@/lib/database.types'
 
 type UserProfileRow = { id: string; display_name: string | null; role: GlobalRole; is_active: boolean } | null
@@ -19,8 +20,8 @@ export default async function DashboardLayout({
 
   const { supabase, user } = await requireUser()
 
-  // Profile, moderator check, and ad eligibility are independent — fetch together
-  const [profileRes, { data: isMod }, showAds] = await Promise.all([
+  // Profile, moderator check, ad eligibility, and unread messages are independent — fetch together
+  const [profileRes, { data: isMod }, showAds, { data: unreadMessages }] = await Promise.all([
     supabase
       .from('users')
       .select('id, display_name, role, is_active')
@@ -28,6 +29,7 @@ export default async function DashboardLayout({
       .single() as unknown as Promise<{ data: UserProfileRow }>,
     supabase.rpc('is_any_board_moderator'),
     getShowAds(supabase),
+    supabase.rpc('get_unread_message_count'),
   ])
   const userProfile = profileRes.data
 
@@ -76,6 +78,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-background flex flex-col">
       <SessionTimeout />
       <PreferencesSyncer />
+      <MessageToast currentUserId={user.id} />
       <Navbar
         userRole={userRole}
         displayName={displayName}
@@ -83,6 +86,7 @@ export default async function DashboardLayout({
         isLeader={isLeader}
         pendingApprovalsCount={pendingApprovalsCount}
         pendingFlagsCount={pendingFlagsCount}
+        unreadMessagesCount={unreadMessages ?? 0}
       />
       <main className="flex-1 pb-20 md:pb-0">
         <AdRail showAds={showAds}>{children}</AdRail>

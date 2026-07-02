@@ -18,6 +18,7 @@ import {
   HelpCircle,
   Settings,
   Kanban,
+  MessageSquare,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -30,6 +31,7 @@ interface NavbarProps {
   isLeader?: boolean
   pendingApprovalsCount?: number
   pendingFlagsCount?: number
+  unreadMessagesCount?: number
 }
 
 export function Navbar({
@@ -39,6 +41,7 @@ export function Navbar({
   isLeader = false,
   pendingApprovalsCount = 0,
   pendingFlagsCount = 0,
+  unreadMessagesCount = 0,
 }: NavbarProps) {
   const pathname = usePathname()
   const supabase = createClient()
@@ -182,6 +185,30 @@ export function Navbar({
                 <CalendarDays className="w-4 h-4" />
                 My Calendar
               </Link>
+
+              {/* Messages */}
+              <Link
+                href="/messages"
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors min-h-0 min-w-0',
+                  isActive('/messages')
+                    ? 'bg-primary-light text-primary'
+                    : 'text-text/60 hover:text-text hover:bg-primary-light/50'
+                )}
+              >
+                <span className="relative">
+                  <MessageSquare className="w-4 h-4" />
+                  {unreadMessagesCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-warning ring-2 ring-card" />
+                  )}
+                </span>
+                Messages
+                {fmt(unreadMessagesCount) && (
+                  <span className="flex items-center justify-center min-w-[1.125rem] h-[1.125rem] px-1 rounded-full bg-warning text-white text-[10px] font-bold leading-none">
+                    {fmt(unreadMessagesCount)}
+                  </span>
+                )}
+              </Link>
             </nav>
           </div>
         </div>
@@ -286,6 +313,25 @@ export function Navbar({
           >
             <CalendarDays className="w-5 h-5" />
             <span className="text-[10px]">Calendar</span>
+          </Link>
+
+          {/* Messages */}
+          <Link
+            href="/messages"
+            className={cn(
+              'flex flex-1 flex-col items-center justify-center py-2 gap-1 text-xs font-medium transition-colors min-h-[56px]',
+              isActive('/messages') ? 'text-primary bg-primary-light/50' : 'text-text/50 hover:text-text'
+            )}
+          >
+            <span className="relative">
+              <MessageSquare className="w-5 h-5" />
+              {fmt(unreadMessagesCount) && (
+                <span className="absolute -top-1.5 -right-2.5 flex items-center justify-center min-w-[1.125rem] h-[1.125rem] px-1 rounded-full bg-warning text-white text-[10px] font-bold leading-none ring-2 ring-card">
+                  {fmt(unreadMessagesCount)}
+                </span>
+              )}
+            </span>
+            <span className="text-[10px]">Messages</span>
           </Link>
         </div>
       </nav>

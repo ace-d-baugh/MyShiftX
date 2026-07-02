@@ -10,6 +10,7 @@ export type CommentPostType = 'shift' | 'request'
 export type JoinOutcome     = 'invalid_code' | 'user_declined' | 'success'
 export type RoadmapColumn   = 'done' | 'in_progress' | 'next' | 'backlog' | 'deferred'
 export type RemovedReason   = 'expired' | 'leader_removed' | 'user_removed'
+export type MessageReaction = 'thumbs_up' | 'laugh' | 'surprise' | 'sad' | 'mad' | 'star'
 export type BillingCycle    = 'monthly' | 'semi_annual' | 'yearly'
 
 export interface Database {
@@ -573,6 +574,102 @@ export interface Database {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          user_id: string
+          last_read_at: string | null
+          hidden_at: string | null
+        }
+        Insert: {
+          conversation_id: string
+          user_id: string
+          last_read_at?: string | null
+          hidden_at?: string | null
+        }
+        Update: {
+          conversation_id?: string
+          user_id?: string
+          last_read_at?: string | null
+          hidden_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_id: string | null
+          body: string
+          reaction: MessageReaction | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          sender_id?: string | null
+          body: string
+          reaction?: MessageReaction | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          sender_id?: string | null
+          body?: string
+          reaction?: MessageReaction | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       push_subscriptions: {
         Row: {
           id: string
@@ -632,6 +729,26 @@ export interface Database {
           requested_at: string; user_display_name: string | null; board_name: string | null
         }[]
       }
+      get_or_create_conversation: { Args: { p_other_user_id: string }; Returns: string }
+      get_conversations: {
+        Args: Record<string, never>
+        Returns: {
+          conversation_id: string
+          other_user_id: string | null
+          other_display_name: string | null
+          last_message_body: string | null
+          last_message_at: string | null
+          last_message_sender_id: string | null
+          unread_count: number
+        }[]
+      }
+      get_unread_message_count: { Args: Record<string, never>; Returns: number }
+      get_messageable_users: {
+        Args: Record<string, never>
+        Returns: { user_id: string; display_name: string | null; board_ids: string[] }[]
+      }
+      is_conversation_participant: { Args: { p_conversation_id: string }; Returns: boolean }
+      shares_board_with: { Args: { p_other_user_id: string }; Returns: boolean }
       is_any_board_moderator: { Args: Record<string, never>; Returns: boolean }
       is_board_member:     { Args: { p_board_id: string }; Returns: boolean }
       is_board_moderator:  { Args: { p_board_id: string }; Returns: boolean }

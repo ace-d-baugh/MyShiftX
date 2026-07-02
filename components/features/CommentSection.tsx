@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
-import { MessageSquare, Star, ChevronDown, User, Edit, Trash2, Flag, X, Mail } from 'lucide-react'
+import { MessageSquare, Star, ChevronDown, User, Edit, Trash2, Flag, X, Send } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { Modal } from '@/components/ui/Modal'
@@ -11,6 +12,7 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { CommentPostType } from '@/lib/database.types'
 import { notifyInterest } from '@/app/actions/notifications'
+import { startConversation } from '@/app/actions/messages'
 
 const QUICK_INTEREST_BODY = "I'm interested!"
 
@@ -34,9 +36,11 @@ interface CommentSectionProps {
   interestedCount: number
   boardId?: string
   actions?: React.ReactNode
-  showContactDisabled?: boolean
+  /** Post owner's user id — enables the "Message" pill for non-owners */
+  ownerUserId?: string | null
   openCommentsTick?: number
   interestTick?: number
+  messageTick?: number
 }
 
 export function CommentSection({
@@ -49,10 +53,12 @@ export function CommentSection({
   interestedCount,
   boardId,
   actions,
-  showContactDisabled,
+  ownerUserId,
   openCommentsTick,
   interestTick,
+  messageTick,
 }: CommentSectionProps) {
+  const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -114,6 +120,10 @@ export function CommentSection({
   useEffect(() => {
     if (interestTick && !isOwner && currentUserId && !posting) handleInterestedPillClick() // eslint-disable-line react-hooks/exhaustive-deps
   }, [interestTick]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (messageTick && !isOwner && currentUserId && ownerUserId) handleMessage() // eslint-disable-line react-hooks/exhaustive-deps
+  }, [messageTick]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleComments = () => {
     setCommentsOpen(prev => {
@@ -177,6 +187,22 @@ export function CommentSection({
       setError(err instanceof Error ? err.message : 'Failed to mark interested.')
     } finally {
       setPosting(false)
+    }
+  }
+
+  // Open (or create) the in-app conversation with the post owner.
+  // Errors (e.g. no longer sharing a board) show in the card's error area.
+  const [messaging, setMessaging] = useState(false)
+  const handleMessage = async () => {
+    if (!ownerUserId || !currentUserId || messaging) return
+    setMessaging(true)
+    setError(null)
+    const result = await startConversation(ownerUserId)
+    if (result.conversationId) {
+      router.push(`/messages/${result.conversationId}`)
+    } else {
+      setError(result.error ?? 'Could not open the conversation.')
+      setMessaging(false)
     }
   }
 
@@ -307,13 +333,17 @@ export function CommentSection({
             <span className="hidden sm:inline">Interested </span>({displayInterestedCount})
             {isOwner && <ChevronDown className={cn('w-3 h-3 transition-transform', interestedOpen && 'rotate-180')} />}
           </button>
-          {showContactDisabled && !isOwner && (
-            <span
-              className="badge bg-text/5 text-text/20 inline-flex items-center gap-1 cursor-not-allowed shrink-0"
-              title="Contact — coming soon"
+          {!isOwner && currentUserId && ownerUserId && (
+            <button
+              type="button"
+              onClick={handleMessage}
+              disabled={messaging}
+              className="badge bg-text/10 text-text/70 hover:bg-primary-light cursor-pointer inline-flex items-center gap-1 transition-colors shrink-0 disabled:opacity-60"
+              title="Message the poster"
             >
-              <Mail className="w-3.5 h-3.5" />
-            </span>
+              <Send className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Message</span>
+            </button>
           )}
         </div>
         {actions && (

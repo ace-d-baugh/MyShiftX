@@ -70,13 +70,19 @@ export function FlagModal({ open, onClose, targetType, targetId, boardId }: Flag
     }
   }
 
+  const targetNoun =
+    targetType === 'user' ? 'User'
+    : targetType === 'comment' ? 'Comment'
+    : targetType === 'board' ? 'Board'
+    : 'Post'
+
   return (
-    <Modal open={open} onClose={handleClose} title="Report Post" size="sm">
+    <Modal open={open} onClose={handleClose} title={`Report ${targetNoun}`} size="sm">
       {success ? (
         <div className="text-center py-4">
           <CheckCircle className="w-10 h-10 text-success mx-auto mb-3" />
           <p className="font-medium text-text">Report submitted</p>
-          <p className="text-sm text-text/60 mt-1 mb-4">A leader will review this post.</p>
+          <p className="text-sm text-text/60 mt-1 mb-4">A leader will review this {targetNoun.toLowerCase()}.</p>
           <Button variant="outline" onClick={handleClose} className="w-full">Close</Button>
         </div>
       ) : (

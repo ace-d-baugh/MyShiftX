@@ -38,7 +38,15 @@ const FAQS = [
   },
   {
     q: 'How do I contact someone about a shift?',
-    a: "Expand the shift card and tap the Contact button. This opens your email app with the post owner's address pre-filled so you can work out the details privately. If the Contact button is greyed out, the post owner hasn't added a contact email to their profile yet — try leaving a comment instead.",
+    a: "Open the three-dot menu (⋮) on any shift or request card and choose Message — this opens a private in-app chat with the post owner where you can work out the details. There's also a Message button in the card's footer row. You can find all your conversations under Messages in the navigation, and start a new one anytime with the Start a chat button there.",
+  },
+  {
+    q: 'Who can I message, and who can see my messages?',
+    a: "You can message anyone who shares at least one board with you — the Start a chat directory on the Messages page lists everyone eligible, searchable by name and filterable by board. Conversations are private between the two of you: other board members and moderators cannot read them. Keep it professional — see the Messages section below for the ground rules.",
+  },
+  {
+    q: 'How do I delete a chat?',
+    a: "On the Messages page, tap the trash icon on a conversation and confirm. This clears the chat from your view only — the other person keeps their copy. If either of you messages again, the conversation reappears for you without the old history. To report someone who is misusing messaging, open the chat and use the three-dot menu → Flag User.",
   },
   {
     q: 'How does shift matching work?',
@@ -222,6 +230,35 @@ export function HelpClient({ userEmail }: HelpClientProps) {
               )}
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── Messages ─────────────────────────────────────────────────────────── */}
+      <section className="mb-10 scroll-mt-20" id="messages">
+        <div className="flex items-center gap-2 mb-1">
+          <MessageSquare className="w-5 h-5 text-primary" />
+          <h2 className="font-accent text-xl font-bold text-text">Messages</h2>
+        </div>
+        <p className="text-sm text-text/60 mb-4">
+          Chat privately with anyone who shares a board with you — work out trade details without
+          leaving the site. Find your conversations under <strong>Messages</strong> in the navigation.
+        </p>
+        <div className="border border-border rounded-xl px-5 py-4">
+          <ul className="space-y-2.5 text-sm text-text/70 leading-relaxed list-disc list-inside">
+            <li><strong>Start a chat</strong> from the ⋮ menu on any shift or request card, or from Messages → Start a chat (search by name, filter by board)</li>
+            <li><strong>Read receipts:</strong> the eye icon under your message shows when the other person has opened the chat — crossed-out means not read yet</li>
+            <li><strong>Reactions:</strong> tap the yellow star next to a received message to react with 👍 😂 😮 😢 😠 or a ⭐ — tap again to change it</li>
+            <li><strong>Notifications:</strong> new messages show a toast at the bottom of the screen, a badge on the Messages tab, and a push notification if you have push enabled</li>
+            <li><strong>Deleting a chat</strong> clears it from your view only — the other person keeps their copy, and a new message brings the chat back without the old history</li>
+          </ul>
+        </div>
+        <div className="mt-3 text-xs text-text/60 bg-primary-light/30 border border-primary/15 rounded-lg px-4 py-3 leading-relaxed">
+          <strong className="text-text/80">Keep it professional.</strong> Messaging is for work-related
+          communication about shifts and scheduling. Profanity, offensive language, harassment, and spam
+          aren&apos;t allowed — see our{' '}
+          <Link href="/terms" className="text-primary hover:underline">Terms</Link>. If someone misuses
+          messaging, open the chat and use the ⋮ menu → <strong>Flag User</strong>; misuse can lead to
+          removal from the site.
         </div>
       </section>
 

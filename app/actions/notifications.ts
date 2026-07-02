@@ -1,8 +1,8 @@
 'use server'
 
 import { createClient } from '@supabase/supabase-js'
-import webpush from 'web-push'
 import { Resend } from 'resend'
+import { sendPushNotification } from '@/lib/push-server'
 import { boardApprovedHtml, interestedHtml, shiftMatchHtml } from '@/components/email-template'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
@@ -123,58 +123,9 @@ export async function notifyInterest(opts: {
   }
 }
 
-// ── Web Push ──────────────────────────────────────────────────────────────────
-
-/**
- * Send a web push to every subscribed device of a user. Fire-and-forget:
- * soft-fails (with a log) when VAPID keys aren't configured, and prunes
- * subscriptions the push service reports as gone (404/410 — user cleared
- * site data or revoked permission without unsubscribing).
- *
- * Intentionally NOT exported: exports from a 'use server' file become
- * client-callable actions, which would let any logged-in user push
- * arbitrary notifications to arbitrary users.
- */
-async function sendPushNotification(userId: string, title: string, body: string, url: string): Promise<void> {
-  try {
-    const publicKey = optionalServerEnv.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-    const privateKey = optionalServerEnv.VAPID_PRIVATE_KEY
-    if (!publicKey || !privateKey || !optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) return
-
-    const db = adminDb()
-    const { data: subs, error } = await db
-      .from('push_subscriptions')
-      .select('id, endpoint, p256dh, auth')
-      .eq('user_id', userId)
-
-    if (error) { console.error('[sendPush] subscription query error:', error.message); return }
-    if (!subs || subs.length === 0) return
-
-    webpush.setVapidDetails('mailto:noreply@myshiftx.com', publicKey, privateKey)
-    const payload = JSON.stringify({ title, body, url })
-
-    await Promise.all(subs.map(async sub => {
-      try {
-        await webpush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          payload,
-          // Shift matches are time-sensitive — ask the push service not to
-          // defer delivery while the device is in a low-power doze state
-          { urgency: 'high' }
-        )
-      } catch (err) {
-        const statusCode = (err as { statusCode?: number }).statusCode
-        if (statusCode === 404 || statusCode === 410) {
-          await db.from('push_subscriptions').delete().eq('id', sub.id)
-        } else {
-          console.error('[sendPush] send error:', err)
-        }
-      }
-    }))
-  } catch (err) {
-    console.error('[sendPush] unexpected error:', err)
-  }
-}
+// Web push lives in lib/push-server.ts (shared with the messaging actions).
+// It's imported rather than exported here so it never becomes a
+// client-callable action.
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   LayoutGrid, User, Flag, Pencil, Trash2,
-  MoreVertical, MessageSquare, Star, Mail, Clock, ChevronDown,
+  MoreVertical, MessageSquare, Star, Send, Clock, ChevronDown,
 } from 'lucide-react'
 import { FlagModal } from '@/components/features/FlagModal'
 import { slugify } from '@/lib/slug'
@@ -63,6 +63,7 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
   useEffect(() => setMounted(true), [])
   const [openCommentsTick, setOpenCommentsTick] = useState(0)
   const [interestTick, setInterestTick] = useState(0)
+  const [messageTick, setMessageTick] = useState(0)
 
   const isOwner = currentUserId && request.user_id === currentUserId
 
@@ -163,9 +164,10 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
           commentCount={request.comment_count ?? 0}
           interestedCount={request.interested_count ?? 0}
           boardId={request.board_id ?? undefined}
-          showContactDisabled={!isOwner}
+          ownerUserId={request.user_id}
           openCommentsTick={openCommentsTick}
           interestTick={interestTick}
+          messageTick={messageTick}
           actions={
             <span className="badge bg-accent/20 text-text shrink-0 font-medium">
               <span className="sm:hidden font-bold">R</span>
@@ -188,8 +190,12 @@ export function RequestCard({ request, currentUserId, currentUserName, onDeactiv
             </button>
             {!isOwner && (
               <>
-                <button className={menuDisabledCls} disabled title="Coming soon">
-                  <Mail className="w-3.5 h-3.5 shrink-0" /> Contact
+                <button
+                  className={request.user_id ? menuItemCls : menuDisabledCls}
+                  disabled={!request.user_id}
+                  onClick={() => { setMessageTick(t => t + 1); setMenuPos(null) }}
+                >
+                  <Send className="w-3.5 h-3.5 shrink-0" /> Message
                 </button>
                 <button className={menuItemCls} onClick={() => { setInterestTick(t => t + 1); setMenuPos(null) }}>
                   <Star className="w-3.5 h-3.5 shrink-0" /> Show Interest

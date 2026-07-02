@@ -108,6 +108,16 @@ export default function TermsPage() {
               <li>Engage in any activity that disrupts or interferes with the Service or servers connected to the Service</li>
               <li>Create multiple accounts to evade a suspension or ban</li>
             </ul>
+            <p className="mt-3">
+              <strong>Direct Messaging.</strong> The Service includes direct messaging between members
+              who share a board. Messaging is provided for professional, work-related communication about
+              shifts and scheduling. You agree to keep messages professional and respectful, and to avoid
+              profanity, offensive, discriminatory, or sexually explicit language, harassment, unwanted
+              advances, spam, and solicitation. Recipients can flag users who misuse messaging, and misuse
+              may result in loss of messaging privileges, suspension, or permanent removal from the Service
+              (see Section 14). MyShiftX may review message content when investigating a flag, abuse
+              report, or suspected violation of these Terms.
+            </p>
           </section>
 
           <section>
@@ -133,10 +143,12 @@ export default function TermsPage() {
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">7. User-Generated Content</h2>
             <p>
-              By posting shift offers, requests, comments, or any other content (&ldquo;User Content&rdquo;)
-              through the Service, you grant MyShiftX a non-exclusive, royalty-free, worldwide license to
-              display, distribute, and transmit that content to other authorized users of the boards where
-              it was posted, solely for the purpose of operating the Service.
+              By posting shift offers, requests, comments, direct messages, or any other content
+              (&ldquo;User Content&rdquo;) through the Service, you grant MyShiftX a non-exclusive,
+              royalty-free, worldwide license to display, distribute, and transmit that content to the
+              users it is addressed to — other authorized users of the boards where it was posted, or,
+              for direct messages, the other participant in the conversation — solely for the purpose
+              of operating the Service.
             </p>
             <p className="mt-3">
               You represent and warrant that you own or have the necessary rights to post all User Content

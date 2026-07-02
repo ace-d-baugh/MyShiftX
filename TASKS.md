@@ -175,7 +175,7 @@ This is the canonical Free vs Pro feature list. Use this when building the upgra
 | Mark interest in shifts (actual trade completed via company system) | ✅ |
 | Manual shift entry & calendar view | ✅ |
 | In-app comments & flagging | ✅ |
-| In-app messaging with anyone in the same board | 🆕 |
+| In-app messaging with anyone in the same board | ✅ |
 | In-app push notifications (web push / PWA) | 🆕 |
 | 4 photo schedule imports per month (OCR → auto-creates shifts) | 🆕 |
 | Ads displayed (right sidebar on desktop, static at bottom of screen on mobile) | 🔲 Task 12 |
@@ -197,7 +197,7 @@ This is the canonical Free vs Pro feature list. Use this when building the upgra
 The following Pro and Free features have not been scoped yet and will need dedicated tasks before launch or shortly after:
 
 - **Photo schedule import (OCR)** — user photographs their paper or on-screen schedule; OCR reads it and populates shifts automatically. This is the highest-value Free feature and the biggest differentiator from manual entry. Needs an OCR service (Google Vision API or similar) + a shift-parsing pipeline. High complexity — scope separately.
-- **In-app messaging** — replaces the current email mailto: contact button with a real in-app thread between two users. Needs a `messages` table, read receipts, and a message UI. High complexity — scope separately.
+- ~~**In-app messaging**~~ — ✅ Done (Task 19): real in-app threads between board-mates with Realtime, unread badges, and push notifications. All tiers, shared-board only.
 - **In-app push notifications** — browser-native web push (PWA-style) using the Push API and a service worker. Free tier. Works on desktop Chrome/Edge/Firefox and Android Chrome. Not available on iOS Safari (they have limited support). Supplements or replaces email for non-SMS users. Medium complexity.
 - ~~**Calendar export/sync**~~ — ✅ Done (Task 17): live-sync iCal feed URL + one-click `.ics` download, works with Google Calendar, Apple Calendar, and Outlook. Pro only.
 - **Trade preferences** — users set preferred shift types, days of week, and time windows; the matching engine factors these in when firing notifications. Extends the existing `notifyShiftPosted`/`notifyRequestPosted` logic. Medium complexity.
@@ -238,16 +238,16 @@ The following Pro and Free features have not been scoped yet and will need dedic
 **Why now:** The database schema is live; now wire up real payments before building the sales page around it.
 
 **👤 You handle (do these first):**
-- [ ] Create a Stripe account at **stripe.com** (use your business email)
-- [ ] In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro`
-  - Add price: **$4.99 / month** (recurring, monthly) "Pro Monthly" Badge: None (or "Best for Flexibility")
-  - Add price: **$26.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $3."
-  - Add price: **$47.99 / year** (recurring, yearly) "Pro Annual" Badge: SAVE 20% BEST VALUE or 2 MONTHS FREE "Billed annually. Saves you $12 compared to monthly."
+- ✅ Create a Stripe account at **stripe.com** (use your business email)
+- ✅ In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro`
+  - Add price: **$4.99 / month** (recurring, monthly) "Pro Monthly" Badge: None (or "Best for Flexibility") price_1ToeJFAU3r6l3WQNHLgGuwNI
+  - Add price: **$26.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $3." price_1ToeJFAU3r6l3WQNKwVPfbTY
+  - Add price: **$47.99 / year** (recurring, yearly) "Pro Annual" Badge: SAVE 20% BEST VALUE or 2 MONTHS FREE "Billed annually. Saves you $12 compared to monthly." price_1ToeJFAU3r6l3WQNo7RMYlhj
   - Note the **Price IDs** for each (format: `price_xxxxx`) — Claude needs these
-- [ ] In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro Trial`
-  - Add price: **$0.00** (one-time or 14-day free trial on the monthly price — your call on duration)
-- [ ] Stripe Dashboard → **Developers → API Keys** → copy **Publishable Key** and **Secret Key**
-- [ ] Add to Vercel environment variables:
+- ✅ In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro Trial` 
+  - Add price: **$0.00** (one-time or 14-day free trial on the monthly price — your call on duration) to_1ToeOTAU3r6l3WQNBelGLTaf
+- ✅ Stripe Dashboard → **Developers → API Keys** → copy **Publishable Key** and **Secret Key**
+- ✅ Add to Vercel environment variables:
   - `STRIPE_SECRET_KEY`
   - `STRIPE_PUBLISHABLE_KEY`
   - `STRIPE_WEBHOOK_SECRET` *(generate after Claude sets up the webhook endpoint)*
@@ -623,8 +623,8 @@ The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over 
 - ✅ `2026-07-01`: Verified live: real feed URL returns valid ICS with correct UTC event times, escaping, and folding (tested with a temporary shift, since deleted); all invalid-token paths 404; `ical_token` confirmed absent from client SELECT grants; roadmap card moved to Done
 
 **👤 You handle:**
-- [ ] Your feed token is already generated — open Profile → Calendar Sync for the URL. Test the subscription flow in Google Calendar (Other calendars → From URL) and Apple Calendar
-- [ ] Heads-up for testing: Google refreshes subscribed feeds on its own schedule (often 6–24 h), so don't judge sync speed by it — Apple Calendar lets you pick the refresh interval
+- ✅ Your feed token is already generated — open Profile → Calendar Sync for the URL. Test the subscription flow in Google Calendar (Other calendars → From URL) and Apple Calendar
+- ✅ Heads-up for testing: Google refreshes subscribed feeds on its own schedule (often 6–24 h), so don't judge sync speed by it — Apple Calendar lets you pick the refresh interval
 
 ---
 
@@ -650,44 +650,41 @@ The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over 
 
 ---
 
-### 19 — In-App Messaging (Within Boards — All Tiers) `WITH PRO LAUNCH`
+### 19 — In-App Messaging (Within Boards — All Tiers) ✅ CODE COMPLETE
 
 **Tier:** Free and Pro — available to all users, within shared boards only. Direct messaging outside of boards is not permitted.
 **Why:** Replaces the current email mailto: contact button with a real in-app conversation thread. Keeps communication on the platform and creates network stickiness.
 
-**Database:**
-```sql
-CREATE TABLE conversations (
-  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
+**🤖 Claude handled:**
+- ✅ `2026-07-02`: `conversations`, `conversation_participants`, `messages` tables created + applied live. Migration `20260702120000_in_app_messaging.sql`. RLS: participants can only read conversations/messages they belong to; only the sender can insert their own messages (`sender_id = auth.uid()` enforced); `last_read_at` is the *only* updatable participant column (column-level grant, so a row can't be moved to another conversation/user)
+- ✅ `2026-07-02`: Conversations are created only through the `get_or_create_conversation()` RPC (`SECURITY DEFINER`) — verifies the other user is active, not yourself, and that both users share ≥1 approved board ("You can only message members of your boards."); idempotent (same pair always returns the same thread, advisory-locked against double-click races). No INSERT policies exist for `authenticated`, so the RPC is the only door in
+- ✅ `2026-07-02`: `messages` added to the `supabase_realtime` publication — postgres_changes respects RLS, so subscribers only receive messages from their own conversations
+- ✅ `2026-07-02`: `/messages` page — conversation list (via `get_conversations()` RPC: other participant, last-message preview, unread count) with unread badges, newest activity first, live-refreshes on incoming messages
+- ✅ `2026-07-02`: `/messages/[conversationId]` page — chat-bubble thread with Realtime append, send box (max 1000 chars, Enter to send), marks read on open and on incoming messages, `router.refresh()` so the navbar badge clears immediately
+- ✅ `2026-07-02`: Unread badge in Navbar via `get_unread_message_count()` RPC — Messages tab added to the desktop sub-nav and the mobile bottom nav (Wall · Calendar · Messages), both with count badges
+- ✅ `2026-07-02`: Disabled "Contact — coming soon" replaced with a working **Message** action on both ShiftCard and RequestCard (⋮ menu + pill row) — opens or creates the thread with the post owner; disabled for posts whose owner account is gone
+- ✅ `2026-07-02`: Web push on new message ("New message from X" + preview, links to the thread) — `sendPushNotification()` moved from `notifications.ts` into shared `lib/push-server.ts` (still not client-callable) so both notification actions and messaging use it
+- ✅ `2026-07-02`: Verified with role-impersonated SQL against the live DB (10/10 pass): shared-board rule enforced, outsider sees 0 rows, sender spoofing blocked by RLS, unread counts correct before/after mark-read, participant-row move blocked by column grant, conversation creation idempotent. `npm run build` + type-check clean; test data cleaned up
 
-CREATE TABLE conversation_participants (
-  conversation_id uuid REFERENCES conversations(id) ON DELETE CASCADE,
-  user_id         uuid REFERENCES users(id) ON DELETE CASCADE,
-  last_read_at    timestamptz,
-  PRIMARY KEY (conversation_id, user_id)
-);
+**🤖 Follow-up round (same day, from live testing feedback):**
+- ✅ `2026-07-02`: **Read receipts** — own messages show an eye (read) / crossed-out eye (not read yet) in front of the timestamp, based on the other participant's `last_read_at`; updates live while the thread is open (`conversation_participants` added to the Realtime publication). Migration `20260702130000_message_reactions_read_receipts.sql`, applied live
+- ✅ `2026-07-02`: **Reactions** — one per message, recipient-only (can't react to your own): 👍 😂 😮 😢 😠 + the site's yellow star. An empty yellow star sits right of the other person's bubble (vertically centered); clicking it opens a popup bar under the star with the six options; the choice replaces the star and can be tapped again to swap. Enforced in the DB: `reaction` column with CHECK constraint, UPDATE policy limited to non-senders, column-level grant so *only* `reaction` is updatable (body/sender/timestamps immutable). Optimistic UI with rollback; syncs to the other side via Realtime UPDATE events
+- ✅ `2026-07-02`: **Message hygiene** — bodies are sanitized server-side (control characters stripped, 3+ blank lines collapsed, trimmed, 1000-char cap) and always rendered as plain text (React escaping — `<script>` etc. stays inert text; there is no HTML rendering path). Reaction values validated server-side against the allowed list on top of the DB constraint
+- ✅ `2026-07-02`: **Ads on Messages** — `/messages` and `/messages/[id]` added to the AdRail page list (same sticky desktop rail + mobile bottom bar as Wall/Calendar; Pro/Trial still ad-free)
+- ✅ `2026-07-02`: **Stale-thread bug fixed** — opening a chat from the list could show an outdated (even empty) thread because Next's client-side router cache re-serves a prior render for up to ~30s. Both the list and the thread now re-fetch fresh data from Supabase on mount, treating server-rendered props as a starting point only
+- ✅ `2026-07-02`: **Start a chat** — button on `/messages` opens a directory modal of everyone sharing an approved board with you (`get_messageable_users()` RPC, active users only) with a name search filter; picking someone opens/creates the thread
+- ✅ `2026-07-02`: Reaction rules verified with role-impersonated SQL against the live DB (7/7 pass): recipient can react + replace, sender gets 0 rows on own message, invalid value hits the CHECK constraint, body edit hits column permissions, outsider gets 0 rows, directory returns board-mates only. Sanitizer unit-tested (NUL/ESC/DEL/CR stripped, `\n`/`\t` kept); build + type-check clean
+- ✅ `2026-07-02`: **Chat delete** — trash icon on each row in `/messages` (with confirmation). Per-user semantics like WhatsApp: sets `hidden_at` on *your* participant row only — the other person keeps the full conversation; your list entry disappears, your view of the history is cleared, and a newer message from either side brings the chat back showing only messages after that point. Nothing is ever removed from the `messages` table. Unread counts and previews respect `hidden_at`. Migration `20260702140000_conversation_delete.sql`, applied live; verified with impersonated SQL (hidden → unlisted + 0 unread; reappears with only the new message; other participant unaffected)
+- ✅ `2026-07-02`: **Polish round from live testing:** (1) reaction picker is now portalled + viewport-clamped so it never gets cut off at the screen edge on short messages; (2) unread dot (same style as the approvals/flags dot) added to the desktop Messages tab icon alongside the count badges; (3) read receipts + unread badge now update *instantly* while both users have the chat open — marking read fires a Realtime **broadcast** to the other side (with the postgres_changes participant subscription kept as fallback) and `router.refresh()` keeps the navbar badge live; (4) Start-a-chat gained a board filter dropdown above the search (checkbox multi-select with an "All boards" master; hidden when the user has only one board); the directory RPC now returns `board_ids` and excludes `is_hidden` memberships on both sides, so auto-added admins only appear on boards they joined explicitly (verified: hidden admin absent from Halle's directory, present where explicitly joined) — migration `20260702150000_directory_boards_filter.sql`, applied live; (5) app-wide `MessageToast` (mounted in the dashboard layout): a new message while not viewing that thread shows a 5-second bottom toast with sender + preview that links to the chat, and refreshes the navbar badge live
+- ✅ `2026-07-02`: **Live-receipt reliability + chat management round:** (1) Root-caused the "seen/badge still needs a refresh" report — Realtime's replication pipeline picks up newly published tables lazily, and the logs show `conversation_participants` was only registered ("Found new oids") after the earlier tests; belt-and-braces fix: an open thread now also polls every 4 s (tab-visible only, incremental — participants row + only messages newer than the last one held) so new messages and read receipts converge within seconds even if realtime drops events entirely; (2) chat header gained a ⋮ menu with **Flag User** (reuses `FlagModal` with `target_type='user'`, lands in the admin/mod flag queue; modal copy now adapts to the target type instead of always saying "Report Post") and **Delete Chat** (same per-user semantics as the list delete, returns to `/messages`); (3) **Terms** Section 5 gained a Direct Messaging conduct clause (professional use, no profanity/offensive language/harassment/spam; misuse → suspension/removal; MyShiftX may review messages when investigating flags) and Section 7 now covers messages as User Content; (4) **Privacy** Section 2 and Section 5 updated: messages/reactions/read-status listed as collected data, message visibility spelled out (participants only, not moderators; reviewable on abuse reports), per-user delete semantics disclosed, and the stale "Contact button email" bullet replaced; (5) **Help & Support**: stale Contact FAQ rewritten for in-app messaging, two new FAQs (who can message / how deletion works), and a dedicated Messages section (`/help#messages`) covering starting chats, read receipts, reactions, notifications, delete semantics, and a keep-it-professional note linking to the Terms and the Flag User path
+- ⚠️ `2026-07-02`: **Testing incident (disclosed):** two of the SQL verification runs used `get_or_create_conversation` between the real Ace and Ace-User B accounts, which returned their *existing* live thread instead of creating a fresh one — the cleanup step then hard-deleted that conversation, including a few real messages from live testing. Unrecoverable. The Ace-Admin ↔ Halle N. conversation was untouched. Later verification runs build throwaway conversations directly and never call `get_or_create_conversation` on real user pairs
 
-CREATE TABLE messages (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  conversation_id uuid REFERENCES conversations(id) ON DELETE CASCADE,
-  sender_id       uuid REFERENCES users(id),
-  body            text NOT NULL CHECK (char_length(body) <= 1000),
-  created_at      timestamptz DEFAULT now()
-);
-```
-
-**🤖 Claude handles:**
-- [ ] Create the tables above with RLS: participants can only read conversations they belong to; only the sender can insert their own messages
-- [ ] Create real-time message subscription using Supabase Realtime on the `messages` table
-- [ ] Build `/messages` page — conversation list with unread count badges, sorted by most recent
-- [ ] Build `/messages/[conversationId]` page — scrollable thread with send box (max 1000 chars)
-- [ ] Add unread message badge to Navbar (next to existing notification indicators)
-- [ ] Replace the "Contact" email button on ShiftCards with a "Message" button that opens or creates a conversation thread
-- [ ] Before creating a conversation, verify both users share at least one approved board (query `user_boards` for overlap). If not, block with "You can only message members of your boards."
-- [ ] Add push notification trigger when a new message arrives
+**👤 You handle:**
+- [ ] Two-account smoke test in the browser: from account A open the ⋮ menu on one of B's posts → **Message** → send; confirm B sees the navbar badge, the thread updates live in a second window, and a "New message from…" push arrives on a push-enabled device
+- [ ] In that same test: watch your sent message flip from crossed-out eye → eye when B opens the thread; as B, react to A's message (star → picker → emoji) and confirm A sees the reaction appear live
+- [ ] Try **Start a chat** — search for a board-mate by name and confirm the thread opens
+- [ ] Try **Delete chat** (trash icon on a row): confirm it disappears for you but not the other account, and that a new message from them brings it back without the old history
+- [ ] Confirm messaging someone after leaving your only shared board is blocked (expected: "You can only message members of your boards.")
 
 ---
 

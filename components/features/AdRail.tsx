@@ -9,6 +9,7 @@ const AD_ENABLED_PATHS = new Set([
   '/wall',
   '/calendar',
   '/profile',
+  '/messages',
   '/leader/approvals',
   '/leader/flags',
   '/leader/archive',
@@ -18,6 +19,7 @@ const AD_ENABLED_PATHS = new Set([
 function isAdEnabledPath(pathname: string): boolean {
   if (AD_ENABLED_PATHS.has(pathname)) return true
   if (/^\/boards\/[^/]+$/.test(pathname)) return true // individual board (members) page, not the /boards list
+  if (/^\/messages\/[^/]+$/.test(pathname)) return true // individual conversation threads
   return false
 }
 

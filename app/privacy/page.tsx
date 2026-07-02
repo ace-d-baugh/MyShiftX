@@ -41,7 +41,7 @@ export default function PrivacyPage() {
               <li><strong>Account information:</strong> Display name, email address, and hashed password when you register</li>
               <li><strong>Profile information:</strong> Phone number (optional), notification preferences, time zone, date and time format preferences</li>
               <li><strong>Shift and request data:</strong> Shift offers and requests you post, including dates, times, shift titles, and details</li>
-              <li><strong>Communications:</strong> Comments, messages, and flags submitted through the platform</li>
+              <li><strong>Communications:</strong> Comments, direct messages you exchange with other board members (including any reactions and read status), and flags submitted through the platform</li>
               <li><strong>Payment information:</strong> Billing details collected by Stripe when you subscribe to Pro (we do not store full card numbers — see Section 8)</li>
               <li><strong>OAuth information:</strong> If you sign in via Google, Facebook, or LinkedIn, we receive your name and email address from that provider</li>
               <li><strong>Support communications:</strong> Messages you send to our support team</li>
@@ -99,7 +99,8 @@ export default function PrivacyPage() {
             <h3 className="font-semibold text-text mt-4 mb-2">Within the Platform</h3>
             <ul className="list-disc list-inside space-y-1">
               <li>Your <strong>display name and shift posts</strong> are visible to all approved members of the boards you belong to</li>
-              <li>Your <strong>contact email</strong> (if added to your profile) is visible to other board members when they click the Contact button on your posts</li>
+              <li>Your <strong>direct messages</strong> are visible only to the other participant in that conversation. They are not visible to other board members or board moderators. Messages are stored on our servers so conversations sync across your devices, and may be reviewed by MyShiftX when investigating a flag, abuse report, or suspected violation of our Terms of Service</li>
+              <li>Deleting a chat removes it from <strong>your</strong> view only — the other participant retains their copy of the conversation</li>
               <li>Your <strong>display name</strong> is associated with your comments, flags, and interest marks as visible to moderators and post owners</li>
             </ul>
 

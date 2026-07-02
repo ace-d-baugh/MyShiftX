@@ -10,7 +10,7 @@ import { getSettings } from '@/lib/settings'
 import { slugify } from '@/lib/slug'
 import {
   Clock, LayoutGrid, User, Flag, Pencil, Trash2,
-  MoreVertical, MessageSquare, Star, Mail, ChevronDown,
+  MoreVertical, MessageSquare, Star, Send, ChevronDown,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { FlagModal } from '@/components/features/FlagModal'
@@ -56,6 +56,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
   useEffect(() => setMounted(true), [])
   const [openCommentsTick, setOpenCommentsTick] = useState(0)
   const [interestTick, setInterestTick] = useState(0)
+  const [messageTick, setMessageTick] = useState(0)
 
   const isOwner = currentUserId && shift.user_id === currentUserId
   const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>('12h')
@@ -183,9 +184,10 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
           commentCount={shift.comment_count ?? 0}
           interestedCount={shift.interested_count ?? 0}
           boardId={shift.board_id ?? undefined}
-          showContactDisabled={!isOwner}
+          ownerUserId={shift.user_id}
           openCommentsTick={openCommentsTick}
           interestTick={interestTick}
+          messageTick={messageTick}
           actions={
             <div className="flex items-center gap-1">
               {isBoth ? (
@@ -228,8 +230,12 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
             </button>
             {!isOwner && (
               <>
-                <button className={menuDisabledCls} disabled title="Coming soon">
-                  <Mail className="w-3.5 h-3.5 shrink-0" /> Contact
+                <button
+                  className={shift.user_id ? menuItemCls : menuDisabledCls}
+                  disabled={!shift.user_id}
+                  onClick={() => { setMessageTick(t => t + 1); setMenuPos(null) }}
+                >
+                  <Send className="w-3.5 h-3.5 shrink-0" /> Message
                 </button>
                 <button className={menuItemCls} onClick={() => { setInterestTick(t => t + 1); setMenuPos(null) }}>
                   <Star className="w-3.5 h-3.5 shrink-0" /> Show Interest
