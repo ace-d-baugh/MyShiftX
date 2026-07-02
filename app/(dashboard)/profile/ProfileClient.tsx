@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { PushNotificationsToggle } from '@/components/features/PushNotificationsToggle'
+import { CalendarSyncSection } from '@/components/features/CalendarSyncSection'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
@@ -30,9 +31,10 @@ interface UserProfile {
 interface ProfileClientProps {
   user: UserProfile | null
   sessionUserId: string
+  isPro: boolean
 }
 
-export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
+export function ProfileClient({ user, sessionUserId, isPro }: ProfileClientProps) {
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -260,6 +262,9 @@ export function ProfileClient({ user, sessionUserId }: ProfileClientProps) {
           onCreateOpenChange={setCreateBoardOpen}
         />
       </div>
+
+      {/* Calendar Sync — Pro/Trial only (Task 17) */}
+      {isPro && <CalendarSyncSection />}
 
       {/* Site Settings */}
       <div className="card shadow-sm">

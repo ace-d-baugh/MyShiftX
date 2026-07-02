@@ -31,6 +31,7 @@ export interface Database {
           billing_cycle: BillingCycle | null
           schedule_import_count: number
           schedule_import_month: string | null
+          ical_token: string | null
           is_active: boolean
           last_login_at: string | null
           created_at: string
@@ -51,6 +52,7 @@ export interface Database {
           billing_cycle?: BillingCycle | null
           schedule_import_count?: number
           schedule_import_month?: string | null
+          ical_token?: string | null
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -71,6 +73,7 @@ export interface Database {
           billing_cycle?: BillingCycle | null
           schedule_import_count?: number
           schedule_import_month?: string | null
+          ical_token?: string | null
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -613,6 +616,8 @@ export interface Database {
         Returns: { membership: Membership; used: number; import_limit: number }[]
       }
       consume_schedule_import: { Args: Record<string, never>; Returns: number }
+      get_or_create_ical_token: { Args: Record<string, never>; Returns: string | null }
+      reset_ical_token:         { Args: Record<string, never>; Returns: string | null }
       get_users_admin: {
         Args: Record<string, never>
         Returns: {

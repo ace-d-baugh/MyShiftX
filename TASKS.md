@@ -188,7 +188,7 @@ This is the canonical Free vs Pro feature list. Use this when building the upgra
 | **Ad-free experience** | 🔲 Task 10 |
 | **SMS notifications** for shift matches (up to 30/mo) | 🔲 Task 11 |
 | **Unlimited photo schedule imports** | 🆕 |
-| **Calendar export & sync** (Google Calendar, Apple iCal) | 🆕 |
+| **Calendar export & sync** (Google Calendar, Apple iCal) | ✅ |
 | **Trade preferences** — set preferred shift types, time of day, etc. for smarter matching | 🆕 |
 | **Bulk shift import** — CSV upload or multi-week photo scan | 🆕 |
 
@@ -199,7 +199,7 @@ The following Pro and Free features have not been scoped yet and will need dedic
 - **Photo schedule import (OCR)** — user photographs their paper or on-screen schedule; OCR reads it and populates shifts automatically. This is the highest-value Free feature and the biggest differentiator from manual entry. Needs an OCR service (Google Vision API or similar) + a shift-parsing pipeline. High complexity — scope separately.
 - **In-app messaging** — replaces the current email mailto: contact button with a real in-app thread between two users. Needs a `messages` table, read receipts, and a message UI. High complexity — scope separately.
 - **In-app push notifications** — browser-native web push (PWA-style) using the Push API and a service worker. Free tier. Works on desktop Chrome/Edge/Firefox and Android Chrome. Not available on iOS Safari (they have limited support). Supplements or replaces email for non-SMS users. Medium complexity.
-- **Calendar export/sync** — export shifts to `.ics` (works with Google Calendar, Apple Calendar, Outlook) or connect a live Google Calendar feed. Pro only. Medium complexity.
+- ~~**Calendar export/sync**~~ — ✅ Done (Task 17): live-sync iCal feed URL + one-click `.ics` download, works with Google Calendar, Apple Calendar, and Outlook. Pro only.
 - **Trade preferences** — users set preferred shift types, days of week, and time windows; the matching engine factors these in when firing notifications. Extends the existing `notifyShiftPosted`/`notifyRequestPosted` logic. Medium complexity.
 - ~~**Direct messaging outside boards**~~ — Removed. Messaging is board-member only for all tiers.
 - **Bulk shift import (CSV / multi-week photo)** — upload a CSV of shifts or scan multiple weeks of a schedule at once. Pro only. Extends the photo OCR feature above.
@@ -601,31 +601,30 @@ The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over 
 
 **👤 You handle:**
 - ✅ `2026-07-01`: Add `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` (values in `.env.local`) to Vercel env vars — the feature is invisible in production until then
-- [ ] Test on desktop Chrome, Android Chrome, and iOS Safari (requires "Add to Home Screen" first on iOS): enable via the Wall banner or Profile toggle, then have a second account mark interest on your post
+- ✅ `2026-07-01`: Test on desktop Chrome, Android Chrome, and iOS Safari (requires "Add to Home Screen" first on iOS): enable via the Wall banner or Profile toggle, then have a second account mark interest on your post
 - ✅ `2026-07-01`: Square 512×512 app icon supplied — moved to `app/apple-icon.png` (Next.js serves it and emits the `apple-touch-icon` link automatically); manifest and push notification icons now use it
 - ✅ `2026-07-01`: Live two-device test found pushes *delivered* but not *popping up* (OS presentation settings, not code). Response: `requireInteraction: true` so desktop toasts stay until dismissed, `urgency: 'high'` on sends so dozing devices get them promptly, and a per-platform "Push Notifications" how-to (Windows / Mac / Android / iPhone) added to Help & Support
 
 ---
 
-### 17 — Calendar Export & Sync (iCal / Google Calendar) `WITH PRO LAUNCH`
+### 17 — Calendar Export & Sync (iCal / Google Calendar) ✅ CODE COMPLETE
 
 **Tier:** Pro only
 **Why:** Users want their shift calendar to live in their native calendar app, not just in MyShiftX. A live-sync iCal feed means it updates automatically when shifts change.
 
 **Architecture:** Generate a secret per-user iCal feed URL. Calendar apps (Google Calendar, Apple Calendar, Outlook) subscribe to it and refresh periodically. No OAuth required — the URL is the authentication.
 
-**🤖 Claude handles:**
-- [ ] Add `ical_token` column to `users` (UUID, unique, generated on first use, nullable)
-- [ ] Create `/api/calendar/[token].ics` route — returns a valid `.ics` file of all the user's active and upcoming shifts. Only accessible to Pro/Trial users. Invalid token returns 404.
-- [ ] Create `/api/calendar/reset-token` route — lets the user rotate their feed URL (invalidates old one)
-- [ ] Add Calendar Sync section to Profile for Pro users:
-  - "Your personal feed URL" (copyable)
-  - Step-by-step instructions for Google Calendar, Apple Calendar, and Outlook
-  - "Reset feed URL" button with warning that existing subscriptions will break
-- [ ] One-click `.ics` download button (exports all current shifts as a static file, no subscription)
+**🤖 Claude handled:**
+- ✅ `2026-07-01`: `ical_token` column on `users` (UUID, unique, nullable, generated on first use). Because it's the feed's only credential, it's excluded from the client-readable SELECT column grant (same idiom as the membership fields) — access goes through two `SECURITY DEFINER` RPCs scoped to `auth.uid()`: `get_or_create_ical_token()` and `reset_ical_token()`, both returning NULL for Basic. Migration `20260702010000_ical_feed_token.sql`, applied live
+- ✅ `2026-07-01`: `/api/calendar/[token].ics` route (token also accepted without `.ics`) — hand-rolled RFC 5545 generation in `lib/ical.ts` (UTC times, escaping, 75-octet line folding, 1-hour refresh hints). Serves active shifts from 30 days back through all upcoming — the same `user_id + is_active` definition My Calendar uses. Bad token, unknown token, deactivated account, and non-Pro membership all return a uniform 404
+- ✅ `2026-07-01`: Token rotation via the `reset_ical_token()` RPC + server action (`app/actions/calendar.ts`) rather than a dedicated route — same behavior, matches the codebase's server-action convention
+- ✅ `2026-07-01`: Calendar Sync card on Profile (Pro/Trial only): copyable feed URL with a treat-it-like-a-password note, link to the setup guides, one-click Download .ics (`?download=1` → attachment), and Reset feed URL behind a subscriptions-will-break confirmation
+- ✅ `2026-07-01`: Step-by-step subscribe guides for Google Calendar, Apple Calendar (iPhone/Mac), and Outlook written into Help & Support (`/help#calendar-sync`); the Profile card links there
+- ✅ `2026-07-01`: Verified live: real feed URL returns valid ICS with correct UTC event times, escaping, and folding (tested with a temporary shift, since deleted); all invalid-token paths 404; `ical_token` confirmed absent from client SELECT grants; roadmap card moved to Done
 
 **👤 You handle:**
-- [ ] Test subscription flow in Google Calendar (Settings → Other calendars → From URL) and Apple Calendar
+- [ ] Your feed token is already generated — open Profile → Calendar Sync for the URL. Test the subscription flow in Google Calendar (Other calendars → From URL) and Apple Calendar
+- [ ] Heads-up for testing: Google refreshes subscribed feeds on its own schedule (often 6–24 h), so don't judge sync speed by it — Apple Calendar lets you pick the refresh interval
 
 ---
 

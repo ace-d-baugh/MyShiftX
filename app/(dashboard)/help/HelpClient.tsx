@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   HelpCircle, ChevronDown, Send, X, CheckCircle,
   LayoutGrid, Star, UserPlus, MessageSquare, ArrowRight,
-  Flag, Bell, Trash2, Users, Monitor, Laptop, Smartphone,
+  Flag, Bell, Trash2, Users, Monitor, Laptop, Smartphone, CalendarDays,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
@@ -101,9 +101,38 @@ const PUSH_GUIDES = [
   },
 ]
 
+const CALENDAR_GUIDES = [
+  {
+    app: 'Google Calendar',
+    steps: [
+      'On a computer, open calendar.google.com — subscribing by URL isn\'t available in the mobile app.',
+      'In the left sidebar, next to "Other calendars," click the + and choose "From URL."',
+      'Paste your feed URL and click "Add calendar."',
+      'Your shifts appear under Other calendars and also sync to the Google Calendar mobile app. Note: Google refreshes subscribed calendars on its own schedule, often every 6–24 hours.',
+    ],
+  },
+  {
+    app: 'Apple Calendar (iPhone / Mac)',
+    steps: [
+      'iPhone: Settings → Apps → Calendar → Calendar Accounts → Add Account → Other → Add Subscribed Calendar, then paste your feed URL.',
+      'Mac: open Calendar → File → New Calendar Subscription, paste the URL, and click Subscribe.',
+      'Set Auto-refresh (e.g. every hour) and choose whether it syncs via iCloud to your other Apple devices.',
+    ],
+  },
+  {
+    app: 'Outlook',
+    steps: [
+      'Open outlook.com (or Outlook on the web) and go to Calendar.',
+      'Choose "Add calendar" → "Subscribe from web."',
+      'Paste your feed URL, give it a name like MyShiftX, and click Import.',
+    ],
+  },
+]
+
 export function HelpClient({ userEmail }: HelpClientProps) {
   const [openIdx, setOpenIdx] = useState<number | null>(null)
   const [openGuide, setOpenGuide] = useState<number | null>(null)
+  const [openCalGuide, setOpenCalGuide] = useState<number | null>(null)
 
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
@@ -223,6 +252,51 @@ export function HelpClient({ userEmail }: HelpClientProps) {
                 <ChevronDown className={cn('w-4 h-4 text-text/40 shrink-0 transition-transform duration-200', openGuide === i && 'rotate-180')} />
               </button>
               {openGuide === i && (
+                <div className="px-5 pb-5 border-t border-border bg-primary-light/10">
+                  <ol className="pt-4 space-y-2.5">
+                    {guide.steps.map((step, si) => (
+                      <li key={si} className="flex gap-2.5 text-sm text-text/70 leading-relaxed">
+                        <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                          {si + 1}
+                        </span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Calendar sync setup (Pro) ────────────────────────────────────────── */}
+      <section className="mb-10 scroll-mt-20" id="calendar-sync">
+        <div className="flex items-center gap-2 mb-1">
+          <CalendarDays className="w-5 h-5 text-primary" />
+          <h2 className="font-accent text-xl font-bold text-text">Calendar Sync</h2>
+          <span className="text-[10px] font-bold uppercase tracking-wide bg-primary/15 text-primary px-1.5 py-0.5 rounded">Pro</span>
+        </div>
+        <p className="text-sm text-text/60 mb-4">
+          Pro members get a personal calendar feed URL that keeps Google Calendar, Apple Calendar, or Outlook
+          in sync with their shifts automatically. Copy your feed URL from{' '}
+          <Link href="/profile" className="text-primary hover:underline">Profile → Calendar Sync</Link>, then
+          follow the steps for your calendar app. Treat the URL like a password — anyone who has it can see
+          your shift calendar.
+        </p>
+        <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
+          {CALENDAR_GUIDES.map((guide, i) => (
+            <div key={guide.app}>
+              <button
+                type="button"
+                onClick={() => setOpenCalGuide(openCalGuide === i ? null : i)}
+                className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left text-sm font-medium text-text hover:bg-primary-light/30 transition-colors min-h-0 min-w-0"
+                aria-expanded={openCalGuide === i}
+              >
+                <span>{guide.app}</span>
+                <ChevronDown className={cn('w-4 h-4 text-text/40 shrink-0 transition-transform duration-200', openCalGuide === i && 'rotate-180')} />
+              </button>
+              {openCalGuide === i && (
                 <div className="px-5 pb-5 border-t border-border bg-primary-light/10">
                   <ol className="pt-4 space-y-2.5">
                     {guide.steps.map((step, si) => (

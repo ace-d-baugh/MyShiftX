@@ -11,11 +11,17 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: userProfile } = await supabase
-    .from('users')
-    .select('id, display_name, email, phone_number, notify_via_email, notify_via_sms, role, is_active, created_at')
-    .eq('id', user.id)
-    .single()
+  const [{ data: userProfile }, { data: membershipRow }] = await Promise.all([
+    supabase
+      .from('users')
+      .select('id, display_name, email, phone_number, notify_via_email, notify_via_sms, role, is_active, created_at')
+      .eq('id', user.id)
+      .single(),
+    // membership columns are locked from direct SELECT — owner-only RPC
+    supabase.rpc('get_own_membership').single(),
+  ])
 
-  return <ProfileClient user={userProfile} sessionUserId={user.id} />
+  const isPro = membershipRow?.membership === 'Pro' || membershipRow?.membership === 'Trial'
+
+  return <ProfileClient user={userProfile} sessionUserId={user.id} isPro={isPro} />
 }
