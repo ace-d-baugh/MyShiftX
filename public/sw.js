@@ -13,8 +13,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || '',
-      icon: '/logos/ShiftX-logo-sm.png',
-      badge: '/logos/ShiftX-logo-sm.png',
+      icon: '/apple-icon.png',
+      badge: '/apple-icon.png',
       data: { url: data.url || '/wall' },
     })
   )
