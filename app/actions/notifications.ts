@@ -157,7 +157,10 @@ async function sendPushNotification(userId: string, title: string, body: string,
       try {
         await webpush.sendNotification(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          payload
+          payload,
+          // Shift matches are time-sensitive — ask the push service not to
+          // defer delivery while the device is in a low-power doze state
+          { urgency: 'high' }
         )
       } catch (err) {
         const statusCode = (err as { statusCode?: number }).statusCode

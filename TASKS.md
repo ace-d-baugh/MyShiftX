@@ -603,6 +603,7 @@ The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over 
 - ✅ `2026-07-01`: Add `NEXT_PUBLIC_VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` (values in `.env.local`) to Vercel env vars — the feature is invisible in production until then
 - [ ] Test on desktop Chrome, Android Chrome, and iOS Safari (requires "Add to Home Screen" first on iOS): enable via the Wall banner or Profile toggle, then have a second account mark interest on your post
 - ✅ `2026-07-01`: Square 512×512 app icon supplied — moved to `app/apple-icon.png` (Next.js serves it and emits the `apple-touch-icon` link automatically); manifest and push notification icons now use it
+- ✅ `2026-07-01`: Live two-device test found pushes *delivered* but not *popping up* (OS presentation settings, not code). Response: `requireInteraction: true` so desktop toasts stay until dismissed, `urgency: 'high'` on sends so dozing devices get them promptly, and a per-platform "Push Notifications" how-to (Windows / Mac / Android / iPhone) added to Help & Support
 
 ---
 

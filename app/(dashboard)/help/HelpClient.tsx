@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   HelpCircle, ChevronDown, Send, X, CheckCircle,
   LayoutGrid, Star, UserPlus, MessageSquare, ArrowRight,
-  Flag, Bell, Trash2, Users,
+  Flag, Bell, Trash2, Users, Monitor, Laptop, Smartphone,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
@@ -58,8 +58,52 @@ const FAQS = [
   },
 ]
 
+const PUSH_GUIDES = [
+  {
+    icon: Monitor,
+    device: 'Windows PC',
+    steps: [
+      'Turn on push from Profile → Notifications → Push Notifications (or tap Enable on the Wall banner), then click Allow when your browser asks.',
+      'Hearing a chime but seeing nothing? The notification went to the Notification Center — press Windows+N (or click the clock in the taskbar) to see it.',
+      'To make notifications pop up on screen: open Settings → System → Notifications and turn off "Do not disturb." Also check its automatic rules — Windows often turns it on by itself during full-screen apps or screen sharing.',
+      'On the same Settings page, find your browser (Chrome, Edge) in the app list, open it, and make sure "Show notification banners" is checked.',
+    ],
+  },
+  {
+    icon: Laptop,
+    device: 'Mac',
+    steps: [
+      'Turn on push from Profile → Notifications → Push Notifications (or tap Enable on the Wall banner), then click Allow when your browser asks.',
+      'Open the Apple menu → System Settings → Notifications, select your browser (Chrome, Safari, etc.), and turn on Allow Notifications.',
+      'Set the alert style to "Banners" (disappears on its own) or "Alerts" (stays until dismissed).',
+      'If notifications still don\'t appear, check that a Focus mode (Do Not Disturb) isn\'t on — the moon icon in the menu bar or Control Center.',
+    ],
+  },
+  {
+    icon: Smartphone,
+    device: 'Android',
+    steps: [
+      'In Chrome, turn on push from Profile → Notifications → Push Notifications (or tap Enable on the Wall banner), then tap Allow.',
+      'By default, notifications may go quietly to the notification bar without popping up over your screen.',
+      'To make them pop up: press and hold a MyShiftX notification in the tray, tap the settings gear, and set it to "Alerting" with "Pop on screen" enabled (wording varies by phone).',
+      'You can also get there via Settings → Apps → Chrome → Notifications and raising the importance of the myshiftx.com entry.',
+    ],
+  },
+  {
+    icon: Smartphone,
+    device: 'iPhone / iPad',
+    steps: [
+      'iPhone requires MyShiftX to be added to your Home Screen first (iOS 16.4 or newer) — push doesn\'t work from a regular Safari tab, and the toggle stays hidden until then.',
+      'In Safari, open myshiftx.com, tap the Share button, and choose "Add to Home Screen."',
+      'Open MyShiftX from the new Home Screen icon (not from Safari), then turn on push from Profile → Notifications → Push Notifications and tap Allow.',
+      'To control how they appear: Settings → Notifications → MyShiftX — enable Lock Screen, Notification Center, and Banners.',
+    ],
+  },
+]
+
 export function HelpClient({ userEmail }: HelpClientProps) {
   const [openIdx, setOpenIdx] = useState<number | null>(null)
+  const [openGuide, setOpenGuide] = useState<number | null>(null)
 
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
@@ -145,6 +189,51 @@ export function HelpClient({ userEmail }: HelpClientProps) {
               {openIdx === i && (
                 <div className="px-5 pb-5 text-sm text-text/70 leading-relaxed border-t border-border bg-primary-light/10">
                   <p className="pt-4">{faq.a}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Push notification setup ──────────────────────────────────────────── */}
+      <section className="mb-10">
+        <div className="flex items-center gap-2 mb-1">
+          <Bell className="w-5 h-5 text-primary" />
+          <h2 className="font-accent text-xl font-bold text-text">Push Notifications</h2>
+        </div>
+        <p className="text-sm text-text/60 mb-4">
+          Get an instant alert when a shift matches or someone&rsquo;s interested in your post — even with
+          the site closed. Turn them on under <strong>Profile → Notifications</strong>, then follow the steps
+          for your device so alerts pop up instead of landing silently in the notification tray.
+        </p>
+        <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
+          {PUSH_GUIDES.map((guide, i) => (
+            <div key={guide.device}>
+              <button
+                type="button"
+                onClick={() => setOpenGuide(openGuide === i ? null : i)}
+                className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left text-sm font-medium text-text hover:bg-primary-light/30 transition-colors min-h-0 min-w-0"
+                aria-expanded={openGuide === i}
+              >
+                <span className="flex items-center gap-2.5">
+                  <guide.icon className="w-4 h-4 text-primary shrink-0" />
+                  {guide.device}
+                </span>
+                <ChevronDown className={cn('w-4 h-4 text-text/40 shrink-0 transition-transform duration-200', openGuide === i && 'rotate-180')} />
+              </button>
+              {openGuide === i && (
+                <div className="px-5 pb-5 border-t border-border bg-primary-light/10">
+                  <ol className="pt-4 space-y-2.5">
+                    {guide.steps.map((step, si) => (
+                      <li key={si} className="flex gap-2.5 text-sm text-text/70 leading-relaxed">
+                        <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                          {si + 1}
+                        </span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
               )}
             </div>

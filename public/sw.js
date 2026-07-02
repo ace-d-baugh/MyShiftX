@@ -16,6 +16,9 @@ self.addEventListener('push', (event) => {
       icon: '/apple-icon.png',
       badge: '/apple-icon.png',
       data: { url: data.url || '/wall' },
+      // Keep desktop toasts on screen until dismissed — the default ~5s
+      // auto-hide is easy to miss for time-sensitive shift matches
+      requireInteraction: true,
     })
   )
 })
