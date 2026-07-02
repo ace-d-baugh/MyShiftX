@@ -29,6 +29,8 @@ export interface Database {
           trial_ends_at: string | null
           trial_used: boolean
           billing_cycle: BillingCycle | null
+          schedule_import_count: number
+          schedule_import_month: string | null
           is_active: boolean
           last_login_at: string | null
           created_at: string
@@ -47,6 +49,8 @@ export interface Database {
           trial_ends_at?: string | null
           trial_used?: boolean
           billing_cycle?: BillingCycle | null
+          schedule_import_count?: number
+          schedule_import_month?: string | null
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -65,6 +69,8 @@ export interface Database {
           trial_ends_at?: string | null
           trial_used?: boolean
           billing_cycle?: BillingCycle | null
+          schedule_import_count?: number
+          schedule_import_month?: string | null
           is_active?: boolean
           last_login_at?: string | null
           created_at?: string
@@ -575,6 +581,11 @@ export interface Database {
         Args: Record<string, never>
         Returns: { membership: Membership; trial_ends_at: string | null; trial_used: boolean; billing_cycle: BillingCycle | null }[]
       }
+      get_schedule_import_status: {
+        Args: Record<string, never>
+        Returns: { membership: Membership; used: number; import_limit: number }[]
+      }
+      consume_schedule_import: { Args: Record<string, never>; Returns: number }
       get_users_admin: {
         Args: Record<string, never>
         Returns: {

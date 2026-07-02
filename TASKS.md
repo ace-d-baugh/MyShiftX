@@ -540,7 +540,7 @@ The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over 
 ---
 
 **👤 You handle — VPS setup (one-time):**
-- [ ] **Check VPS RAM** — multimodal LLM models require at minimum 4 GB RAM to run a quantized model; 8 GB is comfortable. Check your RackNerd plan specs and upgrade if needed (~$20–$25/mo for 4 GB tier).
+- ✅ **Check VPS RAM** — multimodal LLM models require at minimum 4 GB RAM to run a quantized model; 8 GB is comfortable. Check your RackNerd plan specs and upgrade if needed (~$20–$25/mo for 4 GB tier). Have 4.5 GB
 - [ ] **Install Ollama** on the VPS:
   ```bash
   curl -fsSL https://ollama.com/install.sh | sh

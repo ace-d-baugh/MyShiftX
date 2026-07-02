@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Plus } from 'lucide-react'
+import { CalendarDays, Camera, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO, addMonths, startOfMonth, getDaysInMonth, getDay } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { getSettings, fmtTime, type UserSettings } from '@/lib/settings'
+import { ScheduleImportModal } from '@/components/features/ScheduleImportModal'
 
 const ET = 'America/New_York'
 
@@ -26,6 +27,8 @@ interface BoardRequest {
 
 interface CalendarClientProps {
   userId: string
+  displayName: string
+  importEnabled: boolean
   today: string
   myShifts: MyShift[]
   boardShifts: BoardShift[]
@@ -79,9 +82,10 @@ function buildDayMap(
 
 // ── Calendar client ───────────────────────────────────────────────────────────
 
-export function CalendarClient({ today, myShifts, boardShifts, boardRequests }: CalendarClientProps) {
+export function CalendarClient({ userId, displayName, importEnabled, today, myShifts, boardShifts, boardRequests }: CalendarClientProps) {
   const router = useRouter()
   const [settings, setSettings] = useState<UserSettings | null>(null)
+  const [importOpen, setImportOpen] = useState(false)
 
   useEffect(() => { setSettings(getSettings()) }, [])
 
@@ -103,10 +107,31 @@ export function CalendarClient({ today, myShifts, boardShifts, boardRequests }: 
           <CalendarDays className="w-6 h-6 text-primary" />
           <h1 className="font-accent text-2xl font-bold text-text">My Calendar</h1>
         </div>
-        <Link href="/wall/new-shift?from=calendar" className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
-          <Plus className="w-4 h-4" /> Add Shift
-        </Link>
+        <div className="flex items-center gap-2">
+          {importEnabled && (
+            <button
+              onClick={() => setImportOpen(true)}
+              className="btn btn-outline gap-1.5 text-sm px-4 py-2 min-h-0 h-10"
+            >
+              <Camera className="w-4 h-4" />
+              <span className="hidden sm:inline">Import Schedule</span>
+              <span className="sm:hidden">Import</span>
+            </button>
+          )}
+          <Link href="/wall/new-shift?from=calendar" className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
+            <Plus className="w-4 h-4" /> Add Shift
+          </Link>
+        </div>
       </div>
+
+      {importEnabled && (
+        <ScheduleImportModal
+          userId={userId}
+          displayName={displayName}
+          open={importOpen}
+          onClose={() => setImportOpen(false)}
+        />
+      )}
 
       {/* Dot legend */}
       <div className="flex items-center gap-5 mb-6 flex-wrap text-xs text-text/60">
