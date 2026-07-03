@@ -379,7 +379,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
               {/* Post to Wall + Details — accordion (hidden once the shift is in the past) */}
               {isPastShift ? (
                 <div className="rounded-lg border border-border px-3 py-2.5 text-xs text-text/40 bg-primary-light/10">
-                  This shift has already passed — wall options (Giveaway, Trade, OT Approved) are no longer available.
+                  This shift has already passed — Posting to the wall is no longer available.
                 </div>
               ) : (
                 <div className="rounded-lg border border-border overflow-hidden">
