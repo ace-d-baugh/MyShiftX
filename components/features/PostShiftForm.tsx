@@ -276,6 +276,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
       {forms.map((f, i) => {
         const errs = formErrors[i] ?? {}
         const partial = i > 0 && isTouched(f) && Object.keys(errs).some(k => errs[k])
+        const isPastShift = isEdit && !!f.start_time && new Date(f.start_time).getTime() < Date.now()
 
         return (
           <div key={i} className="card shadow-sm">
@@ -374,53 +375,59 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
                 )
               })()}
 
-              {/* Post to Wall + Details — accordion */}
-              <div className="rounded-lg border border-border overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => toggleWall(i)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 bg-primary-light/20 hover:bg-primary-light/40 transition-colors min-h-0 text-left"
-                >
-                  <span className="text-sm font-medium text-text">
-                    Post to Wall
-                    {(f.is_trade || f.is_giveaway) && (
-                      <span className="ml-2 text-xs text-primary font-normal">
-                        ({[f.is_giveaway && 'Giveaway', f.is_trade && 'Trade'].filter(Boolean).join(' + ')})
-                      </span>
-                    )}
-                  </span>
-                  <ChevronDown className={cn('w-4 h-4 text-text/40 transition-transform duration-200 shrink-0', (wallOpen[i] ?? wallExpanded) && 'rotate-180')} />
-                </button>
+              {/* Post to Wall + Details — accordion (hidden once the shift is in the past) */}
+              {isPastShift ? (
+                <div className="rounded-lg border border-border px-3 py-2.5 text-xs text-text/40 bg-primary-light/10">
+                  This shift has already passed — wall options (Giveaway, Trade, OT Approved) are no longer available.
+                </div>
+              ) : (
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => toggleWall(i)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 bg-primary-light/20 hover:bg-primary-light/40 transition-colors min-h-0 text-left"
+                  >
+                    <span className="text-sm font-medium text-text">
+                      Post to Wall
+                      {(f.is_trade || f.is_giveaway) && (
+                        <span className="ml-2 text-xs text-primary font-normal">
+                          ({[f.is_giveaway && 'Giveaway', f.is_trade && 'Trade'].filter(Boolean).join(' + ')})
+                        </span>
+                      )}
+                    </span>
+                    <ChevronDown className={cn('w-4 h-4 text-text/40 transition-transform duration-200 shrink-0', (wallOpen[i] ?? wallExpanded) && 'rotate-180')} />
+                  </button>
 
-                {(wallOpen[i] ?? wallExpanded) && (
-                  <div className="px-3 pt-3 pb-3 space-y-4 border-t border-border">
-                    <div>
-                      <p className="text-xs text-text/50 mb-2">Leave unchecked to add to your calendar only.</p>
-                      <div className="flex flex-wrap gap-4">
-                        <label className="flex items-center gap-2 cursor-pointer min-h-0">
-                          <Checkbox name="is_giveaway" checked={f.is_giveaway} onChange={onChange(i)} />
-                          <span className="text-sm text-text">Giveaway</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer min-h-0">
-                          <Checkbox name="is_trade" checked={f.is_trade} onChange={onChange(i)} />
-                          <span className="text-sm text-text">Trade</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer min-h-0">
-                          <Checkbox name="is_overtime_approved" checked={f.is_overtime_approved} onChange={onChange(i)} />
-                          <span className="text-sm text-text">OT Approved</span>
-                        </label>
+                  {(wallOpen[i] ?? wallExpanded) && (
+                    <div className="px-3 pt-3 pb-3 space-y-4 border-t border-border">
+                      <div>
+                        <p className="text-xs text-text/50 mb-2">Leave unchecked to add to your calendar only.</p>
+                        <div className="flex flex-wrap gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                            <Checkbox name="is_giveaway" checked={f.is_giveaway} onChange={onChange(i)} />
+                            <span className="text-sm text-text">Giveaway</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                            <Checkbox name="is_trade" checked={f.is_trade} onChange={onChange(i)} />
+                            <span className="text-sm text-text">Trade</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                            <Checkbox name="is_overtime_approved" checked={f.is_overtime_approved} onChange={onChange(i)} />
+                            <span className="text-sm text-text">OT Approved</span>
+                          </label>
+                        </div>
+                        {errs.is_trade && <p className="mt-1 text-xs text-warning">{errs.is_trade}</p>}
                       </div>
-                      {errs.is_trade && <p className="mt-1 text-xs text-warning">{errs.is_trade}</p>}
-                    </div>
 
-                    <div>
-                      <label className="block text-xs font-medium text-text/70 mb-1">Details (optional)</label>
-                      <textarea name="details" value={f.details} onChange={onChange(i)}
-                        className="input h-20 resize-none text-sm" placeholder="Any additional details..." maxLength={500} />
+                      <div>
+                        <label className="block text-xs font-medium text-text/70 mb-1">Details (optional)</label>
+                        <textarea name="details" value={f.details} onChange={onChange(i)}
+                          className="input h-20 resize-none text-sm" placeholder="Any additional details..." maxLength={500} />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )
