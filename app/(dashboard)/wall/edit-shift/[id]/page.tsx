@@ -7,9 +7,10 @@ export const metadata = { title: 'Edit Shift – MyShiftX' }
 
 interface PageProps {
   params: { id: string }
+  searchParams: { from?: string }
 }
 
-export default async function EditShiftPage({ params }: PageProps) {
+export default async function EditShiftPage({ params, searchParams }: PageProps) {
   const supabase = createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -39,6 +40,7 @@ export default async function EditShiftPage({ params }: PageProps) {
           userId={user.id}
           displayName={userProfile?.display_name ?? 'User'}
           shiftId={shift.id}
+          returnTo={searchParams.from === 'calendar' ? '/calendar' : '/wall'}
           initialData={{
             board_id:             shift.board_id,
             shift_title:          shift.shift_title,

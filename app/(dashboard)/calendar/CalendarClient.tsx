@@ -195,7 +195,7 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                         {(data?.myShifts ?? []).map(s => (
                           <button
                             key={s.id}
-                            onClick={() => router.push(`/wall/edit-shift/${s.id}`)}
+                            onClick={() => router.push(`/wall/edit-shift/${s.id}?from=calendar`)}
                             className={cn(
                               'w-full text-left rounded px-1 py-0.5 text-[10px] leading-tight transition-colors border-l-2',
                               s.is_trade && s.is_giveaway ? 'border-l-primary bg-primary/5 hover:bg-primary/10' :

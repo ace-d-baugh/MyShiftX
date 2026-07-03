@@ -49,6 +49,7 @@ interface PostShiftFormProps {
   shiftId?: string
   initialData?: ShiftInitialData
   wallExpanded?: boolean   // true = wall open by default, false (calendar) = collapsed
+  returnTo?: string        // where to navigate after a successful submit (defaults to /wall)
 }
 
 function toLocal(iso: string): string {
@@ -109,7 +110,7 @@ function isTouched(f: ShiftForm) {
     f.is_trade || f.is_giveaway || f.is_overtime_approved || !!f.details
 }
 
-export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initialData, wallExpanded = true }: PostShiftFormProps) {
+export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initialData, wallExpanded = true, returnTo = '/wall' }: PostShiftFormProps) {
   const router = useRouter()
   const supabase = createClient()
   const isEdit = !!shiftId
@@ -235,7 +236,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
         }
       }
       onSuccess?.()
-      router.push('/wall')
+      router.push(returnTo)
     } catch (err: unknown) {
       setServerError(err instanceof Error ? err.message : isEdit ? 'Failed to update shift.' : 'Failed to post shift.')
     } finally {
