@@ -30,7 +30,11 @@ export default function BetaTestPage() {
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">Why now</h2>
             <p>
-              This is a passion project for me that I have been dreaming about for years. I&rsquo;ve been working on it tirelessly, and the feedback from this beta group is invaluable in shaping the final product. I want to make sure that I roll this out without any conflicts while working for a large company and sharing it with its employees, my coworkers and most of all... you, my friends.  I know this was short notice, but your input has been crucial. Thank you!
+              This is a passion project for me that I have been dreaming about for years. I&rsquo;ve been working on it tirelessly, and the feedback from this beta group is invaluable in shaping the final product. I want to make sure that I roll this out without any conflicts while working for a large company and sharing it with its employees, my coworkers and most of all... you, my friends.
+            </p>
+            <p>&nbsp;</p>
+            <p>
+              I know this was short notice, but your input has been crucial. Thank you!
             </p>
           </section>
 

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Users, Crown, LayoutGrid, ChevronDown, MoreHorizontal,
-  Pencil, Trash2, Check, X,
+  Pencil, Trash2, Check, X, MessageSquare,
   LogOut, UserMinus, Flag, UserCog, UserPlus, Copy, Download, AlertTriangle, QrCode,
 } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
@@ -17,6 +18,7 @@ import {
   removeUserFromBoard, leaveBoard,
   updateBoardName, deleteBoard, regenerateInviteCode,
 } from '@/app/actions/boards'
+import { startConversation } from '@/app/actions/messages'
 import type { BoardRole } from '@/lib/database.types'
 import type { ManagedBoard, BoardMember } from './types'
 
@@ -38,6 +40,7 @@ type RemoveTarget = { member: BoardMember; boardId: string }
 type FlagTarget = { userId: string; boardId: string }
 
 export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }: UsersClientProps) {
+  const router = useRouter()
   const [boards, setBoards] = useState(initial)
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [openMenuFor, setOpenMenuFor] = useState<{ id: string; top: number; right: number } | null>(null)
@@ -63,6 +66,7 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
 
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [messagingUserId, setMessagingUserId] = useState<string | null>(null)
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -78,6 +82,20 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
   }
 
   // ── Handlers ────────────────────────────────────────────────────────────────
+
+  const handleMessage = async (userId: string) => {
+    if (messagingUserId) return
+    closeMenu()
+    setMessagingUserId(userId)
+    setError(null)
+    const result = await startConversation(userId)
+    setMessagingUserId(null)
+    if (result.conversationId) {
+      router.push(`/messages/${result.conversationId}`)
+    } else {
+      setError(result.error ?? 'Could not open the conversation.')
+    }
+  }
 
   const openChangeRole = (member: BoardMember, boardId: string, myRole: BoardRole) => {
     closeMenu()
@@ -535,6 +553,7 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
           const canFlag = !isMe && (myRole === 'Mod' || myRole === 'User')
           const canChangeRole = !isMe && (myRole === 'Leader' || myRole === 'Mod' || isAdmin) && items.role !== 'Leader'
           const canRemove = !isMe && (myRole === 'Leader' || isAdmin)
+          menuItems.push({ label: 'Message', icon: MessageSquare, action: () => handleMessage(items.userId) })
           if (canFlag) menuItems.push({ label: 'Flag User', icon: Flag, action: () => { closeMenu(); setFlagTarget({ userId: items.userId, boardId: board.boardId }) } })
           if (canChangeRole) menuItems.push({ label: 'Change Role', icon: UserCog, action: () => openChangeRole(items, board.boardId, myRole) })
           if (canRemove) menuItems.push({ label: 'Remove User', icon: UserMinus, danger: true, action: () => { closeMenu(); setRemoveTarget({ member: items, boardId: board.boardId }) } })

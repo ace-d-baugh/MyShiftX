@@ -1,6 +1,6 @@
 'use server'
 
-import { getActionSession } from '@/lib/auth/session'
+import { createServerClient } from '@/lib/supabase/server'
 
 export type SurveyPayload = {
   heard_from:               string | null
@@ -32,20 +32,27 @@ export type SurveyPayload = {
   nps:                      string | null
   open_feedback:            string
   feature_awareness:        Record<string, string>
+  testimonial:              string
+  testimonial_consent:      boolean
 }
 
+// Not behind the auth wall (Task: beta close-out) — logged-in users still get
+// their response tied to their account and deduped, but a signed-out visitor
+// (or anyone reaching /survey after the site goes dark) can still submit.
 export async function submitSurvey(data: SurveyPayload): Promise<{ error?: string }> {
+  const supabase = createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id ?? null
+
   try {
-    const { supabase, userId } = await getActionSession()
-
-    // Check for duplicate submission
-    const { data: existing } = await supabase
-      .from('beta_survey_responses')
-      .select('id')
-      .eq('user_id', userId)
-      .single()
-
-    if (existing) return { error: 'DUPLICATE' }
+    if (userId) {
+      const { data: existing } = await supabase
+        .from('beta_survey_responses')
+        .select('id')
+        .eq('user_id', userId)
+        .single()
+      if (existing) return { error: 'DUPLICATE' }
+    }
 
     const { error } = await supabase
       .from('beta_survey_responses')
@@ -56,20 +63,18 @@ export async function submitSurvey(data: SurveyPayload): Promise<{ error?: strin
     if (error) return { error: error.message }
     return {}
   } catch (e) {
-    return { error: e instanceof Error ? e.message : 'Not authenticated.' }
+    return { error: e instanceof Error ? e.message : 'Something went wrong submitting the survey.' }
   }
 }
 
 export async function checkExistingSubmission(): Promise<boolean> {
-  try {
-    const { supabase, userId } = await getActionSession()
-    const { data } = await supabase
-      .from('beta_survey_responses')
-      .select('id')
-      .eq('user_id', userId)
-      .single()
-    return !!data
-  } catch {
-    return false
-  }
+  const supabase = createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+  const { data } = await supabase
+    .from('beta_survey_responses')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+  return !!data
 }

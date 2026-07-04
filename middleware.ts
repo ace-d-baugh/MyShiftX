@@ -1,6 +1,22 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { env } from '@/lib/env'
+import { isBetaClosed } from '@/lib/beta-schedule'
+
+// The actual product (plus auth pages, since there's nothing to sign into
+// once it's closed) — everything that isn't public marketing collateral.
+// /beta-test is included so old links to it fall through to the past-tense
+// closed page once the deadline passes. Matched as an exact path or a path
+// prefix (so "/beta-test" doesn't also swallow "/beta-test-closed").
+const LOCKED_ROUTES = [
+  '/wall', '/calendar', '/profile', '/messages', '/boards', '/leader',
+  '/admin', '/help', '/kanban', '/login', '/register', '/forgot-password',
+  '/reset-password', '/verify-email', '/beta-test',
+]
+
+function isLockedRoute(pathname: string): boolean {
+  return LOCKED_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`))
+}
 
 // EEA member states + UK + Switzerland — the regions Google's ad-consent
 // requirements (and our own CookieConsentBanner suppression) target.
@@ -11,6 +27,15 @@ const EEA_UK_CH_COUNTRIES = new Set([
 ])
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  if (isBetaClosed() && isLockedRoute(pathname)) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/beta-test-closed'
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -33,8 +58,6 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user }, error } = await supabase.auth.getUser()
-
-  const pathname = request.nextUrl.pathname
 
   // Log every middleware decision in development to diagnose loops
   if (process.env.NODE_ENV === 'development') {

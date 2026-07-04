@@ -476,6 +476,8 @@ export interface Database {
           nps: string | null
           open_feedback: string | null
           feature_awareness: Json | null
+          testimonial: string | null
+          testimonial_consent: boolean
         }
         Insert: {
           id?: string
@@ -510,6 +512,8 @@ export interface Database {
           nps?: string | null
           open_feedback?: string | null
           feature_awareness?: Json | null
+          testimonial?: string | null
+          testimonial_consent?: boolean
         }
         Update: {
           id?: string
@@ -544,6 +548,8 @@ export interface Database {
           nps?: string | null
           open_feedback?: string | null
           feature_awareness?: Json | null
+          testimonial?: string | null
+          testimonial_consent?: boolean
         }
         Relationships: []
       }

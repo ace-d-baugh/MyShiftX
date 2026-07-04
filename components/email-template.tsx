@@ -208,6 +208,19 @@ export const shiftMatchHtml = (opts: {
   `)
 }
 
+/** Sent once to every beta tester the night the beta closes */
+export const betaClosingHtml = (opts: { displayName?: string; surveyUrl: string; betaTestUrl: string }) =>
+  shell(`
+    ${h1('The beta is wrapping up tonight 💜')}
+    ${p(`Hi${opts.displayName ? ` ${opts.displayName}` : ''},`)}
+    ${p('Beta testing is sadly wrapping up tonight. MyShiftX will go dark while I process everyone’s feedback and get ready for what’s next.')}
+    ${highlight('Goes dark tonight at 11:59 PM')}
+    ${p('If you haven’t already, please fill out the survey — it’s the single biggest thing that shapes what happens next, and it’ll stay open for about a week even after the site goes dark.')}
+    ${btn(opts.surveyUrl, 'Fill Out the Survey')}
+    ${p(`Want the full story on why, and what's next? <a href="${opts.betaTestUrl}" style="color:#BD80FF;">Read the beta wrap-up page</a>.`)}
+    ${muted('Thank you for being some of the very first people to use MyShiftX, break it, and tell me what needed to change. This isn’t goodbye — just see you soon.')}
+  `)
+
 /** Generic notification — available for future use */
 export const notificationHtml = (opts: {
   title: string
