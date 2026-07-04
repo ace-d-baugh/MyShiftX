@@ -31,6 +31,7 @@ export type SurveyPayload = {
   bugs_feedback:            string
   nps:                      string | null
   open_feedback:            string
+  feature_awareness:        Record<string, string>
 }
 
 export async function submitSurvey(data: SurveyPayload): Promise<{ error?: string }> {

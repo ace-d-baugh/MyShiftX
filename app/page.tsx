@@ -4,6 +4,7 @@ import { ArrowRight, RefreshCw, Gift, Clock, Shield, Users, Zap, Star, Quote } f
 import { AnimateIn } from '@/components/landing/AnimateIn'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { createServerClient } from '@/lib/supabase/server'
+import { INDUSTRIES } from '@/lib/landing/industries'
 
 export const metadata = {
   title: 'MyShiftX – Shift Trading for Shift Workers',
@@ -66,15 +67,6 @@ const features = [
     iconBg: 'bg-secondary/30',
     iconColor: 'text-primary',
   },
-]
-
-const properties = [
-  'Theme Parks',
-  'Hotels & Resorts',
-  'Restaurants',
-  'Retail Stores',
-  'Warehouses',
-  'Event Venues',
 ]
 
 // Placeholder testimonials — swap for real user reviews once collected.
@@ -251,11 +243,14 @@ export default async function HomePage() {
             <p className="text-text/60 mb-8">Find shifts across every property and department you work.</p>
           </AnimateIn>
           <div className="flex flex-wrap justify-center gap-3">
-            {properties.map((p, i) => (
-              <AnimateIn key={p} animation="fade-in" delay={i * 70}>
-                <span className="bg-card border border-primary/20 text-text rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-default">
-                  {p}
-                </span>
+            {INDUSTRIES.map((industry, i) => (
+              <AnimateIn key={industry.slug} animation="fade-in" delay={i * 70}>
+                <Link
+                  href={`/for/${industry.slug}`}
+                  className="bg-card border border-primary/20 text-text rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200"
+                >
+                  {industry.shortName}
+                </Link>
               </AnimateIn>
             ))}
           </div>

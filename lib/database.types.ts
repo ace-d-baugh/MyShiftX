@@ -475,6 +475,7 @@ export interface Database {
           bugs_feedback: string | null
           nps: string | null
           open_feedback: string | null
+          feature_awareness: Json | null
         }
         Insert: {
           id?: string
@@ -508,6 +509,7 @@ export interface Database {
           bugs_feedback?: string | null
           nps?: string | null
           open_feedback?: string | null
+          feature_awareness?: Json | null
         }
         Update: {
           id?: string
@@ -541,6 +543,7 @@ export interface Database {
           bugs_feedback?: string | null
           nps?: string | null
           open_feedback?: string | null
+          feature_awareness?: Json | null
         }
         Relationships: []
       }

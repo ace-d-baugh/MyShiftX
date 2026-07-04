@@ -8,6 +8,7 @@ import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown, X, Chec
 import { createClient } from '@/lib/supabase/client'
 import { deactivateShift, deactivateRequest } from '@/app/actions/posts'
 import { PushPromptBanner } from '@/components/features/PushPromptBanner'
+import { BetaClosureBanner } from '@/components/features/BetaClosureBanner'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
 import { RequestCard, type RequestData } from '@/components/features/RequestCard'
 import { WallSkeleton } from '@/components/ui/WallSkeleton'
@@ -451,6 +452,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
         </div>
       </div>
 
+      <BetaClosureBanner />
       <PushPromptBanner />
 
       {/* Deactivate error */}

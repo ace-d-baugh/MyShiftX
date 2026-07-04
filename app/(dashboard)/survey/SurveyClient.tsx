@@ -110,6 +110,48 @@ function CheckGroup({ options, values, onChange }: {
   )
 }
 
+const AWARENESS_OPTIONS = [
+  { value: 'unaware', label: "Didn't know it existed" },
+  { value: 'aware_unused', label: 'Knew about it, never tried it' },
+  { value: 'used_liked', label: 'Tried it, liked it' },
+  { value: 'used_disliked', label: "Tried it, didn't like it" },
+] as const
+
+const FEATURE_AWARENESS_ITEMS = [
+  { key: 'interest_star', label: 'The ⭐ interest button on a shift or request' },
+  { key: 'comments', label: 'Commenting on a post' },
+  { key: 'message_from_card', label: 'Messaging a poster directly from a shift/request card' },
+  { key: 'board_filters', label: 'Date and board filters on the Wall' },
+  { key: 'messages_inbox', label: 'The Messages inbox (direct messages, reactions, read receipts)' },
+  { key: 'push_notifications', label: 'Push notifications' },
+  { key: 'dark_mode', label: 'Dark mode' },
+  { key: 'my_calendar', label: 'The My Calendar page' },
+  { key: 'calendar_sync', label: 'Calendar Sync — subscribing your Google/Apple/Outlook calendar (Pro/Trial only)' },
+] as const
+
+function AwarenessRow({ label, value, onChange }: {
+  label: string; value: string | undefined; onChange: (v: string) => void
+}) {
+  return (
+    <div className="mb-4 pb-4 border-b border-border/50 last:border-0 last:mb-0 last:pb-0">
+      <p className="text-sm text-text/90 mb-2 leading-snug">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {AWARENESS_OPTIONS.map(opt => (
+          <button key={opt.value} type="button" onClick={() => onChange(opt.value)}
+            className={cn(
+              'px-2.5 py-1.5 rounded-md border text-xs font-medium transition-colors min-h-0 min-w-0',
+              value === opt.value
+                ? 'bg-primary border-primary text-white'
+                : 'border-border text-text/60 hover:border-primary/50 hover:text-text bg-background'
+            )}>
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 interface Props {
@@ -124,6 +166,7 @@ export function SurveyClient({ displayName, alreadySubmitted }: Props) {
   const [answers, setAnswers] = useState<Partial<SurveyPayload>>({
     current_method: [], wanted_features: [], appealing_pro_features: [],
     features_used: [], one_thing: '', bugs_feedback: '', open_feedback: '',
+    feature_awareness: {},
   })
   const [submitted, setSubmitted] = useState(alreadySubmitted)
   const [loading, setLoading] = useState(false)
@@ -279,6 +322,21 @@ export function SurveyClient({ displayName, alreadySubmitted }: Props) {
             { value: 'managed-board', label: 'Managed board settings or members' },
           ]} />
       </QuestionBlock>
+
+      {/* ── Feature-by-feature awareness ── */}
+      <SectionLabel>Feature by feature</SectionLabel>
+      <p className="text-xs text-text/50 -mt-3 mb-4">
+        The beta is wrapping up — this is our last chance to find out which features actually landed. For each one, tell us honestly whether you knew it was there.
+      </p>
+
+      {FEATURE_AWARENESS_ITEMS.map(item => (
+        <AwarenessRow
+          key={item.key}
+          label={item.label}
+          value={answers.feature_awareness?.[item.key]}
+          onChange={v => set('feature_awareness', { ...(answers.feature_awareness ?? {}), [item.key]: v })}
+        />
+      ))}
 
       {/* ── Notifications ── */}
       <SectionLabel>Notifications &amp; matching</SectionLabel>
