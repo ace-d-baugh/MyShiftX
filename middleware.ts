@@ -18,6 +18,11 @@ function isLockedRoute(pathname: string): boolean {
   return LOCKED_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`))
 }
 
+// Only the production domain goes dark tonight — the dev subdomain (and any
+// Vercel preview deployment, and localhost) keeps working so development can
+// continue right up to the real relaunch.
+const PRODUCTION_HOSTNAMES = new Set(['myshiftx.com', 'www.myshiftx.com'])
+
 // EEA member states + UK + Switzerland — the regions Google's ad-consent
 // requirements (and our own CookieConsentBanner suppression) target.
 const EEA_UK_CH_COUNTRIES = new Set([
@@ -29,7 +34,7 @@ const EEA_UK_CH_COUNTRIES = new Set([
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  if (isBetaClosed() && isLockedRoute(pathname)) {
+  if (isBetaClosed() && PRODUCTION_HOSTNAMES.has(request.nextUrl.hostname) && isLockedRoute(pathname)) {
     const url = request.nextUrl.clone()
     url.pathname = '/beta-test-closed'
     url.search = ''
