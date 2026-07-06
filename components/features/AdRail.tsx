@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { AdSlot } from './AdSlot'
+import { cn } from '@/lib/utils'
 
 // Pages that get an ad slot. Everything else (landing pages, auth/OAuth
 // pages, admin tools, the Kanban roadmap) stays ad-free.
@@ -14,6 +15,9 @@ const AD_ENABLED_PATHS = new Set([
   '/leader/flags',
   '/leader/archive',
   '/help',
+  '/terms',
+  '/privacy',
+  '/data-deletion',
 ])
 
 function isAdEnabledPath(pathname: string): boolean {
@@ -29,6 +33,10 @@ const STICKY_MOBILE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT_STICKY_MOBILE
 interface AdRailProps {
   showAds: boolean
   children: React.ReactNode
+  /** False for standalone pages (Terms, Privacy, Data Deletion) that render
+   * outside the dashboard layout and have no bottom nav for the mobile ad
+   * bar to sit above. Defaults to true (the dashboard's normal layout). */
+  hasBottomNav?: boolean
 }
 
 /**
@@ -37,7 +45,7 @@ interface AdRailProps {
  * sticky bottom bar on mobile (sits just above the existing bottom nav).
  * Renders nothing extra when ads shouldn't show here.
  */
-export function AdRail({ showAds, children }: AdRailProps) {
+export function AdRail({ showAds, children, hasBottomNav = true }: AdRailProps) {
   const pathname = usePathname()
   const enabled = showAds && isAdEnabledPath(pathname)
 
@@ -57,7 +65,12 @@ export function AdRail({ showAds, children }: AdRailProps) {
       )}
 
       {enabled && (
-        <div className="lg:hidden fixed bottom-14 inset-x-0 z-40 px-2 py-1 bg-card/95 backdrop-blur-sm border-t border-border">
+        <div
+          className={cn(
+            'lg:hidden fixed inset-x-0 z-40 px-2 py-1 bg-card/95 backdrop-blur-sm border-t border-border',
+            hasBottomNav ? 'bottom-14' : 'bottom-0'
+          )}
+        >
           <AdSlot slotId={STICKY_MOBILE_SLOT} className="w-full max-w-md mx-auto h-16" />
         </div>
       )}

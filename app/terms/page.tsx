@@ -1,10 +1,16 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { createServerClient } from '@/lib/supabase/server'
+import { getPublicShowAds } from '@/lib/auth/session'
+import { AdRail } from '@/components/features/AdRail'
 
 export const metadata = { title: 'Terms & Conditions – MyShiftX' }
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const showAds = await getPublicShowAds(createServerClient())
+
   return (
+    <AdRail showAds={showAds} hasBottomNav={false}>
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 py-12">
         <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-text/60 hover:text-text mb-8 min-h-0 min-w-0">
@@ -455,5 +461,6 @@ export default function TermsPage() {
         </div>
       </div>
     </div>
+    </AdRail>
   )
 }
