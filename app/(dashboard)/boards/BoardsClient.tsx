@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   Users, Crown, LayoutGrid, ChevronDown, MoreHorizontal,
@@ -290,7 +291,12 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <span className="font-accent font-bold text-text text-sm truncate">{board.boardName}</span>
+                      <Link
+                        href={`/boards/${board.boardSlug}`}
+                        className="font-accent font-bold text-text text-sm truncate hover:text-primary hover:underline"
+                      >
+                        {board.boardName}
+                      </Link>
                       {/* Member count pill */}
                       <span className="text-[11px] font-semibold bg-primary/15 text-primary px-2 py-0.5 rounded-full shrink-0 leading-none">
                         {board.members.length}

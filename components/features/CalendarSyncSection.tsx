@@ -51,7 +51,7 @@ export function CalendarSyncSection() {
   }
 
   return (
-    <div className="card shadow-sm">
+    <div id="calendar-sync" className="card shadow-sm">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 bg-secondary/20 rounded-full flex items-center justify-center">
           <CalendarDays className="w-5 h-5 text-primary" />

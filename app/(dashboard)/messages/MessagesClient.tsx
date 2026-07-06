@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
-import { Check, ChevronDown, LayoutGrid, MessageSquare, Search, SquarePen, Trash2, User } from 'lucide-react'
+import { ChevronDown, LayoutGrid, MessageSquare, Search, SquarePen, Trash2, User } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -38,6 +38,31 @@ interface MessagesClientProps {
   initialConversations: ConversationSummary[]
 }
 
+function MateRow({ member, startingWith, onStart }: {
+  member: BoardMate
+  startingWith: string | null
+  onStart: (userId: string) => void
+}) {
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => onStart(member.user_id)}
+        disabled={startingWith !== null}
+        className="flex items-center gap-3 w-full text-left px-2 py-2.5 rounded-md hover:bg-primary-light/50 transition-colors disabled:opacity-60 min-h-0"
+      >
+        <span className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center shrink-0">
+          <User className="w-4 h-4 text-primary" />
+        </span>
+        <span className="text-sm font-medium text-text flex-1 truncate">
+          {member.display_name ?? 'Unnamed User'}
+        </span>
+        {startingWith === member.user_id && <LoadingSpinner size="sm" />}
+      </button>
+    </li>
+  )
+}
+
 export function MessagesClient({ currentUserId, initialConversations }: MessagesClientProps) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
@@ -50,9 +75,11 @@ export function MessagesClient({ currentUserId, initialConversations }: Messages
   const [startingWith, setStartingWith] = useState<string | null>(null)
   const [directoryError, setDirectoryError] = useState<string | null>(null)
 
-  // Board filter (only shown when the user belongs to 2+ boards)
+  // Board filter (only shown when the user belongs to 2+ boards). null = "All
+  // Boards", which groups the list by board (accordion) instead of a flat list.
   const [myBoards, setMyBoards] = useState<BoardOption[] | null>(null)
-  const [selectedBoardIds, setSelectedBoardIds] = useState<Set<string>>(new Set())
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null)
+  const [collapsedBoards, setCollapsedBoards] = useState<Set<string>>(new Set())
   const [boardFilterOpen, setBoardFilterOpen] = useState(false)
 
   // Chat delete (per-user hide)
@@ -109,12 +136,18 @@ export function MessagesClient({ currentUserId, initialConversations }: Messages
         .map(b => ({ id: b.board_id, name: (b.boards as unknown as { name: string } | null)?.name ?? 'Board' }))
         .sort((a, b) => a.name.localeCompare(b.name))
       setMyBoards(boards)
-      setSelectedBoardIds(new Set(boards.map(b => b.id))) // default: all boards
+      setSelectedBoardId(null) // default: All Boards
+      setCollapsedBoards(new Set())
     }
   }
 
-  const toggleBoard = (boardId: string) => {
-    setSelectedBoardIds(prev => {
+  const selectBoard = (boardId: string | null) => {
+    setSelectedBoardId(boardId)
+    setBoardFilterOpen(false)
+  }
+
+  const toggleBoardCollapsed = (boardId: string) => {
+    setCollapsedBoards(prev => {
       const next = new Set(prev)
       if (next.has(boardId)) next.delete(boardId)
       else next.add(boardId)
@@ -122,14 +155,9 @@ export function MessagesClient({ currentUserId, initialConversations }: Messages
     })
   }
 
-  const allBoardsSelected = myBoards !== null && selectedBoardIds.size === myBoards.length
-  const boardFilterLabel = myBoards === null
-    ? 'All boards'
-    : allBoardsSelected
-      ? 'All boards'
-      : selectedBoardIds.size === 1
-        ? myBoards.find(b => selectedBoardIds.has(b.id))?.name ?? '1 board'
-        : `${selectedBoardIds.size} boards`
+  const boardFilterLabel = selectedBoardId === null
+    ? 'All Boards'
+    : myBoards?.find(b => b.id === selectedBoardId)?.name ?? 'Board'
 
   const handleStartChat = async (userId: string) => {
     if (startingWith) return
@@ -160,14 +188,23 @@ export function MessagesClient({ currentUserId, initialConversations }: Messages
     }
   }
 
-  const filteredMates = (boardMates ?? []).filter(m => {
-    if (!(m.display_name ?? '').toLowerCase().includes(search.trim().toLowerCase())) return false
-    // Board filter applies only when it's shown (2+ boards) and not "all"
-    if (myBoards !== null && myBoards.length > 1 && !allBoardsSelected) {
-      return m.board_ids.some(id => selectedBoardIds.has(id))
-    }
-    return true
-  })
+  const searchedMates = (boardMates ?? []).filter(m =>
+    (m.display_name ?? '').toLowerCase().includes(search.trim().toLowerCase())
+  )
+
+  // A specific board is picked → flat list scoped to it.
+  const filteredMates = selectedBoardId === null
+    ? searchedMates
+    : searchedMates.filter(m => m.board_ids.includes(selectedBoardId))
+
+  // "All Boards" with 2+ boards → group into a collapsible section per board
+  // instead of one undifferentiated list. Boards with no matches are hidden.
+  const showGroupedByBoard = selectedBoardId === null && myBoards !== null && myBoards.length > 1
+  const groupedByBoard = showGroupedByBoard
+    ? myBoards!
+        .map(board => ({ board, members: searchedMates.filter(m => m.board_ids.includes(board.id)) }))
+        .filter(group => group.members.length > 0)
+    : []
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
@@ -274,34 +311,32 @@ export function MessagesClient({ currentUserId, initialConversations }: Messages
               >
                 <button
                   type="button"
-                  onClick={() => setSelectedBoardIds(new Set(
-                    allBoardsSelected ? [] : myBoards.map(b => b.id)
-                  ))}
+                  onClick={() => selectBoard(null)}
                   className="flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-text hover:bg-primary-light/50 transition-colors min-h-0"
                 >
                   <span className={cn(
-                    'w-4 h-4 rounded border flex items-center justify-center shrink-0',
-                    allBoardsSelected ? 'bg-primary border-primary text-white' : 'border-border'
+                    'w-4 h-4 rounded-full border flex items-center justify-center shrink-0',
+                    selectedBoardId === null ? 'border-primary' : 'border-border'
                   )}>
-                    {allBoardsSelected && <Check className="w-3 h-3" />}
+                    {selectedBoardId === null && <span className="w-2 h-2 rounded-full bg-primary" />}
                   </span>
-                  All boards
+                  All Boards
                 </button>
                 <div className="my-1 border-t border-border" />
                 {myBoards.map(b => {
-                  const checked = selectedBoardIds.has(b.id)
+                  const checked = selectedBoardId === b.id
                   return (
                     <button
                       key={b.id}
                       type="button"
-                      onClick={() => toggleBoard(b.id)}
+                      onClick={() => selectBoard(b.id)}
                       className="flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm text-text/80 hover:bg-primary-light/50 transition-colors min-h-0"
                     >
                       <span className={cn(
-                        'w-4 h-4 rounded border flex items-center justify-center shrink-0',
-                        checked ? 'bg-primary border-primary text-white' : 'border-border'
+                        'w-4 h-4 rounded-full border flex items-center justify-center shrink-0',
+                        checked ? 'border-primary' : 'border-border'
                       )}>
-                        {checked && <Check className="w-3 h-3" />}
+                        {checked && <span className="w-2 h-2 rounded-full bg-primary" />}
                       </span>
                       <span className="truncate">{b.name}</span>
                     </button>
@@ -329,6 +364,40 @@ export function MessagesClient({ currentUserId, initialConversations }: Messages
         <div className="max-h-72 overflow-y-auto -mx-2">
           {boardMates === null ? (
             <div className="flex justify-center py-6"><LoadingSpinner size="sm" /></div>
+          ) : showGroupedByBoard ? (
+            groupedByBoard.length === 0 ? (
+              <p className="text-xs text-text/50 text-center py-6">
+                {boardMates.length === 0
+                  ? 'No one to message yet — you can chat with members of your boards.'
+                  : 'No one matches your search.'}
+              </p>
+            ) : (
+              <div className="space-y-1">
+                {groupedByBoard.map(({ board, members }) => {
+                  const collapsed = collapsedBoards.has(board.id)
+                  return (
+                    <div key={board.id}>
+                      <button
+                        type="button"
+                        onClick={() => toggleBoardCollapsed(board.id)}
+                        className="flex items-center gap-2 w-full text-left px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-text/50 hover:text-text/80 transition-colors min-h-0"
+                      >
+                        <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', collapsed && '-rotate-90')} />
+                        <span className="truncate">{board.name}</span>
+                        <span className="text-text/30 normal-case font-normal">({members.length})</span>
+                      </button>
+                      {!collapsed && (
+                        <ul>
+                          {members.map(m => (
+                            <MateRow key={m.user_id} member={m} startingWith={startingWith} onStart={handleStartChat} />
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )
           ) : filteredMates.length === 0 ? (
             <p className="text-xs text-text/50 text-center py-6">
               {boardMates.length === 0
@@ -338,22 +407,7 @@ export function MessagesClient({ currentUserId, initialConversations }: Messages
           ) : (
             <ul>
               {filteredMates.map(m => (
-                <li key={m.user_id}>
-                  <button
-                    type="button"
-                    onClick={() => handleStartChat(m.user_id)}
-                    disabled={startingWith !== null}
-                    className="flex items-center gap-3 w-full text-left px-2 py-2.5 rounded-md hover:bg-primary-light/50 transition-colors disabled:opacity-60 min-h-0"
-                  >
-                    <span className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4 text-primary" />
-                    </span>
-                    <span className="text-sm font-medium text-text flex-1 truncate">
-                      {m.display_name ?? 'Unnamed User'}
-                    </span>
-                    {startingWith === m.user_id && <LoadingSpinner size="sm" />}
-                  </button>
-                </li>
+                <MateRow key={m.user_id} member={m} startingWith={startingWith} onStart={handleStartChat} />
               ))}
             </ul>
           )}
