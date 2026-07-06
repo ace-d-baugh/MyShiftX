@@ -34,7 +34,7 @@ function VerifyEmailContent() {
     })
 
     return () => subscription.unsubscribe()
-  }, [redirectTo])
+  }, [redirectTo, router, supabase])
 
   return (
     <div className="card shadow-lg text-center animate-auth-card-in">

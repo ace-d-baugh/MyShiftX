@@ -11,11 +11,11 @@ import {
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
+import { InviteModal } from '@/components/features/InviteModal'
 import {
-  LayoutGrid, Plus, X, Pencil, Key, Trash2, Check, Copy,
-  RefreshCw, Users, MoreVertical,
+  LayoutGrid, Plus, X, Pencil, UserPlus, Trash2, Check,
+  Users, MoreVertical,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import type { BoardRole } from '@/lib/database.types'
 
 interface BoardEntry {
@@ -67,9 +67,6 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
 
   // Code modal
   const [codeBoard, setCodeBoard] = useState<BoardEntry | null>(null)
-  const [codeToggleLoading, setCodeToggleLoading] = useState(false)
-  const [regenLoading, setRegenLoading] = useState(false)
-  const [codeCopied, setCodeCopied] = useState(false)
 
   // Delete confirm
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -179,33 +176,24 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
 
   // ── Code modal ────────────────────────────────────────────────────────────
 
-  const handleToggleCode = async () => {
-    if (!codeBoard) return
-    setCodeToggleLoading(true)
-    const result = await toggleInviteCode(codeBoard.board_id, !codeBoard.invite_code_enabled)
-    setCodeToggleLoading(false)
-    if (result.error) { setError(result.error); return }
-    const updated = { ...codeBoard, invite_code_enabled: !codeBoard.invite_code_enabled }
-    setCodeBoard(updated)
-    setBoards(prev => prev.map(b => b.board_id === codeBoard.board_id ? { ...b, invite_code_enabled: updated.invite_code_enabled } : b))
+  const handleToggleCode = async (): Promise<{ error?: string }> => {
+    if (!codeBoard) return {}
+    const nextEnabled = !codeBoard.invite_code_enabled
+    const result = await toggleInviteCode(codeBoard.board_id, nextEnabled)
+    if (result.error) return result
+    setCodeBoard(prev => prev ? { ...prev, invite_code_enabled: nextEnabled } : null)
+    setBoards(prev => prev.map(b => b.board_id === codeBoard.board_id ? { ...b, invite_code_enabled: nextEnabled } : b))
+    return result
   }
 
-  const handleRegen = async () => {
-    if (!codeBoard) return
-    setRegenLoading(true)
+  const handleRegen = async (): Promise<{ code?: string; error?: string }> => {
+    if (!codeBoard) return {}
     const result = await regenerateInviteCode(codeBoard.board_id)
-    setRegenLoading(false)
-    if (result.error) { setError(result.error); return }
-    const updated = { ...codeBoard, invite_code: result.code! }
-    setCodeBoard(updated)
-    setBoards(prev => prev.map(b => b.board_id === codeBoard.board_id ? { ...b, invite_code: result.code! } : b))
-  }
-
-  const copyCode = () => {
-    if (!codeBoard) return
-    navigator.clipboard.writeText(codeBoard.invite_code)
-    setCodeCopied(true)
-    setTimeout(() => setCodeCopied(false), 2000)
+    if (result.error) return result
+    const newCode = result.code!
+    setCodeBoard(prev => prev ? { ...prev, invite_code: newCode } : null)
+    setBoards(prev => prev.map(b => b.board_id === codeBoard.board_id ? { ...b, invite_code: newCode } : b))
+    return result
   }
 
   // ── Delete ────────────────────────────────────────────────────────────────
@@ -299,13 +287,14 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                       <Link href={`/boards/${board.slug}`} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0 inline-flex" title="View members" aria-label="View members">
                         <Users className="w-3.5 h-3.5" />
                       </Link>
+                      {/* Invite — visible to all roles; the modal itself hides code-changing controls for non-Leaders */}
+                      <button onClick={() => setCodeBoard(board)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Invite" aria-label="Invite to board">
+                        <UserPlus className="w-3.5 h-3.5" />
+                      </button>
                       {editingId !== board.board_id && board.role === 'Leader' && (
                         <>
                           <button onClick={() => startEdit(board)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Rename" aria-label="Rename board">
                             <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => { setCodeBoard(board); setCodeCopied(false) }} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Invite code" aria-label="Manage invite code">
-                            <Key className="w-3.5 h-3.5" />
                           </button>
                           <button onClick={() => setDeleteId(board.board_id)} className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0" title="Delete board" aria-label="Delete board">
                             <Trash2 className="w-3.5 h-3.5" />
@@ -402,6 +391,19 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
             className="fixed z-20 bg-card border border-border rounded-lg shadow-lg min-w-[160px] py-1"
             style={{ top: menuPos.top, right: menuPos.right }}
           >
+            <Link
+              href={`/boards/${menuBoard.slug}`}
+              onClick={closeBoardMenu}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20"
+            >
+              <Users className="w-3.5 h-3.5 shrink-0" /> Members
+            </Link>
+            <button
+              onClick={() => { setCodeBoard(menuBoard); closeBoardMenu() }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20 text-left"
+            >
+              <UserPlus className="w-3.5 h-3.5 shrink-0" /> Invite
+            </button>
             {menuBoard.role === 'Leader' && (
               <>
                 <button
@@ -410,28 +412,15 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                 >
                   <Pencil className="w-3.5 h-3.5 shrink-0" /> Rename
                 </button>
-                <Link
-                  href={`/boards/${menuBoard.slug}`}
-                  onClick={closeBoardMenu}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20"
-                >
-                  <Users className="w-3.5 h-3.5 shrink-0" /> Members
-                </Link>
-                <button
-                  onClick={() => { setCodeBoard(menuBoard); setCodeCopied(false); closeBoardMenu() }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-primary-light/20 text-left"
-                >
-                  <Key className="w-3.5 h-3.5 shrink-0" /> Invite Code
-                </button>
                 <button
                   onClick={() => { setDeleteId(menuBoard.board_id); closeBoardMenu() }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-warning hover:bg-warning/10 text-left"
                 >
                   <Trash2 className="w-3.5 h-3.5 shrink-0" /> Delete Board
                 </button>
-                <div className="border-t border-border my-1" />
               </>
             )}
+            <div className="border-t border-border my-1" />
             <button
               onClick={() => { setLeaveId(menuBoard.board_id); setLeaveName(menuBoard.name); closeBoardMenu() }}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-warning hover:bg-warning/10 text-left"
@@ -492,60 +481,17 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
 
       {/* ── Code Modal (Leader) ──────────────────────────────────────────── */}
       {codeBoard && (
-        <Modal open onClose={() => setCodeBoard(null)} size="sm">
-          <h3 className="font-accent font-bold text-text text-lg mb-1">{codeBoard.name}</h3>
-          <p className="text-xs text-text/50 mb-4">Invite Code</p>
-
-          <div className="flex items-center gap-2 mb-4">
-            <span className="font-mono text-3xl font-bold tracking-[0.3em] text-primary select-all">
-              {codeBoard.invite_code}
-            </span>
-            <button
-              onClick={copyCode}
-              className="p-1.5 rounded-md text-text/40 hover:text-primary hover:bg-primary-light transition-colors min-h-0 min-w-0"
-              aria-label="Copy invite code"
-            >
-              {codeCopied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between mb-4 p-3 rounded-lg bg-primary-light/30">
-            <div>
-              <p className="text-sm font-medium text-text">Accept new members</p>
-              <p className="text-xs text-text/50">{codeBoard.invite_code_enabled ? 'Code is active' : 'Code is paused'}</p>
-            </div>
-            <button
-              onClick={handleToggleCode}
-              disabled={codeToggleLoading}
-              role="switch"
-              aria-checked={codeBoard.invite_code_enabled}
-              aria-label="Toggle invite code"
-              className={cn(
-                'relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0',
-                codeBoard.invite_code_enabled ? 'bg-primary' : 'bg-border'
-              )}
-            >
-              <span
-                className={cn(
-                  'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform',
-                  codeBoard.invite_code_enabled ? 'translate-x-5' : 'translate-x-0.5'
-                )}
-              />
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <button
-              onClick={handleRegen}
-              disabled={regenLoading}
-              className="flex items-center gap-1.5 text-xs text-text/50 hover:text-warning transition-colors min-h-0"
-            >
-              <RefreshCw className={cn('w-3.5 h-3.5', regenLoading && 'animate-spin')} />
-              Regenerate Code
-            </button>
-            <Button variant="outline" size="sm" onClick={() => setCodeBoard(null)}>Close</Button>
-          </div>
-        </Modal>
+        <InviteModal
+          open
+          onClose={() => setCodeBoard(null)}
+          boardName={codeBoard.name}
+          boardSlug={codeBoard.slug}
+          inviteCode={codeBoard.invite_code}
+          inviteCodeEnabled={codeBoard.invite_code_enabled}
+          isLeader={codeBoard.role === 'Leader'}
+          onToggleEnabled={handleToggleCode}
+          onRegenerate={handleRegen}
+        />
       )}
 
       {/* ── Leave Board Confirmation Modal ──────────────────────────────── */}

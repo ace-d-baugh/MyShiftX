@@ -4,8 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   HelpCircle, ChevronDown, Send, X, CheckCircle,
-  LayoutGrid, Star, UserPlus, MessageSquare, ArrowRight,
-  Flag, Bell, Trash2, Users, Monitor, Laptop, Smartphone, CalendarDays,
+  LayoutGrid, Star, UserPlus, MessageSquare,
+  Bell, Monitor, Laptop, Smartphone, CalendarDays,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
@@ -356,7 +356,7 @@ export function HelpClient({ userEmail }: HelpClientProps) {
       <section>
         <h2 className="font-accent text-xl font-bold text-text mb-1">Comments &amp; Concerns</h2>
         <p className="text-sm text-text/60 mb-5">
-          Can't find what you're looking for? Send us a message and we'll get back to you within 24–48 hours.
+          Can&apos;t find what you&apos;re looking for? Send us a message and we&apos;ll get back to you within 24–48 hours.
         </p>
 
         {submitted ? (
@@ -365,7 +365,7 @@ export function HelpClient({ userEmail }: HelpClientProps) {
               <CheckCircle className="w-6 h-6 text-success" />
             </div>
             <p className="font-accent font-bold text-text text-lg">Message sent!</p>
-            <p className="text-sm text-text/60">We'll reply to <strong>{userEmail}</strong> within 24–48 hours.</p>
+            <p className="text-sm text-text/60">We&apos;ll reply to <strong>{userEmail}</strong> within 24–48 hours.</p>
             <button
               onClick={handleClear}
               className="text-xs text-primary hover:underline min-h-0 min-w-0 mt-2"

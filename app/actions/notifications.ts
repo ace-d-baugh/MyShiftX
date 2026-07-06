@@ -94,7 +94,7 @@ export async function notifyInterest(opts: {
       )
     }
 
-    if (!ownerWantsEmail) { console.log('[notifyInterest] owner has email notifications off — skipping email'); return }
+    if (!ownerWantsEmail) return
     if (!ownerEmail) { console.error('[notifyInterest] ownerEmail is null after lookup'); return }
     if (!optionalServerEnv.RESEND_API_KEY) {
       console.error('[notifyInterest] RESEND_API_KEY is not set — cannot send interest email')
@@ -115,8 +115,6 @@ export async function notifyInterest(opts: {
 
     if (sendError) {
       console.error('[notifyInterest] Resend error:', sendError)
-    } else {
-      console.log(`[notifyInterest] sent for ${opts.postType} ${opts.postId} ("${postTitle}")`)
     }
   } catch (err) {
     console.error('[notifyInterest] unexpected error:', err)
@@ -204,7 +202,6 @@ async function sendMatchNotifications(opts: {
       }),
     }).then(({ error }) => {
       if (error) console.error('[notifyMatch] Resend error (requester):', error)
-      else console.log(`[notifyMatch] sent match email to requester for request "${opts.requestTitle}"`)
     }))
   }
 
@@ -224,7 +221,6 @@ async function sendMatchNotifications(opts: {
       }),
     }).then(({ error }) => {
       if (error) console.error('[notifyMatch] Resend error (shift poster):', error)
-      else console.log(`[notifyMatch] sent match email to shift poster for shift "${opts.shiftTitle}"`)
     }))
   }
 
@@ -346,7 +342,6 @@ export async function notifyRequestPosted(opts: {
       .neq('user_id', opts.requesterUserId)
 
     if (error) { console.error('[notifyRequestPosted] query error:', error.message); return }
-    console.log(`[notifyRequestPosted] found ${(shifts ?? []).length} active shifts to check for board ${opts.boardId} on ${opts.requestedDate}`)
 
     // Deduplicate by shift poster user_id — same person may have multiple matching shifts
     const seenPosters = new Set<string>()
