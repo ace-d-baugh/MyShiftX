@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
-import { checkExistingSubmission } from '@/app/actions/survey'
 import { isSurveyClosed } from '@/lib/beta-schedule'
 import { SurveyClient } from './SurveyClient'
 
@@ -13,8 +12,8 @@ export default async function SurveyPage() {
   const supabase = createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const alreadySubmitted = await checkExistingSubmission()
-
+  // Personalizes the greeting only — never submitted with the survey data,
+  // and the survey itself is fully anonymous (see app/actions/survey.ts).
   let displayName = 'there'
   if (user) {
     const { data: profile } = await supabase
@@ -25,10 +24,5 @@ export default async function SurveyPage() {
     displayName = profile?.display_name ?? 'there'
   }
 
-  return (
-    <SurveyClient
-      displayName={displayName}
-      alreadySubmitted={alreadySubmitted}
-    />
-  )
+  return <SurveyClient displayName={displayName} />
 }

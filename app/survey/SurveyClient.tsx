@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
@@ -158,21 +158,34 @@ function AwarenessRow({ label, value, onChange }: {
 
 interface Props {
   displayName: string
-  alreadySubmitted: boolean
 }
 
 const REQUIRED = ['ease_register', 'ease_join_board', 'ease_post_shift', 'ease_find_shifts',
   'overall_useful', 'would_replace', 'display_mode', 'primary_device', 'nps'] as const
 
-export function SurveyClient({ displayName, alreadySubmitted }: Props) {
+// Submissions are fully anonymous (no user_id is ever recorded — see
+// app/actions/survey.ts), so "already submitted" is tracked client-side only.
+const SUBMITTED_STORAGE_KEY = 'myshiftx-survey-submitted'
+
+export function SurveyClient({ displayName }: Props) {
   const [answers, setAnswers] = useState<Partial<SurveyPayload>>({
     current_method: [], wanted_features: [], appealing_pro_features: [],
     features_used: [], one_thing: '', bugs_feedback: '', open_feedback: '',
     feature_awareness: {}, testimonial: '', testimonial_consent: false,
   })
-  const [submitted, setSubmitted] = useState(alreadySubmitted)
+  const [submitted, setSubmitted] = useState(false)
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(SUBMITTED_STORAGE_KEY)) {
+        setAlreadySubmitted(true)
+        setSubmitted(true)
+      }
+    } catch {}
+  }, [])
 
   const set = <K extends keyof SurveyPayload>(key: K, val: SurveyPayload[K]) =>
     setAnswers(prev => ({ ...prev, [key]: val }))
@@ -188,8 +201,8 @@ export function SurveyClient({ displayName, alreadySubmitted }: Props) {
     setError(null)
     const result = await submitSurvey(answers as SurveyPayload)
     setLoading(false)
-    if (result.error === 'DUPLICATE') { setSubmitted(true); return }
     if (result.error) { setError(result.error); return }
+    try { localStorage.setItem(SUBMITTED_STORAGE_KEY, '1') } catch {}
     setSubmitted(true)
   }
 
@@ -530,7 +543,7 @@ export function SurveyClient({ displayName, alreadySubmitted }: Props) {
               onChange={e => set('testimonial_consent', e.target.checked)}
               className="mt-0.5"
             />
-            It&rsquo;s okay to feature this quote publicly, possibly alongside my first name and role.
+            It&rsquo;s okay to feature this quote publicly (shown anonymously — the survey doesn&rsquo;t collect your name).
           </label>
         )}
       </QuestionBlock>

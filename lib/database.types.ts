@@ -445,7 +445,6 @@ export interface Database {
       beta_survey_responses: {
         Row: {
           id: string
-          user_id: string | null
           submitted_at: string | null
           heard_from: string | null
           workplace_type: string | null
@@ -481,7 +480,6 @@ export interface Database {
         }
         Insert: {
           id?: string
-          user_id?: string | null
           submitted_at?: string | null
           heard_from?: string | null
           workplace_type?: string | null
@@ -517,7 +515,6 @@ export interface Database {
         }
         Update: {
           id?: string
-          user_id?: string | null
           submitted_at?: string | null
           heard_from?: string | null
           workplace_type?: string | null

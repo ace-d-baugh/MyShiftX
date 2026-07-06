@@ -36,45 +36,21 @@ export type SurveyPayload = {
   testimonial_consent:      boolean
 }
 
-// Not behind the auth wall (Task: beta close-out) — logged-in users still get
-// their response tied to their account and deduped, but a signed-out visitor
-// (or anyone reaching /survey after the site goes dark) can still submit.
+// Not behind the auth wall (Task: beta close-out) — fully anonymous. No
+// identifying info is ever stored, so duplicate-submission prevention is
+// handled client-side only (localStorage), not by tying responses to an
+// account.
 export async function submitSurvey(data: SurveyPayload): Promise<{ error?: string }> {
   const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const userId = user?.id ?? null
 
   try {
-    if (userId) {
-      const { data: existing } = await supabase
-        .from('beta_survey_responses')
-        .select('id')
-        .eq('user_id', userId)
-        .single()
-      if (existing) return { error: 'DUPLICATE' }
-    }
-
     const { error } = await supabase
       .from('beta_survey_responses')
-      .insert({ user_id: userId, ...data })
+      .insert(data)
 
-    // Unique-constraint hit means a concurrent submission won the race
-    if (error?.code === '23505') return { error: 'DUPLICATE' }
     if (error) return { error: error.message }
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Something went wrong submitting the survey.' }
   }
-}
-
-export async function checkExistingSubmission(): Promise<boolean> {
-  const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
-  const { data } = await supabase
-    .from('beta_survey_responses')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
-  return !!data
 }
