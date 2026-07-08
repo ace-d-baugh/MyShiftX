@@ -8,9 +8,11 @@ import { createClient } from '@/lib/supabase/client'
 import { shiftSchema } from '@/lib/validations/shifts'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
-import { Plus, Save, X, ArrowLeft, ChevronDown, Calendar } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { Plus, Save, X, ArrowLeft, ChevronDown, Calendar, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { notifyShiftPosted } from '@/app/actions/notifications'
+import { deactivateShift } from '@/app/actions/posts'
 import { getSettings } from '@/lib/settings'
 
 interface Board { id: string; name: string }
@@ -119,6 +121,8 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
   const [dataLoading, setDataLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const firstForm: ShiftForm = initialData ? {
     board_id:             initialData.board_id ?? '',
@@ -244,6 +248,19 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
     }
   }
 
+  const handleDelete = async () => {
+    if (!shiftId) return
+    setDeleteLoading(true)
+    const result = await deactivateShift(shiftId)
+    setDeleteLoading(false)
+    if (result.error) {
+      setServerError(result.error)
+      setShowDeleteConfirm(false)
+      return
+    }
+    router.push(returnTo)
+  }
+
   if (dataLoading) return <div className="card shadow-sm flex items-center justify-center py-12 text-text/50">Loading...</div>
 
   if (boards.length === 0) return (
@@ -269,6 +286,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
     forms.every((f, i) => i === 0 ? isFormComplete(f) : !isTouched(f) || isFormComplete(f))
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {serverError && (
         <div className="p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm">{serverError}</div>
@@ -287,6 +305,12 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
                 <span className="text-sm font-semibold text-text">
                   {isEdit ? 'Shift Details' : `Shift ${i + 1}`}
                 </span>
+                {isEdit && (
+                  <button type="button" onClick={() => setShowDeleteConfirm(true)}
+                    className="flex items-center gap-1 text-xs text-warning hover:text-warning/80 min-h-0 min-w-0 transition-colors">
+                    <Trash2 className="w-3.5 h-3.5" /> Delete Shift
+                  </button>
+                )}
                 {i > 0 && (
                   <button type="button" onClick={() => removeForm(i)}
                     className="flex items-center gap-1 text-xs text-warning hover:text-warning/80 min-h-0 min-w-0 transition-colors">
@@ -456,5 +480,17 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
         </Button>
       </div>
     </form>
+    {isEdit && (
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete Shift"
+        message="Are you sure you want to delete this shift? This removes it from your calendar and the Wall. This cannot be undone."
+        confirmLabel="Delete"
+        loading={deleteLoading}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+    )}
+    </>
   )
 }

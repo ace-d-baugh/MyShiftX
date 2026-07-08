@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Camera, Check, ScanLine, Trash2 } from 'lucide-react'
+import { Camera, Check, Plus, ScanLine, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -142,6 +142,11 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
 
   const setRow = (i: number, patch: Partial<ImportRow>) =>
     setRows(prev => prev.map((r, idx) => idx === i ? { ...r, ...patch } : r))
+
+  // The reader doesn't always catch every shift on a busy schedule — let
+  // people fill in anything it missed rather than leave the modal empty-handed.
+  const addRow = () =>
+    setRows(prev => [...prev, { include: true, date: '', start: '', end: '', title: '' }])
 
   const included = rows.filter(r => r.include && r.date && r.start && r.end)
 
@@ -301,7 +306,16 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
             </table>
           </div>
 
+          <button
+            type="button"
+            onClick={addRow}
+            className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/70 transition-colors min-h-0"
+          >
+            <Plus className="w-4 h-4" /> Add a Shift Manually
+          </button>
+
           <p className="text-xs text-text/40">
+            Missing a shift? The reader doesn&apos;t always catch every row on a busy schedule — add it above.
             Shifts ending at or before their start time are saved as overnight shifts (ending the next day).
           </p>
 
