@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useLayoutEffect, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -77,9 +77,10 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
   const [leaveName, setLeaveName] = useState<string>('')
   const [leaveLoading, setLeaveLoading] = useState(false)
 
-  // Mobile board action menu
+  // Board action menu (three-dot dropdown)
   const [menuBoard, setMenuBoard] = useState<BoardEntry | null>(null)
-  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null)
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   const loadBoards = useCallback(async () => {
     setLoading(true)
@@ -220,12 +221,40 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
     await loadBoards()
   }
 
+  const MENU_MARGIN = 8
+  // Rough guess before the menu has actually rendered (item count varies by
+  // role) — corrected against the real measured size in the layout effect
+  // below, so this only needs to be in the ballpark.
+  const ESTIMATED_MENU_WIDTH = 180
+  const ESTIMATED_MENU_HEIGHT = 220
+
   const openBoardMenu = (board: BoardEntry, e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
+    const left = Math.min(
+      Math.max(rect.right - ESTIMATED_MENU_WIDTH, MENU_MARGIN),
+      window.innerWidth - ESTIMATED_MENU_WIDTH - MENU_MARGIN
+    )
+    const top = rect.bottom + 4 + ESTIMATED_MENU_HEIGHT > window.innerHeight
+      ? Math.max(rect.top - 4 - ESTIMATED_MENU_HEIGHT, MENU_MARGIN)
+      : rect.bottom + 4
+    setMenuPos({ top, left })
     setMenuBoard(board)
   }
   const closeBoardMenu = () => { setMenuBoard(null); setMenuPos(null) }
+
+  // Correct the estimate against the menu's actual rendered size, so it
+  // never overflows the viewport regardless of how many items it has.
+  useLayoutEffect(() => {
+    if (!menuBoard || !menuRef.current) return
+    const el = menuRef.current
+    const rect = el.getBoundingClientRect()
+    const left = Math.min(Math.max(rect.left, MENU_MARGIN), window.innerWidth - rect.width - MENU_MARGIN)
+    const top = Math.min(Math.max(rect.top, MENU_MARGIN), window.innerHeight - rect.height - MENU_MARGIN)
+    if (left !== rect.left || top !== rect.top) {
+      setMenuPos({ top, left })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuBoard])
 
   const approvedBoards = boards.filter(b => b.is_approved)
   const pendingBoards  = boards.filter(b => !b.is_approved)
@@ -274,42 +303,15 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                         <Link href={`/boards/${board.slug}`} className="font-medium text-text flex-1 hover:text-primary hover:underline transition-colors min-h-0 min-w-0 truncate">
                           {board.name}
                         </Link>
-                        <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{board.role}</Badge>
                       </div>
                     )}
                   </td>
 
-                  {/* Actions cell */}
+                  {/* Actions cell: role pill + three-dot menu */}
                   <td className="px-3 py-2.5 align-top">
-                    {/* Desktop: icon row */}
-                    <div className="hidden sm:flex items-center justify-end gap-0.5">
-                      {/* Members — visible to all roles */}
-                      <Link href={`/boards/${board.slug}`} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0 inline-flex" title="View members" aria-label="View members">
-                        <Users className="w-3.5 h-3.5" />
-                      </Link>
-                      {/* Invite — visible to all roles; the modal itself hides code-changing controls for non-Leaders */}
-                      <button onClick={() => setCodeBoard(board)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Invite" aria-label="Invite to board">
-                        <UserPlus className="w-3.5 h-3.5" />
-                      </button>
-                      {editingId !== board.board_id && board.role === 'Leader' && (
-                        <>
-                          <button onClick={() => startEdit(board)} className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0" title="Rename" aria-label="Rename board">
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => setDeleteId(board.board_id)} className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0" title="Delete board" aria-label="Delete board">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="w-px h-4 bg-border mx-1" />
-                        </>
-                      )}
-                      <button onClick={() => { setLeaveId(board.board_id); setLeaveName(board.name) }} className="p-1 text-text/40 hover:text-warning min-h-0 min-w-0" title="Leave board" aria-label="Leave board">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {/* Mobile: three-dot menu */}
                     {editingId !== board.board_id && (
-                      <div className="sm:hidden flex items-center justify-end">
+                      <div className="flex items-center justify-end gap-2">
+                        <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{board.role}</Badge>
                         <button
                           onClick={e => openBoardMenu(board, e)}
                           className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0"
@@ -383,13 +385,14 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
         )}
       </div>
 
-      {/* ── Mobile Board Actions Dropdown ───────────────────────────────── */}
+      {/* ── Board Actions Dropdown ───────────────────────────────────────── */}
       {menuBoard && menuPos && (
         <>
           <div className="fixed inset-0 z-10" onClick={closeBoardMenu} />
           <div
+            ref={menuRef}
             className="fixed z-20 bg-card border border-border rounded-lg shadow-lg min-w-[160px] py-1"
-            style={{ top: menuPos.top, right: menuPos.right }}
+            style={{ top: menuPos.top, left: menuPos.left }}
           >
             <Link
               href={`/boards/${menuBoard.slug}`}
