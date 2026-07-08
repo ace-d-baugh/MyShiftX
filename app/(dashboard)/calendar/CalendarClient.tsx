@@ -115,16 +115,19 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
             >
               <Camera className="w-4 h-4" />
               <span className="hidden sm:inline">Import Schedule</span>
-              <span className="sm:hidden">Import</span>
+              <span className="hidden min-[505px]:inline sm:hidden">Import</span>
             </button>
           )}
           <Link href="/profile#calendar-sync" className="btn btn-outline gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
             <RefreshCw className="w-4 h-4" />
             <span className="hidden sm:inline">Sync Calendar</span>
-            <span className="sm:hidden">Sync</span>
+            <span className="hidden min-[505px]:inline sm:hidden">Sync</span>
           </Link>
           <Link href="/wall/new-shift?from=calendar" className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
-            <Plus className="w-4 h-4" /> Add Schedule
+            <Plus className="w-4 h-4" />
+            <span className="hidden min-[505px]:inline">
+              <span className="hidden sm:inline">Add </span>Shift
+            </span>
           </Link>
         </div>
       </div>
