@@ -194,7 +194,7 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
       {!boardsLoading && boards.length === 0 && (
         <div className="py-8 text-center text-sm text-text/60">
           You haven&apos;t joined any boards yet.{' '}
-          <a href="/profile" className="text-primary underline">Join or create a board</a> first.
+          <a href="/profile#my-boards" className="text-primary underline">Join or create a board</a> first.
         </div>
       )}
 

@@ -234,7 +234,7 @@ export function ProfileClient({ user, sessionUserId, isPro }: ProfileClientProps
       </div>
 
       {/* My Boards */}
-      <div className="card shadow-sm">
+      <div id="my-boards" className="card shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
             <LayoutDashboard className="w-5 h-5 text-success" />

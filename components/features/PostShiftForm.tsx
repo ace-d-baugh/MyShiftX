@@ -249,7 +249,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
   if (boards.length === 0) return (
     <div className="card shadow-sm py-8 text-center text-sm text-text/60">
       You haven&apos;t joined any boards yet.{' '}
-      <a href="/profile" className="text-primary underline">Join or create a board</a> first.
+      <a href="/profile#my-boards" className="text-primary underline">Join or create a board</a> first.
     </div>
   )
 
