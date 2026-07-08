@@ -96,9 +96,9 @@ export function Navbar({
         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
           <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
             <Image
-              src="/logos/ShiftX-logo.svg"
+              src="/logos/MyShiftX-Full-Logo-Gradient.svg"
               alt="MyShiftX Logo"
-              width={1560} height={500}
+              width={5000} height={1024}
               priority
               className="h-12 w-auto"
             />
@@ -219,9 +219,9 @@ export function Navbar({
         <div className="px-4 flex items-center justify-between h-14">
           <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
             <Image
-              src="/logos/ShiftX-logo.svg"
+              src="/logos/MyShiftX-Gradient-Color.svg"
               alt="MyShiftX Logo"
-              width={1560} height={500}
+              width={1024} height={1024}
               priority
               className="h-10 w-auto"
             />

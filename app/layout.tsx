@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/logos/ShiftX-logo-lg.png',
+        url: '/logos/FULL-LOGO-GRADIENT-COLOR.png',
         alt: 'MyShiftX',
       },
     ],

@@ -18,10 +18,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="text-center mb-8 animate-slide-down">
           <Link href="/" className="inline-flex flex-row items-center justify-center gap-0">
             <Image
-              src="/logos/ShiftX-logo.svg"
+              src="/logos/MyShiftX-Full-Logo-Gradient.svg"
               alt="MyShiftX"
-              width={1560}
-              height={500}
+              width={5000}
+              height={1024}
               className="h-14 w-auto"
               priority
             />

@@ -32,12 +32,20 @@ export function LandingHeader({ displayName }: LandingHeaderProps) {
         )}>
         <Link href={isLoggedIn ? '/wall' : '/'} className="flex flex-row items-center gap-0 align-baseline">
           <Image
-            src="/logos/ShiftX-logo.svg"
+            src="/logos/MyShiftX-Full-Logo-Gradient.svg"
             alt="MyShiftX Logo"
-            width={1560}
-            height={500}
+            width={5000}
+            height={1024}
             priority
-            className="h-14 w-auto"
+            className="hidden md:block h-14 w-auto"
+          />
+          <Image
+            src="/logos/MyShiftX-Gradient-Color.svg"
+            alt="MyShiftX Logo"
+            width={1024}
+            height={1024}
+            priority
+            className="md:hidden h-10 w-auto"
           />
         </Link>
 

@@ -112,10 +112,10 @@ export default function NotFound() {
       <header className="relative z-10 px-4 py-6 animate-slide-down">
         <Link href="/" className="inline-flex items-center gap-0 align-baseline">
           <Image
-            src="/logos/ShiftX-logo.svg"
+            src="/logos/MyShiftX-Full-Logo-Gradient.svg"
             alt="MyShiftX Logo"
-            width={1560}
-            height={500}
+            width={5000}
+            height={1024}
             className="h-12 w-auto"
           />
         </Link>

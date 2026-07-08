@@ -328,10 +328,10 @@ export default async function HomePage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-row items-center gap-0 align-baseline">
               <Image
-                src="/logos/ShiftX-new.svg"
+                src="/logos/MyShiftX-Full-Logo-Gradient.svg"
                 alt="MyShiftX"
-                width={1337}
-                height={429}
+                width={5000}
+                height={1024}
                 className="h-12 w-auto brightness-0 invert opacity-60"
               />
             </div>

@@ -39,10 +39,10 @@ const shell = (body: string) => `
                   text-align:center;
                 ">
               <img
-                src="https://myshiftx.com/logos/ShiftX-logo-sm.png"
+                src="https://myshiftx.com/logos/FULL-LOGO-GRADIENT-COLOR.png"
                 alt="MyShiftX"
-                width="200"
-                height="50"
+                width="220"
+                height="45"
                 style="display:block;border:0;margin:0 auto;"
               />
             </td>
