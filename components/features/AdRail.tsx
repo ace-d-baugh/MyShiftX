@@ -18,6 +18,8 @@ const AD_ENABLED_PATHS = new Set([
   '/terms',
   '/privacy',
   '/data-deletion',
+  '/about',
+  '/contact',
 ])
 
 function isAdEnabledPath(pathname: string): boolean {

@@ -390,6 +390,7 @@ The following Pro and Free features have not been scoped yet and will need dedic
 - ✅ Ad units created in AdSense and wired in — "Sticky Desktop" (`2239887190`) and "Sticky Mobile" (`5339481808`) are the only two placements needed; `AdRail` reuses them across all `AD_ENABLED_PATHS` rather than needing one unit per page
 - ✅ Review the placeholder layout — confirm sizing/placement (300×600 desktop rail, mobile bar above the bottom nav) feels right before real ad units go live
 - ✅ Google flagged crawl trouble — **Vercel Authentication** was on for Production, blocking Googlebot entirely; scoped it to Preview deployments only so myshiftx.com is publicly crawlable again (Wall/Calendar/Profile/etc. still require login, so Google can only ever crawl the public marketing/legal pages — expected)
+- ✅ `2026-07-08`: Went through AdSense's site-readiness checklist — found two gaps (no standalone About/Contact pages; footer only linked Terms/Privacy/Log In). Claude built `/about` and `/contact`, extracted the previously-duplicated landing footer into `components/landing/Footer.tsx`, and added About/Contact/Data Deletion links to it (Data Deletion existed but was never linked from anywhere public-facing). Both new pages are in the sitemap and ad-enabled, matching Terms/Privacy
 - [ ] Confirm ads are now working
 
 ### 13 — Business Entity & Legal Protection `PARALLEL`

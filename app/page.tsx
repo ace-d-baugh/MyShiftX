@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight, RefreshCw, Gift, Clock, Shield, Users, Zap, Star, Quote } from 'lucide-react'
 import { AnimateIn } from '@/components/landing/AnimateIn'
 import { LandingHeader } from '@/components/landing/LandingHeader'
+import { Footer } from '@/components/landing/Footer'
 import { createServerClient } from '@/lib/supabase/server'
 import { INDUSTRIES } from '@/lib/landing/industries'
 
@@ -322,35 +322,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="bg-[#2F2040] text-white/60 py-8 px-4 mt-auto">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex flex-row items-center gap-0 align-baseline">
-              <Image
-                src="/logos/MyShiftX-Full-Logo-Gradient.svg"
-                alt="MyShiftX"
-                width={5000}
-                height={1024}
-                className="h-12 w-auto brightness-0 invert opacity-60"
-              />
-            </div>
-            <div className="flex gap-6 text-sm">
-              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-              <Link href="/login" className="hover:text-white transition-colors">Log In</Link>
-            </div>
-          </div>
-          <div className="mt-6 pt-6 border-t border-white/10 text-xs text-center text-white/40">
-            <p>
-              MyShiftX is an independent platform and is not affiliated with, sponsored by,
-              or endorsed by any specific employer. All trademarks are property of their
-              respective owners.
-            </p>
-            <p className="mt-2">© {new Date().getFullYear()} MyShiftX. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
