@@ -29,6 +29,7 @@ export default async function NewShiftPage({ searchParams }: { searchParams: { f
         userId={user.id}
         displayName={userProfile?.display_name ?? 'User'}
         wallExpanded={searchParams.from !== 'calendar'}
+        returnTo={searchParams.from === 'calendar' ? '/calendar' : '/wall'}
       />
     </div>
   )
