@@ -71,15 +71,22 @@ export async function createBoard(name: string): Promise<{ error?: string; board
       return { error: boardErr.message }
     }
 
-    // Auto-assign creator as Leader
-    const { error: memberErr } = await supabase.from('user_boards').insert({
+    // Auto-assign creator as Leader. Upsert (not insert): if the creator is
+    // themselves an Admin, the on_board_created_add_admins trigger already
+    // fired by this point and auto-added them as a *hidden* Leader (every
+    // admin auto-joins every board for oversight — see auto_add_admins_to_board).
+    // A plain insert would collide with that row's (user_id, board_id) unique
+    // constraint; upsert reconciles it instead and un-hides it, since the
+    // actual creator should see their own board normally.
+    const { error: memberErr } = await supabase.from('user_boards').upsert({
       user_id: userId,
       board_id: board.id,
       role: 'Leader',
       is_approved: true,
+      is_hidden: false,
       approved_by_user_id: userId,
       approved_at: new Date().toISOString(),
-    })
+    }, { onConflict: 'user_id,board_id' })
 
     if (memberErr) return { error: memberErr.message }
 
