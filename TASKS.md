@@ -381,14 +381,16 @@ The following Pro and Free features have not been scoped yet and will need dedic
 - ✅ `2026-07-01`: Google-certified CMP (Funding Choices) wired in — 3-choice consent message (Consent / Do Not Consent / Manage) for EEA/UK/Switzerland. `middleware.ts` reads Vercel's `x-vercel-ip-country` edge header (no geo-IP service needed) and sets a `myshiftx-region` cookie; the custom `CookieConsentBanner` reads it and suppresses itself for EEA/UK/CH visitors so they don't get two consent prompts — Google's CMP handles that region instead
 - ✅ `2026-07-01`: First real ad unit live — "Sticky Desktop" (slot `2239887190`) wired into the desktop rail via `NEXT_PUBLIC_ADSENSE_SLOT_STICKY_DESKTOP`. Along the way, corrected `<AdSlot>` to mirror whatever format AdSense actually generated per-unit instead of forcing one template on every slot. Originally created as fixed 300×600; switched to auto/responsive (`display:block`, min-height 250px reserved in the sticky rail) to match the updated unit
 - ✅ `2026-07-01`: Second real ad unit live — "Sticky Mobile" (auto/responsive format, slot `5339481808`) wired into the mobile bottom bar via `NEXT_PUBLIC_ADSENSE_SLOT_STICKY_MOBILE`. Both placements from the original plan (desktop rail + mobile bar) now have real ad units — no more placeholders on either.
+- ✅ `2026-07-08`: Now that the U.S. states message is published in AdSense too, `middleware.ts` buckets `US` visitors into their own `myshiftx-region=us` cookie value (previously lumped into `other`), and `CookieConsentBanner` suppresses itself for that region same as it already did for `eea` — Google's CMP now handles consent for both EEA/UK/CH and U.S. visitors, our own banner only shows to the remaining "other" regions.
 
 **👤 You handle:**
-- ✅ Publisher ID confirmed: `ca-pub-4865817496577079` (added to `.env.local`; **still needs adding to Vercel env vars** for production)
+- ✅ Publisher ID confirmed: `ca-pub-4865817496577079` (added to `.env.local`and to Vercel env for production)
 - ✅ Sign up for **Google AdSense** at **adsense.google.com** if not already approved (requires a live site with content)
-- [ ] **Create the actual consent message** in AdSense → Privacy & messaging → choose the 3-choice GDPR message type, target EEA + UK + Switzerland, publish it (this is a hosted wizard in your Google account — nothing to hand to Claude for this part, the code integration is already live and will pick up whatever message you publish)
-- [ ] Once approved: create an ad unit per placement in the AdSense dashboard and give Claude each `data-ad-slot` ID to wire into the corresponding `<AdSlot>` usage
-- [ ] Review the placeholder layout — confirm sizing/placement (300×600 desktop rail, mobile bar above the bottom nav) feels right before real ad units go live
-- [ ] Google flagged crawl trouble — check whether **Vercel Deployment Protection** is enabled on the production domain (would block Googlebot entirely); also note that Wall/Calendar/Profile/etc. are behind login so Google can never crawl the actual ad-bearing pages, only the public marketing/legal pages
+- ✅ **Create the actual consent message(s)** in AdSense → Privacy & messaging — the EEA/UK/CH GDPR message and the U.S. states message are both published now
+- ✅ Ad units created in AdSense and wired in — "Sticky Desktop" (`2239887190`) and "Sticky Mobile" (`5339481808`) are the only two placements needed; `AdRail` reuses them across all `AD_ENABLED_PATHS` rather than needing one unit per page
+- ✅ Review the placeholder layout — confirm sizing/placement (300×600 desktop rail, mobile bar above the bottom nav) feels right before real ad units go live
+- ✅ Google flagged crawl trouble — **Vercel Authentication** was on for Production, blocking Googlebot entirely; scoped it to Preview deployments only so myshiftx.com is publicly crawlable again (Wall/Calendar/Profile/etc. still require login, so Google can only ever crawl the public marketing/legal pages — expected)
+- [ ] Confirm ads are now working
 
 ### 13 — Business Entity & Legal Protection `PARALLEL`
 

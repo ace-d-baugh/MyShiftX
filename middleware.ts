@@ -90,12 +90,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // Vercel populates this header at the edge — no geo-IP service needed.
-  // Used to defer to Google's ad-consent CMP for EEA/UK/CH visitors instead
-  // of showing our own generic cookie banner to them too.
+  // Used to defer to Google's ad-consent CMP (which now has both an EEA/UK/CH
+  // message and a U.S. states message published) instead of showing our own
+  // generic cookie banner to those visitors too.
   // Only set when missing or changed, so most responses carry no Set-Cookie
   // header and stay cacheable. The 24h maxAge means it re-sets once a day.
   const country = request.headers.get('x-vercel-ip-country') ?? ''
-  const region = EEA_UK_CH_COUNTRIES.has(country) ? 'eea' : 'other'
+  const region = EEA_UK_CH_COUNTRIES.has(country) ? 'eea' : country === 'US' ? 'us' : 'other'
   if (request.cookies.get('myshiftx-region')?.value !== region) {
     supabaseResponse.cookies.set('myshiftx-region', region, {
       path: '/',
