@@ -68,6 +68,7 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
   const [step, setStep] = useState<Step>('pick')
   const [error, setError] = useState<string | null>(null)
   const [boards, setBoards] = useState<Board[]>([])
+  const [boardsLoading, setBoardsLoading] = useState(true)
   const [boardId, setBoardId] = useState('')
   const [rows, setRows] = useState<ImportRow[]>([])
   const [remaining, setRemaining] = useState<number | null>(null) // -1 = unlimited
@@ -78,6 +79,7 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
     setStep('pick')
     setError(null)
     setRows([])
+    setBoardsLoading(true)
 
     const load = async () => {
       const [{ data: memberRows }, { data: statusRows }] = await Promise.all([
@@ -97,6 +99,7 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
       if (status) {
         setRemaining(status.import_limit < 0 ? -1 : Math.max(0, status.import_limit - status.used))
       }
+      setBoardsLoading(false)
     }
     load()
   }, [open, supabase, userId])
@@ -188,7 +191,14 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
         </div>
       )}
 
-      {step === 'pick' && (
+      {!boardsLoading && boards.length === 0 && (
+        <div className="py-8 text-center text-sm text-text/60">
+          You haven&apos;t joined any boards yet.{' '}
+          <a href="/profile" className="text-primary underline">Join or create a board</a> first.
+        </div>
+      )}
+
+      {(boardsLoading || boards.length > 0) && step === 'pick' && (
         <div className="space-y-4">
           <p className="text-sm text-text/70">
             Take a photo of your printed or on-screen schedule and MyShiftX will read

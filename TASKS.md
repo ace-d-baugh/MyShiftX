@@ -447,7 +447,7 @@ Complete in order — each step unlocks the next.
 | Vercel Pro | $20/mo | 1 seat, includes 1M edge requests |
 | Supabase Pro | $35/mo | $25 base + usage; budget $35–$60/mo at launch |
 | Claude Pro (dev) | $20/mo | Includes Claude Code |
-| Domains (myshiftx + digitalelegance) | $3/mo | ~$15–$20/yr each, amortized |
+| Domains (myshiftx + digitalelegance) | $2/mo | ~$11/yr each, amortized |
 | Stripe | Per transaction | 2.9% + $0.30 flat fee; no monthly fee |
 | Twilio SMS (paid users only) | ~$0.37/paid user/mo | At 30 SMS/user; base + carrier cost |
 | **Floor total (excl. Twilio + Stripe)** | **$88/mo** | Scales with paid users beyond this |
@@ -542,45 +542,22 @@ The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over 
 ---
 
 **👤 You handle — VPS setup (one-time):**
-- ✅ **Check VPS RAM** — multimodal LLM models require at minimum 4 GB RAM to run a quantized model; 8 GB is comfortable. Check your RackNerd plan specs and upgrade if needed (~$20–$25/mo for 4 GB tier). Have 4.5 GB
-- [ ] **Install Ollama** on the VPS:
-  ```bash
-  curl -fsSL https://ollama.com/install.sh | sh
-  ```
-- [ ] **Pull a multimodal model** — recommended options (pick one):
-  - `ollama pull llava` — 7B, good accuracy, ~4 GB RAM
-  - `ollama pull llama3.2-vision` — Meta's official vision model, excellent accuracy, ~8 GB RAM
-  - `ollama pull moondream` — very small (1.8B), ~2 GB RAM, less accurate but works on low-RAM VPS
-- [ ] **Expose Ollama securely** — by default Ollama listens on `localhost:11434`. For Next.js on Vercel to reach it, either:
-  - Option A (recommended): Add a **Nginx reverse proxy** on the VPS at a path like `/ollama/` with HTTP Basic Auth or a secret header check, then expose via HTTPS using your existing SSL cert on the VPS
-  - Option B: Open port 11434 in the VPS firewall and protect with a secret key checked in the Next.js API route
-- [ ] **Add `VPS_OLLAMA_URL` and `VPS_OLLAMA_SECRET` to Vercel environment variables** (e.g., `https://vps.digitalelegance.com/ollama` + a long random secret)
+- ✅ `2026-07-08`: Purchased a dedicated **Contabo Cloud VPS 20** for this feature (200 GB SSD, 6 cores, 12 GB RAM, Ubuntu 24.04, `95.111.234.215`) — supersedes the old plan to reuse/upgrade the shared RackNerd box (`docs/vps-ollama-setup.md` is now superseded by this entry; that box stays on digitalelegance.com + the Discord app only)
+- ✅ `2026-07-08`: Ollama installed, systemd pinned to `OLLAMA_NUM_PARALLEL=1` / `OLLAMA_MAX_LOADED_MODELS=1`, 2 GB swap added as an OOM safety net
+- ✅ `2026-07-08`: Pulled `qwen2.5vl:3b` — **not** `llama3.2-vision`: this Ollama build (0.31.1) errors with `unknown model architecture: 'mllama'` when actually loading it (confirmed in `journalctl -u ollama`), so the Meta vision model is off the table on this Ollama version regardless of RAM. Also tried `qwen2.5vl:7b` for better accuracy given the extra RAM headroom, but CPU-only prompt-eval time made it (and even 3b marginally) too slow on a *cold* model load; steady-state (model already resident) is what matters and both were fine — 3b was kept since it's already the app's coded-in default and comfortably fast warm (~2–3s round-trip in testing, real photos will run longer but should stay well under the route's 110s timeout)
+- ✅ `2026-07-08`: Exposed via **nginx reverse proxy + Let's Encrypt TLS** at `https://ai.myshiftx.com/ollama/` (new DNS A record added), gated on a `Bearer` secret header — chose this over opening port 11434 directly. One gotcha worth knowing: Ollama itself rejects requests unless the `Host` header is `localhost`/`127.0.0.1` (DNS-rebinding protection), so the nginx config overrides `proxy_set_header Host "localhost"` rather than passing through the real hostname
+- ✅ `2026-07-08`: `ufw` firewall active — only SSH/80/443 open, Ollama's `11434` stays localhost-only (never reachable externally, proxy is the only door)
+- ✅ `2026-07-08`: `VPS_OLLAMA_URL` and `VPS_OLLAMA_SECRET` added to `.env.local`; **still needs adding to Vercel env vars** for production
+- [ ] Root password was shared over chat during initial SSH setup — rotate it in the Contabo panel (SSH key auth is already in place for everything going forward, so the password won't be needed again)
+- [ ] VPS flagged a pending kernel upgrade (`6.8.0-106` running → `6.8.0-134` available) — reboot whenever convenient; not urgent
 
 **🤖 Claude handles:**
-- [ ] Add `schedule_import_count` (integer, default 0) and `import_count_reset_date` (timestamptz) columns to `users` table — reset to 0 on the 1st of each month (same pattern as SMS counter)
-- [ ] Create `/api/schedule-import/route.ts`:
-  - Verify auth and check quota (Basic: ≤4, Pro: unlimited)
-  - Accept image upload (multipart form data)
-  - Send base64 image + structured prompt to Ollama endpoint on VPS
-  - Parse Ollama's JSON response into an array of `{ date, start_time, end_time, title }`
-  - Increment `schedule_import_count`
-  - Return parsed shifts to client for review
-- [ ] **Prompt engineering** — the prompt sent to Ollama is critical for accuracy:
-  ```
-  "You are reading a work schedule. Extract every shift shown.
-   Return ONLY a JSON array with no other text:
-   [{ "date": "YYYY-MM-DD", "start_time": "HH:MM", "end_time": "HH:MM", "title": "Shift title or role" }]
-   If a date shows no year, assume the nearest upcoming occurrence.
-   If a time is missing, omit that shift. Return [] if no shifts found."
-  ```
-- [ ] Create `ScheduleImportModal` client component:
-  - Camera/file upload button (accepts image/*)
-  - Loading state while VPS processes ("Reading your schedule…")
-  - Review table: each parsed shift shown with editable fields (date, start, end, title, board selector)
-  - "Add to Calendar" confirms and bulk-inserts approved shifts
-  - Shows remaining imports this month for Basic users
-- [ ] Add import button to the Calendar page and the "+" Post menu
-- [ ] Add monthly import counter reset to the existing nightly cron (`/api/cron/expirations`)
+- ✅ `schedule_import_count` + `schedule_import_month` columns on `users`, with `get_schedule_import_status()` / `consume_schedule_import()` `SECURITY DEFINER` RPCs that reset the counter lazily when the ET month rolls over — no cron changes needed (`supabase/migrations/20260701235216_schedule_import_quota.sql`)
+- ✅ `/api/schedule-import/route.ts` — verifies auth, checks quota up front (consumed only after a successful parse so a VPS hiccup doesn't burn an import), accepts multipart image upload (8 MB max, JPEG/PNG/WebP), sends base64 image + structured-output schema to Ollama's `/api/chat`, parses/validates the JSON response (zod), returns shifts + remaining count
+- ✅ **Prompt engineering** — final prompt (in `route.ts`) uses Ollama's `format` (JSON-schema-constrained decoding) rather than a plain "return only JSON" instruction, so the model structurally cannot return prose/markdown fences; also anchors "no year shown" dates to today's ET date and normalizes AM/PM to 24-hour
+- ✅ `ScheduleImportModal` client component — camera/file picker (client-side downscale + re-encode to JPEG first, keeps HEIC/multi-MB photos out of the pipeline and speeds up CPU inference), "Reading your schedule…" loading state, editable review table (date/start/end/title/include-checkbox + board selector), overnight-shift handling (end ≤ start rolls to next day), remaining-imports counter for Basic users
+- ✅ Import button wired into the Calendar page (`CalendarClient.tsx`)
+- ✅ No cron changes needed — see quota reset note above (lazy reset beats a nightly job here since it self-heals on next use regardless of when the cron last ran)
 
 ---
 
