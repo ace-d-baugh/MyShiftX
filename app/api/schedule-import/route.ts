@@ -3,9 +3,11 @@ import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { optionalServerEnv } from '@/lib/env'
 
-// CPU-only inference on the VPS takes 30–90s per image — well past the
-// default function timeout. Requires Vercel Pro (max 300s on Pro).
-export const maxDuration = 120
+// CPU-only inference on the VPS routinely takes 2-5 minutes per image
+// (measured against real schedule photos, not just the small test cases the
+// 30-90s estimate was based on) — well past the default function timeout.
+// Requires Vercel Pro; 290s leaves a small margin under Pro's 300s hard cap.
+export const maxDuration = 290
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
@@ -119,7 +121,9 @@ export async function POST(req: NextRequest) {
         // of the day pays the multi-minute model load.
         keep_alive: '60m',
       }),
-      signal: AbortSignal.timeout(110_000),
+      // Leaves ~10s of the 290s function budget for the JSON parse/quota RPC
+      // that happen after this resolves.
+      signal: AbortSignal.timeout(280_000),
     })
     if (!res.ok) {
       const detail = await res.text().catch(() => '')

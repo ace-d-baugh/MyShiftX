@@ -237,7 +237,7 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
           <p className="text-sm text-text/70 flex items-center gap-1.5">
             <ScanLine className="w-4 h-4 text-primary" /> Reading your schedule…
           </p>
-          <p className="text-xs text-text/40">This can take up to a minute.</p>
+          <p className="text-xs text-text/40">This can take a few minutes — please keep this open.</p>
         </div>
       )}
 
