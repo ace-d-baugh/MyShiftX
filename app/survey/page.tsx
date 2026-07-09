@@ -7,7 +7,9 @@ export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Beta Survey – MyShiftX' }
 
 export default async function SurveyPage() {
-  if (isSurveyClosed()) redirect('/beta-test-closed')
+  // The beta wrap-up pages are gone; once the survey window ends, send
+  // stragglers to the home page instead.
+  if (isSurveyClosed()) redirect('/')
 
   const supabase = createServerClient()
   const { data: { user } } = await supabase.auth.getUser()

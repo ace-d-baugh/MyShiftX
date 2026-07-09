@@ -11,6 +11,10 @@ import { OAuthButtons } from '@/components/ui/OAuthButtons'
 
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>
 
+// Temporary pause on new sign-ups between the beta wrap-up and launch.
+// Flip to false to reopen registration (submit button + OAuth sign-up).
+const REGISTRATION_PAUSED = true
+
 export default function RegisterPage() {
   return <Suspense><RegisterForm /></Suspense>
 }
@@ -43,6 +47,7 @@ function RegisterForm() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (REGISTRATION_PAUSED) return
     setServerError(null)
 
     const parseResult = registerSchema.safeParse({
@@ -100,13 +105,21 @@ function RegisterForm() {
       <h1 className="font-accent text-2xl font-bold text-text mb-1">Create Account</h1>
       <p className="text-text/60 text-sm mb-6">Join the MyShiftX community.</p>
 
+      {REGISTRATION_PAUSED && (
+        <div className="mb-4 p-3 rounded-md bg-info/10 border border-info/20 text-info text-sm">
+          New registrations are temporarily paused while we get ready for launch — check
+          back soon! Existing members can still{' '}
+          <Link href="/login" className="font-medium underline min-h-0 min-w-0">log in</Link>.
+        </div>
+      )}
+
       {serverError && (
         <div key={serverError} className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm animate-shake">
           {serverError}
         </div>
       )}
 
-      <OAuthButtons mode="register" />
+      {!REGISTRATION_PAUSED && <OAuthButtons mode="register" />}
 
       <form onSubmit={onSubmit} className="space-y-4 mt-4" noValidate>
         {/* Email */}
@@ -220,8 +233,8 @@ function RegisterForm() {
 
         <button
           type="submit"
-          disabled={loading || !form.terms_accepted}
-          className={`btn btn-primary w-full gap-2 ${!form.terms_accepted ? 'opacity-40 cursor-not-allowed' : ''}`}
+          disabled={REGISTRATION_PAUSED || loading || !form.terms_accepted}
+          className={`btn btn-primary w-full gap-2 ${REGISTRATION_PAUSED || !form.terms_accepted ? 'opacity-40 cursor-not-allowed' : ''}`}
         >
           {loading ? (
             <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />

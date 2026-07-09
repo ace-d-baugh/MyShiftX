@@ -1,27 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { env } from '@/lib/env'
-import { isBetaClosed } from '@/lib/beta-schedule'
-
-// The actual product (plus auth pages, since there's nothing to sign into
-// once it's closed) — everything that isn't public marketing collateral.
-// /beta-test is included so old links to it fall through to the past-tense
-// closed page once the deadline passes. Matched as an exact path or a path
-// prefix (so "/beta-test" doesn't also swallow "/beta-test-closed").
-const LOCKED_ROUTES = [
-  '/wall', '/calendar', '/profile', '/messages', '/boards', '/leader',
-  '/admin', '/help', '/kanban', '/login', '/register', '/forgot-password',
-  '/reset-password', '/verify-email', '/beta-test',
-]
-
-function isLockedRoute(pathname: string): boolean {
-  return LOCKED_ROUTES.some(route => pathname === route || pathname.startsWith(`${route}/`))
-}
-
-// Only the production domain goes dark tonight — the dev subdomain (and any
-// Vercel preview deployment, and localhost) keeps working so development can
-// continue right up to the real relaunch.
-const PRODUCTION_HOSTNAMES = new Set(['myshiftx.com', 'www.myshiftx.com'])
 
 // EEA member states + UK + Switzerland — the regions Google's ad-consent
 // requirements (and our own CookieConsentBanner suppression) target.
@@ -33,13 +12,6 @@ const EEA_UK_CH_COUNTRIES = new Set([
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
-
-  if (isBetaClosed() && PRODUCTION_HOSTNAMES.has(request.nextUrl.hostname) && isLockedRoute(pathname)) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/beta-test-closed'
-    url.search = ''
-    return NextResponse.redirect(url)
-  }
 
   let supabaseResponse = NextResponse.next({ request })
 
