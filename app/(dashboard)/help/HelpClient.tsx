@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   HelpCircle, ChevronDown, Send, X, CheckCircle,
   LayoutGrid, Star, UserPlus, MessageSquare,
-  Bell, Monitor, Laptop, Smartphone, CalendarDays,
+  Bell, Monitor, Laptop, Smartphone, CalendarDays, Camera,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
@@ -13,9 +13,10 @@ import { sendSupportMessage } from '@/app/actions/help'
 
 interface HelpClientProps {
   userEmail: string
+  importEnabled: boolean
 }
 
-const FAQS = [
+const FAQS: { q: string; a: string; importOnly?: boolean }[] = [
   {
     q: "What's the difference between a Shift Offer and a Shift Request?",
     a: "A Shift Offer means you have a shift and want someone to take it — you post the date, time, and details so others can express interest. A Shift Request means you're looking to pick up a shift — you post the date and your preferred time window so shift owners can reach out. Both appear on the Wall, separated into Offers and Requests tabs.",
@@ -47,6 +48,11 @@ const FAQS = [
   {
     q: 'How do I delete a chat?',
     a: "On the Messages page, tap the trash icon on a conversation and confirm. This clears the chat from your view only — the other person keeps their copy. If either of you messages again, the conversation reappears for you without the old history. To report someone who is misusing messaging, open the chat and use the three-dot menu → Flag User.",
+  },
+  {
+    q: 'Can MyShiftX read my work schedule from a photo?',
+    a: "Yes — that's Photo Schedule Import. On the Calendar page, tap Import Schedule, then snap a photo of the posted schedule (paper or a screenshot from your scheduling app). Your shifts are read in seconds and shown next to your photo for review — you can edit, uncheck, or add rows before anything is saved, and shifts that overlap something already on your calendar are flagged. Free accounts get 4 imports per month; Pro is unlimited. See the Photo Schedule Import section below for details.",
+    importOnly: true,
   },
   {
     q: 'How does shift matching work?',
@@ -137,7 +143,8 @@ const CALENDAR_GUIDES = [
   },
 ]
 
-export function HelpClient({ userEmail }: HelpClientProps) {
+export function HelpClient({ userEmail, importEnabled }: HelpClientProps) {
+  const faqs = FAQS.filter(f => importEnabled || !f.importOnly)
   const [openIdx, setOpenIdx] = useState<number | null>(null)
   const [openGuide, setOpenGuide] = useState<number | null>(null)
   const [openCalGuide, setOpenCalGuide] = useState<number | null>(null)
@@ -212,7 +219,7 @@ export function HelpClient({ userEmail }: HelpClientProps) {
       <section className="mb-10">
         <h2 className="font-accent text-xl font-bold text-text mb-4">Frequently Asked Questions</h2>
         <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
-          {FAQS.map((faq, i) => (
+          {faqs.map((faq, i) => (
             <div key={i}>
               <button
                 type="button"
@@ -308,6 +315,44 @@ export function HelpClient({ userEmail }: HelpClientProps) {
       </section>
 
       {/* ── Calendar sync setup (Pro) ────────────────────────────────────────── */}
+      {/* ── Photo Schedule Import (shown only where the feature is live) ────── */}
+      {importEnabled && (
+        <section className="mb-10 scroll-mt-20" id="schedule-import">
+          <div className="flex items-center gap-2 mb-1">
+            <Camera className="w-5 h-5 text-primary" />
+            <h2 className="font-accent text-xl font-bold text-text">Photo Schedule Import</h2>
+          </div>
+          <p className="text-sm text-text/60 mb-4">
+            Turn a photo of the posted schedule into shifts on your calendar — no retyping.
+            Works with paper schedules and screenshots from scheduling apps, and it finds your
+            row even on a schedule that lists the whole team. Start from{' '}
+            <Link href="/calendar" className="text-primary hover:underline">Calendar → Import Schedule</Link>.
+          </p>
+          <div className="border border-border rounded-xl px-5 py-4">
+            <ol className="space-y-2.5">
+              {[
+                'On the Calendar page, tap Import Schedule, then take a photo of the posted schedule or choose a screenshot. Clear, straight-on, well-lit shots read best.',
+                'Your shifts appear in seconds in a review table, with your photo right above it so you can check every row without picking the schedule back up.',
+                'Fix anything the reader got wrong, uncheck rows you don\'t want, or add a missed shift manually. Shifts that overlap something already on your calendar are flagged — keep the old one, replace it, or edit the times.',
+                'Pick the board to add them to and confirm. Done — the shifts are on your calendar.',
+              ].map((step, si) => (
+                <li key={si} className="flex gap-2.5 text-sm text-text/70 leading-relaxed">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                    {si + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="mt-3 text-xs text-text/60 bg-primary-light/30 border border-primary/15 rounded-lg px-4 py-3 leading-relaxed space-y-1.5">
+            <p><strong className="text-text/80">Good to know:</strong> free accounts get 4 imports per month; Pro and Trial members are unlimited. Failed reads never count against your limit.</p>
+            <p><strong className="text-text/80">Full-team schedules:</strong> the reader looks for your display name to pick out your row — it helps if your MyShiftX display name matches the name on the schedule (change it on your Profile page).</p>
+            <p><strong className="text-text/80">Privacy:</strong> your photo is used only to read the shifts and is never stored — not by us, and not by the AI service that processes it.</p>
+          </div>
+        </section>
+      )}
+
       <section className="mb-10 scroll-mt-20" id="calendar-sync">
         <div className="flex items-center gap-2 mb-1">
           <CalendarDays className="w-5 h-5 text-primary" />

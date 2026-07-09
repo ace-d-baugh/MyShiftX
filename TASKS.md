@@ -196,13 +196,13 @@ This is the canonical Free vs Pro feature list. Use this when building the upgra
 
 The following Pro and Free features have not been scoped yet and will need dedicated tasks before launch or shortly after:
 
-- **Photo schedule import (OCR)** — user photographs their paper or on-screen schedule; OCR reads it and populates shifts automatically. This is the highest-value Free feature and the biggest differentiator from manual entry. Needs an OCR service (Google Vision API or similar) + a shift-parsing pipeline. High complexity — scope separately.
+- ~~**Photo schedule import**~~ — ✅ Done (Task 15): user photographs their paper or on-screen schedule and Gemini 2.5 Flash reads it onto their calendar in seconds, with review/conflict handling. The highest-value Free feature and the biggest differentiator from manual entry. 4/month Free, unlimited Pro.
 - ~~**In-app messaging**~~ — ✅ Done (Task 19): real in-app threads between board-mates with Realtime, unread badges, and push notifications. All tiers, shared-board only.
 - **In-app push notifications** — browser-native web push (PWA-style) using the Push API and a service worker. Free tier. Works on desktop Chrome/Edge/Firefox and Android Chrome. Not available on iOS Safari (they have limited support). Supplements or replaces email for non-SMS users. Medium complexity.
 - ~~**Calendar export/sync**~~ — ✅ Done (Task 17): live-sync iCal feed URL + one-click `.ics` download, works with Google Calendar, Apple Calendar, and Outlook. Pro only.
 - **Trade preferences** — users set preferred shift types, days of week, and time windows; the matching engine factors these in when firing notifications. Extends the existing `notifyShiftPosted`/`notifyRequestPosted` logic. Medium complexity.
 - ~~**Direct messaging outside boards**~~ — Removed. Messaging is board-member only for all tiers.
-- **Bulk shift import (CSV / multi-week photo)** — upload a CSV of shifts or scan multiple weeks of a schedule at once. Pro only. Extends the photo OCR feature above.
+- **Bulk shift import (CSV / multi-week photo)** — upload a CSV of shifts or scan multiple weeks of a schedule at once. Pro only. Extends photo import (Task 15).
 
 ---
 
@@ -528,37 +528,34 @@ Because the existing codebase is React/TypeScript, Expo is the natural path — 
 
 ---
 
-### 15 — Photo Schedule Import (Local LLM on VPS) `POST-LAUNCH`
+### 15 — Photo Schedule Import (Gemini 2.5 Flash) `CODE COMPLETE — needs Vercel env var`
 
 **Tier:** Free = 4 imports/month · Pro = unlimited
-**Why it matters:** The single biggest UX unlock for Cast Members. Instead of manually entering each shift, they photograph their paper or screen schedule and MyShiftX reads it automatically.
+**Why it matters:** The single biggest UX unlock for Cast Members. Instead of manually entering each shift, they photograph their paper or screen schedule and MyShiftX reads it onto their calendar in seconds.
 
 **Architecture overview:**
 ```
-Browser → /api/schedule-import (Next.js) → Ollama on VPS → parsed JSON → confirmation UI → Supabase
+Browser → /api/schedule-import (Next.js) → Gemini 2.5 Flash (Google API) → parsed JSON → review UI → Supabase
 ```
 
-The VPS runs Ollama with a multimodal model locally. Next.js calls the VPS over HTTP with the image. The VPS never stores images — processes and discards.
+Gemini reads the photo with a hand-tuned parsing prompt that isolates the target employee's row (the modal sends the user's display name), resolves year-less dates by day-of-week alignment, and returns explicit overnight `end_date`s. The route tries the free-tier `generativelanguage` endpoint first and falls back to the billing-gated Vertex `aiplatform` endpoint on 401/403 (Google issues look-alike `AQ.` keys for both surfaces). Photos are processed per-request and never stored. Whole feature is gated on `GEMINI_API_KEY` — invisible until the env var lands in Vercel, then flips on automatically (marketing on the landing page and the Help docs section are gated the same way).
+
+**Final benchmark (2026-07-08):** 2/2 exact on a real scheduling-app screenshot (dates, times, titles) and 8/8 exact on a dense synthetic 2-week schedule incl. an overnight shift, 5–10s per image, ~1k tokens (~0.1¢ paid / $0 free tier).
 
 ---
 
-**👤 You handle — VPS setup (one-time):**
-- ✅ `2026-07-08`: Purchased a dedicated **Contabo Cloud VPS 20** for this feature (200 GB SSD, 6 cores, 12 GB RAM, Ubuntu 24.04, `95.111.234.215`) — supersedes the old plan to reuse/upgrade the shared RackNerd box (`docs/vps-ollama-setup.md` is now superseded by this entry; that box stays on digitalelegance.com + the Discord app only)
-- ✅ `2026-07-08`: Ollama installed, systemd pinned to `OLLAMA_NUM_PARALLEL=1` / `OLLAMA_MAX_LOADED_MODELS=1`, 2 GB swap added as an OOM safety net
-- ✅ `2026-07-08`: Pulled `qwen2.5vl:3b` — **not** `llama3.2-vision`: this Ollama build (0.31.1) errors with `unknown model architecture: 'mllama'` when actually loading it (confirmed in `journalctl -u ollama`), so the Meta vision model is off the table on this Ollama version regardless of RAM. Also tried `qwen2.5vl:7b` for better accuracy given the extra RAM headroom, but CPU-only prompt-eval time made it (and even 3b marginally) too slow on a *cold* model load; steady-state (model already resident) is what matters and both were fine — 3b was kept since it's already the app's coded-in default and comfortably fast warm (~2–3s round-trip in testing, real photos will run longer but should stay well under the route's 110s timeout)
-- ✅ `2026-07-08`: Exposed via **nginx reverse proxy + Let's Encrypt TLS** at `https://ai.myshiftx.com/ollama/` (new DNS A record added), gated on a `Bearer` secret header — chose this over opening port 11434 directly. One gotcha worth knowing: Ollama itself rejects requests unless the `Host` header is `localhost`/`127.0.0.1` (DNS-rebinding protection), so the nginx config overrides `proxy_set_header Host "localhost"` rather than passing through the real hostname
-- ✅ `2026-07-08`: `ufw` firewall active — only SSH/80/443 open, Ollama's `11434` stays localhost-only (never reachable externally, proxy is the only door)
-- ✅ `2026-07-08`: `VPS_OLLAMA_URL` and `VPS_OLLAMA_SECRET` added to `.env.local`; **still needs adding to Vercel env vars** for production
-- [ ] Root password was shared over chat during initial SSH setup — rotate it in the Contabo panel (SSH key auth is already in place for everything going forward, so the password won't be needed again)
-- [ ] VPS flagged a pending kernel upgrade (`6.8.0-106` running → `6.8.0-134` available) — reboot whenever convenient; not urgent
+**👤 You handle:**
+- ✅ `2026-07-08`: Created Google AI Studio project + free-tier API key (in `.env.local` as `GEMINI_API_KEY`); wrote the parsing prompt the route now uses
+- [ ] Add `GEMINI_API_KEY` to Vercel env vars to turn the feature (and its landing/Help marketing) on in production — free-tier key works; the paid Vertex key (project 126596084990) needs API + billing enabled in its Cloud project if/when volume justifies it
+- [ ] Remove the retired `VPS_OLLAMA_URL` / `VPS_OLLAMA_SECRET` / `OLLAMA_VISION_MODEL` vars from Vercel
+- [ ] Delete the `ai.myshiftx.com` DNS A record; refund/repurpose the Contabo VPS (wiped clean 2026-07-08)
 
 **🤖 Claude handles:**
 - ✅ `schedule_import_count` + `schedule_import_month` columns on `users`, with `get_schedule_import_status()` / `consume_schedule_import()` `SECURITY DEFINER` RPCs that reset the counter lazily when the ET month rolls over — no cron changes needed (`supabase/migrations/20260701235216_schedule_import_quota.sql`)
-- ✅ `/api/schedule-import/route.ts` — verifies auth, checks quota up front (consumed only after a successful parse so a VPS hiccup doesn't burn an import), accepts multipart image upload (8 MB max, JPEG/PNG/WebP), sends base64 image + structured-output schema to Ollama's `/api/chat`, parses/validates the JSON response (zod), returns shifts + remaining count
-- ✅ **Prompt engineering** — final prompt (in `route.ts`) uses Ollama's `format` (JSON-schema-constrained decoding) rather than a plain "return only JSON" instruction, so the model structurally cannot return prose/markdown fences; also anchors "no year shown" dates to today's ET date and normalizes AM/PM to 24-hour
-- ✅ `ScheduleImportModal` client component — camera/file picker (client-side downscale + re-encode to JPEG first, keeps HEIC/multi-MB photos out of the pipeline and speeds up CPU inference), "Reading your schedule…" loading state, editable review table (date/start/end/title/include-checkbox + board selector), overnight-shift handling (end ≤ start rolls to next day), remaining-imports counter for Basic users
-- ✅ Import button wired into the Calendar page (`CalendarClient.tsx`)
-- ✅ No cron changes needed — see quota reset note above (lazy reset beats a nightly job here since it self-heals on next use regardless of when the cron last ran)
+- ✅ `/api/schedule-import/route.ts` — verifies auth, checks quota up front (consumed only after a successful parse so a backend hiccup doesn't burn an import), accepts multipart image upload (8 MB max, JPEG/PNG/WebP) + the user's display name, calls Gemini, extracts/validates the JSON (zod, AM/PM salvage), returns shifts + remaining count
+- ✅ `ScheduleImportModal` — camera/file picker (client-side downscale + JPEG re-encode keeps HEIC/multi-MB photos out of the pipeline), photo shown above the editable review table, live any-overlap conflict detection against the selected board with keep/replace/edit resolution (replace uses the `deactivate_own_shift` RPC), overnight-shift handling, manual add-a-row, remaining-imports counter
+- ✅ Import button wired into the Calendar page; landing-page selling-point section + Help page section/FAQ, all gated on `GEMINI_API_KEY`
+- ✅ `2026-07-08`: **VPS backend evaluated and retired.** Full story in `schedule-from-image.md`: built Ollama + qwen2.5vl:3b on a Contabo VPS (nginx/TLS/secret-gated at ai.myshiftx.com), found and fixed a prompt bug (today-date anchoring caused models to extract only today's row) and an nginx 180s timeout that was killing production imports; benchmarked 3B/7B/granite — best case was still minutes-per-photo with unreliable extraction on app-screenshot layouts. Gemini 2.5 Flash scored perfectly in seconds, so the route moved to Gemini exclusively and the VPS was wiped (Ollama, nginx vhost, TLS cert removed; sshd hardened to key-only while it lived)
 
 ---
 

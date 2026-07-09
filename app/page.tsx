@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { ArrowRight, RefreshCw, Gift, Clock, Shield, Users, Zap, Star, Quote } from 'lucide-react'
+import { ArrowRight, RefreshCw, Gift, Clock, Shield, Users, Zap, Star, Quote, Camera, ScanLine, CalendarCheck, Sparkles } from 'lucide-react'
 import { AnimateIn } from '@/components/landing/AnimateIn'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
 import { createServerClient } from '@/lib/supabase/server'
+import { optionalServerEnv } from '@/lib/env'
 import { INDUSTRIES } from '@/lib/landing/industries'
 
 export const metadata = {
@@ -125,6 +126,10 @@ export default async function HomePage() {
     displayName = profile?.display_name ?? user.email ?? 'Account'
   }
 
+  // Photo Schedule Import marketing appears only where the feature itself is
+  // live — same env-var flip that gates the Calendar's Import button.
+  const importEnabled = Boolean(optionalServerEnv.GEMINI_API_KEY)
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
 
@@ -232,6 +237,65 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── Photo Schedule Import highlight (gated with the feature) ── */}
+      {importEnabled && (
+        <section className="py-20 px-4 bg-background">
+          <div className="max-w-6xl mx-auto">
+            <AnimateIn>
+              <div className="card border border-primary/20 bg-gradient-to-br from-primary-light/60 via-card to-card p-8 md:p-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+
+                  {/* Copy */}
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide mb-4">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      New
+                    </span>
+                    <h2 className="font-accent text-3xl md:text-4xl font-bold text-text mb-4 leading-tight">
+                      Snap a Photo.<br />Your Schedule&apos;s In.
+                    </h2>
+                    <p className="text-text/70 mb-6 leading-relaxed">
+                      Stop retyping the week&apos;s schedule. Photograph the posted schedule — paper
+                      on the break-room wall or a screenshot from your scheduling app — and MyShiftX
+                      reads your shifts onto your calendar in seconds.
+                    </p>
+                    <ul className="space-y-2.5 text-sm text-text/70 mb-8">
+                      <li className="flex gap-2"><CalendarCheck className="w-4 h-4 text-success shrink-0 mt-0.5" /> Finds <em>your</em> row, even on a full-team schedule</li>
+                      <li className="flex gap-2"><CalendarCheck className="w-4 h-4 text-success shrink-0 mt-0.5" /> You review every shift next to your photo before anything saves</li>
+                      <li className="flex gap-2"><CalendarCheck className="w-4 h-4 text-success shrink-0 mt-0.5" /> Spots overlaps with shifts already on your calendar</li>
+                    </ul>
+                    <Link href="/register" className="btn btn-primary min-h-0 h-11 px-6 gap-2 group">
+                      Try Photo Import
+                      <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                    </Link>
+                  </div>
+
+                  {/* Steps visual */}
+                  <div className="space-y-4">
+                    {[
+                      { icon: Camera, title: '1. Snap it', desc: 'Photograph the posted schedule or upload a screenshot.' },
+                      { icon: ScanLine, title: '2. We read it', desc: 'Your shifts are extracted in seconds — dates, times, and roles.' },
+                      { icon: CalendarCheck, title: '3. Review & done', desc: 'Confirm the shifts and they land on your calendar and boards.' },
+                    ].map(({ icon: Icon, title, desc }) => (
+                      <div key={title} className="flex items-start gap-4 bg-card border border-border rounded-xl px-5 py-4 shadow-sm">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <Icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-accent font-bold text-text">{title}</p>
+                          <p className="text-sm text-text/60">{desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                </div>
+              </div>
+            </AnimateIn>
+          </div>
+        </section>
+      )}
 
       {/* ── Properties ── */}
       <section className="py-16 px-4 bg-primary-light overflow-hidden">
