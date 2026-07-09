@@ -4,7 +4,9 @@ import { ArrowRight, Zap } from 'lucide-react'
 import { AnimateIn } from '@/components/landing/AnimateIn'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
+import { PhotoImportHighlight } from '@/components/landing/PhotoImportHighlight'
 import { createServerClient } from '@/lib/supabase/server'
+import { optionalServerEnv } from '@/lib/env'
 import { INDUSTRIES, getIndustry } from '@/lib/landing/industries'
 
 export function generateStaticParams() {
@@ -31,6 +33,10 @@ export default async function IndustryLandingPage({ params }: { params: { slug: 
   }
 
   const otherIndustries = INDUSTRIES.filter(i => i.slug !== industry.slug)
+
+  // Photo Schedule Import marketing appears only where the feature itself is
+  // live — same env-var flip that gates the Calendar's Import button.
+  const importEnabled = Boolean(optionalServerEnv.GEMINI_API_KEY)
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -138,6 +144,9 @@ export default async function IndustryLandingPage({ params }: { params: { slug: 
           </div>
         </div>
       </section>
+
+      {/* ── Photo Schedule Import highlight (gated with the feature) ── */}
+      {importEnabled && <PhotoImportHighlight industryName={industry.shortName} />}
 
       {/* ── Other industries ── */}
       <section className="py-16 px-4 bg-background overflow-hidden">
