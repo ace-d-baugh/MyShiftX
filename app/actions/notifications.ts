@@ -150,6 +150,13 @@ function formatDisplayDate(isoDate: string): string {
   return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
+// Match alert *emails* are a Pro/Trial benefit (Task 10) — web push stays
+// free for everyone. Unknown membership is treated as Basic so a lookup
+// hiccup never leaks a paid perk.
+function isProMembership(membership: string | null | undefined): boolean {
+  return membership === 'Pro' || membership === 'Trial'
+}
+
 async function sendMatchNotifications(opts: {
   shiftTitle: string
   requestTitle: string
@@ -159,10 +166,12 @@ async function sendMatchNotifications(opts: {
   shiftPosterEmail: string | null
   shiftPosterName: string
   shiftPosterNotify: boolean
+  shiftPosterMembership: string | null
   requesterUserId: string | null
   requesterEmail: string | null
   requesterName: string
   requesterNotify: boolean
+  requesterMembership: string | null
 }) {
   const wallUrl = `${BASE_URL}/wall`
   const displayDate = formatDisplayDate(opts.shiftDate)
@@ -186,7 +195,7 @@ async function sendMatchNotifications(opts: {
     ))
   }
 
-  if (opts.requesterNotify && opts.requesterEmail) {
+  if (opts.requesterNotify && opts.requesterEmail && isProMembership(opts.requesterMembership)) {
     sends.push(resend.emails.send({
       from: 'MyShiftX <noreply@myshiftx.com>',
       to: opts.requesterEmail,
@@ -205,7 +214,7 @@ async function sendMatchNotifications(opts: {
     }))
   }
 
-  if (opts.shiftPosterNotify && opts.shiftPosterEmail) {
+  if (opts.shiftPosterNotify && opts.shiftPosterEmail && isProMembership(opts.shiftPosterMembership)) {
     sends.push(resend.emails.send({
       from: 'MyShiftX <noreply@myshiftx.com>',
       to: opts.shiftPosterEmail,
@@ -250,17 +259,18 @@ export async function notifyShiftPosted(opts: {
     const db = adminDb()
     const shiftDate = getETDate(opts.startTimeIso)
 
-    // Fetch poster's own email + notify pref
+    // Fetch poster's own email + notify pref + tier (service role bypasses
+    // the membership column lock; match emails are Pro/Trial-only)
     const { data: posterData } = await db
       .from('users')
-      .select('email, notify_via_email')
+      .select('email, notify_via_email, membership')
       .eq('id', opts.posterUserId)
       .single()
 
     // Fetch active requests on the same board for the same date
     const { data: requests, error } = await db
       .from('requests')
-      .select('request_title, preferred_times, user_id, users!user_id(email, display_name, notify_via_email), boards!board_id(name)')
+      .select('request_title, preferred_times, user_id, users!user_id(email, display_name, notify_via_email, membership), boards!board_id(name)')
       .eq('board_id', opts.boardId)
       .eq('requested_date', shiftDate)
       .eq('is_active', true)
@@ -279,7 +289,7 @@ export async function notifyShiftPosted(opts: {
       if (!shiftMatchesPreferences(opts.startTimeIso, prefs)) continue
 
       seenRequesters.add(uid)
-      const requester = (req.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean } | null
+      const requester = (req.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean; membership: string | null } | null
       const board     = (req.boards as unknown) as { name: string } | null
 
       await sendMatchNotifications({
@@ -291,10 +301,12 @@ export async function notifyShiftPosted(opts: {
         shiftPosterEmail:  posterData?.email ?? null,
         shiftPosterName:   opts.posterName,
         shiftPosterNotify: posterData?.notify_via_email ?? false,
+        shiftPosterMembership: posterData?.membership ?? null,
         requesterUserId:   uid,
         requesterEmail:    requester?.email ?? null,
         requesterName:     requester?.display_name ?? 'Someone',
         requesterNotify:   requester?.notify_via_email ?? false,
+        requesterMembership: requester?.membership ?? null,
       })
     }
   } catch (err) {
@@ -323,10 +335,11 @@ export async function notifyRequestPosted(opts: {
 
     const db = adminDb()
 
-    // Fetch requester's own email + notify pref
+    // Fetch requester's own email + notify pref + tier (match emails are
+    // Pro/Trial-only; service role bypasses the membership column lock)
     const { data: requesterData } = await db
       .from('users')
-      .select('email, notify_via_email')
+      .select('email, notify_via_email, membership')
       .eq('id', opts.requesterUserId)
       .single()
 
@@ -335,7 +348,7 @@ export async function notifyRequestPosted(opts: {
     //  getETDate() does the correct ET date comparison instead.)
     const { data: shifts, error } = await db
       .from('shifts')
-      .select('shift_title, start_time, user_id, users!user_id(email, display_name, notify_via_email), boards!board_id(name)')
+      .select('shift_title, start_time, user_id, users!user_id(email, display_name, notify_via_email, membership), boards!board_id(name)')
       .eq('board_id', opts.boardId)
       .eq('is_active', true)
       .gt('expires_at', new Date().toISOString())
@@ -354,7 +367,7 @@ export async function notifyRequestPosted(opts: {
       if (!shiftMatchesPreferences(startIso, opts.preferredTimes)) continue
 
       seenPosters.add(uid)
-      const poster = (shift.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean } | null
+      const poster = (shift.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean; membership: string | null } | null
       const board  = (shift.boards as unknown) as { name: string } | null
 
       await sendMatchNotifications({
@@ -366,10 +379,12 @@ export async function notifyRequestPosted(opts: {
         shiftPosterEmail:  poster?.email ?? null,
         shiftPosterName:   poster?.display_name ?? 'Someone',
         shiftPosterNotify: poster?.notify_via_email ?? false,
+        shiftPosterMembership: poster?.membership ?? null,
         requesterUserId:   opts.requesterUserId,
         requesterEmail:    requesterData?.email ?? null,
         requesterName:     opts.requesterName,
         requesterNotify:   requesterData?.notify_via_email ?? false,
+        requesterMembership: requesterData?.membership ?? null,
       })
     }
   } catch (err) {

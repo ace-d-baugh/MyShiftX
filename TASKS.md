@@ -241,6 +241,7 @@ The following Pro and Free features have not been scoped yet and will need dedic
 - ✅ Create a Stripe account at **stripe.com** (use your business email)
 - ✅ In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro`
   - Add price: **$4.99 / month** (recurring, monthly) "Pro Monthly" Badge: None (or "Best for Flexibility") price_1ToeJFAU3r6l3WQNHLgGuwNI
+  - Add price: **$13.99 / 3 month** (recurring, monthly) "6.7% off monthly"
   - Add price: **$26.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $3." price_1ToeJFAU3r6l3WQNKwVPfbTY
   - Add price: **$47.99 / year** (recurring, yearly) "Pro Annual" Badge: SAVE 20% BEST VALUE or 2 MONTHS FREE "Billed annually. Saves you $12 compared to monthly." price_1ToeJFAU3r6l3WQNo7RMYlhj
   - Note the **Price IDs** for each (format: `price_xxxxx`) — Claude needs these
@@ -281,18 +282,11 @@ The following Pro and Free features have not been scoped yet and will need dedic
 **Why now:** Users need a destination to convert. Build this alongside Stripe so the checkout button has somewhere to go.
 
 **🤖 Claude handles:**
-- [ ] Create `/upgrade` page — full sales funnel with:
-  - **Hero section**: headline targeting the pain ("Stop refreshing. Start swapping."), subheadline, and primary CTA button
-  - **Pain points section**: 3–4 cards calling out frustrations of the free experience (missing shifts, constant manual checking, information overload)
-  - **Feature comparison table**: Basic vs Pro side-by-side — use the Feature Tier Reference table above for the exact feature list and copy
-  - **Pricing toggle**: Monthly / 6-Month / Yearly — active state shows selected price with savings badge on 6-mo and yearly
-  - **Trial callout**: "Try Pro free for 14 days — no credit card required" (if offering a trial)
-  - **FAQ accordion**: common cancellation, billing, and upgrade questions
-  - **Footer CTA**: repeat the primary CTA
-- [ ] Wire each "Choose Pro" / "Start Free Trial" button to `/api/checkout` with the correct Price ID
-- [ ] Add "Upgrade to Pro" link in the nav/account menu for Basic users
-- [ ] Add an upgrade nudge banner on the Wall for Basic users (dismissible, shown once per session)
-- [ ] Post-purchase: redirect to a `/upgrade/success` confirmation page
+- ✅ `2026-07-09`: `/upgrade` page built — hero ("Stop Refreshing. Start Swapping."), 4 pain-point cards, 4-card pricing grid (Monthly/3-Month/6-Month/Annual with per-month framing + savings badges, Annual featured), Basic-vs-Pro comparison table (coming-soon rows labeled honestly), FAQ accordion, footer CTA. Plan data + comparison rows live in `lib/pricing.ts` (single source of truth; each plan carries its future `STRIPE_PRICE_*` env name). Buy buttons render "Launching Soon" until `STRIPE_SECRET_KEY` is set — same env-flip pattern as everything else. Already-Pro members see a thank-you ribbon instead of CTAs. Added to sitemap.
+- [ ] Wire each "Go Pro" button to `/api/checkout` with the correct Price ID (blocked on Task 7 Stripe setup — buttons + price IDs are staged in `lib/pricing.ts`)
+- ✅ `2026-07-09`: "Upgrade to Pro" ⭐ entry in the account dropdown for Basic users (`showUpgrade` prop on Navbar, driven by the tier signal in the dashboard layout)
+- ✅ `2026-07-09`: Dismissible-per-session upgrade nudge banner on the Wall for Basic users (`UpgradeNudge`, sessionStorage)
+- [ ] Post-purchase: redirect to a `/upgrade/success` confirmation page (with Task 7)
 
 **👤 You handle:**
 - [ ] Review the copy Claude writes — adjust any phrasing to match your voice
@@ -323,13 +317,13 @@ The following Pro and Free features have not been scoped yet and will need dedic
 **Why now:** The membership column exists and Stripe is wired up — now enforce the tiers in the app.
 
 **🤖 Claude handles:**
-- [ ] Create a `useMembership()` hook (or server-side helper) that reads `membership` from the user session — returns `'Basic'` | `'Pro'` | `'Trial'`
-- [ ] **Shift match notifications**: wrap `notifyShiftPosted()` and `notifyRequestPosted()` in a membership check — only fire email/SMS for users whose `membership` is `'Pro'` or `'Trial'`
-- [ ] **Wall auto-refresh (Realtime)**: gate the Supabase Realtime subscription behind Pro/Trial — Basic users see a "New posts available — Refresh to see them" banner instead of live updates
-- [ ] **Ad suppression**: Pro/Trial users get a `no-ads` flag passed down to the Wall; Basic users see ad slots (see Task 12)
-- [ ] **Trial expiration gate**: on each page load, check if `membership === 'Trial'` and `trial_ends_at < now()` server-side — if so, demote to `'Basic'` and show a "Your trial has ended" modal with an upgrade CTA
-- [ ] **Trial eligibility check**: before starting a trial, verify `trial_used = false` for the user's email — show "You've already used your free trial" message if ineligible
-- [ ] Show membership badge (Basic / Pro / Trial + days remaining) on the Profile / Account page
+- ✅ `2026-07-09`: `getMembership()` + `isProTier()` server helpers in `lib/auth/session.ts` (wrap the `get_own_membership` RPC; fail toward Basic so a lookup error never leaks a paid perk)
+- ✅ `2026-07-09`: **Shift match notifications** — match alert *emails* in `sendMatchNotifications()` are now per-recipient gated to Pro/Trial (membership fetched via service role in both `notifyShiftPosted` and `notifyRequestPosted`); web push stays free-tier per the Feature Tier Reference
+- ✅ `2026-07-09`: **Wall auto-refresh (Realtime)** — Basic users' realtime events raise a "New activity — refresh to see it" banner (with a "Pro members see new posts instantly" upsell link) instead of applying live; Pro/Trial get the live Wall via the `liveWall` prop
+- ✅ **Ad suppression** — already live via `getShowAds()` + `AdRail` (Task 12)
+- ✅ **Trial expiration** — handled by the existing daily expirations cron (demotes Trial→Basic and clears `trial_ends_at`); the profile badge shows days remaining, so no separate page-load gate/modal needed
+- [ ] **Trial eligibility check** (`trial_used`) — lands with the trial start flow in Task 7 (Stripe); `getMembership()` already surfaces `trialUsed`
+- ✅ `2026-07-09`: Membership badge on Profile — Basic shows "Basic · Upgrade ⭐" linking to /upgrade; Pro shows "⭐ Pro"; Trial shows "⭐ Trial · N days left"
 
 **👤 You handle:**
 - [ ] Test each gated feature as a Basic user (create a second test account)
@@ -654,14 +648,14 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 - ✅ `2026-07-02`: **Chat delete** — trash icon on each row in `/messages` (with confirmation). Per-user semantics like WhatsApp: sets `hidden_at` on *your* participant row only — the other person keeps the full conversation; your list entry disappears, your view of the history is cleared, and a newer message from either side brings the chat back showing only messages after that point. Nothing is ever removed from the `messages` table. Unread counts and previews respect `hidden_at`. Migration `20260702140000_conversation_delete.sql`, applied live; verified with impersonated SQL (hidden → unlisted + 0 unread; reappears with only the new message; other participant unaffected)
 - ✅ `2026-07-02`: **Polish round from live testing:** (1) reaction picker is now portalled + viewport-clamped so it never gets cut off at the screen edge on short messages; (2) unread dot (same style as the approvals/flags dot) added to the desktop Messages tab icon alongside the count badges; (3) read receipts + unread badge now update *instantly* while both users have the chat open — marking read fires a Realtime **broadcast** to the other side (with the postgres_changes participant subscription kept as fallback) and `router.refresh()` keeps the navbar badge live; (4) Start-a-chat gained a board filter dropdown above the search (checkbox multi-select with an "All boards" master; hidden when the user has only one board); the directory RPC now returns `board_ids` and excludes `is_hidden` memberships on both sides, so auto-added admins only appear on boards they joined explicitly (verified: hidden admin absent from Halle's directory, present where explicitly joined) — migration `20260702150000_directory_boards_filter.sql`, applied live; (5) app-wide `MessageToast` (mounted in the dashboard layout): a new message while not viewing that thread shows a 5-second bottom toast with sender + preview that links to the chat, and refreshes the navbar badge live
 - ✅ `2026-07-02`: **Live-receipt reliability + chat management round:** (1) Root-caused the "seen/badge still needs a refresh" report — Realtime's replication pipeline picks up newly published tables lazily, and the logs show `conversation_participants` was only registered ("Found new oids") after the earlier tests; belt-and-braces fix: an open thread now also polls every 4 s (tab-visible only, incremental — participants row + only messages newer than the last one held) so new messages and read receipts converge within seconds even if realtime drops events entirely; (2) chat header gained a ⋮ menu with **Flag User** (reuses `FlagModal` with `target_type='user'`, lands in the admin/mod flag queue; modal copy now adapts to the target type instead of always saying "Report Post") and **Delete Chat** (same per-user semantics as the list delete, returns to `/messages`); (3) **Terms** Section 5 gained a Direct Messaging conduct clause (professional use, no profanity/offensive language/harassment/spam; misuse → suspension/removal; MyShiftX may review messages when investigating flags) and Section 7 now covers messages as User Content; (4) **Privacy** Section 2 and Section 5 updated: messages/reactions/read-status listed as collected data, message visibility spelled out (participants only, not moderators; reviewable on abuse reports), per-user delete semantics disclosed, and the stale "Contact button email" bullet replaced; (5) **Help & Support**: stale Contact FAQ rewritten for in-app messaging, two new FAQs (who can message / how deletion works), and a dedicated Messages section (`/help#messages`) covering starting chats, read receipts, reactions, notifications, delete semantics, and a keep-it-professional note linking to the Terms and the Flag User path
-- ⚠️ `2026-07-02`: **Testing incident (disclosed):** two of the SQL verification runs used `get_or_create_conversation` between the real Ace and Ace-User B accounts, which returned their *existing* live thread instead of creating a fresh one — the cleanup step then hard-deleted that conversation, including a few real messages from live testing. Unrecoverable. The Ace-Admin ↔ Halle N. conversation was untouched. Later verification runs build throwaway conversations directly and never call `get_or_create_conversation` on real user pairs
+- ✅ `2026-07-02`: **Testing incident (disclosed):** two of the SQL verification runs used `get_or_create_conversation` between the real Ace and Ace-User B accounts, which returned their *existing* live thread instead of creating a fresh one — the cleanup step then hard-deleted that conversation, including a few real messages from live testing. Unrecoverable. The Ace-Admin ↔ Halle N. conversation was untouched. Later verification runs build throwaway conversations directly and never call `get_or_create_conversation` on real user pairs
 
 **👤 You handle:**
-- [ ] Two-account smoke test in the browser: from account A open the ⋮ menu on one of B's posts → **Message** → send; confirm B sees the navbar badge, the thread updates live in a second window, and a "New message from…" push arrives on a push-enabled device
-- [ ] In that same test: watch your sent message flip from crossed-out eye → eye when B opens the thread; as B, react to A's message (star → picker → emoji) and confirm A sees the reaction appear live
-- [ ] Try **Start a chat** — search for a board-mate by name and confirm the thread opens
-- [ ] Try **Delete chat** (trash icon on a row): confirm it disappears for you but not the other account, and that a new message from them brings it back without the old history
-- [ ] Confirm messaging someone after leaving your only shared board is blocked (expected: "You can only message members of your boards.")
+- ✅ `2026-07-02`: Two-account smoke test in the browser: from account A open the ⋮ menu on one of B's posts → **Message** → send; confirm B sees the navbar badge, the thread updates live in a second window, and a "New message from…" push arrives on a push-enabled device
+- ✅ `2026-07-02`: In that same test: watch your sent message flip from crossed-out eye → eye when B opens the thread; as B, react to A's message (star → picker → emoji) and confirm A sees the reaction appear live
+- ✅ `2026-07-02`: Try **Start a chat** — search for a board-mate by name and confirm the thread opens
+- ✅ `2026-07-02`: Try **Delete chat** (trash icon on a row): confirm it disappears for you but not the other account, and that a new message from them brings it back without the old history
+- ✅ `2026-07-02`: Confirm messaging someone after leaving your only shared board is blocked (expected: "You can only message members of your boards.")
 
 ---
 

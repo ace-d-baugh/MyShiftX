@@ -7,7 +7,7 @@ import { INDUSTRIES } from '@/lib/landing/industries'
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = 'https://myshiftx.com'
   const routes = [
-    '', '/login', '/register', '/about', '/contact', '/terms', '/privacy', '/data-deletion',
+    '', '/login', '/register', '/about', '/contact', '/upgrade', '/terms', '/privacy', '/data-deletion',
     ...INDUSTRIES.map(i => `/for/${i.slug}`),
   ]
 

@@ -87,6 +87,7 @@ export default async function DashboardLayout({
         pendingApprovalsCount={pendingApprovalsCount}
         pendingFlagsCount={pendingFlagsCount}
         unreadMessagesCount={unreadMessages ?? 0}
+        showUpgrade={showAds /* showAds === Basic tier, same signal */}
       />
       <main className="flex-1 pb-20 md:pb-0">
         <AdRail showAds={showAds}>{children}</AdRail>

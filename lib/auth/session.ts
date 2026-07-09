@@ -58,6 +58,35 @@ export async function requireModeratorOrAdmin() {
   return { supabase, user, isAdmin, isMod }
 }
 
+export interface Membership {
+  tier: 'Basic' | 'Pro' | 'Trial'
+  trialEndsAt: string | null
+  trialUsed: boolean
+  billingCycle: string | null
+}
+
+/**
+ * The current user's membership, via the get_own_membership() RPC (the
+ * membership columns are column-locked from direct SELECT). Falls back to
+ * Basic on any failure, so feature gating errs toward the free experience;
+ * ads specifically use getShowAds below, which errs the other way.
+ */
+export async function getMembership(supabase: Supabase): Promise<Membership> {
+  const { data } = await supabase.rpc('get_own_membership').single()
+  const tier = data?.membership
+  return {
+    tier: tier === 'Pro' || tier === 'Trial' ? tier : 'Basic',
+    trialEndsAt: data?.trial_ends_at ?? null,
+    trialUsed: Boolean(data?.trial_used),
+    billingCycle: data?.billing_cycle ?? null,
+  }
+}
+
+/** Pro and Trial members get every gated feature. */
+export function isProTier(m: Membership): boolean {
+  return m.tier === 'Pro' || m.tier === 'Trial'
+}
+
 /**
  * Whether ads should be shown to the current session user (Basic/Free tier
  * only — Pro and Trial members never see ads). Uses get_own_membership()

@@ -32,9 +32,12 @@ interface ProfileClientProps {
   user: UserProfile | null
   sessionUserId: string
   isPro: boolean
+  membershipTier?: 'Basic' | 'Pro' | 'Trial'
+  /** ISO timestamp — only set while membershipTier is 'Trial'. */
+  trialEndsAt?: string | null
 }
 
-export function ProfileClient({ user, sessionUserId, isPro }: ProfileClientProps) {
+export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Basic', trialEndsAt = null }: ProfileClientProps) {
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -136,11 +139,33 @@ export function ProfileClient({ user, sessionUserId, isPro }: ProfileClientProps
     )
   }
 
+  const trialDaysLeft = trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000))
+    : null
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-      <div>
-        <h1 className="font-accent text-2xl font-bold text-text">My Profile</h1>
-        <p className="text-sm text-text/60">Manage your account settings and boards</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="font-accent text-2xl font-bold text-text">My Profile</h1>
+          <p className="text-sm text-text/60">Manage your account settings and boards</p>
+        </div>
+        {/* Membership badge */}
+        {membershipTier === 'Basic' ? (
+          <Link
+            href="/upgrade"
+            className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide bg-primary/10 text-primary hover:bg-primary/20 rounded-full px-3 py-1.5 transition-colors min-h-0 min-w-0"
+            title="See what Pro unlocks"
+          >
+            Basic · Upgrade ⭐
+          </Link>
+        ) : (
+          <span className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide bg-secondary text-text rounded-full px-3 py-1.5">
+            ⭐ {membershipTier === 'Trial' && trialDaysLeft !== null
+              ? `Trial · ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`
+              : 'Pro'}
+          </span>
+        )}
       </div>
 
       {isNewOAuthUser && (

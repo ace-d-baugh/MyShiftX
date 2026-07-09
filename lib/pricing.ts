@@ -1,0 +1,92 @@
+// Canonical Pro plan definitions — the /upgrade page renders from this, and
+// the Stripe checkout route (Task 7) will map `priceIdEnv` to real Stripe
+// Price IDs once they exist in Vercel env vars. Keep the numbers in sync with
+// Stripe Dashboard → Products → MyShiftX Pro (see TASKS.md Task 7).
+
+export interface ProPlan {
+  key: 'monthly' | 'quarterly' | 'semiannual' | 'annual'
+  name: string
+  /** Total charged per billing period, in dollars. */
+  price: number
+  /** Human description of the billing period. */
+  per: string
+  /** Effective monthly cost, for apples-to-apples display. */
+  perMonth: string
+  /** Savings badge; null renders no badge. */
+  badge: string | null
+  /** Whether the card gets the highlighted "best value" treatment. */
+  featured: boolean
+  /** One-line hook under the plan name. */
+  hook: string
+  /** Fine print under the price. */
+  finePrint: string
+  /** Env var that will hold this plan's Stripe Price ID. */
+  priceIdEnv: string
+}
+
+export const PRO_PLANS: ProPlan[] = [
+  {
+    key: 'monthly',
+    name: 'Monthly',
+    price: 4.99,
+    per: 'per month',
+    perMonth: '$4.99',
+    badge: null,
+    featured: false,
+    hook: 'Total flexibility',
+    finePrint: 'Billed monthly. Cancel anytime in two clicks.',
+    priceIdEnv: 'STRIPE_PRICE_PRO_MONTHLY',
+  },
+  {
+    key: 'quarterly',
+    name: '3 Months',
+    price: 13.99,
+    per: 'every 3 months',
+    perMonth: '$4.66',
+    badge: 'SAVE 6.7%',
+    featured: false,
+    hook: 'A full season of Pro',
+    finePrint: 'Billed $13.99 every 3 months — less than one coffee saved.',
+    priceIdEnv: 'STRIPE_PRICE_PRO_QUARTERLY',
+  },
+  {
+    key: 'semiannual',
+    name: '6 Months',
+    price: 26.99,
+    per: 'every 6 months',
+    perMonth: '$4.50',
+    badge: 'SAVE 10%',
+    featured: false,
+    hook: 'Set it and forget it',
+    finePrint: 'Billed $26.99 every 6 months. Saves you $3 vs monthly.',
+    priceIdEnv: 'STRIPE_PRICE_PRO_SEMIANNUAL',
+  },
+  {
+    key: 'annual',
+    name: 'Annual',
+    price: 47.99,
+    per: 'per year',
+    perMonth: '$4.00',
+    badge: 'BEST VALUE · 2+ MONTHS FREE',
+    featured: true,
+    hook: 'The one most people pick',
+    finePrint: 'Billed $47.99/year — a full year of Pro for less than 10 months of monthly.',
+    priceIdEnv: 'STRIPE_PRICE_PRO_ANNUAL',
+  },
+]
+
+/** Rows for the Basic vs Pro comparison table on /upgrade. */
+export const TIER_COMPARISON: { feature: string; basic: string | boolean; pro: string | boolean; comingSoon?: boolean }[] = [
+  { feature: 'Shift boards, offers & requests', basic: true, pro: true },
+  { feature: 'Mark interest & comment on shifts', basic: true, pro: true },
+  { feature: 'Private messaging with board-mates', basic: true, pro: true },
+  { feature: 'Push notifications', basic: true, pro: true },
+  { feature: 'Photo Schedule Import', basic: '4 per month', pro: 'Unlimited' },
+  { feature: 'Ads', basic: 'Ad-supported', pro: 'None. Anywhere.' },
+  { feature: 'Live Wall — new posts appear instantly', basic: false, pro: true },
+  { feature: 'Instant match alerts by email', basic: false, pro: true },
+  { feature: 'Calendar sync (Google · Apple · Outlook)', basic: false, pro: true },
+  { feature: 'SMS match alerts (30/month)', basic: false, pro: true, comingSoon: true },
+  { feature: 'Trade preferences — smarter matching', basic: false, pro: true, comingSoon: true },
+  { feature: 'Bulk import (CSV & multi-week photos)', basic: false, pro: true, comingSoon: true },
+]

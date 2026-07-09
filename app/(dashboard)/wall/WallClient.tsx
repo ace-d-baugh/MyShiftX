@@ -8,6 +8,7 @@ import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown, X, Chec
 import { createClient } from '@/lib/supabase/client'
 import { deactivateShift, deactivateRequest } from '@/app/actions/posts'
 import { PushPromptBanner } from '@/components/features/PushPromptBanner'
+import { UpgradeNudge } from '@/components/features/UpgradeNudge'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
 import { RequestCard, type RequestData } from '@/components/features/RequestCard'
 import { WallSkeleton } from '@/components/ui/WallSkeleton'
@@ -87,11 +88,13 @@ interface WallClientProps {
   hasBoards: boolean
   initialTab?: Tab
   initialDate?: string
+  /** Pro/Trial perk: apply realtime updates live. Basic gets a refresh banner. */
+  liveWall?: boolean
 }
 
 type Tab = 'offers' | 'requests'
 
-export function WallClient({ userId, displayName, boards, hasBoards, initialTab = 'offers', initialDate = '' }: WallClientProps) {
+export function WallClient({ userId, displayName, boards, hasBoards, initialTab = 'offers', initialDate = '', liveWall = false }: WallClientProps) {
   const supabase = useMemo(() => createClient(), [])
   const [tab, setTab] = useState<Tab>(initialTab)
   const [shifts, setShifts] = useState<ShiftData[]>([])
@@ -259,7 +262,11 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
     else loadRequests()
   }, [tab, loadShifts, loadRequests])
 
-  // Realtime subscriptions — silently refresh when posts are added, changed, or removed
+  // Realtime subscriptions. Pro/Trial (liveWall): changes are applied to the
+  // list the moment they land. Basic: the same events only raise a "new
+  // activity" banner — the refresh is manual, which is the upsell.
+  const [newActivity, setNewActivity] = useState(false)
+
   useEffect(() => {
     if (!hasBoards) return
 
@@ -269,6 +276,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
         'postgres_changes',
         { event: '*', schema: 'public', table: 'shifts' },
         (payload) => {
+          if (!liveWall) { setNewActivity(true); return }
           if (payload.eventType === 'DELETE') {
             setShifts(prev => prev.filter(s => s.id !== (payload.old as { id: string }).id))
           } else if (payload.eventType === 'UPDATE' && !(payload.new as { is_active: boolean }).is_active) {
@@ -286,6 +294,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
         'postgres_changes',
         { event: '*', schema: 'public', table: 'requests' },
         (payload) => {
+          if (!liveWall) { setNewActivity(true); return }
           if (payload.eventType === 'DELETE') {
             setRequests(prev => prev.filter(r => r.id !== (payload.old as { id: string }).id))
           } else if (payload.eventType === 'UPDATE' && !(payload.new as { is_active: boolean }).is_active) {
@@ -301,7 +310,13 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       supabase.removeChannel(shiftsChannel)
       supabase.removeChannel(requestsChannel)
     }
-  }, [hasBoards, supabase, upsertShift, upsertRequest])
+  }, [hasBoards, liveWall, supabase, upsertShift, upsertRequest])
+
+  const handleManualRefresh = () => {
+    setNewActivity(false)
+    loadShifts(true)
+    loadRequests(true)
+  }
 
   const handleDeactivateShift = async (id: string) => {
     setDeactivateError(null)
@@ -452,6 +467,24 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       </div>
 
       <PushPromptBanner />
+
+      {/* Soft upsell for Basic members — dismissible per session */}
+      {!liveWall && <UpgradeNudge />}
+
+      {/* Basic-tier realtime gate: something changed, refresh is manual */}
+      {newActivity && (
+        <div className="mb-4 p-3 rounded-md bg-info/10 border border-info/20 text-sm flex flex-wrap items-center justify-between gap-2">
+          <span className="text-text/80">
+            New activity on the Wall —{' '}
+            <button onClick={handleManualRefresh} className="text-primary font-medium underline min-h-0 min-w-0">
+              refresh to see it
+            </button>
+          </span>
+          <Link href="/upgrade" className="text-xs text-text/50 hover:text-primary min-h-0 min-w-0">
+            ⭐ Pro members see new posts instantly
+          </Link>
+        </div>
+      )}
 
       {/* Deactivate error */}
       {deactivateError && (

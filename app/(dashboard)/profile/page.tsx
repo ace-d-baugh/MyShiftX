@@ -21,7 +21,18 @@ export default async function ProfilePage() {
     supabase.rpc('get_own_membership').single(),
   ])
 
-  const isPro = membershipRow?.membership === 'Pro' || membershipRow?.membership === 'Trial'
+  const tier = membershipRow?.membership === 'Pro' || membershipRow?.membership === 'Trial'
+    ? membershipRow.membership as 'Pro' | 'Trial'
+    : 'Basic'
+  const isPro = tier !== 'Basic'
 
-  return <ProfileClient user={userProfile} sessionUserId={user.id} isPro={isPro} />
+  return (
+    <ProfileClient
+      user={userProfile}
+      sessionUserId={user.id}
+      isPro={isPro}
+      membershipTier={tier}
+      trialEndsAt={membershipRow?.trial_ends_at ?? null}
+    />
+  )
 }

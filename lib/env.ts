@@ -36,6 +36,9 @@ export const optionalServerEnv = {
   get GEMINI_API_KEY() { return process.env.GEMINI_API_KEY },
   // Defaults to gemini-2.5-flash in the route if unset.
   get GEMINI_MODEL() { return process.env.GEMINI_MODEL },
+  // Stripe (Task 7) — checkout stays in "launching soon" mode until this is
+  // set, which also gates the upgrade entry points (nav link, Wall banner).
+  get STRIPE_SECRET_KEY() { return process.env.STRIPE_SECRET_KEY },
   // Web Push (Task 16) — VAPID key pair. The public key is also read
   // client-side as NEXT_PUBLIC_VAPID_PUBLIC_KEY; push features stay fully
   // hidden until both are set.
