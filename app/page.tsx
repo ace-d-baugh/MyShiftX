@@ -244,7 +244,8 @@ export default async function HomePage() {
 
       {/* ── Properties ── */}
       <section className="py-16 px-4 bg-primary-light overflow-hidden">
-        <div className="max-w-2xl mx-auto text-center">
+        {/* max-w-screen-sm = 640px, the closest Tailwind stop under the 650px design cap */}
+        <div className="max-w-screen-sm mx-auto text-center">
           <AnimateIn>
             <h2 className="font-accent text-2xl md:text-3xl font-bold text-text mb-3">
               Built For Any Workplace

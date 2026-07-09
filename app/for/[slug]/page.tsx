@@ -150,7 +150,8 @@ export default async function IndustryLandingPage({ params }: { params: { slug: 
 
       {/* ── Other industries ── */}
       <section className="py-16 px-4 bg-background overflow-hidden">
-        <div className="max-w-2xl mx-auto text-center">
+        {/* max-w-screen-sm = 640px, the closest Tailwind stop under the 650px design cap */}
+        <div className="max-w-screen-sm mx-auto text-center">
           <AnimateIn>
             <p className="text-text/50 text-sm mb-6">Also built for</p>
           </AnimateIn>
