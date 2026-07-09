@@ -3,38 +3,15 @@ import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { optionalServerEnv } from '@/lib/env'
 
-// CPU-only inference on the VPS routinely takes 2-5 minutes per image
-// (measured against real schedule photos, not just the small test cases the
-// 30-90s estimate was based on) — well past the default function timeout.
-// Requires Vercel Pro; 290s leaves a small margin under Pro's 300s hard cap.
-export const maxDuration = 290
+// Gemini answers in 5-15s; 90s covers a slow inference plus the endpoint
+// fallback attempt without holding the function open needlessly.
+export const maxDuration = 90
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
-const DEFAULT_MODEL = 'qwen2.5vl:3b'
+const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash'
 
-// Structured-output schema passed to Ollama — constrains generation so the
-// model can only emit this shape (no prose, no markdown fences).
-const OLLAMA_FORMAT = {
-  type: 'object',
-  properties: {
-    shifts: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          date:       { type: 'string' },
-          start_time: { type: 'string' },
-          end_time:   { type: 'string' },
-          title:      { type: 'string' },
-        },
-        required: ['date', 'start_time', 'end_time'],
-      },
-    },
-  },
-  required: ['shifts'],
-} as const
-
+// Shape returned to the client (ScheduleImportModal).
 const parsedShiftSchema = z.object({
   date:       z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   start_time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
@@ -42,22 +19,93 @@ const parsedShiftSchema = z.object({
   title:      z.string().trim().max(35).optional(),
 })
 
-function buildPrompt(): string {
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' })
-  return `You are reading a photo of a work schedule. Today's date is ${today}.
-Extract every work shift shown in the image.
+// Gemini rows carry an explicit end_date for overnight shifts; the client
+// derives overnight from end <= start, so end_date is validated but unused.
+const geminiShiftSchema = z.object({
+  start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  start_time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+  end_date:   z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  end_time:   z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+  title:      z.string().trim().max(35).optional(),
+})
 
-Rules:
-- "date" must be YYYY-MM-DD. If the schedule shows no year, use the nearest occurrence on or after today's date.
-- "start_time" and "end_time" must be 24-hour HH:MM. Convert AM/PM times (e.g. "3:15 PM" -> "15:15").
-- "title" is the role, position, or location text shown for that shift, if any (keep it under 35 characters).
-- Skip days marked off, vacation, or with no shift. Skip entries with a missing or unreadable time.
-- If the image contains no readable schedule, return an empty shifts array.`
+// Prompt validated by hand against Gemini 2.5 Flash (see "Prompt That
+// Worked" in schedule-from-image.md): benchmarked 2/2 on a real app
+// screenshot and 8/8 on a dense synthetic table. It isolates the target
+// employee's row on multi-employee schedules and resolves year-less dates
+// by day-of-week alignment. One lesson from the earlier self-hosted-model
+// benchmarks still applies here: never mention today's date in the prompt —
+// it makes vision models tunnel-vision onto today's row.
+function buildGeminiPrompt(userName: string): string {
+  const target = userName.trim()
+    ? `Target Name to find: ${userName.trim()}
+If the image shows only a single person's schedule with no names, treat that schedule as the target's.`
+    : `No target name is available. The image should show a single person's schedule — extract that schedule's shifts.`
+  return `You are a highly accurate operational calendar parser for an employee shift tracking application. Your job is to analyze the attached schedule image and extract ONLY the work shifts that belong to the target employee specified below.
+
+### Target Employee Context
+${target}
+
+Follow these execution steps precisely:
+
+### Step 1: User Identification & Row Isolation
+1. Scan the image for the target employee name. Look for exact matches, or the closest partial match (e.g., if the target name is "John Smith", look for "Smith, John", "John S.", or text partially truncated near a margin that uniquely matches).
+2. Once the target name is identified, isolate ONLY the spatial region, row, or card associated directly with that name.
+3. Explicitly discard all schedule blocks, rows, or tables belonging to any other employee. Do not extract or process any data lines outside of the target user's specific schedule boundaries.
+
+### Step 2: Date & Shift Cross-Referencing
+For the isolated data blocks belonging to the target employee, transcribe the following details step-by-step in your raw thinking space:
+- The specific calendar date or day of the week header bound to that entry.
+- The literal raw time window text exactly as written in the cell/block (e.g., "15:30 - 00:30").
+- The literal location, role, or activity text associated with that specific time block.
+Note: If a specific day is explicitly marked "OFF", "RDO", "LOA", or is completely blank, note it as empty and skip it.
+
+### Step 3: Normalization & Structural Rules
+Convert your findings from Step 2 using these strict parameters:
+1. Time Format: Convert all start and end times to 24-hour HH:MM strings (e.g., "15:30", "00:30"). If a time uses a 12-hour format, normalize it to 24-hour time.
+2. Date Resolution: Extract the exact calendar year, month, and day from the document's main headers to construct a strict "YYYY-MM-DD" date string. If the schedule omits the year, dynamically resolve the correct calendar year by selecting the closest matching Gregorian calendar year where the written days of the week align perfectly with those specific calendar dates.
+3. Over-Midnight (Overnight) Rules: If a shift's normalized end time is numerically less than or equal to its start time (e.g., Start: 22:00, End: 06:00), it runs past midnight. Calculate the end_date as exactly one calendar day AFTER the start_date.
+
+### Step 4: Final JSON Output
+Provide your final output at the very bottom inside a standard JSON code block matching the schema below. Output absolutely zero markdown or conversational prose outside of the JSON block once you reach this step.
+
+{
+  "shifts": [
+    {
+      "start_date": "YYYY-MM-DD",
+      "start_time": "HH:MM",
+      "end_date": "YYYY-MM-DD",
+      "end_time": "HH:MM",
+      "title": "Normalized Location/Role Title"
+    }
+  ]
+}`
+}
+
+// The model answers in prose (transcription steps, then fenced JSON) — pull
+// out the JSON object rather than assuming the whole reply parses.
+function extractJson(content: string): string {
+  const start = content.indexOf('{')
+  const end = content.lastIndexOf('}')
+  return start >= 0 && end > start ? content.slice(start, end + 1) : content
+}
+
+// Normalize "3:15 PM" / "9:00" style times to strict 24-hour HH:MM so a
+// model that ignores the 24-hour instruction doesn't cost the user a row.
+function normalizeTime(t: unknown): unknown {
+  if (typeof t !== 'string') return t
+  const m = t.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i)
+  if (!m) return t
+  let h = Number(m[1])
+  const ampm = m[3]?.toUpperCase()
+  if (ampm === 'PM' && h < 12) h += 12
+  if (ampm === 'AM' && h === 12) h = 0
+  return `${String(h).padStart(2, '0')}:${m[2]}`
 }
 
 export async function POST(req: NextRequest) {
-  const { VPS_OLLAMA_URL, VPS_OLLAMA_SECRET } = optionalServerEnv
-  if (!VPS_OLLAMA_URL || !VPS_OLLAMA_SECRET) {
+  const { GEMINI_API_KEY } = optionalServerEnv
+  if (!GEMINI_API_KEY) {
     return NextResponse.json({ error: 'Schedule import is not configured yet.' }, { status: 503 })
   }
 
@@ -68,8 +116,8 @@ export async function POST(req: NextRequest) {
   }
 
   // Quota check up front so a Basic user over the limit never triggers a
-  // (slow, CPU-bound) model run. Consumption happens after a successful
-  // parse so a VPS failure doesn't burn an import.
+  // model call. Consumption happens after a successful parse so a backend
+  // failure doesn't burn an import.
   const { data: statusRows, error: statusErr } = await supabase.rpc('get_schedule_import_status')
   const status = statusRows?.[0]
   if (statusErr || !status) {
@@ -83,10 +131,15 @@ export async function POST(req: NextRequest) {
   }
 
   let file: File | null = null
+  let userName = ''
   try {
     const form = await req.formData()
     const entry = form.get('image')
     if (entry instanceof File) file = entry
+    const name = form.get('name')
+    // Only used to point the model at the right row on multi-employee
+    // schedules — not a security input, but cap it defensively.
+    if (typeof name === 'string') userName = name.slice(0, 80)
   } catch {
     return NextResponse.json({ error: 'Invalid upload.' }, { status: 400 })
   }
@@ -101,51 +154,84 @@ export async function POST(req: NextRequest) {
   }
 
   const imageB64 = Buffer.from(await file.arrayBuffer()).toString('base64')
-  const model = optionalServerEnv.OLLAMA_VISION_MODEL ?? DEFAULT_MODEL
+  const geminiModel = optionalServerEnv.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL
+  // Google mints look-alike keys for two different surfaces (the key prefix
+  // does NOT distinguish them): AI Studio keys work on the free-tier
+  // generativelanguage endpoint, Vertex express keys only on the
+  // billing-gated aiplatform endpoint. Same request/response shape on both —
+  // try the free endpoint first and fall back on an auth error.
+  const geminiBases = [
+    'https://generativelanguage.googleapis.com/v1beta/models',
+    'https://aiplatform.googleapis.com/v1/publishers/google/models',
+  ]
 
   let content: string
   try {
-    const res = await fetch(`${VPS_OLLAMA_URL}/api/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${VPS_OLLAMA_SECRET}`,
-      },
-      body: JSON.stringify({
-        model,
-        stream: false,
-        messages: [{ role: 'user', content: buildPrompt(), images: [imageB64] }],
-        format: OLLAMA_FORMAT,
-        options: { temperature: 0 },
-        // Keep the model resident between imports so only the first request
-        // of the day pays the multi-minute model load.
-        keep_alive: '60m',
-      }),
-      // Leaves ~10s of the 290s function budget for the JSON parse/quota RPC
-      // that happen after this resolves.
-      signal: AbortSignal.timeout(280_000),
-    })
+    let res: Response | null = null
+    for (const base of geminiBases) {
+      res = await fetch(`${base}/${geminiModel}:generateContent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': GEMINI_API_KEY,
+        },
+        body: JSON.stringify({
+          contents: [{
+            role: 'user',
+            parts: [
+              { inlineData: { mimeType: file.type, data: imageB64 } },
+              { text: buildGeminiPrompt(userName) },
+            ],
+          }],
+          generationConfig: { temperature: 0 },
+        }),
+        signal: AbortSignal.timeout(60_000),
+      })
+      // 401/403 = wrong surface for this key type — try the other one.
+      if (res.status !== 401 && res.status !== 403) break
+    }
+    if (!res) throw new Error('unreachable')
     if (!res.ok) {
       const detail = await res.text().catch(() => '')
-      console.error(`[schedule-import] Ollama HTTP ${res.status}:`, detail.slice(0, 500))
+      console.error(`[schedule-import] Gemini HTTP ${res.status}:`, detail.slice(0, 500))
       return NextResponse.json({ error: 'The schedule reader is unavailable right now. Please try again in a minute.' }, { status: 502 })
     }
-    const json = await res.json() as { message?: { content?: string } }
-    content = json.message?.content ?? ''
-  } catch (err) {
-    console.error('[schedule-import] Ollama request failed:', err)
-    const timedOut = err instanceof Error && err.name === 'TimeoutError'
-    return NextResponse.json(
-      { error: timedOut ? 'Reading the schedule took too long. Try a clearer or smaller photo.' : 'Could not reach the schedule reader. Please try again.' },
-      { status: 502 }
+    const json = await res.json() as {
+      candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] } }[]
+      usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number }
+    }
+    // eslint-disable-next-line no-console -- operational metrics, not debug noise
+    console.log(
+      `[schedule-import] model=${geminiModel} prompt_tokens=${json.usageMetadata?.promptTokenCount ?? '?'}` +
+      ` output_tokens=${json.usageMetadata?.candidatesTokenCount ?? '?'}`
     )
+    content = (json.candidates?.[0]?.content?.parts ?? [])
+      .filter(p => !p.thought && typeof p.text === 'string')
+      .map(p => p.text)
+      .join('')
+  } catch (err) {
+    console.error('[schedule-import] Gemini request failed:', err)
+    return NextResponse.json({ error: 'Could not reach the schedule reader. Please try again.' }, { status: 502 })
   }
 
   let shifts: z.infer<typeof parsedShiftSchema>[]
   try {
-    const parsed = JSON.parse(content) as { shifts?: unknown[] }
+    const parsed = JSON.parse(extractJson(content)) as { shifts?: unknown[] }
     shifts = (parsed.shifts ?? [])
-      .map(s => parsedShiftSchema.safeParse(s))
+      .map(s => {
+        if (s && typeof s === 'object') {
+          const o = s as Record<string, unknown>
+          o.start_time = normalizeTime(o.start_time)
+          o.end_time = normalizeTime(o.end_time)
+        }
+        // Gemini's schema names the date start_date and includes an
+        // end_date; map to the client shape (overnight is re-derived from
+        // end <= start on save, so end_date itself is validated then dropped).
+        const g = geminiShiftSchema.safeParse(s)
+        if (!g.success) return g
+        const { start_date, start_time, end_time, title } = g.data
+        return parsedShiftSchema.safeParse({ date: start_date, start_time, end_time, title })
+      })
       .filter((r): r is { success: true; data: z.infer<typeof parsedShiftSchema> } => r.success)
       .map(r => r.data)
   } catch {

@@ -49,3 +49,8 @@ next-env.d.ts
 # Misc
 .turbo
 *.log
+
+# Documents
+docs/
+schedule-from-image.md
+Test-Schedule-Image.png

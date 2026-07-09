@@ -31,12 +31,11 @@ export const optionalServerEnv = {
   get SUPABASE_SERVICE_ROLE_KEY() { return process.env.SUPABASE_SERVICE_ROLE_KEY },
   get RESEND_API_KEY() { return process.env.RESEND_API_KEY },
   get CRON_SECRET() { return process.env.CRON_SECRET },
-  // Photo schedule import (Task 15) — Ollama vision model on the VPS.
-  // e.g. https://vps.digitalelegance.com/ollama — no trailing slash.
-  get VPS_OLLAMA_URL() { return process.env.VPS_OLLAMA_URL },
-  get VPS_OLLAMA_SECRET() { return process.env.VPS_OLLAMA_SECRET },
-  // Defaults to qwen2.5vl:3b in the route if unset.
-  get OLLAMA_VISION_MODEL() { return process.env.OLLAMA_VISION_MODEL },
+  // Photo schedule import (Task 15) — Gemini vision backend. The feature
+  // stays fully hidden until the key is set (same pattern as AdSense).
+  get GEMINI_API_KEY() { return process.env.GEMINI_API_KEY },
+  // Defaults to gemini-2.5-flash in the route if unset.
+  get GEMINI_MODEL() { return process.env.GEMINI_MODEL },
   // Web Push (Task 16) — VAPID key pair. The public key is also read
   // client-side as NEXT_PUBLIC_VAPID_PUBLIC_KEY; push features stay fully
   // hidden until both are set.

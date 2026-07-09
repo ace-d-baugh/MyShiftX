@@ -48,10 +48,9 @@ export default async function CalendarPage() {
     supabase.from('users').select('display_name').eq('id', user.id).single(),
   ])
 
-  // Photo schedule import stays hidden until the VPS-side Ollama setup is
-  // live (docs/vps-ollama-setup.md) — flips on automatically once
-  // VPS_OLLAMA_URL + VPS_OLLAMA_SECRET are set, same pattern as AdSense.
-  const importEnabled = Boolean(optionalServerEnv.VPS_OLLAMA_URL && optionalServerEnv.VPS_OLLAMA_SECRET)
+  // Photo schedule import stays hidden until the Gemini key is configured —
+  // same env-var-flip pattern as AdSense.
+  const importEnabled = Boolean(optionalServerEnv.GEMINI_API_KEY)
 
   return (
     <CalendarClient

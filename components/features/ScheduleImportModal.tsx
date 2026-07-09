@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera, Check, Plus, ScanLine, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -26,6 +26,22 @@ interface ImportRow {
   title: string
 }
 
+interface ExistingShift {
+  id: string
+  start_time: string
+  end_time: string
+  shift_title: string
+}
+
+// [start, end) of a row, with the same overnight roll-forward used on save.
+function rowSpan(r: ImportRow): { s: Date; e: Date } | null {
+  if (!r.date || !r.start || !r.end) return null
+  const s = new Date(`${r.date}T${r.start}`)
+  const e = new Date(`${r.date}T${r.end}`)
+  if (e <= s) e.setDate(e.getDate() + 1)
+  return { s, e }
+}
+
 interface ScheduleImportModalProps {
   userId: string
   displayName: string
@@ -36,8 +52,8 @@ interface ScheduleImportModalProps {
 type Step = 'pick' | 'reading' | 'review' | 'saving' | 'done'
 
 // Downscale + re-encode to JPEG before upload: keeps HEIC photos out of the
-// pipeline (iOS decodes them locally), shrinks multi-MB camera shots, and
-// smaller images are dramatically faster on the CPU-only VPS model.
+// pipeline (iOS decodes them locally) and shrinks multi-MB camera shots so
+// uploads stay fast and token costs stay low.
 async function toJpeg(file: File, maxDim = 1600): Promise<Blob> {
   const url = URL.createObjectURL(file)
   try {
@@ -73,12 +89,24 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
   const [rows, setRows] = useState<ImportRow[]>([])
   const [remaining, setRemaining] = useState<number | null>(null) // -1 = unlimited
   const [savedCount, setSavedCount] = useState(0)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [existingShifts, setExistingShifts] = useState<ExistingShift[]>([])
+  const [replacedCount, setReplacedCount] = useState(0)
+
+  // Revoke the previous object URL whenever it's replaced, and on unmount.
+  useEffect(() => {
+    if (!previewUrl) return
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [previewUrl])
 
   useEffect(() => {
     if (!open) return
     setStep('pick')
     setError(null)
     setRows([])
+    setPreviewUrl(null)
+    setExistingShifts([])
+    setReplacedCount(0)
     setBoardsLoading(true)
 
     const load = async () => {
@@ -110,8 +138,13 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
     setStep('reading')
     try {
       const jpeg = await toJpeg(file)
+      // Keep the exact image the reader sees so the review step can show it
+      // next to the extracted rows.
+      setPreviewUrl(URL.createObjectURL(jpeg))
       const form = new FormData()
       form.append('image', jpeg, 'schedule.jpg')
+      // Lets the reader isolate this user's row on multi-employee schedules.
+      form.append('name', displayName)
 
       const res = await fetch('/api/schedule-import', { method: 'POST', body: form })
       const json = await res.json() as { error?: string; shifts?: ParsedShift[]; remaining?: number }
@@ -142,6 +175,54 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
 
   const setRow = (i: number, patch: Partial<ImportRow>) =>
     setRows(prev => prev.map((r, idx) => idx === i ? { ...r, ...patch } : r))
+
+  // When a board is picked, fetch the user's existing shifts around the
+  // imported dates. Conflicts are derived from this list at render/save time
+  // (so editing a row's times updates the warning live); rows that conflict
+  // at fetch time start unchecked so a double-import can't slip through on a
+  // blind "Add All".
+  useEffect(() => {
+    if (step !== 'review' || !boardId) return
+    setExistingShifts([]) // don't show a previous board's conflicts while fetching
+    let cancelled = false
+    const loadExisting = async () => {
+      const dates = rows.map(r => r.date).filter(Boolean).sort()
+      if (dates.length === 0) return
+      const from = new Date(`${dates[0]}T00:00:00`)
+      from.setDate(from.getDate() - 1) // catch overnight shifts started the day before
+      const to = new Date(`${dates[dates.length - 1]}T00:00:00`)
+      to.setDate(to.getDate() + 2)
+      const { data: existing } = await supabase
+        .from('shifts')
+        .select('id, start_time, end_time, shift_title')
+        .eq('user_id', userId).eq('board_id', boardId).eq('is_active', true)
+        .gte('start_time', from.toISOString()).lt('start_time', to.toISOString())
+      if (cancelled || !existing) return
+      setExistingShifts(existing)
+      setRows(prev => prev.map(r => {
+        const span = rowSpan(r)
+        const conflicted = span && existing.some(x => new Date(x.start_time) < span.e && new Date(x.end_time) > span.s)
+        return conflicted ? { ...r, include: false } : r
+      }))
+    }
+    loadExisting()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rows deliberately omitted: this only fetches + sets initial checkbox state per board pick; conflicts themselves are derived live via conflictsFor
+  }, [step, boardId, supabase, userId])
+
+  const conflictsFor = (r: ImportRow): ExistingShift[] => {
+    const span = rowSpan(r)
+    if (!span) return []
+    return existingShifts.filter(x => new Date(x.start_time) < span.e && new Date(x.end_time) > span.s)
+  }
+
+  const fmtShift = (x: ExistingShift) => {
+    const s = new Date(x.start_time)
+    const e = new Date(x.end_time)
+    const day = s.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+    const hm = (d: Date) => d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
+    return `"${x.shift_title}" (${day}, ${hm(s)}–${hm(e)})`
+  }
 
   // The reader doesn't always catch every shift on a busy schedule — let
   // people fill in anything it missed rather than leave the modal empty-handed.
@@ -177,6 +258,21 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
       })
       const { error: insertErr } = await supabase.from('shifts').insert(inserts)
       if (insertErr) throw insertErr
+
+      // Replace: soft-delete the existing shifts each included row overlapped
+      // (same deactivate_own_shift RPC the Calendar's Delete action uses).
+      // Runs after the insert so a failure here can't lose the old shifts
+      // without the new ones existing.
+      const replaceIds = [...new Set(included.flatMap(r => conflictsFor(r).map(x => x.id)))]
+      if (replaceIds.length > 0) {
+        const results = await Promise.all(
+          replaceIds.map(id => supabase.rpc('deactivate_own_shift', { p_shift_id: id }))
+        )
+        if (results.some(res => res.error)) {
+          setError('Shifts were added, but removing the replaced shift(s) failed — delete them from your Calendar manually.')
+        }
+      }
+      setReplacedCount(replaceIds.length)
       setSavedCount(inserts.length)
       setStep('done')
       router.refresh()
@@ -242,12 +338,21 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
           <p className="text-sm text-text/70 flex items-center gap-1.5">
             <ScanLine className="w-4 h-4 text-primary" /> Reading your schedule…
           </p>
-          <p className="text-xs text-text/40">This can take a few minutes — please keep this open.</p>
+          <p className="text-xs text-text/40">This usually takes a few seconds.</p>
         </div>
       )}
 
       {(step === 'review' || step === 'saving') && (
         <div className="space-y-4">
+          {previewUrl && (
+            <div>
+              <p className="text-xs text-text/50 mb-1">Your photo — check the rows below against it:</p>
+              <div className="rounded-lg border border-border overflow-auto max-h-60 bg-black/5">
+                {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, next/image can't optimize it */}
+                <img src={previewUrl} alt="Your uploaded schedule" className="w-full object-contain" />
+              </div>
+            </div>
+          )}
           <div>
             <label className="block text-xs font-medium text-text/60 mb-1">Add these shifts to board</label>
             <select className="input text-sm h-9" value={boardId} onChange={e => setBoardId(e.target.value)}>
@@ -269,8 +374,11 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r, i) => (
-                  <tr key={i} className={`border-b border-border last:border-0 ${r.include ? '' : 'opacity-40'}`}>
+                {rows.map((r, i) => {
+                  const conflicts = conflictsFor(r)
+                  return (
+                  <React.Fragment key={i}>
+                  <tr className={`${conflicts.length === 0 ? 'border-b' : ''} border-border last:border-0 ${r.include ? '' : 'opacity-40'}`}>
                     <td className="px-2 py-1.5">
                       <Checkbox checked={r.include} onChange={e => setRow(i, { include: e.target.checked })} />
                     </td>
@@ -301,7 +409,20 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
                       </button>
                     </td>
                   </tr>
-                ))}
+                  {conflicts.length > 0 && (
+                    <tr className={`border-b border-border last:border-0 ${r.include ? '' : 'opacity-40'}`}>
+                      <td colSpan={6} className="px-2 pb-2 pt-0 text-left">
+                        <p className="text-[11px] text-warning leading-snug">
+                          Overlaps {conflicts.map(fmtShift).join(' and ')} already on your calendar.
+                          If you add this shift, it will replace the one currently on your calendar —
+                          or edit the times above so they don&apos;t overlap.
+                        </p>
+                      </td>
+                    </tr>
+                  )}
+                  </React.Fragment>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -340,7 +461,7 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
             <Check className="w-6 h-6 text-success" />
           </div>
           <p className="text-sm text-text">
-            Added {savedCount} shift{savedCount === 1 ? '' : 's'} to your calendar.
+            Added {savedCount} shift{savedCount === 1 ? '' : 's'} to your calendar{replacedCount > 0 ? ` (replaced ${replacedCount} existing shift${replacedCount === 1 ? '' : 's'})` : ''}.
           </p>
           {remaining !== null && remaining >= 0 && (
             <p className="text-xs text-text/50">{remaining} of 4 free imports left this month.</p>
