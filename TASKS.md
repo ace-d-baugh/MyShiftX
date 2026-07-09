@@ -547,8 +547,8 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 **👤 You handle:**
 - ✅ `2026-07-08`: Created Google AI Studio project + free-tier API key (in `.env.local` as `GEMINI_API_KEY`); wrote the parsing prompt the route now uses
 - [ ] Add `GEMINI_API_KEY` to Vercel env vars to turn the feature (and its landing/Help marketing) on in production — free-tier key works; the paid Vertex key (project 126596084990) needs API + billing enabled in its Cloud project if/when volume justifies it
-- [ ] Remove the retired `VPS_OLLAMA_URL` / `VPS_OLLAMA_SECRET` / `OLLAMA_VISION_MODEL` vars from Vercel
-- [ ] Delete the `ai.myshiftx.com` DNS A record; refund/repurpose the Contabo VPS (wiped clean 2026-07-08)
+- ✅ `2026-07-08`: Remove the retired `VPS_OLLAMA_URL` / `VPS_OLLAMA_SECRET` / `OLLAMA_VISION_MODEL` vars from Vercel
+- ✅ `2026-07-08`: Delete the `ai.myshiftx.com` DNS A record; refund/repurpose the Contabo VPS (wiped clean 2026-07-08)
 
 **🤖 Claude handles:**
 - ✅ `schedule_import_count` + `schedule_import_month` columns on `users`, with `get_schedule_import_status()` / `consume_schedule_import()` `SECURITY DEFINER` RPCs that reset the counter lazily when the ET month rolls over — no cron changes needed (`supabase/migrations/20260701235216_schedule_import_quota.sql`)
