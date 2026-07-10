@@ -43,7 +43,7 @@ export function PhotoImportHighlight({ industryName }: PhotoImportHighlightProps
                   <li className="flex gap-2"><CalendarCheck className="w-4 h-4 text-success shrink-0 mt-0.5" /> Spots overlaps with shifts already on your calendar</li>
                 </ul>
                 <Link href="/register" className="btn btn-primary min-h-0 h-11 px-6 gap-2 group">
-                  Try Photo Import
+                  Get Started Free
                   <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Link>
               </div>

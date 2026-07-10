@@ -53,9 +53,9 @@ const features = [
   },
   {
     icon: Shield,
-    title: 'Leader-Approved Profiles',
+    title: 'Verified Coworkers Only',
     description:
-      'Roles and locations you add are reviewed and approved by your leaders before they go live, keeping the board accurate and trustworthy.',
+      "Every workplace board is private and invite-only. Roles and locations are approved by your board's creator before members can post — so you only trade with real teammates from your location.",
     border: 'border-l-warning',
     iconBg: 'bg-warning/10',
     iconColor: 'text-warning',
@@ -64,7 +64,7 @@ const features = [
     icon: Users,
     title: 'Built-In Moderation',
     description:
-      'Built for shift workers, by shift workers. Leader oversight, a flagging system, and moderation tools keep the board clean and trustworthy.',
+      'Built for shift workers, by shift workers. Board-run moderation and a simple flagging system keep the Wall clean, current, and trustworthy — no corporate oversight required.',
     border: 'border-l-secondary',
     iconBg: 'bg-secondary/30',
     iconColor: 'text-primary',
@@ -72,10 +72,13 @@ const features = [
 ]
 
 // Placeholder testimonials — swap for real user reviews once collected.
+// Each carries an industry tag matching the "Built For Any Workplace" chips
+// above, so the reviews grid reads as coverage across workplaces.
 const placeholderReviews = [
   {
     name: 'Jamie T.',
     role: 'Attractions Team Member',
+    industry: 'Theme Parks',
     quote:
       "I picked up three extra shifts in my first week just from the board. So much easier than scrolling through a Facebook group.",
     rating: 5,
@@ -83,6 +86,7 @@ const placeholderReviews = [
   {
     name: 'Morgan R.',
     role: 'Quick Service Associate',
+    industry: 'Restaurants',
     quote:
       "Posted a shift I couldn't cover and had someone take it within the hour. The filters make it easy to find people who actually work your role.",
     rating: 5,
@@ -90,6 +94,7 @@ const placeholderReviews = [
   {
     name: 'Casey L.',
     role: 'Merchandise Associate',
+    industry: 'Retail Stores',
     quote:
       "Love that everything auto-expires. No more digging through a feed full of shifts that already happened.",
     rating: 4,
@@ -97,13 +102,15 @@ const placeholderReviews = [
   {
     name: 'Devon P.',
     role: 'Custodial Team Member',
+    industry: 'Event Venues',
     quote:
-      "Knowing my leader approves every role and location on the board makes a huge difference. Feels a lot safer than the old way of trading shifts.",
+      "Knowing every role and location on the board is verified makes a huge difference. Feels a lot safer than the old way of trading shifts.",
     rating: 5,
   },
   {
     name: 'Riley S.',
     role: 'Front Desk Associate',
+    industry: 'Hotels & Resorts',
     quote:
       "Requesting a day off and having people reach out directly saved me so much back-and-forth in group chats.",
     rating: 5,
@@ -111,6 +118,7 @@ const placeholderReviews = [
   {
     name: 'Avery K.',
     role: 'Lifeguard',
+    industry: 'Theme Parks',
     quote:
       "Clean, simple, and built by people who actually understand how shift trading works.",
     rating: 4,
@@ -168,9 +176,9 @@ export default async function HomePage() {
           {/* Headline */}
           <div className="animate-fade-in-up" style={{ animationDelay: '150ms' }}>
             <h1 className="font-accent text-4xl md:text-6xl font-bold text-text mb-6 leading-tight">
-              Your Shift Exchange{' '}
+              Ditch the Chaos of the{' '}
               <span className="text-primary relative inline-block">
-                Star
+                Group Chat.
                 {/* Animated underline draws after the headline appears */}
                 <span
                   className="absolute -bottom-1 left-0 h-[3px] rounded-full bg-gradient-to-r from-primary via-secondary to-primary animate-expand-width"
@@ -183,8 +191,9 @@ export default async function HomePage() {
           {/* Sub-copy */}
           <div className="animate-fade-in-up" style={{ animationDelay: '320ms' }}>
             <p className="text-lg md:text-xl text-text/70 max-w-2xl mx-auto mb-10">
-              MyShiftX is the fast, safe, and simple platform for trading, giving away,
-              and requesting shifts at work. Ditch the chaos.
+              MyShiftX is the dedicated shift board for your workplace. Post open shifts,
+              request coverage, and organize your calendar without digging through
+              fragmented texts or out-of-date feeds.
             </p>
           </div>
 
@@ -294,9 +303,14 @@ export default async function HomePage() {
                     ))}
                   </div>
                   <p className="text-text/70 text-sm leading-relaxed flex-1">&quot;{review.quote}&quot;</p>
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <p className="font-medium text-text text-sm">{review.name}</p>
-                    <p className="text-text/50 text-xs">{review.role}</p>
+                  <div className="mt-4 pt-4 border-t border-border flex items-end justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-text text-sm">{review.name}</p>
+                      <p className="text-text/50 text-xs">{review.role}</p>
+                    </div>
+                    <span className="shrink-0 text-[10px] font-medium bg-primary/10 text-primary rounded-full px-2 py-0.5">
+                      {review.industry}
+                    </span>
                   </div>
                 </div>
               </AnimateIn>
@@ -316,16 +330,16 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-2xl mx-auto text-center">
           <AnimateIn>
             <h2 className="font-accent text-3xl md:text-4xl font-bold text-white mb-4">
-              Ready to Simplify Your Schedule?
+              Take Control of Your Work Week
             </h2>
             <p className="text-white/80 text-lg mb-8">
-              Join the MyShiftX community today.
+              Set up a private board for your workplace in less than two minutes.
             </p>
             <Link
               href="/register"
               className="inline-flex items-center gap-2 bg-white text-primary font-bold rounded-md px-8 py-3 text-base hover:bg-white/90 hover:scale-105 transition-all duration-200 group"
             >
-              Create Your Account
+              Get Started Free
               <ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </AnimateIn>
