@@ -26,7 +26,7 @@ export default async function AboutPage() {
             <p>
               MyShiftX is a shift trading and scheduling board for people who work fixed shifts —
               retail associates, restaurant staff, warehouse crews, hotel and resort teams, theme
-              park cast members, and event venue staff. Instead of trading shifts over group chats,
+              park teams, and event venue staff. Instead of trading shifts over group chats,
               paper sign-up sheets, or word of mouth, MyShiftX gives every workplace a shared board
               where people can post shifts they want to give away or trade, request coverage they
               need, and keep their whole schedule in one calendar.
@@ -47,7 +47,7 @@ export default async function AboutPage() {
           <section>
             <h2 className="font-accent text-xl font-bold text-text mb-3">How it works</h2>
             <p>
-              Leaders create a board for their team and share an invite code. From there, anyone
+              Anyone can create a board for their team and share an invite code. From there, anyone
               on the board can post a shift offer or a request, mark interest in someone else&apos;s
               post, and message directly to work out the details. Everything is organized by date
               on a shared Wall and a personal calendar, with moderation tools so board leaders stay
