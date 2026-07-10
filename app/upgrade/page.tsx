@@ -21,19 +21,19 @@ const PAIN_POINTS = [
     icon: Clock,
     title: 'The good shifts vanish in minutes',
     body:
-      "Someone posts the exact Saturday you need — and by the time you check the Wall, it's spoken for. Pro emails you the moment a match drops, so you're the first to answer, not the fifth.",
+      "Someone posts the exact Saturday you need — and by the time you check the Wall, it's spoken for. Pro emails you the moment a match drops, so you claim the shift while everyone else is still asleep.",
   },
   {
     icon: RefreshCw,
     title: 'Your thumb deserves a break',
     body:
-      'Basic shows you the Wall when you ask. Pro\'s live Wall updates itself the instant anything posts — new offers just appear. No refreshing, no "did I miss something?"',
+      'Stop pulling down to refresh. Pro\'s Wall streams new posts in real time — offers just appear the second they\'re posted. No more "did I miss something?"',
   },
   {
     icon: Camera,
-    title: 'Four photo imports goes fast',
+    title: 'Four imports a month disappears fast',
     body:
-      "Once you've snapped a schedule instead of typing it, you won't want to go back. Pro makes Photo Schedule Import unlimited — every schedule, every week, on your calendar in seconds.",
+      "Once you've snapped a printed schedule instead of typing it out, you won't want to go back. Pro makes Photo Schedule Import unlimited — every schedule, every week, on your calendar in seconds.",
   },
   {
     icon: ShieldCheck,
@@ -50,7 +50,7 @@ const FAQS = [
   },
   {
     q: 'What happens to my boards and shifts if I go back to Basic?',
-    a: 'Nothing is deleted — ever. Your boards, shifts, messages, and calendar all stay exactly as they are. You just lose the Pro conveniences (live Wall, match alerts, unlimited imports, calendar sync) and see ads again.',
+    a: 'Nothing is deleted — ever. Your boards, shifts, messages, and calendar all stay exactly as they are. Your account simply returns to the standard limits: 4 photo imports a month, manual Wall refreshing, and standard ads.',
   },
   {
     q: 'How do the 3-month, 6-month, and annual plans work?',
@@ -117,9 +117,13 @@ export default async function UpgradePage() {
           </div>
           <div className="animate-fade-in-up" style={{ animationDelay: '320ms' }}>
             <p className="text-lg md:text-xl text-text/70 max-w-2xl mx-auto mb-8">
-              Basic gets you on the board. Pro puts the board to work <em>for you</em> —
-              instant match alerts, a Wall that updates itself, unlimited photo imports,
-              and not a single ad. From <strong className="text-text">$4 a month</strong>.
+              Basic gets you on the board. Pro puts the board to work <em>for you</em> with
+              instant match alerts, a live-updating Wall, and unlimited photo imports.{' '}
+              <strong className="text-text">
+                At less than the cost of a single coffee, picking up just one extra shift
+                pays for the entire year.
+              </strong>{' '}
+              From <strong className="text-text">$4 a month</strong>.
             </p>
           </div>
           <div className="animate-fade-in-up" style={{ animationDelay: '480ms' }}>
@@ -127,7 +131,6 @@ export default async function UpgradePage() {
               See the Plans
               <ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" />
             </a>
-            <p className="text-xs text-text/50 mt-3">One saved shift and Pro has paid for itself.</p>
           </div>
         </div>
       </section>
@@ -260,8 +263,8 @@ export default async function UpgradePage() {
                       <td className="px-5 py-3 text-text/80">
                         {row.feature}
                         {row.comingSoon && (
-                          <span className="ml-2 text-[10px] font-bold uppercase tracking-wide bg-info/10 text-info px-1.5 py-0.5 rounded">
-                            Coming soon
+                          <span className="ml-2 text-[10px] font-bold uppercase tracking-wide bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                            Pro Preview
                           </span>
                         )}
                       </td>

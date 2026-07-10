@@ -46,7 +46,7 @@ export const PRO_PLANS: ProPlan[] = [
     badge: 'SAVE 6.7%',
     featured: false,
     hook: 'A full season of Pro',
-    finePrint: 'Billed $13.99 every 3 months — less than one coffee saved.',
+    finePrint: 'Billed $13.99 quarterly. Ideal for seasonal or part-time schedules.',
     priceIdEnv: 'STRIPE_PRICE_PRO_QUARTERLY',
   },
   {
@@ -58,7 +58,7 @@ export const PRO_PLANS: ProPlan[] = [
     badge: 'SAVE 10%',
     featured: false,
     hook: 'Set it and forget it',
-    finePrint: 'Billed $26.99 every 6 months. Saves you $3 vs monthly.',
+    finePrint: 'Billed $26.99 every 6 months. Lock in your schedule for the next half-year.',
     priceIdEnv: 'STRIPE_PRICE_PRO_SEMIANNUAL',
   },
   {
@@ -70,7 +70,7 @@ export const PRO_PLANS: ProPlan[] = [
     badge: 'BEST VALUE · 2+ MONTHS FREE',
     featured: true,
     hook: 'The one most people pick',
-    finePrint: 'Billed $47.99/year — a full year of Pro for less than 10 months of monthly.',
+    finePrint: 'Billed $47.99 annually — less than one shift\'s pay to protect your schedule all year.',
     priceIdEnv: 'STRIPE_PRICE_PRO_ANNUAL',
   },
 ]
