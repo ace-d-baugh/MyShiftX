@@ -8,6 +8,18 @@ interface PhotoImportHighlightProps {
    * industry, e.g. "theme parks". Omit for the generic home-page copy.
    */
   industryName?: string
+  /**
+   * Industry-familiar scheduling apps to name-drop for instant recognition
+   * (e.g. ["UKG", "Kronos", "Workday"]). Only used with industryName.
+   */
+  scheduleApps?: string[]
+}
+
+// "UKG, Kronos, or Workday" — Oxford-comma "or" list.
+function orList(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? ''
+  if (items.length === 2) return `${items[0]} or ${items[1]}`
+  return `${items.slice(0, -1).join(', ')}, or ${items[items.length - 1]}`
 }
 
 /**
@@ -15,10 +27,13 @@ interface PhotoImportHighlightProps {
  * where the feature is live — gate on optionalServerEnv.GEMINI_API_KEY at the
  * call site (same flag that shows the Calendar's Import button).
  */
-export function PhotoImportHighlight({ industryName }: PhotoImportHighlightProps) {
+export function PhotoImportHighlight({ industryName, scheduleApps }: PhotoImportHighlightProps) {
+  const appsPhrase = scheduleApps?.length
+    ? `a screenshot from ${orList(scheduleApps)}`
+    : 'a screenshot from your scheduling app'
   const intro = industryName
-    ? `Schedules at ${industryName.toLowerCase()} still get posted as printouts and app screenshots — and then everyone retypes them. Not anymore: photograph the posted schedule and MyShiftX reads your shifts onto your calendar in seconds.`
-    : `Stop retyping the week's schedule. Photograph the posted schedule — paper on the break-room wall or a screenshot from your scheduling app — and MyShiftX reads your shifts onto your calendar in seconds.`
+    ? `Schedules at ${industryName.toLowerCase()} still get retyped by hand. Not anymore: whether it's a paper printout on the wall or ${appsPhrase}, photograph it and MyShiftX reads your shifts onto your calendar in seconds.`
+    : `Stop retyping the week's schedule. Photograph the posted schedule — paper on the break-room wall or ${appsPhrase} — and MyShiftX reads your shifts onto your calendar in seconds.`
 
   return (
     <section className="py-20 px-4 bg-background">

@@ -146,7 +146,9 @@ export default async function IndustryLandingPage({ params }: { params: { slug: 
       </section>
 
       {/* ── Photo Schedule Import highlight (gated with the feature) ── */}
-      {importEnabled && <PhotoImportHighlight industryName={industry.shortName} />}
+      {importEnabled && (
+        <PhotoImportHighlight industryName={industry.shortName} scheduleApps={industry.scheduleApps} />
+      )}
 
       {/* ── Other industries ── */}
       <section className="py-16 px-4 bg-background overflow-hidden">

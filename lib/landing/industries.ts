@@ -31,36 +31,42 @@ export interface Industry {
   solutions: IndustrySolution[]
   ctaHeadline: string
   ctaSubcopy: string
+  /** Scheduling apps this industry knows — name-dropped in the photo-import section. */
+  scheduleApps: string[]
 }
 
+// Copy voice: always the employee's perspective. These pages convert the
+// worker who spins up a board for their team — never a manager evaluating
+// software. No "your manager", no "leadership oversight", no enterprise
+// framing anywhere.
 export const INDUSTRIES: Industry[] = [
   {
     slug: 'retail',
     shortName: 'Retail Stores',
     metaTitle: 'Shift Swap App for Retail Associates – MyShiftX',
     metaDescription:
-      'Stop waiting on a manager to text the group chat. Post open shifts, pick up extra hours, and swap with other associates in minutes.',
+      'Stop texting twenty coworkers to cover a shift. Post open shifts, pick up extra hours, and swap with other associates in minutes.',
     heroKicker: 'Built for Retail Associates',
-    heroHeadlinePrefix: 'Open Shifts,',
-    heroHeadlineHighlight: 'Filled Fast',
+    heroHeadlinePrefix: 'Get Your',
+    heroHeadlineHighlight: 'Weekend Back',
     heroSubcopy:
-      "When someone calls out, your manager shouldn't have to burn an hour texting every associate on the schedule. Post the open shift, and whoever's free and qualified can grab it.",
-    painPointsIntro: "If any of this sounds familiar, you already know why we built this.",
+      "When you need a shift covered for a floor set, inventory night, or a weekend off, you shouldn't have to text twenty coworkers individually. Post it to the board, let the right people see it, and lock in coverage fast — no texting marathon.",
+    painPointsIntro: 'If any of this sounds familiar, you already know why we built this.',
     painPoints: [
       {
         icon: AlertTriangle,
         title: 'A call-out turns into a scramble',
-        body: "One person doesn't show, and suddenly your manager is calling down the list hoping someone picks up. Hours pass before the shift is covered — or it never is.",
+        body: "One person doesn't show, everyone's phone blows up, and the floor runs short-handed while the texts go unanswered. Hours pass before the shift is covered — or it never is.",
+      },
+      {
+        icon: MessageSquareOff,
+        title: 'The group chat is where shifts go to die',
+        body: 'Dropping a shift into a massive GroupMe or iMessage thread means it gets buried under memes and chat noise — the coworkers who actually want the hours never even see it.',
       },
       {
         icon: CalendarClock,
         title: 'Your availability never quite matches the schedule',
-        body: 'You updated your availability weeks ago, but the system — or the person entering it — is always a step behind. Kronos, UKG, Workday, whatever it is, you\'re still stuck asking a manager to fix a shift by hand.',
-      },
-      {
-        icon: MessageSquareOff,
-        title: 'Every swap needs a manager in the middle',
-        body: "You and a coworker already agreed to trade — now you both wait for someone with a badge to approve it before it's official.",
+        body: 'You updated your availability weeks ago, but the system — or the person entering it — is always a step behind. So you\'re back to hunting for a trade by hand.',
       },
     ],
     solutionsIntro: 'How MyShiftX fixes it',
@@ -77,24 +83,25 @@ export const INDUSTRIES: Industry[] = [
       },
       {
         icon: Shield,
-        title: 'Every trade is out in the open',
-        body: 'No side deals in a group chat that a manager finds out about after the fact — every offer and pickup is visible and accounted for.',
+        title: 'Clean, organized, and visible',
+        body: 'Every offer and pickup lives on one board your whole team can see — nothing gets buried, double-booked, or lost in a thread.',
       },
     ],
     ctaHeadline: 'Stop chasing coverage. Start posting it.',
     ctaSubcopy: 'Free for associates. Set up your board in minutes.',
+    scheduleApps: ['UKG', 'Kronos', 'Workday', 'Deputy'],
   },
   {
     slug: 'restaurants',
     shortName: 'Restaurants',
     metaTitle: 'Shift Swap App for Restaurant Staff – MyShiftX',
     metaDescription:
-      'Front of house, back of house, servers, cooks — trade shifts without the group chat chaos or a manager approving every single swap.',
+      'Front of house, back of house, servers, cooks — trade doubles and closing shifts without the group chat chaos or the breakroom printout.',
     heroKicker: 'Built for FOH & BOH',
-    heroHeadlinePrefix: 'No More',
-    heroHeadlineHighlight: 'Clopenings You Can\'t Escape',
+    heroHeadlinePrefix: 'Trade Your Double.',
+    heroHeadlineHighlight: 'Claim the Close.',
     heroSubcopy:
-      "Close at midnight, open at 6 AM — clopening shifts wreck your sleep and your life outside work. When you need out of one, MyShiftX gets it in front of every server, cook, and host who could cover it.",
+      'Front-of-house or back-of-house, restaurant schedules are chaotic. Stop relying on paper logs by the POS terminal or frantic text threads. Post your shift, swap seamlessly, and keep your kitchen or floor fully staffed.',
     painPointsIntro: 'The stuff that makes "the schedule" a dirty word',
     painPoints: [
       {
@@ -108,9 +115,9 @@ export const INDUSTRIES: Industry[] = [
         body: "Someone posts \"can anyone cover Friday close??\" into a GroupMe with forty people in it and hopes for the best. Half the time nobody sees it in time.",
       },
       {
-        icon: AlertTriangle,
-        title: 'Every trade waits on a manager',
-        body: "You found someone to cover — now you're both waiting on a manager to sign off before you can actually stop worrying about it.",
+        icon: CalendarClock,
+        title: 'The breakroom printout problem',
+        body: "Need to drop a lunch shift to study, or pick up an extra dinner double? Don't hope someone checks the printout by the kitchen — half the staff won't see it until it's too late.",
       },
     ],
     solutionsIntro: 'How MyShiftX fixes it',
@@ -126,26 +133,27 @@ export const INDUSTRIES: Industry[] = [
         body: "Need out of a clopening? Post a request with your preferred time window and let people come to you.",
       },
       {
-        icon: Clock,
-        title: 'Stale posts disappear on their own',
-        body: "Shift posts auto-expire 30 minutes before start time, so you're never digging through offers for a shift that already happened.",
+        icon: Shield,
+        title: 'Server shifts go to servers',
+        body: 'Roles keep the board sane: servers see server shifts, line cooks see kitchen shifts. No accidental cross-scheduling chaos.',
       },
     ],
     ctaHeadline: 'Get your life back from the clopening.',
     ctaSubcopy: 'Free for FOH and BOH staff. Takes two minutes to set up.',
+    scheduleApps: ['7shifts', 'HotSchedules', 'Toast'],
   },
   {
     slug: 'warehouses',
     shortName: 'Warehouses',
     metaTitle: 'Shift Swap App for Warehouse Associates – MyShiftX',
     metaDescription:
-      'Flex schedules, VTO, VET, and shifts that vanish the second they post — trade with other associates before the good ones are gone.',
+      'Rigid crews, mandatory overtime, and attendance points on the line — coordinate trades instantly with qualified teammates before your shift starts.',
     heroKicker: 'Built for Warehouse Associates',
-    heroHeadlinePrefix: 'Grab the Shift',
-    heroHeadlineHighlight: 'Before It\'s Gone',
+    heroHeadlinePrefix: 'Own Your Shift.',
+    heroHeadlineHighlight: 'Protect Your Metrics.',
     heroSubcopy:
-      "Flex schedules mean your hours change week to week and the shifts you actually want disappear fast. MyShiftX puts every open shift and trade in one place so you're not refreshing an app hoping to get lucky.",
-    painPointsIntro: 'What flex scheduling actually feels like',
+      'Warehouse schedules are rigid, and missing a shift can cost you attendance points. When mandatory overtime hits or you need coverage for a night shift, MyShiftX lets you coordinate trades instantly with qualified teammates.',
+    painPointsIntro: 'What working the schedule actually feels like',
     painPoints: [
       {
         icon: Clock,
@@ -153,14 +161,14 @@ export const INDUSTRIES: Industry[] = [
         body: 'Weekday mornings get claimed almost instantly, leaving nights and weekends for whoever was too slow. Flex means competing against everyone else on shift, every single week.',
       },
       {
+        icon: AlertTriangle,
+        title: 'One conflict can cost you points',
+        body: "Attendance systems don't care why you missed — childcare, car trouble, a class that moved. It hits your record the same. Finding coverage before your shift starts shouldn't be a long shot.",
+      },
+      {
         icon: CalendarClock,
         title: "VTO and VET aren't something you can count on",
         body: "Voluntary time off and extra hours show up when they show up — there's no way to plan around them, and no easy way to trade into a shift that actually works for you.",
-      },
-      {
-        icon: AlertTriangle,
-        title: 'Your schedule changes, your life doesn\'t',
-        body: "Childcare, a second job, a class — none of it moves just because your shift did. Finding someone to trade with shouldn't mean posting into the void and hoping.",
       },
     ],
     solutionsIntro: 'How MyShiftX fixes it',
@@ -171,9 +179,9 @@ export const INDUSTRIES: Industry[] = [
         body: 'See every shift offer and request from other associates in one place instead of piecing it together from texts and word of mouth.',
       },
       {
-        icon: Zap,
-        title: 'Filter to what actually fits your role',
-        body: "Only see shifts relevant to your role and site — not a wall of postings that don't apply to you.",
+        icon: Shield,
+        title: 'Only qualified teammates see it',
+        body: 'Filter by role so specialized shifts — forklift-certified, specific lines, tier leads — are only visible to people actually signed off to work them.',
       },
       {
         icon: Gift,
@@ -183,69 +191,71 @@ export const INDUSTRIES: Industry[] = [
     ],
     ctaHeadline: 'Stop losing shifts to whoever was faster.',
     ctaSubcopy: 'Free for warehouse associates. Set up your board in minutes.',
+    scheduleApps: ['UKG', 'Kronos', 'Workday', 'Deputy'],
   },
   {
     slug: 'hotels',
     shortName: 'Hotels & Resorts',
     metaTitle: 'Shift Swap App for Hotel & Resort Staff – MyShiftX',
     metaDescription:
-      'Front desk, housekeeping, F&B, maintenance — five different schedules competing for the same people. Trade shifts across departments without the chaos.',
+      'Front desk, housekeeping, F&B, valet — 24/7 schedules across departments that never see each other. Coordinate trades in one centralized hub.',
     heroKicker: 'Built for Front Desk, Housekeeping & F&B',
-    heroHeadlinePrefix: 'One Board for',
-    heroHeadlineHighlight: 'Every Department',
+    heroHeadlinePrefix: 'Keep the 24/7 Schedule',
+    heroHeadlineHighlight: 'Moving Smoothly',
     heroSubcopy:
-      "Front desk, housekeeping, F&B, and maintenance all run on different clocks and pull from the same staff. When someone can't make a shift, MyShiftX gets it in front of the people who can actually cover it.",
+      "From the front desk to housekeeping, resort teams work around the clock. When departments are scattered across the property, finding coverage shouldn't mean hunting down phone numbers. Coordinate trades effortlessly in one centralized hub.",
     painPointsIntro: 'Five schedules, one exhausted staff',
     painPoints: [
       {
         icon: AlertTriangle,
         title: 'Call-outs are just part of the day',
-        body: 'On a team of thirty, one or two people not showing up is normal, not rare. Somebody still has to scramble to cover the gap every single time.',
-      },
-      {
-        icon: CalendarClock,
-        title: 'Every department has its own rush hour',
-        body: 'Front desk peaks at check-in and check-out, housekeeping peaks mid-morning, F&B follows the meal schedule — coordinating coverage across all of it by hand is a full-time job on its own.',
+        body: 'On a team of thirty, one or two people not showing up is normal, not rare. Somebody still has to cover the gap every single time — and it\'s usually whoever answers their phone first.',
       },
       {
         icon: MessageSquareOff,
-        title: 'Housekeeping turnover leaves gaps nobody plans for',
-        body: "It's consistently the hardest role to keep staffed, which means the people who stay end up covering more than their share.",
+        title: 'Departments live in different worlds',
+        body: "Housekeeping and front desk barely cross paths during a workday — but when you need coverage, you're somehow expected to know who's free and hunt down their number.",
+      },
+      {
+        icon: Clock,
+        title: 'The 3 AM coverage problem',
+        body: "An overnight audit or early-morning open needs covering, and there's no good way to ask — a group text at 3 AM wakes the whole team, and waiting until morning is too late.",
       },
     ],
     solutionsIntro: 'How MyShiftX fixes it',
     solutions: [
       {
         icon: RefreshCw,
-        title: 'Post an open shift in seconds',
-        body: "Can't cover a shift? Post it and let staff across your property — not just your department — see it and pick it up.",
+        title: 'Your department, one dedicated board',
+        body: 'Spin up a board for your team — front desk, housekeeping, banquets — and every open shift reaches the right people, no matter what hours or floors they work.',
       },
       {
         icon: Zap,
-        title: 'Filter by role and location',
-        body: "See shifts relevant to your role and property so front desk isn't wading through housekeeping postings and vice versa.",
+        title: 'Filter by role and property',
+        body: "See shifts relevant to your role and property, so front desk isn't wading through housekeeping postings and vice versa.",
       },
       {
-        icon: Shield,
-        title: 'Leaders keep oversight',
-        body: 'Roles and locations are approved by leadership before they go live, so coverage stays accurate without a manager approving every single trade.',
+        icon: Gift,
+        title: 'Get the word out without waking anyone',
+        body: 'Post the overnight or early-open you need covered and the board carries it quietly — teammates see it when they check in, no 3 AM group text required.',
       },
     ],
     ctaHeadline: 'Cover the gap without the group chat scramble.',
     ctaSubcopy: 'Free for hotel and resort staff. Set up your board in minutes.',
+    scheduleApps: ['UKG', 'Kronos', 'Workday', 'Deputy'],
   },
   {
     slug: 'theme-parks',
     shortName: 'Theme Parks',
     metaTitle: 'Shift Swap App for Theme Park Team Members – MyShiftX',
     metaDescription:
-      'Rotating attractions, regular-time-for-regular-time trades, and a call board that only updates a few times a day. MyShiftX makes trading shifts simple.',
+      'Attraction-specific training, regular-time-for-regular-time trades, and a call board that goes stale — MyShiftX matches trades to qualified peers.',
     heroKicker: 'Built for Attractions & Park Teams',
-    heroHeadlinePrefix: 'Trade Shifts',
-    heroHeadlineHighlight: 'Without the Guesswork',
+    heroHeadlinePrefix: 'Clear Qualifications.',
+    heroHeadlineHighlight: 'Faster Coverage.',
     heroSubcopy:
-      "Regular time trades for regular time, overtime trades for overtime, and the call board only tells half the story. MyShiftX makes it obvious what's available and who's offering it.",
-    painPointsIntro: "What trading a shift actually looks like right now",
+      "Park schedules are complex, and you can't just trade with anyone — they have to be trained on your exact attraction, venue, or land. MyShiftX filters your trades by precise roles and locations, so your shift is only seen by cross-trained peers.",
+    painPointsIntro: 'What trading a shift actually looks like right now',
     painPoints: [
       {
         icon: AlertTriangle,
@@ -253,13 +263,13 @@ export const INDUSTRIES: Industry[] = [
         body: "A regular-time shift can only trade for another regular-time shift, and overtime only trades for overtime. Finding the right match usually means asking around and hoping.",
       },
       {
-        icon: CalendarClock,
-        title: 'You don\'t always know where you\'ll end up',
-        body: "Getting rotated between attractions mid-shift is normal, which makes planning a trade around exactly where you'll be that much harder.",
+        icon: Shield,
+        title: 'Qualified-only is the whole game',
+        body: 'Posting "can anyone take my closing shift?" is useless if the person who answers isn\'t signed off on your console. Every trade starts with the same question: are you even trained here?',
       },
       {
         icon: Clock,
-        title: 'The call board doesn\'t update in real time',
+        title: "The call board doesn't update in real time",
         body: 'Open shifts get released in phases and go stale fast — by the time you check, the good ones are already gone.',
       },
     ],
@@ -268,34 +278,35 @@ export const INDUSTRIES: Industry[] = [
       {
         icon: RefreshCw,
         title: 'Real-time board, not a static list',
-        body: "Browse and post shift offers as they happen — no waiting for the next scheduled call board update.",
+        body: 'Browse and post shift offers as they happen — no waiting for the next scheduled call board update.',
       },
       {
         icon: Zap,
-        title: 'Filter by attraction and role',
-        body: 'See shifts relevant to the attractions and roles you actually work, across every location on property.',
+        title: 'Filter by role, line, and proficiency',
+        body: 'Your shift is only seen by peers signed off on the same attraction, venue, or land — no dead-end offers from people who aren\'t trained on your console.',
       },
       {
-        icon: Gift,
-        title: 'Post a request and let it come to you',
-        body: "Need a specific day off? Post a request with your preferred time window instead of asking around one person at a time.",
+        icon: CalendarClock,
+        title: 'One calendar across every land',
+        body: 'Work multiple locations or rotate mid-shift? Every shift you pick up lands on one unified, auto-updating calendar, wherever on property it is.',
       },
     ],
     ctaHeadline: 'Make trading a shift as easy as posting it.',
     ctaSubcopy: 'Free for team members. Set up your board in minutes.',
+    scheduleApps: ['Workday', 'UKG', 'Kronos'],
   },
   {
     slug: 'event-venues',
     shortName: 'Event Venues',
     metaTitle: 'Shift Swap App for Event & Venue Staff – MyShiftX',
     metaDescription:
-      'Call times, half hour, and crews pulled from a dozen different group chats. Cover shifts across your venue without the scramble.',
+      'Stadium, arena, and theater schedules change with every booking. Trade, drop, and pick up gigs instantly with your venue crew.',
     heroKicker: 'Built for Event & Venue Crews',
-    heroHeadlinePrefix: 'Cover a Call Time,',
-    heroHeadlineHighlight: 'Not a Whole Chat Thread',
+    heroHeadlinePrefix: 'Match Your Schedule to',
+    heroHeadlineHighlight: 'the Event Calendar',
     heroSubcopy:
-      "Half hour is coming whether or not your crew is full. MyShiftX gets an open call in front of everyone who could cover it, instead of buried in a group chat with people from three different shows ago.",
-    painPointsIntro: "The reality of staffing a venue with a rotating crew",
+      "Stadium, arena, and theater schedules change with every booking. When a show gets added or you need to drop a game-day shift, don't scramble — trade, drop, and pick up gigs instantly with your venue crew.",
+    painPointsIntro: 'The reality of working a rotating event calendar',
     painPoints: [
       {
         icon: AlertTriangle,
@@ -309,8 +320,8 @@ export const INDUSTRIES: Industry[] = [
       },
       {
         icon: CalendarClock,
-        title: 'Skills have to match the call, every time',
-        body: "You can't just fill a slot with anyone — the person covering needs the right role for that call, and finding them fast is its own job.",
+        title: 'The calendar changes with every tour',
+        body: 'Event schedules move with tour dates and game times. When your hours are this unpredictable, a missed post in a thread is a missed paycheck.',
       },
     ],
     solutionsIntro: 'How MyShiftX fixes it',
@@ -326,13 +337,14 @@ export const INDUSTRIES: Industry[] = [
         body: 'See only the calls relevant to your role and location — not every shift across every event.',
       },
       {
-        icon: Clock,
-        title: 'Nothing lingers past its call time',
-        body: 'Shift posts expire automatically so the board never fills up with calls that already happened.',
+        icon: Gift,
+        title: 'Extra shifts, no email blast',
+        body: 'When a big show drops extra calls, they hit the Wall the moment they\'re posted — check the board and claim your spot before the mass email even goes out.',
       },
     ],
     ctaHeadline: 'Fill the call before half hour, not after.',
     ctaSubcopy: 'Free for event and venue crews. Set up your board in minutes.',
+    scheduleApps: ['ABI MasterMind', 'Shiftboard', 'UKG'],
   },
 ]
 
