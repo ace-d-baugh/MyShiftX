@@ -222,12 +222,13 @@ export function Navbar({
       <header className="md:hidden sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         <div className="px-4 flex items-center justify-between h-14">
           <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
+            {/* Full logo (icon + wordmark), matching the login page and desktop */}
             <Image
-              src="/logos/MyShiftX-Gradient-Color.svg"
+              src="/logos/MyShiftX-Full-Logo-Gradient.svg"
               alt="MyShiftX Logo"
-              width={1024} height={1024}
+              width={5000} height={1024}
               priority
-              className="h-10 w-auto"
+              className="h-9 w-auto"
             />
           </Link>
 

@@ -31,21 +31,14 @@ export function LandingHeader({ displayName }: LandingHeaderProps) {
             : 'flex flex-col sm:flex-row items-center gap-2 sm:justify-between'
         )}>
         <Link href={isLoggedIn ? '/wall' : '/'} className="flex flex-row items-center gap-0 align-baseline">
+          {/* Full logo (icon + wordmark) at every breakpoint — smaller on mobile */}
           <Image
             src="/logos/MyShiftX-Full-Logo-Gradient.svg"
             alt="MyShiftX Logo"
             width={5000}
             height={1024}
             priority
-            className="hidden md:block h-14 w-auto"
-          />
-          <Image
-            src="/logos/MyShiftX-Gradient-Color.svg"
-            alt="MyShiftX Logo"
-            width={1024}
-            height={1024}
-            priority
-            className="md:hidden h-10 w-auto"
+            className="h-10 md:h-14 w-auto"
           />
         </Link>
 
