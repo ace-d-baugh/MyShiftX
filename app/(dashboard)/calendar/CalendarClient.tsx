@@ -33,6 +33,7 @@ interface CalendarClientProps {
   myShifts: MyShift[]
   boardShifts: BoardShift[]
   boardRequests: BoardRequest[]
+  boards: { id: string; name: string }[]
 }
 
 // ── Day data ─────────────────────────────────────────────────────────────────
@@ -82,15 +83,31 @@ function buildDayMap(
 
 // ── Calendar client ───────────────────────────────────────────────────────────
 
-export function CalendarClient({ userId, displayName, importEnabled, today, myShifts, boardShifts, boardRequests }: CalendarClientProps) {
+export function CalendarClient({ userId, displayName, importEnabled, today, myShifts, boardShifts, boardRequests, boards }: CalendarClientProps) {
   const router = useRouter()
   const [settings, setSettings] = useState<UserSettings | null>(null)
   const [importOpen, setImportOpen] = useState(false)
 
+  // Hidden board filter for marketing screenshots: clicking the calendar
+  // icon in the heading toggles a dropdown that narrows every shift, dot,
+  // and request to one board. Toggling it off also clears the filter, so
+  // the calendar returns to normal with no trace.
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [filterBoardId, setFilterBoardId] = useState('')
+  const toggleFilter = () => {
+    setFilterOpen(open => {
+      if (open) setFilterBoardId('')
+      return !open
+    })
+  }
+
   useEffect(() => { setSettings(getSettings()) }, [])
 
   const todayDate = parseISO(today)
-  const dayMap = buildDayMap(myShifts, boardShifts, boardRequests)
+  const fMyShifts      = filterBoardId ? myShifts.filter(s => s.board_id === filterBoardId) : myShifts
+  const fBoardShifts   = filterBoardId ? boardShifts.filter(s => s.board_id === filterBoardId) : boardShifts
+  const fBoardRequests = filterBoardId ? boardRequests.filter(r => r.board_id === filterBoardId) : boardRequests
+  const dayMap = buildDayMap(fMyShifts, fBoardShifts, fBoardRequests)
 
   const months = Array.from({ length: 4 }, (_, i) => addMonths(startOfMonth(todayDate), i))
 
@@ -104,7 +121,15 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <CalendarDays className="w-6 h-6 text-primary" />
+          {/* The icon doubles as the invisible toggle for the screenshot filter */}
+          <button
+            type="button"
+            onClick={toggleFilter}
+            aria-label="My Calendar"
+            className="cursor-default min-h-0 min-w-0 p-0 border-0 bg-transparent"
+          >
+            <CalendarDays className="w-6 h-6 text-primary" />
+          </button>
           <h1 className="font-accent text-2xl font-bold text-text">My Calendar</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -139,6 +164,26 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
           open={importOpen}
           onClose={() => setImportOpen(false)}
         />
+      )}
+
+      {/* Hidden screenshot filter — only exists while toggled via the icon */}
+      {filterOpen && (
+        <div className="mb-6 flex items-center gap-3">
+          <label htmlFor="board-filter" className="text-xs font-medium text-text/60 shrink-0">
+            Show board
+          </label>
+          <select
+            id="board-filter"
+            className="input text-sm h-9 max-w-xs"
+            value={filterBoardId}
+            onChange={e => setFilterBoardId(e.target.value)}
+          >
+            <option value="">All boards</option>
+            {boards.map(b => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
+        </div>
       )}
 
       {/* Dot legend */}

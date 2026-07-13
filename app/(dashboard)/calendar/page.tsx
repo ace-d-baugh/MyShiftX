@@ -17,7 +17,7 @@ export default async function CalendarPage() {
   const endMonth = new Date(now.getFullYear(), now.getMonth() + 4, 0)
   const windowEnd = new Date(endMonth.getFullYear(), endMonth.getMonth(), endMonth.getDate(), 23, 59, 59).toISOString()
 
-  const [{ data: myShifts }, { data: boardShifts }, { data: boardRequests }, { data: profile }] = await Promise.all([
+  const [{ data: myShifts }, { data: boardShifts }, { data: boardRequests }, { data: profile }, { data: memberRows }] = await Promise.all([
     // User's own shifts (all types — personal calendar entries)
     supabase
       .from('shifts')
@@ -46,7 +46,18 @@ export default async function CalendarPage() {
       .gt('expires_at', now.toISOString()),
     // Display name for shifts created via schedule import
     supabase.from('users').select('display_name').eq('id', user.id).single(),
+    // Approved boards — feeds the hidden screenshot board filter
+    supabase
+      .from('user_boards')
+      .select('board_id, boards(id, name)')
+      .eq('user_id', user.id)
+      .eq('is_approved', true),
   ])
+
+  const boards = (memberRows ?? [])
+    .map((ub: { board_id: string; boards: { id: string; name: string } | null }) => ub.boards)
+    .filter((b): b is { id: string; name: string } => !!b)
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   // Photo schedule import stays hidden until the Gemini key is configured —
   // same env-var-flip pattern as AdSense.
@@ -66,6 +77,7 @@ export default async function CalendarPage() {
         id: string; start_time: string; is_trade: boolean; is_giveaway: boolean; board_id: string | null
       }[]}
       boardRequests={(boardRequests ?? []) as { id: string; requested_date: string; board_id: string | null }[]}
+      boards={boards}
     />
   )
 }
