@@ -1,10 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, KeyRound, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, KeyRound, CheckCircle, MailX } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { resetPasswordSchema } from '@/lib/validations/auth'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+
+// The recovery link only produces a session when its PKCE code can be
+// exchanged — which requires the same browser that requested the reset and
+// the *latest* requested link (each new request invalidates prior ones).
+// Verify that up front so a dead link shows guidance instead of letting the
+// form submit into a cryptic "Auth session missing" error.
+type LinkState = 'checking' | 'ready' | 'invalid'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -16,6 +25,27 @@ export default function ResetPasswordPage() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [linkState, setLinkState] = useState<LinkState>('checking')
+
+  useEffect(() => {
+    let cancelled = false
+    const verify = async () => {
+      // The client auto-exchanges the ?code= from the email link on load;
+      // confirm it produced a session, and retry the exchange explicitly in
+      // case auto-detection didn't run.
+      let { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        const code = new URLSearchParams(window.location.search).get('code')
+        if (code) {
+          const { data } = await supabase.auth.exchangeCodeForSession(code)
+          session = data.session
+        }
+      }
+      if (!cancelled) setLinkState(session ? 'ready' : 'invalid')
+    }
+    verify()
+    return () => { cancelled = true }
+  }, [supabase])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -52,6 +82,42 @@ export default function ResetPasswordPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (linkState === 'checking') {
+    return (
+      <div className="card shadow-lg text-center animate-auth-card-in py-10">
+        <LoadingSpinner />
+        <p className="text-text/60 text-sm mt-3">Verifying your reset link…</p>
+      </div>
+    )
+  }
+
+  if (linkState === 'invalid') {
+    return (
+      <div className="card shadow-lg animate-auth-card-in">
+        <div className="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <MailX className="w-6 h-6 text-warning" />
+        </div>
+        <h1 className="font-accent text-2xl font-bold text-text mb-2 text-center">
+          This reset link isn&apos;t valid anymore
+        </h1>
+        <div className="text-text/70 text-sm space-y-2 mb-6">
+          <p>That can happen for a few reasons:</p>
+          <ul className="list-disc list-inside space-y-1 text-text/60">
+            <li>The link was already used or has expired</li>
+            <li>A newer reset email was requested — only the most recent link works</li>
+            <li>It was opened in a different browser than the one that requested it</li>
+          </ul>
+          <p>
+            Request a fresh link and open it in the same browser you request it from.
+          </p>
+        </div>
+        <Link href="/forgot-password" className="btn btn-primary w-full">
+          Request a New Link
+        </Link>
+      </div>
+    )
   }
 
   if (success) {
