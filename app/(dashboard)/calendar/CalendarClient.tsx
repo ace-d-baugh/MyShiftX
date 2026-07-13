@@ -90,16 +90,13 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
 
   // Hidden board filter for marketing screenshots: clicking the calendar
   // icon in the heading toggles a dropdown that narrows every shift, dot,
-  // and request to one board. Toggling it off also clears the filter, so
-  // the calendar returns to normal with no trace.
+  // and request to one board. The toggle only shows/hides the dropdown —
+  // the selected filter KEEPS applying while hidden (that's the point:
+  // filter to one board, hide the control, capture a clean screenshot).
+  // It resets only by choosing "All boards" in the dropdown.
   const [filterOpen, setFilterOpen] = useState(false)
   const [filterBoardId, setFilterBoardId] = useState('')
-  const toggleFilter = () => {
-    setFilterOpen(open => {
-      if (open) setFilterBoardId('')
-      return !open
-    })
-  }
+  const toggleFilter = () => setFilterOpen(open => !open)
 
   useEffect(() => { setSettings(getSettings()) }, [])
 
