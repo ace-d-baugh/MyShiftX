@@ -64,7 +64,7 @@ export function MembershipIcon({ user: u }: { user: UserRow }) {
       <Star
         fill="#ffea80"
         strokeWidth={0}
-        className="w-4 h-4 rotate-[-30deg] text-[#FFEA80] shrink-0"
+        className="w-4 h-4 text-[#FFEA80] shrink-0"
         aria-label="Free"
       />
     )

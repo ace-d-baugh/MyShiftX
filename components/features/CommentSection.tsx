@@ -328,8 +328,8 @@ export function CommentSection({
             )}
           >
             {(displayInterestedCount > 0 || myInterest)
-              ? <Star className="w-3.5 h-3.5 rotate-[-30deg] text-secondary-accent" fill="#ffea80" strokeWidth={0} />
-              : <Star className="w-3.5 h-3.5 rotate-[-30deg]" />}
+              ? <Star className="w-3.5 h-3.5 text-secondary-accent" fill="#ffea80" strokeWidth={0} />
+              : <Star className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">Interested </span>({displayInterestedCount})
             {isOwner && <ChevronDown className={cn('w-3 h-3 transition-transform', interestedOpen && 'rotate-180')} />}
           </button>
@@ -365,7 +365,7 @@ export function CommentSection({
             <ul className="space-y-1.5">
               {interestedUsers.map(u => (
                 <li key={u.user_id} className="flex items-center gap-2 text-sm text-text">
-                  <Star className="w-3.5 h-3.5 rotate-[-30deg] text-secondary-accent shrink-0" fill="#ffea80" strokeWidth={0} />
+                  <Star className="w-3.5 h-3.5 text-secondary-accent shrink-0" fill="#ffea80" strokeWidth={0} />
                   {u.display_name}
                   <span className="text-xs text-text/40">{formatDistanceToNow(parseISO(u.created_at), { addSuffix: true })}</span>
                 </li>
@@ -411,8 +411,8 @@ export function CommentSection({
                     )}
                   >
                     {isInterested
-                      ? <Star className="w-3 h-3 rotate-[-30deg] text-secondary-accent" fill="#ffea80" strokeWidth={0} />
-                      : <Star className="w-3 h-3 rotate-[-30deg]" />} Interested?
+                      ? <Star className="w-3 h-3 text-secondary-accent" fill="#ffea80" strokeWidth={0} />
+                      : <Star className="w-3 h-3" />} Interested?
                   </button>
                 ) : <span />}
                 <Button
@@ -442,7 +442,7 @@ export function CommentSection({
                       <span className="font-medium text-text">{c.display_name}</span>
                       {c.is_interested && (
                         <span className="inline-flex items-center gap-0.5 text-primary">
-                          <Star className="w-3 h-3 rotate-[-30deg] text-secondary-accent" fill="#ffea80" strokeWidth={0} /> Interested
+                          <Star className="w-3 h-3 text-secondary-accent" fill="#ffea80" strokeWidth={0} /> Interested
                         </span>
                       )}
                       <span>&bull; {formatDistanceToNow(parseISO(c.created_at), { addSuffix: true })}</span>

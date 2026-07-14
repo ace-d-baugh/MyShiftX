@@ -171,7 +171,7 @@ export function AdminCharts({ users }: AdminChartsProps) {
                 <div key={d.key} className="flex items-center gap-2 text-sm">
                   <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: MEMBERSHIP_COLOR[d.key] }} />
                   {d.key === 'free' ? (
-                    <Star fill="#ffea80" strokeWidth={0} className="w-4 h-4 rotate-[-30deg] text-[#FFEA80] shrink-0" />
+                    <Star fill="#ffea80" strokeWidth={0} className="w-4 h-4 text-[#FFEA80] shrink-0" />
                   ) : (
                     <span className="text-base leading-none shrink-0" role="img" aria-label={d.key}>{MEMBERSHIP_EMOJI[d.key]}</span>
                   )}
