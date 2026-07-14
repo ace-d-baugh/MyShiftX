@@ -42,7 +42,7 @@ function ReactionIcon({ reaction, className }: { reaction: MessageReaction; clas
   if (reaction === 'star') {
     return (
       <Star
-        className={cn('w-4 h-4 rotate-[-30deg] text-secondary-accent', className)}
+        className={cn('w-4 h-4 text-secondary-accent', className)}
         fill="#ffea80"
         strokeWidth={0}
       />
@@ -422,7 +422,7 @@ export function ConversationClient({
                       >
                         {m.reaction
                           ? <ReactionIcon reaction={m.reaction} />
-                          : <Star className="w-4 h-4 rotate-[-30deg] text-secondary-accent" />}
+                          : <Star className="w-4 h-4 text-secondary-accent" />}
                       </button>
                     )}
                   </div>
