@@ -151,7 +151,7 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
             <RefreshCw className="w-4 h-4" />
             <span className="hidden sm:inline">Sync Calendar</span>
             <span className="hidden min-[505px]:inline sm:hidden">Sync</span>
-            {!isPro && <Crown className="w-3.5 h-3.5 text-warning" aria-label="Pro feature" />}
+            {!isPro && <Crown className="w-3.5 h-3.5 text-secondary-accent" fill="#ffea80" strokeWidth={0} aria-label="Pro feature" />}
           </Link>
           <Link href="/wall/new-shift?from=calendar" className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
             <Plus className="w-4 h-4" />
@@ -270,27 +270,41 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                         ))}
                       </div>
 
-                      {/* Activity dots — one row pinned to the bottom of the
-                          cell; the wall dots (offers) group together, with a
-                          small gap before the request dot since it navigates
-                          to a different tab. Slightly smaller on mobile so
-                          all four fit a narrow day cell without wrapping. */}
+                      {/* Activity dots — big tappable circles in one row at
+                          the bottom of the cell. The three wall dots (offers)
+                          overlap like an avatar stack: giveaway in front,
+                          trade behind it, both at the back (-ml-2 ≈ 40%
+                          overlap at the 20px desktop size). The request dot
+                          sits alone on the other side of the row, same size,
+                          since it opens the Requests tab instead. */}
                       {data && (data.hasBoth || data.hasTradeOnly || data.hasGiveawayOnly || data.hasRequest) && (
                         <div className="flex items-center mt-auto pt-1">
-                          <div className="flex items-center gap-0.5">
+                          <div className="flex items-center">
                             {data.hasBoth && (
-                              <button onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)} title="Trade + Giveaway on this day">
-                                <span className="block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary hover:opacity-70 transition-opacity" />
+                              <button
+                                onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)}
+                                title="Trade + Giveaway on this day"
+                                className="relative z-0 min-h-0 min-w-0"
+                              >
+                                <span className="block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-primary ring-1 ring-card hover:opacity-70 transition-opacity" />
                               </button>
                             )}
                             {data.hasTradeOnly && (
-                              <button onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)} title="Trade shift on this day">
-                                <span className="block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-info hover:opacity-70 transition-opacity" />
+                              <button
+                                onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)}
+                                title="Trade shift on this day"
+                                className={cn('relative z-10 min-h-0 min-w-0', data.hasBoth && '-ml-2')}
+                              >
+                                <span className="block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-info ring-1 ring-card hover:opacity-70 transition-opacity" />
                               </button>
                             )}
                             {data.hasGiveawayOnly && (
-                              <button onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)} title="Giveaway shift on this day">
-                                <span className="block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-success hover:opacity-70 transition-opacity" />
+                              <button
+                                onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)}
+                                title="Giveaway shift on this day"
+                                className={cn('relative z-20 min-h-0 min-w-0', (data.hasBoth || data.hasTradeOnly) && '-ml-2')}
+                              >
+                                <span className="block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-success ring-1 ring-card hover:opacity-70 transition-opacity" />
                               </button>
                             )}
                           </div>
@@ -298,9 +312,9 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                             <button
                               onClick={() => router.push(`/wall?tab=requests&date=${dateStr}`)}
                               title="Shift request on this day"
-                              className={(data.hasBoth || data.hasTradeOnly || data.hasGiveawayOnly) ? 'ml-1.5 sm:ml-2' : ''}
+                              className="ml-auto min-h-0 min-w-0"
                             >
-                              <span className="block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent hover:opacity-70 transition-opacity" />
+                              <span className="block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-accent hover:opacity-70 transition-opacity" />
                             </button>
                           )}
                         </div>
