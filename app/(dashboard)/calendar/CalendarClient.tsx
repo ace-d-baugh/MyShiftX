@@ -286,25 +286,25 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                                 title="Trade + Giveaway on this day"
                                 className="relative z-0 min-h-0 min-w-0"
                               >
-                                <span className="block w-3 h-3 min-[505px]:w-4 min-[505px]:h-4 sm:w-5 sm:h-5 rounded-full bg-primary ring-1 ring-card hover:opacity-70 transition-opacity" />
+                                <span className="block w-2.5 h-2.5 min-[505px]:w-4 min-[505px]:h-4 sm:w-5 sm:h-5 rounded-full bg-primary ring-1 ring-card hover:opacity-70 transition-opacity" />
                               </button>
                             )}
                             {data.hasTradeOnly && (
                               <button
                                 onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)}
                                 title="Trade shift on this day"
-                                className={cn('relative z-10 min-h-0 min-w-0', data.hasBoth && '-ml-1.5 min-[505px]:-ml-2')}
+                                className={cn('relative z-10 min-h-0 min-w-0', data.hasBoth && '-ml-1 min-[505px]:-ml-2')}
                               >
-                                <span className="block w-3 h-3 min-[505px]:w-4 min-[505px]:h-4 sm:w-5 sm:h-5 rounded-full bg-info ring-1 ring-card hover:opacity-70 transition-opacity" />
+                                <span className="block w-2.5 h-2.5 min-[505px]:w-4 min-[505px]:h-4 sm:w-5 sm:h-5 rounded-full bg-info ring-1 ring-card hover:opacity-70 transition-opacity" />
                               </button>
                             )}
                             {data.hasGiveawayOnly && (
                               <button
                                 onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)}
                                 title="Giveaway shift on this day"
-                                className={cn('relative z-20 min-h-0 min-w-0', (data.hasBoth || data.hasTradeOnly) && '-ml-1.5 min-[505px]:-ml-2')}
+                                className={cn('relative z-20 min-h-0 min-w-0', (data.hasBoth || data.hasTradeOnly) && '-ml-1 min-[505px]:-ml-2')}
                               >
-                                <span className="block w-3 h-3 min-[505px]:w-4 min-[505px]:h-4 sm:w-5 sm:h-5 rounded-full bg-success ring-1 ring-card hover:opacity-70 transition-opacity" />
+                                <span className="block w-2.5 h-2.5 min-[505px]:w-4 min-[505px]:h-4 sm:w-5 sm:h-5 rounded-full bg-success ring-1 ring-card hover:opacity-70 transition-opacity" />
                               </button>
                             )}
                           </div>
@@ -312,9 +312,9 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                             <button
                               onClick={() => router.push(`/wall?tab=requests&date=${dateStr}`)}
                               title="Shift request on this day"
-                              className="ml-auto min-h-0 min-w-0"
+                              className="ml-auto relative z-30 min-h-0 min-w-0"
                             >
-                              <span className="block w-3 h-3 min-[505px]:w-4 min-[505px]:h-4 sm:w-5 sm:h-5 rounded-full bg-accent hover:opacity-70 transition-opacity" />
+                              <span className="block w-2.5 h-2.5 min-[505px]:w-4 min-[505px]:h-4 sm:w-5 sm:h-5 rounded-full bg-accent hover:opacity-70 transition-opacity" />
                             </button>
                           )}
                         </div>
