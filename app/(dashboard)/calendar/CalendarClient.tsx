@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Camera, Plus, RefreshCw } from 'lucide-react'
+import { CalendarDays, Camera, Crown, Plus, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO, addMonths, startOfMonth, getDaysInMonth, getDay } from 'date-fns'
@@ -34,6 +34,7 @@ interface CalendarClientProps {
   boardShifts: BoardShift[]
   boardRequests: BoardRequest[]
   boards: { id: string; name: string }[]
+  isPro: boolean
 }
 
 // ── Day data ─────────────────────────────────────────────────────────────────
@@ -83,7 +84,7 @@ function buildDayMap(
 
 // ── Calendar client ───────────────────────────────────────────────────────────
 
-export function CalendarClient({ userId, displayName, importEnabled, today, myShifts, boardShifts, boardRequests, boards }: CalendarClientProps) {
+export function CalendarClient({ userId, displayName, importEnabled, today, myShifts, boardShifts, boardRequests, boards, isPro }: CalendarClientProps) {
   const router = useRouter()
   const [settings, setSettings] = useState<UserSettings | null>(null)
   const [importOpen, setImportOpen] = useState(false)
@@ -140,10 +141,17 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
               <span className="hidden min-[505px]:inline sm:hidden">Import</span>
             </button>
           )}
-          <Link href="/profile#calendar-sync" className="btn btn-outline gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
+          {/* Calendar Sync is Pro-only: Basic gets the same button with a
+              crown, routed to the upgrade page (the profile sync section
+              doesn't exist for them). */}
+          <Link
+            href={isPro ? '/profile#calendar-sync' : '/upgrade'}
+            className="btn btn-outline gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline"
+          >
             <RefreshCw className="w-4 h-4" />
             <span className="hidden sm:inline">Sync Calendar</span>
             <span className="hidden min-[505px]:inline sm:hidden">Sync</span>
+            {!isPro && <Crown className="w-3.5 h-3.5 text-warning" aria-label="Pro feature" />}
           </Link>
           <Link href="/wall/new-shift?from=calendar" className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
             <Plus className="w-4 h-4" />
@@ -262,27 +270,37 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                         ))}
                       </div>
 
-                      {/* Activity dots */}
+                      {/* Activity dots — one row pinned to the bottom of the
+                          cell; the wall dots (offers) group together, with a
+                          small gap before the request dot since it navigates
+                          to a different tab. Slightly smaller on mobile so
+                          all four fit a narrow day cell without wrapping. */}
                       {data && (data.hasBoth || data.hasTradeOnly || data.hasGiveawayOnly || data.hasRequest) && (
-                        <div className="flex items-center gap-0.5 mt-1 flex-wrap">
-                          {data.hasBoth && (
-                            <button onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)} title="Trade + Giveaway on this day">
-                              <span className="block w-2 h-2 rounded-full bg-primary hover:opacity-70 transition-opacity" />
-                            </button>
-                          )}
-                          {data.hasTradeOnly && (
-                            <button onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)} title="Trade shift on this day">
-                              <span className="block w-2 h-2 rounded-full bg-info hover:opacity-70 transition-opacity" />
-                            </button>
-                          )}
-                          {data.hasGiveawayOnly && (
-                            <button onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)} title="Giveaway shift on this day">
-                              <span className="block w-2 h-2 rounded-full bg-success hover:opacity-70 transition-opacity" />
-                            </button>
-                          )}
+                        <div className="flex items-center mt-auto pt-1">
+                          <div className="flex items-center gap-0.5">
+                            {data.hasBoth && (
+                              <button onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)} title="Trade + Giveaway on this day">
+                                <span className="block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary hover:opacity-70 transition-opacity" />
+                              </button>
+                            )}
+                            {data.hasTradeOnly && (
+                              <button onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)} title="Trade shift on this day">
+                                <span className="block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-info hover:opacity-70 transition-opacity" />
+                              </button>
+                            )}
+                            {data.hasGiveawayOnly && (
+                              <button onClick={() => router.push(`/wall?tab=offers&date=${dateStr}`)} title="Giveaway shift on this day">
+                                <span className="block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-success hover:opacity-70 transition-opacity" />
+                              </button>
+                            )}
+                          </div>
                           {data.hasRequest && (
-                            <button onClick={() => router.push(`/wall?tab=requests&date=${dateStr}`)} title="Shift request on this day">
-                              <span className="block w-2 h-2 rounded-full bg-accent hover:opacity-70 transition-opacity" />
+                            <button
+                              onClick={() => router.push(`/wall?tab=requests&date=${dateStr}`)}
+                              title="Shift request on this day"
+                              className={(data.hasBoth || data.hasTradeOnly || data.hasGiveawayOnly) ? 'ml-1.5 sm:ml-2' : ''}
+                            >
+                              <span className="block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent hover:opacity-70 transition-opacity" />
                             </button>
                           )}
                         </div>

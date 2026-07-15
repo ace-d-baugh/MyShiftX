@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
+import { getMembership, isProTier } from '@/lib/auth/session'
 import { optionalServerEnv } from '@/lib/env'
 import { CalendarClient } from './CalendarClient'
 
@@ -17,7 +18,7 @@ export default async function CalendarPage() {
   const endMonth = new Date(now.getFullYear(), now.getMonth() + 4, 0)
   const windowEnd = new Date(endMonth.getFullYear(), endMonth.getMonth(), endMonth.getDate(), 23, 59, 59).toISOString()
 
-  const [{ data: myShifts }, { data: boardShifts }, { data: boardRequests }, { data: profile }, { data: memberRows }] = await Promise.all([
+  const [{ data: myShifts }, { data: boardShifts }, { data: boardRequests }, { data: profile }, { data: memberRows }, membership] = await Promise.all([
     // User's own shifts (all types — personal calendar entries)
     supabase
       .from('shifts')
@@ -52,6 +53,8 @@ export default async function CalendarPage() {
       .select('board_id, boards(id, name)')
       .eq('user_id', user.id)
       .eq('is_approved', true),
+    // Calendar Sync is Pro-only — Basic gets an upsell button instead
+    getMembership(supabase),
   ])
 
   const boards = (memberRows ?? [])
@@ -78,6 +81,7 @@ export default async function CalendarPage() {
       }[]}
       boardRequests={(boardRequests ?? []) as { id: string; requested_date: string; board_id: string | null }[]}
       boards={boards}
+      isPro={isProTier(membership)}
     />
   )
 }
