@@ -79,7 +79,9 @@ export function AdRail({ showAds, children, hasBottomNav = true }: AdRailProps) 
         <div
           className={cn(
             'lg:hidden fixed inset-x-0 z-40 px-2 py-1 bg-card/95 backdrop-blur-sm border-t border-border',
-            hasBottomNav ? 'bottom-14' : 'bottom-0'
+            // The bottom tab nav is md:hidden, so only offset above it below
+            // md; from md to lg the bar sits flush with the bottom edge.
+            hasBottomNav ? 'bottom-14 md:bottom-0' : 'bottom-0'
           )}
         >
           {/* "Remove Ads" tab perched on the bar's top edge; the SVG draws the
