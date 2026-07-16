@@ -1,6 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Crown } from 'lucide-react'
 import { AdSlot } from './AdSlot'
 import { cn } from '@/lib/utils'
 
@@ -61,6 +63,13 @@ export function AdRail({ showAds, children, hasBottomNav = true }: AdRailProps) 
       {enabled && (
         <aside className="hidden lg:block w-[300px] shrink-0 pr-4">
           <div className="sticky top-28">
+            <Link
+              href="/upgrade"
+              className="mb-1 flex items-center justify-end gap-1 text-[11px] font-medium text-text/60 hover:text-text min-h-0 min-w-0"
+            >
+              <Crown className="w-3.5 h-3.5 text-secondary-accent" fill="#ffea80" strokeWidth={0} aria-hidden="true" />
+              Remove Ads
+            </Link>
             <AdSlot slotId={STICKY_DESKTOP_SLOT} className="w-full min-h-[250px]" />
           </div>
         </aside>
@@ -73,6 +82,31 @@ export function AdRail({ showAds, children, hasBottomNav = true }: AdRailProps) 
             hasBottomNav ? 'bottom-14' : 'bottom-0'
           )}
         >
+          {/* "Remove Ads" tab perched on the bar's top edge; the SVG draws the
+           * ogee flare that sweeps its top-left edge down into the bar. h-6
+           * matches the 24-unit viewBox so the curve isn't stretched. */}
+          <Link
+            href="/upgrade"
+            className="absolute bottom-full right-3 flex h-6 items-center gap-1 rounded-tr-lg border-t border-r border-border bg-card/95 backdrop-blur-sm pr-2.5 pl-1 text-[11px] font-medium leading-none text-text/70 min-h-0 min-w-0"
+          >
+            <svg
+              aria-hidden="true"
+              className="absolute right-full bottom-0 h-full w-4"
+              viewBox="0 0 16 24"
+              preserveAspectRatio="none"
+            >
+              <path d="M16 0 C7 0 9 24 0 24 L16 24 Z" className="fill-card/95" />
+              <path
+                d="M16 0 C7 0 9 24 0 24"
+                fill="none"
+                strokeWidth="1"
+                vectorEffect="non-scaling-stroke"
+                className="stroke-border"
+              />
+            </svg>
+            <Crown className="w-3.5 h-3.5 text-secondary-accent" fill="#ffea80" strokeWidth={0} aria-hidden="true" />
+            Remove Ads
+          </Link>
           <AdSlot slotId={STICKY_MOBILE_SLOT} className="w-full max-w-md mx-auto h-16" />
         </div>
       )}

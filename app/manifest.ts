@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'MyShiftX',
     short_name: 'MyShiftX',
-    description: 'The shift swap board for cast members.',
+    description: 'The shift swap board for shift workers.',
     start_url: '/wall',
     display: 'standalone',
     background_color: '#ffffff',
