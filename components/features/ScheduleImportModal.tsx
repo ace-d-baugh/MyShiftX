@@ -230,6 +230,8 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
     setRows(prev => [...prev, { include: true, date: '', start: '', end: '', title: '' }])
 
   const included = rows.filter(r => r.include && r.date && r.start && r.end)
+  const allIncluded = rows.length > 0 && rows.every(r => r.include)
+  const someIncluded = rows.some(r => r.include)
 
   const handleSave = async () => {
     if (!boardId || included.length === 0) return
@@ -342,12 +344,15 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
         </div>
       )}
 
+      {/* Flex column so the photo preview and shifts table shrink (down to
+        * their min-h floors) and scroll internally on short screens, keeping
+        * the board picker and action buttons in view. */}
       {(step === 'review' || step === 'saving') && (
-        <div className="space-y-4">
+        <div className="flex min-h-0 flex-col gap-4">
           {previewUrl && (
-            <div>
+            <div className="flex min-h-0 flex-col">
               <p className="text-xs text-text/50 mb-1">Your photo — check the rows below against it:</p>
-              <div className="rounded-lg border border-border overflow-auto max-h-60 bg-black/5">
+              <div className="min-h-16 shrink rounded-lg border border-border overflow-auto max-h-60 bg-black/5">
                 {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, next/image can't optimize it */}
                 <img src={previewUrl} alt="Your uploaded schedule" className="w-full object-contain" />
               </div>
@@ -361,11 +366,21 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
             </select>
           </div>
 
-          <div className="rounded-lg border border-border overflow-x-auto">
+          <div className="min-h-24 shrink rounded-lg border border-border overflow-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-text/50 border-b border-border">
-                  <th className="px-2 py-2 w-8"><span className="sr-only">Include</span></th>
+              {/* Sticky (with a shadow standing in for the collapsed border-b,
+                * which doesn't travel with position:sticky) so the column
+                * labels and select-all stay visible while the rows scroll. */}
+              <thead className="sticky top-0 z-10 bg-card shadow-[0_1px_0_0_hsl(var(--color-border))]">
+                <tr className="text-left text-xs text-text/50">
+                  <th className="px-2 py-2 w-8">
+                    <Checkbox
+                      checked={allIncluded}
+                      indeterminate={someIncluded && !allIncluded}
+                      onChange={() => setRows(prev => prev.map(r => ({ ...r, include: !allIncluded })))}
+                      aria-label="Select all shifts"
+                    />
+                  </th>
                   <th className="px-2 py-2">Date</th>
                   <th className="px-2 py-2">Start</th>
                   <th className="px-2 py-2">End</th>

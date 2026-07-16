@@ -55,16 +55,17 @@ export function Modal({ open, onClose, title, children, className, size = 'md' }
         onClick={onClose}
         aria-hidden="true"
       />
-      {/* Panel */}
+      {/* Panel — capped at the viewport (minus the overlay padding) so tall
+        * content scrolls inside the body instead of running offscreen. */}
       <div
         className={cn(
-          'relative bg-card rounded-xl shadow-xl w-full p-6 z-10',
+          'relative bg-card rounded-xl shadow-xl w-full p-6 z-10 flex max-h-full flex-col',
           sizes[size],
           className
         )}
       >
         {title && (
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 shrink-0">
             <h2 className="font-accent text-xl font-bold text-text">{title}</h2>
             <button
               onClick={onClose}
@@ -75,7 +76,9 @@ export function Modal({ open, onClose, title, children, className, size = 'md' }
             </button>
           </div>
         )}
-        {children}
+        {/* Body scrolls as a last resort; content that manages its own inner
+          * scrolling (flex children with min-height floors) shrinks first. */}
+        <div className="flex min-h-0 flex-col overflow-y-auto">{children}</div>
       </div>
     </div>
   )
