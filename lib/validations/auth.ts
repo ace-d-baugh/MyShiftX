@@ -2,7 +2,19 @@ import { z } from 'zod'
 
 export const displayNameRegex = /^[A-Z][a-zA-Z]*(?:[-\s][A-Z][a-zA-Z]*)* [A-Z]\.$/
 
+// Letters, spaces, and hyphens only — keeps the derived site display name
+// ("First L.") valid under displayNameRegex above.
+const nameRegex = /^[A-Za-z]+(?:[-\s][A-Za-z]+)*$/
+
 export const registerSchema = z.object({
+  first_name: z.string().trim()
+    .min(1, 'First name is required')
+    .max(40, 'First name is too long')
+    .regex(nameRegex, 'Letters, spaces, and hyphens only'),
+  last_name: z.string().trim()
+    .min(1, 'Last name is required')
+    .max(40, 'Last name is too long')
+    .regex(nameRegex, 'Letters, spaces, and hyphens only'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   confirm_password: z.string().min(1, 'Please confirm your password'),

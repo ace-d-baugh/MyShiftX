@@ -32,7 +32,6 @@ interface BoardEntry {
 
 interface MyBoardsSectionProps {
   userId: string
-  displayNameReady: boolean
   createOpen: boolean
   onCreateOpenChange: (open: boolean) => void
 }
@@ -41,7 +40,7 @@ const roleVariant: Record<BoardRole, 'user' | 'mod' | 'leader'> = {
   User: 'user', Mod: 'mod', Leader: 'leader',
 }
 
-export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreateOpenChange }: MyBoardsSectionProps) {
+export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBoardsSectionProps) {
   const supabase = createClient()
   const [boards, setBoards] = useState<BoardEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -356,33 +355,29 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
       {/* Join with invite code */}
       <div className="pt-2 border-t border-border">
         <p className="text-xs font-medium text-text/50 mb-2 uppercase tracking-wide">Join a Board</p>
-        {!displayNameReady ? (
-          <p className="text-sm text-text/50 italic">To unlock, please save your display name above.</p>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9"
-                placeholder="XXXXXXX"
-                maxLength={7}
-                value={joinCode}
-                onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null) }}
-                onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
-              />
-              <Button
-                size="sm"
-                loading={joinLoading}
-                onClick={handleLookup}
-                className="h-9 min-w-[56px]"
-              >
-                Join
-              </Button>
-            </div>
-            {joinError && <p className="text-xs text-warning">{joinError}</p>}
-            {joinSuccess && <p className="text-xs text-success">{joinSuccess}</p>}
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9"
+              placeholder="XXXXXXX"
+              maxLength={7}
+              value={joinCode}
+              onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null) }}
+              onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
+            />
+            <Button
+              size="sm"
+              loading={joinLoading}
+              onClick={handleLookup}
+              className="h-9 min-w-[56px]"
+            >
+              Join
+            </Button>
           </div>
-        )}
+          {joinError && <p className="text-xs text-warning">{joinError}</p>}
+          {joinSuccess && <p className="text-xs text-success">{joinSuccess}</p>}
+        </div>
       </div>
 
       {/* ── Board Actions Dropdown ───────────────────────────────────────── */}

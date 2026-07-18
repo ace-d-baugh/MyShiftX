@@ -763,10 +763,12 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       ) : tab === 'offers' ? (
         shifts.length === 0 ? (
           <EmptyState
-            message="No shift offers found"
-            subtext={!hasBoards ? 'Import your schedule and join a board — it takes about two minutes.' : 'Be the first to post a shift!'}
-            href={hasBoards ? '/wall/new-shift' : '/welcome'}
-            btnLabel={hasBoards ? 'Post a Shift' : 'Get Set Up'}
+            message={hasBoards ? 'No shift offers found' : 'No shifts to see here yet'}
+            subtext={!hasBoards
+              ? "You'll see your boards' shift posts once a leader approves you into a board. Haven't joined one yet? Join or create one from your profile."
+              : 'Be the first to post a shift!'}
+            href={hasBoards ? '/wall/new-shift' : '/profile#my-boards'}
+            btnLabel={hasBoards ? 'Post a Shift' : 'Join or Create a Board'}
           />
         ) : filteredShifts.length === 0 ? (
           <div className="text-center py-16 px-4 text-text/50 text-sm">
@@ -812,10 +814,12 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       ) : (
         requests.length === 0 ? (
           <EmptyState
-            message="No shift requests found"
-            subtext={!hasBoards ? 'Import your schedule and join a board — it takes about two minutes.' : 'Need a shift? Post a request!'}
-            href={hasBoards ? '/wall/new-request' : '/welcome'}
-            btnLabel={hasBoards ? 'Post a Request' : 'Get Set Up'}
+            message={hasBoards ? 'No shift requests found' : 'No requests to see here yet'}
+            subtext={!hasBoards
+              ? "You'll see your boards' shift requests once a leader approves you into a board. Haven't joined one yet? Join or create one from your profile."
+              : 'Need a shift? Post a request!'}
+            href={hasBoards ? '/wall/new-request' : '/profile#my-boards'}
+            btnLabel={hasBoards ? 'Post a Request' : 'Join or Create a Board'}
           />
         ) : filteredRequests.length === 0 ? (
           <div className="text-center py-16 px-4 text-text/50 text-sm">

@@ -83,11 +83,6 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
     syncToDB(siteSettings ?? getSettings(), t)
   }
 
-  // Track whether a valid display name has been saved
-  const [hasDisplayNameSaved, setHasDisplayNameSaved] = useState(
-    !!(user?.display_name && user.display_name !== 'User' && displayNameRegex.test(user.display_name))
-  )
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -114,7 +109,6 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
 
       if (updateError) throw updateError
       setSaveSuccess(true)
-      setHasDisplayNameSaved(displayNameRegex.test(displayName))
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save profile.')
@@ -288,8 +282,7 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
           </div>
           <button
             onClick={() => setCreateBoardOpen(true)}
-            disabled={!hasDisplayNameSaved}
-            className="p-1.5 rounded-md border border-border text-text/40 hover:text-primary hover:border-primary hover:bg-primary-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-0 min-w-0"
+            className="p-1.5 rounded-md border border-border text-text/40 hover:text-primary hover:border-primary hover:bg-primary-light transition-colors min-h-0 min-w-0"
             title="Create a board"
             aria-label="Create a board"
           >
@@ -298,7 +291,6 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
         </div>
         <MyBoardsSection
           userId={sessionUserId}
-          displayNameReady={hasDisplayNameSaved}
           createOpen={createBoardOpen}
           onCreateOpenChange={setCreateBoardOpen}
         />

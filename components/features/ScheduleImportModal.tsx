@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
-interface Board { id: string; name: string }
+interface Board { id: string; name: string; pending?: boolean }
 
 interface ParsedShift {
   date: string
@@ -248,16 +248,20 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
     setBoardsLoading(true)
 
     const load = async () => {
+      // Pending memberships count too (Task 22 v3): the calendar works while
+      // a join request awaits approval — only wall posting stays gated.
       const [{ data: memberRows }, { data: statusRows }] = await Promise.all([
         supabase
-          .from('user_boards').select('board_id, boards(id, name)')
-          .eq('user_id', userId).eq('is_approved', true),
+          .from('user_boards').select('board_id, is_approved, boards(id, name)')
+          .eq('user_id', userId),
         supabase.rpc('get_schedule_import_status'),
       ])
       const list = (memberRows ?? [])
-        .map((ub: { board_id: string; boards: Board | null }) => ub.boards)
+        .map((ub: { board_id: string; is_approved: boolean; boards: { id: string; name: string } | null }): Board | null =>
+          ub.boards ? { ...ub.boards, pending: !ub.is_approved } : null)
         .filter((b): b is Board => !!b)
-        .sort((a, b) => a.name.localeCompare(b.name))
+        .sort((a, b) =>
+          Number(a.pending ?? false) - Number(b.pending ?? false) || a.name.localeCompare(b.name))
       setBoards(list)
       if (list.length === 1) setBoardId(list[0].id)
 
@@ -501,8 +505,14 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
             <label className="block text-xs font-medium text-text/60 mb-1">Add these shifts to board</label>
             <select className="input text-sm h-9" value={boardId} onChange={e => setBoardId(e.target.value)}>
               <option value="">Select a board…</option>
-              {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              {boards.map(b => <option key={b.id} value={b.id}>{b.name}{b.pending ? ' (pending approval)' : ''}</option>)}
             </select>
+            {boards.find(b => b.id === boardId)?.pending && (
+              <p className="mt-1 text-[11px] text-info">
+                This board hasn&apos;t approved you yet — these shifts go on your calendar now, and
+                posting to the wall unlocks once a leader approves you.
+              </p>
+            )}
           </div>
 
           <div className="min-h-24 shrink rounded-lg border border-border overflow-auto">
