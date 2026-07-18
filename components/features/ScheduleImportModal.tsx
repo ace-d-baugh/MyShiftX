@@ -76,6 +76,144 @@ async function toJpeg(file: File, maxDim = 1600): Promise<Blob> {
   }
 }
 
+// Interactive photo viewer for the review step: wheel or pinch to zoom
+// (anchored on the pointer, so you can inspect one cell of the schedule),
+// drag to pan while zoomed, double-click/double-tap to toggle. At rest the
+// container allows vertical touch panning so it doesn't trap modal scrolling.
+function ZoomableImage({ src, alt }: { src: string; alt: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [t, setT] = useState({ scale: 1, x: 0, y: 0 })
+  const tRef = useRef(t)
+  useEffect(() => { tRef.current = t }, [t])
+
+  // Live pointer positions (container-relative) and the gesture they anchor.
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const gesture = useRef<
+    | { kind: 'pan'; px: number; py: number; x: number; y: number }
+    | { kind: 'pinch'; dist: number; cx: number; cy: number; scale: number; x: number; y: number }
+    | null
+  >(null)
+
+  // Keep scale in [1, 6] and the image edges pinned to the viewport edges.
+  const clamp = React.useCallback((scale: number, x: number, y: number) => {
+    const el = ref.current
+    const s = Math.min(6, Math.max(1, scale))
+    if (!el) return { scale: s, x: 0, y: 0 }
+    const { width, height } = el.getBoundingClientRect()
+    return {
+      scale: s,
+      x: Math.min(0, Math.max(width - width * s, x)),
+      y: Math.min(0, Math.max(height - height * s, y)),
+    }
+  }, [])
+
+  // Native listener because React's onWheel can't reliably preventDefault
+  // (passive by default) — and the page must not scroll while zooming.
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const rect = el.getBoundingClientRect()
+      const px = e.clientX - rect.left
+      const py = e.clientY - rect.top
+      const factor = Math.exp(-e.deltaY * 0.0022)
+      setT(prev => {
+        const s = Math.min(6, Math.max(1, prev.scale * factor))
+        const r = s / prev.scale
+        return clamp(s, px - (px - prev.x) * r, py - (py - prev.y) * r)
+      })
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [clamp])
+
+  // (Re)anchor the active gesture from whatever pointers are down — also
+  // called on pointer-up so a pinch hands off cleanly to a one-finger pan.
+  const startGesture = () => {
+    const pts = [...pointers.current.values()]
+    const { scale, x, y } = tRef.current
+    if (pts.length >= 2) {
+      const [a, b] = pts
+      gesture.current = {
+        kind: 'pinch',
+        dist: Math.hypot(a.x - b.x, a.y - b.y),
+        cx: (a.x + b.x) / 2,
+        cy: (a.y + b.y) / 2,
+        scale, x, y,
+      }
+    } else if (pts.length === 1 && scale > 1) {
+      gesture.current = { kind: 'pan', px: pts[0].x, py: pts[0].y, x, y }
+    } else {
+      gesture.current = null
+    }
+  }
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    pointers.current.set(e.pointerId, { x: e.clientX - rect.left, y: e.clientY - rect.top })
+    e.currentTarget.setPointerCapture(e.pointerId)
+    startGesture()
+  }
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!pointers.current.has(e.pointerId)) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    pointers.current.set(e.pointerId, { x: e.clientX - rect.left, y: e.clientY - rect.top })
+    const g = gesture.current
+    if (!g) return
+    if (g.kind === 'pinch' && pointers.current.size >= 2) {
+      const [a, b] = [...pointers.current.values()]
+      const dist = Math.hypot(a.x - b.x, a.y - b.y)
+      const cx = (a.x + b.x) / 2
+      const cy = (a.y + b.y) / 2
+      const s = Math.min(6, Math.max(1, g.scale * (dist / (g.dist || 1))))
+      const r = s / g.scale
+      setT(clamp(s, cx - (g.cx - g.x) * r, cy - (g.cy - g.y) * r))
+    } else if (g.kind === 'pan' && pointers.current.size === 1) {
+      const p = [...pointers.current.values()][0]
+      setT(prev => clamp(prev.scale, g.x + (p.x - g.px), g.y + (p.y - g.py)))
+    }
+  }
+
+  const endPointer = (e: React.PointerEvent) => {
+    pointers.current.delete(e.pointerId)
+    startGesture()
+  }
+
+  const onDoubleClick = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const px = e.clientX - rect.left
+    const py = e.clientY - rect.top
+    setT(prev => prev.scale > 1
+      ? { scale: 1, x: 0, y: 0 }
+      : clamp(2.5, px * (1 - 2.5), py * (1 - 2.5)))
+  }
+
+  const zoomed = t.scale > 1
+  return (
+    <div
+      ref={ref}
+      className={`h-full w-full overflow-hidden select-none ${zoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'}`}
+      style={{ touchAction: zoomed ? 'none' : 'pan-y' }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endPointer}
+      onPointerCancel={endPointer}
+      onDoubleClick={onDoubleClick}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, next/image can't optimize it */}
+      <img
+        src={src}
+        alt={alt}
+        draggable={false}
+        className="h-full w-full object-contain"
+        style={{ transform: `translate(${t.x}px, ${t.y}px) scale(${t.scale})`, transformOrigin: '0 0' }}
+      />
+    </div>
+  )
+}
+
 export function ScheduleImportModal({ userId, displayName, open, onClose }: ScheduleImportModalProps) {
   const router = useRouter()
   const supabase = createClient()
@@ -351,10 +489,11 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
         <div className="flex min-h-0 flex-col gap-4">
           {previewUrl && (
             <div className="flex min-h-0 flex-col">
-              <p className="text-xs text-text/50 mb-1">Your photo — check the rows below against it:</p>
-              <div className="min-h-16 shrink rounded-lg border border-border overflow-auto max-h-60 bg-black/5">
-                {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, next/image can't optimize it */}
-                <img src={previewUrl} alt="Your uploaded schedule" className="w-full object-contain" />
+              <p className="text-xs text-text/50 mb-1">
+                Your photo — scroll, pinch, or double-click to zoom in; drag to pan:
+              </p>
+              <div className="min-h-16 h-60 shrink rounded-lg border border-border overflow-hidden bg-black/5">
+                <ZoomableImage key={previewUrl} src={previewUrl} alt="Your uploaded schedule" />
               </div>
             </div>
           )}

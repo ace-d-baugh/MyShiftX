@@ -92,6 +92,111 @@
 .dark .placeholder\:text-text\/40::placeholder { color: hsl(var(--color-text) / 0.55); }
 .dark .placeholder\:text-text\/50::placeholder { color: hsl(var(--color-text) / 0.65); }
 
+/*
+ * ── Pro themes ──────────────────────────────────────────────────────────────
+ * Midnight and Cyberpunk ride on the `dark` class (so every `.dark` rule
+ * applies) and only override the palette; Nordic is light-based. These MUST
+ * stay unlayered: the theme-* classes are composed at runtime ('theme-'+id in
+ * lib/theme.ts), so they never appear literally in scanned content and
+ * Tailwind would tree-shake them out of any @layer block.
+ */
+
+/* Midnight — true #000000 OLED black, neutral surfaces, same purple brand */
+.theme-midnight {
+  --color-primary-light: 269 35% 13%;
+  --color-secondary: 269 40% 28%;
+  --color-text: 0 0% 93%;
+  --color-background: 0 0% 0%;
+  --color-foreground: 0 0% 93%;
+  --color-card: 0 0% 4%;
+  --color-card-foreground: 0 0% 93%;
+  --color-border: 0 0% 16%;
+  --color-input: 0 0% 16%;
+}
+
+/* Cyberpunk — neon magenta/cyan/green on near-black, monospace type */
+.theme-cyberpunk {
+  --color-primary: 320 100% 60%;
+  --color-primary-light: 320 70% 14%;
+  --color-secondary: 275 85% 34%;
+  --color-accent: 55 100% 55%;
+  --color-secondary-accent: 180 100% 50%;
+  --color-text: 165 85% 78%;
+  --color-success: 135 100% 54%;
+  --color-info: 190 100% 60%;
+  --color-warning: 350 100% 66%;
+  --color-background: 255 60% 4%;
+  --color-foreground: 165 85% 78%;
+  --color-card: 255 45% 8%;
+  --color-card-foreground: 165 85% 78%;
+  --color-border: 285 70% 28%;
+  --color-input: 285 70% 28%;
+  --color-ring: 320 100% 60%;
+}
+
+/* Nordic — cream background, sage green primary, slate text, muted accents */
+.theme-nordic {
+  --color-primary: 150 25% 40%;
+  --color-primary-light: 150 22% 91%;
+  --color-secondary: 150 24% 80%;
+  --color-accent: 24 45% 60%;
+  --color-secondary-accent: 45 55% 82%;
+  --color-text: 210 18% 28%;
+  --color-success: 140 30% 48%;
+  --color-info: 205 45% 52%;
+  --color-warning: 5 55% 56%;
+  --color-background: 42 33% 96%;
+  --color-foreground: 210 18% 28%;
+  --color-card: 40 40% 99%;
+  --color-card-foreground: 210 18% 28%;
+  --color-border: 42 20% 86%;
+  --color-input: 42 20% 86%;
+  --color-ring: 150 25% 40%;
+}
+
+/*
+ * :root prefix outranks the next/font variable classes on <html>
+ * ((0,1,1) vs (0,1,0)), so both font vars resolve to monospace everywhere,
+ * including `font-accent` headings.
+ */
+:root.theme-cyberpunk {
+  --font-lato: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-philosopher: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+/* ── Pro theme flourishes ── */
+
+/* Cyberpunk: neon glow on headings and primary actions */
+.theme-cyberpunk h1,
+.theme-cyberpunk h2,
+.theme-cyberpunk h3 {
+  text-shadow: 0 0 14px hsl(var(--color-primary) / 0.45);
+}
+.theme-cyberpunk .btn-primary {
+  box-shadow: 0 0 14px hsl(var(--color-primary) / 0.3);
+}
+.theme-cyberpunk .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 0 22px hsl(var(--color-primary) / 0.5);
+}
+.theme-cyberpunk .card {
+  box-shadow: 0 0 0 1px hsl(var(--color-border) / 0.5), 0 0 18px hsl(var(--color-primary) / 0.07);
+}
+/* Neon badges read best with the near-black background as text */
+.theme-cyberpunk .badge-trade,
+.theme-cyberpunk .badge-giveaway,
+.theme-cyberpunk .badge-ot { color: hsl(255 60% 6%); }
+.theme-cyberpunk .badge-ot { background-color: hsl(55 100% 55%); }
+
+/* Nordic: swap the hardcoded star-yellow accents for the muted cream */
+.theme-nordic .badge-ot,
+.theme-nordic .btn-outline:hover:not(:disabled) {
+  background-color: hsl(45 55% 82%);
+  color: hsl(210 18% 28%);
+}
+.theme-nordic .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 18px hsl(150 25% 40% / 0.35);
+}
+
 @layer components {
   /* Badge styles for Trade, Giveaway, OT */
   .badge {
@@ -245,6 +350,39 @@
     hsl(269 35% 20%) 65%,
     hsl(269 25% 15%) 100%
   );
+}
+
+/* Midnight: neutral gray shimmer on pure black */
+.theme-midnight .skeleton {
+  background-image: linear-gradient(135deg, hsl(0 0% 9%) 0%, hsl(0 0% 13%) 35%, hsl(0 0% 17%) 50%, hsl(0 0% 13%) 65%, hsl(0 0% 9%) 100%);
+}
+.theme-midnight .skeleton-strong {
+  background-image: linear-gradient(135deg, hsl(0 0% 12%) 0%, hsl(0 0% 17%) 35%, hsl(0 0% 21%) 50%, hsl(0 0% 17%) 65%, hsl(0 0% 12%) 100%);
+}
+.theme-midnight .skeleton-soft {
+  background-image: linear-gradient(135deg, hsl(0 0% 7%) 0%, hsl(0 0% 10%) 35%, hsl(0 0% 13%) 50%, hsl(0 0% 10%) 65%, hsl(0 0% 7%) 100%);
+}
+
+/* Cyberpunk: magenta-tinted shimmer */
+.theme-cyberpunk .skeleton {
+  background-image: linear-gradient(135deg, hsl(285 40% 12%) 0%, hsl(300 50% 17%) 35%, hsl(320 45% 21%) 50%, hsl(300 50% 17%) 65%, hsl(285 40% 12%) 100%);
+}
+.theme-cyberpunk .skeleton-strong {
+  background-image: linear-gradient(135deg, hsl(285 45% 16%) 0%, hsl(300 55% 21%) 35%, hsl(320 50% 26%) 50%, hsl(300 55% 21%) 65%, hsl(285 45% 16%) 100%);
+}
+.theme-cyberpunk .skeleton-soft {
+  background-image: linear-gradient(135deg, hsl(285 35% 10%) 0%, hsl(300 40% 14%) 35%, hsl(320 35% 17%) 50%, hsl(300 40% 14%) 65%, hsl(285 35% 10%) 100%);
+}
+
+/* Nordic: warm beige/sage shimmer */
+.theme-nordic .skeleton {
+  background-image: linear-gradient(135deg, hsl(42 25% 90%) 0%, hsl(150 15% 87%) 35%, hsl(42 40% 94%) 50%, hsl(150 15% 87%) 65%, hsl(42 25% 90%) 100%);
+}
+.theme-nordic .skeleton-strong {
+  background-image: linear-gradient(135deg, hsl(42 22% 86%) 0%, hsl(150 15% 82%) 35%, hsl(42 30% 90%) 50%, hsl(150 15% 82%) 65%, hsl(42 22% 86%) 100%);
+}
+.theme-nordic .skeleton-soft {
+  background-image: linear-gradient(135deg, hsl(42 25% 93%) 0%, hsl(150 12% 90%) 35%, hsl(42 40% 96%) 50%, hsl(150 12% 90%) 65%, hsl(42 25% 93%) 100%);
 }
 
 /* Hide the native calendar icon when a date value is present so only the custom X shows */

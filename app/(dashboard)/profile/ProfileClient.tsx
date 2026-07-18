@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { User, Bell, LayoutDashboard, Trash2, Save, CheckCircle, Plus, Settings } from 'lucide-react'
+import { User, Bell, LayoutDashboard, Trash2, Save, CheckCircle, Plus, Settings, Check, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { MyBoardsSection } from '@/components/features/MyBoardsSection'
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
 import { getSettings, saveSettings, type UserSettings, type WeekStart, type DateFormat, type TimeFormat, DEFAULT_SETTINGS } from '@/lib/settings'
-import { getStoredTheme, applyTheme } from '@/lib/theme'
+import { getStoredTheme, applyTheme, THEMES, isProTheme, type Theme } from '@/lib/theme'
 import { upsertPreferences } from '@/lib/preferences'
 import type { GlobalRole } from '@/lib/database.types'
 
@@ -56,28 +56,27 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
 
   // Site settings (localStorage)
   const [siteSettings, setSiteSettings] = useState<UserSettings | null>(null)
-  const [darkMode, setDarkMode] = useState(false)
+  const [theme, setTheme] = useState<Theme>('light')
   useEffect(() => {
     setSiteSettings(getSettings())
-    setDarkMode(getStoredTheme() === 'dark')
+    setTheme(getStoredTheme())
   }, [])
 
-  const syncToDB = (settings: UserSettings, isDark: boolean) => {
-    upsertPreferences(sessionUserId, { ...settings, theme: isDark ? 'dark' : 'light' })
+  const syncToDB = (settings: UserSettings, t: Theme) => {
+    upsertPreferences(sessionUserId, { ...settings, theme: t })
   }
 
   const updateSetting = <K extends keyof UserSettings>(key: K, val: UserSettings[K]) => {
     const next = saveSettings({ [key]: val })
     setSiteSettings(next)
-    syncToDB(next, darkMode)
+    syncToDB(next, theme)
   }
 
-  const toggleDarkMode = () => {
-    const next = !darkMode
-    setDarkMode(next)
-    applyTheme(next ? 'dark' : 'light')
-    const current = siteSettings ?? getSettings()
-    syncToDB(current, next)
+  const selectTheme = (t: Theme) => {
+    if (isProTheme(t) && !isPro) return
+    setTheme(t)
+    applyTheme(t)
+    syncToDB(siteSettings ?? getSettings(), t)
   }
 
   // Track whether a valid display name has been saved
@@ -304,20 +303,63 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
         </div>
 
         <div className="space-y-4">
-          {/* Dark Mode */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-text">Dark Mode</p>
-              <p className="text-xs text-text/50">Switch between light and dark theme</p>
+          {/* Theme */}
+          <div>
+            <p className="text-sm font-medium text-text">Theme</p>
+            <p className="text-xs text-text/50 mb-2">
+              {isPro ? 'Pick how MyShiftX looks' : 'Pick how MyShiftX looks — unlock 3 more themes with Pro ⭐'}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {THEMES.map(t => {
+                const locked = t.pro && !isPro
+                const selected = theme === t.id
+                const swatch = (
+                  <span
+                    className="flex h-9 w-full items-center justify-center gap-1.5 rounded-md border border-black/10"
+                    style={{ backgroundColor: t.preview.bg }}
+                  >
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.preview.accent }} />
+                    <span className="h-1.5 w-7 rounded-full opacity-70" style={{ backgroundColor: t.preview.text }} />
+                  </span>
+                )
+                const labelRow = (
+                  <span className="flex items-center justify-between gap-1">
+                    <span className="text-xs font-medium text-text truncate">{t.label}</span>
+                    {locked
+                      ? <Lock className="w-3 h-3 text-text/40 shrink-0" />
+                      : selected && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+                  </span>
+                )
+                if (locked) {
+                  return (
+                    <Link
+                      key={t.id}
+                      href="/upgrade"
+                      title={`${t.description} — Pro theme, tap to upgrade`}
+                      className="flex flex-col gap-1.5 rounded-lg border border-border p-2 opacity-60 hover:opacity-100 hover:border-primary/50 transition-all min-h-0 min-w-0"
+                    >
+                      {swatch}
+                      {labelRow}
+                    </Link>
+                  )
+                }
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => selectTheme(t.id)}
+                    aria-pressed={selected}
+                    title={t.description}
+                    className={`flex flex-col gap-1.5 rounded-lg border p-2 text-left transition-colors min-h-0 min-w-0 ${
+                      selected ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {swatch}
+                    {labelRow}
+                  </button>
+                )
+              })}
             </div>
-            <button
-              onClick={toggleDarkMode}
-              role="switch"
-              aria-checked={darkMode}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${darkMode ? 'bg-primary' : 'bg-border'}`}
-            >
-              <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${darkMode ? 'translate-x-5' : 'translate-x-0.5'}`} />
-            </button>
           </div>
 
           {/* Week Start */}
