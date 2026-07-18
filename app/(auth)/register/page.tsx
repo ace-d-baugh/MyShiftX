@@ -12,8 +12,11 @@ import { OAuthButtons } from '@/components/ui/OAuthButtons'
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>
 
 // Temporary pause on new sign-ups between the beta wrap-up and launch.
-// Flip to false to reopen registration (submit button + OAuth sign-up).
-const REGISTRATION_PAUSED = true
+// Fail-closed: registration is paused unless NEXT_PUBLIC_REGISTRATION_OPEN=1
+// is set for the environment. Currently set in .env.local and Vercel Preview
+// (dev branch) only — leave it unset on Production until launch, then add it
+// there to reopen sign-ups with no code change.
+const REGISTRATION_PAUSED = process.env.NEXT_PUBLIC_REGISTRATION_OPEN !== '1'
 
 export default function RegisterPage() {
   return <Suspense><RegisterForm /></Suspense>

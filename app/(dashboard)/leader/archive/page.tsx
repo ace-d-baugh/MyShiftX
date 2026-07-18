@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = { title: 'Archive – MyShiftX' }
 
-const REASONS: RemovedReason[] = ['expired', 'leader_removed', 'user_removed']
+const REASONS: RemovedReason[] = ['expired', 'leader_removed', 'user_removed', 'covered']
 
 export default async function ArchivePage() {
   const { supabase } = await requireModeratorOrAdmin()

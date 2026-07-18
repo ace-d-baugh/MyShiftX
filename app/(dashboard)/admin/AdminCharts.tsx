@@ -2,8 +2,7 @@
 
 import { useMemo } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
-import { Star } from 'lucide-react'
-import { getMembershipKey, MEMBERSHIP_OPTIONS, type UserRow, type MembershipFilterKey } from './AdminClient'
+import { getMembershipKey, MEMBERSHIP_OPTIONS, MEMBERSHIP_ICON, type UserRow, type MembershipFilterKey } from './AdminClient'
 
 interface AdminChartsProps {
   users: UserRow[]
@@ -13,15 +12,9 @@ const MEMBERSHIP_COLOR: Record<MembershipFilterKey, string> = {
   free: 'hsl(var(--color-secondary-accent))',
   trial: 'hsl(var(--color-info))',
   monthly: 'hsl(var(--color-accent))',
+  quarterly: 'hsl(var(--color-warning))',
   semi_annual: 'hsl(var(--color-primary))',
   yearly: 'hsl(var(--color-success))',
-}
-
-const MEMBERSHIP_EMOJI: Partial<Record<MembershipFilterKey, string>> = {
-  trial: '⚖️',
-  monthly: '📅',
-  semi_annual: '🥈',
-  yearly: '🏆',
 }
 
 // List prices from the pricing plan, normalized to a monthly-equivalent value.
@@ -30,6 +23,7 @@ const MEMBERSHIP_MONTHLY_PRICE: Record<MembershipFilterKey, number> = {
   free: 0,
   trial: 0,
   monthly: 4.99,
+  quarterly: 13.99 / 3,
   semi_annual: 26.99 / 6,
   yearly: 47.99 / 12,
 }
@@ -67,7 +61,7 @@ const tooltipStyle = {
 
 export function AdminCharts({ users }: AdminChartsProps) {
   const pieData = useMemo(() => {
-    const counts: Record<MembershipFilterKey, number> = { free: 0, trial: 0, monthly: 0, semi_annual: 0, yearly: 0 }
+    const counts: Record<MembershipFilterKey, number> = { free: 0, trial: 0, monthly: 0, quarterly: 0, semi_annual: 0, yearly: 0 }
     for (const u of users) counts[getMembershipKey(u)]++
     return MEMBERSHIP_OPTIONS.map(o => ({ key: o.key, label: o.label, count: counts[o.key] })).filter(d => d.count > 0)
   }, [users])
@@ -170,11 +164,7 @@ export function AdminCharts({ users }: AdminChartsProps) {
               {pieData.map(d => (
                 <div key={d.key} className="flex items-center gap-2 text-sm">
                   <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: MEMBERSHIP_COLOR[d.key] }} />
-                  {d.key === 'free' ? (
-                    <Star fill="#ffea80" strokeWidth={0} className="w-4 h-4 text-[#FFEA80] shrink-0" />
-                  ) : (
-                    <span className="text-base leading-none shrink-0" role="img" aria-label={d.key}>{MEMBERSHIP_EMOJI[d.key]}</span>
-                  )}
+                  <span className="text-base leading-none shrink-0" role="img" aria-label={d.key}>{MEMBERSHIP_ICON[d.key]}</span>
                   <span className="text-text/80 flex-1">{d.label}</span>
                   <span className="font-medium text-text">{d.count}</span>
                 </div>
@@ -228,7 +218,7 @@ export function AdminCharts({ users }: AdminChartsProps) {
       <div className="card">
         <h2 className="font-accent text-lg font-bold text-text mb-1">Estimated Income</h2>
         <p className="text-xs text-text/40 italic mb-4">
-          Based on signups to date — memberships use current list pricing ($4.99/mo, $26.99/6mo, $47.99/yr) applied
+          Based on signups to date — memberships use current list pricing ($4.99/mo, $13.99/3mo, $26.99/6mo, $47.99/yr) applied
           since signup; ads assume ${AD_REVENUE_PER_FREE_USER.toFixed(2)}/mo per Free user (no AdSense data yet). Not
           a forecast of future signups.
         </p>

@@ -107,7 +107,7 @@ const PUSH_GUIDES = [
     icon: Smartphone,
     device: 'iPhone / iPad',
     steps: [
-      'iPhone requires MyShiftX to be added to your Home Screen first (iOS 16.4 or newer) — push doesn\'t work from a regular Safari tab, and the toggle stays hidden until then.',
+      'iPhone requires MyShiftX to be added to your Home Screen first (iOS 16.4 or newer) — push doesn\'t work from a regular Safari tab. The app shows you these install steps on The Wall and in your Profile whenever you\'re browsing from an iPhone.',
       'In Safari, open myshiftx.com, tap the Share button, and choose "Add to Home Screen."',
       'Open MyShiftX from the new Home Screen icon (not from Safari), then turn on push from Profile → Notifications → Push Notifications and tap Allow.',
       'To control how they appear: Settings → Notifications → MyShiftX — enable Lock Screen, Notification Center, and Banners.',

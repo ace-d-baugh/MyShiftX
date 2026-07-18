@@ -39,7 +39,7 @@ const shell = (body: string) => `
                   text-align:center;
                 ">
               <img
-                src="https://myshiftx.com/logos/FULL-LOGO-GRADIENT-COLOR.png"
+                src="https://myshiftx.com/logos/MyShiftX-Full-Logo-Gradient.png"
                 alt="MyShiftX"
                 width="220"
                 height="45"
@@ -159,6 +159,83 @@ export const interestedHtml = (opts: {
     ${btn(opts.wallUrl, 'Go to The Wall')}
     ${muted('You can turn off email notifications in your profile settings.')}
   `)
+
+/** Sent to a shift owner when someone claims their shift (Trade Loop) */
+export const claimReceivedHtml = (opts: {
+  claimantName: string
+  shiftTitle: string
+  wallUrl: string
+}) =>
+  shell(`
+    ${h1('Someone wants your shift! 🤝')}
+    ${p(`<strong>${opts.claimantName}</strong> tapped "I'll take this shift" on your post:`)}
+    ${highlight(opts.shiftTitle)}
+    ${p('Head to The Wall to accept or decline their claim. Accepting marks your post as covered.')}
+    ${btn(opts.wallUrl, 'Review the Claim')}
+    ${muted('You can turn off email notifications in your profile settings.')}
+  `)
+
+/** Sent to a claimant when the owner accepts or declines their claim (Trade Loop) */
+export const claimResultHtml = (opts: {
+  accepted: boolean
+  ownerName: string
+  shiftTitle: string
+  /** accepted → profile trade record; declined → back to the wall */
+  ctaUrl: string
+}) =>
+  opts.accepted
+    ? shell(`
+        ${h1('Your claim was accepted! 🎉')}
+        ${p(`<strong>${opts.ownerName}</strong> accepted your claim on:`)}
+        ${highlight(opts.shiftTitle)}
+        ${p('Now complete the trade in your company\'s scheduling system. Once it goes through, the owner will confirm it and it will count toward your trade record.')}
+        ${btn(opts.ctaUrl, 'View Your Trade Record')}
+        ${muted('You can turn off email notifications in your profile settings.')}
+      `)
+    : shell(`
+        ${h1('Update on your claim')}
+        ${p(`<strong>${opts.ownerName}</strong> declined your claim on:`)}
+        ${highlight(opts.shiftTitle)}
+        ${p('No worries — there are more shifts on The Wall.')}
+        ${btn(opts.ctaUrl, 'Back to The Wall')}
+        ${muted('You can turn off email notifications in your profile settings.')}
+      `)
+
+/** Weekly digest: new activity on the user's boards this week (Task 22) */
+export const weeklyDigestHtml = (opts: {
+  displayName?: string
+  shiftCount: number
+  requestCount: number
+  items: { title: string; when: string; board: string }[]
+  wallUrl: string
+  unsubscribeUrl: string
+}) => {
+  const summary = [
+    opts.shiftCount > 0 ? `${opts.shiftCount} new shift${opts.shiftCount === 1 ? '' : 's'} up for grabs` : '',
+    opts.requestCount > 0 ? `${opts.requestCount} new request${opts.requestCount === 1 ? '' : 's'}` : '',
+  ].filter(Boolean).join(' and ')
+
+  const itemRows = opts.items.map(i => `
+    <tr>
+      <td style="padding:10px 14px;border-bottom:1px solid #E0D8F7;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:600;color:#2f2040;">${i.title}</p>
+        <p style="margin:2px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9b8ab4;">${i.when} · ${i.board}</p>
+      </td>
+    </tr>
+  `).join('')
+
+  return shell(`
+    ${h1('This week on your boards 📋')}
+    ${p(`Hi${opts.displayName ? ` ${opts.displayName}` : ''},`)}
+    ${p(`There ${opts.shiftCount + opts.requestCount === 1 ? 'is' : 'are'} <strong>${summary}</strong> on your boards.`)}
+    <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+           style="border:1px solid #E0D8F7;border-radius:8px;margin:0 0 8px;border-collapse:separate;overflow:hidden;">
+      ${itemRows}
+    </table>
+    ${btn(opts.wallUrl, 'See Them on The Wall')}
+    ${muted(`You get this digest once a week when there's new activity. <a href="${opts.unsubscribeUrl}" style="color:#9b8ab4;">Unsubscribe from the digest</a> — other notifications are unaffected.`)}
+  `)
+}
 
 /** Sent to both parties when a shift and request on the same board may match */
 export const shiftMatchHtml = (opts: {

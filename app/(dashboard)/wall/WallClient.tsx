@@ -8,8 +8,10 @@ import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown, X, Chec
 import { createClient } from '@/lib/supabase/client'
 import { deactivateShift, deactivateRequest } from '@/app/actions/posts'
 import { PushPromptBanner } from '@/components/features/PushPromptBanner'
+import { IosInstallPrompt } from '@/components/features/IosInstallPrompt'
 import { UpgradeNudge } from '@/components/features/UpgradeNudge'
 import { ShiftCard, type ShiftData } from '@/components/features/ShiftCard'
+import type { MyClaim, PendingClaim, TradeStats } from '@/components/features/ClaimSection'
 import { RequestCard, type RequestData } from '@/components/features/RequestCard'
 import { WallSkeleton } from '@/components/ui/WallSkeleton'
 import { Checkbox } from '@/components/ui/Checkbox'
@@ -108,6 +110,12 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
   const [myPostsOnly, setMyPostsOnly] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [deactivateError, setDeactivateError] = useState<string | null>(null)
+
+  // Trade Loop (Task 21): claim state for the visible shifts
+  const [myClaims, setMyClaims] = useState<Map<string, MyClaim>>(new Map())
+  const [pendingByShift, setPendingByShift] = useState<Map<string, PendingClaim[]>>(new Map())
+  const [statsByUser, setStatsByUser] = useState<Map<string, TradeStats>>(new Map())
+  const [awaitingFinalize, setAwaitingFinalize] = useState(0)
 
   // Collapsed state for day-group accordions, persisted per user
   const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(new Set())
@@ -249,6 +257,93 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       return next
     })
   }, [supabase, attachCommentCounts])
+
+  // Trade Loop (Task 21): load claim state for the visible shifts — the
+  // current user's own claims, pending claims on their posts (with each
+  // claimant's reliability record), completed-trade badges for posters, and
+  // how many accepted trades are past their shift end awaiting confirmation.
+  const loadClaimData = useCallback(async (shiftList: ShiftData[]) => {
+    const shiftIds = shiftList.map(s => s.id)
+
+    const [mineRes, pendingRes, acceptedRes] = await Promise.all([
+      shiftIds.length
+        ? supabase
+            .from('shift_claims')
+            .select('id, shift_id, status')
+            .eq('claimant_id', userId)
+            .in('shift_id', shiftIds)
+            .order('created_at', { ascending: false })
+        : Promise.resolve({ data: [] }),
+      supabase
+        .from('shift_claims')
+        .select('id, shift_id, claimant_id, claimant:users!claimant_id(display_name)')
+        .eq('owner_id', userId)
+        .eq('status', 'pending'),
+      supabase
+        .from('shift_claims')
+        .select('id, shifts!shift_id(end_time)')
+        .eq('owner_id', userId)
+        .eq('status', 'accepted'),
+    ])
+
+    // Latest claim per shift (a declined claimant may have claimed again)
+    const mine = new Map<string, MyClaim>()
+    for (const c of (mineRes.data ?? []) as { id: string; shift_id: string; status: MyClaim['status'] }[]) {
+      if (!mine.has(c.shift_id)) mine.set(c.shift_id, { id: c.id, status: c.status })
+    }
+
+    // Reliability stats for everyone we'll display: posters + pending claimants
+    const pendingRows = (pendingRes.data ?? []) as unknown as {
+      id: string; shift_id: string; claimant_id: string
+      claimant: { display_name: string | null } | null
+    }[]
+    const statUserIds = [...new Set([
+      ...shiftList.map(s => s.user_id).filter((id): id is string => !!id),
+      ...pendingRows.map(c => c.claimant_id),
+    ])]
+    const stats = new Map<string, TradeStats>()
+    if (statUserIds.length) {
+      const { data } = await supabase.rpc('get_trade_stats_for_users', { p_user_ids: statUserIds })
+      for (const row of data ?? []) {
+        stats.set(row.user_id, { picked_up: row.picked_up, covered: row.covered, fell_through: row.fell_through })
+      }
+    }
+
+    const pending = new Map<string, PendingClaim[]>()
+    for (const c of pendingRows) {
+      const list = pending.get(c.shift_id) ?? []
+      list.push({
+        id: c.id,
+        claimant_id: c.claimant_id,
+        claimant_name: c.claimant?.display_name ?? 'A board member',
+        stats: stats.get(c.claimant_id),
+      })
+      pending.set(c.shift_id, list)
+    }
+
+    const now = Date.now()
+    const awaiting = ((acceptedRes.data ?? []) as unknown as { id: string; shifts: { end_time: string } | null }[])
+      .filter(c => c.shifts && parseISO(c.shifts.end_time).getTime() < now)
+      .length
+
+    setMyClaims(mine)
+    setPendingByShift(pending)
+    setStatsByUser(stats)
+    setAwaitingFinalize(awaiting)
+  }, [supabase, userId])
+
+  // Refresh claim state whenever the shift list changes (initial load,
+  // realtime upserts, and post-action reloads all funnel through setShifts).
+  useEffect(() => {
+    if (!hasBoards) return
+    loadClaimData(shifts).catch(() => {})
+  }, [hasBoards, shifts, loadClaimData])
+
+  const handleClaimChanged = useCallback(() => {
+    // Accepting archives the post, so reload the list; the effect above
+    // re-pulls claim state for whatever remains visible.
+    loadShifts(true)
+  }, [loadShifts])
 
   const isFirstRender = useRef(true)
   useEffect(() => {
@@ -468,6 +563,9 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
 
       <PushPromptBanner />
 
+      {/* iOS Safari tab: push needs a Home Screen install first (Task 23) */}
+      <IosInstallPrompt />
+
       {/* Soft upsell for Basic members — dismissible per session */}
       {!liveWall && <UpgradeNudge />}
 
@@ -482,6 +580,19 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
           </span>
           <Link href="/upgrade" className="text-xs text-text/50 hover:text-primary min-h-0 min-w-0">
             ⭐ Pro members see new posts instantly
+          </Link>
+        </div>
+      )}
+
+      {/* Trade Loop: accepted trades past their shift end, awaiting confirmation */}
+      {awaitingFinalize > 0 && (
+        <div className="mb-4 p-3 rounded-md bg-success/10 border border-success/20 text-sm flex flex-wrap items-center justify-between gap-2">
+          <span className="text-text/80">
+            🤝 {awaitingFinalize === 1 ? 'A trade you accepted has' : `${awaitingFinalize} trades you accepted have`} passed —
+            did {awaitingFinalize === 1 ? 'it' : 'they'} go through?
+          </span>
+          <Link href="/profile#trade-record" className="text-primary font-medium underline text-xs min-h-0 min-w-0">
+            Confirm in your Trade Record
           </Link>
         </div>
       )}
@@ -653,9 +764,9 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
         shifts.length === 0 ? (
           <EmptyState
             message="No shift offers found"
-            subtext={!hasBoards ? 'Join or create a board to see posts.' : 'Be the first to post a shift!'}
-            href={hasBoards ? '/wall/new-shift' : '/profile'}
-            btnLabel={hasBoards ? 'Post a Shift' : 'Go to Profile'}
+            subtext={!hasBoards ? 'Import your schedule and join a board — it takes about two minutes.' : 'Be the first to post a shift!'}
+            href={hasBoards ? '/wall/new-shift' : '/welcome'}
+            btnLabel={hasBoards ? 'Post a Shift' : 'Get Set Up'}
           />
         ) : filteredShifts.length === 0 ? (
           <div className="text-center py-16 px-4 text-text/50 text-sm">
@@ -686,6 +797,10 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
                         currentUserId={userId}
                         currentUserName={displayName}
                         onDeactivate={handleDeactivateShift}
+                        myClaim={myClaims.get(shift.id)}
+                        pendingClaims={pendingByShift.get(shift.id)}
+                        posterStats={shift.user_id ? statsByUser.get(shift.user_id) : undefined}
+                        onClaimChanged={handleClaimChanged}
                       />
                     </div>
                   ))}
@@ -698,9 +813,9 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
         requests.length === 0 ? (
           <EmptyState
             message="No shift requests found"
-            subtext={!hasBoards ? 'Join or create a board to see posts.' : 'Need a shift? Post a request!'}
-            href={hasBoards ? '/wall/new-request' : '/profile'}
-            btnLabel={hasBoards ? 'Post a Request' : 'Go to Profile'}
+            subtext={!hasBoards ? 'Import your schedule and join a board — it takes about two minutes.' : 'Need a shift? Post a request!'}
+            href={hasBoards ? '/wall/new-request' : '/welcome'}
+            btnLabel={hasBoards ? 'Post a Request' : 'Get Set Up'}
           />
         ) : filteredRequests.length === 0 ? (
           <div className="text-center py-16 px-4 text-text/50 text-sm">

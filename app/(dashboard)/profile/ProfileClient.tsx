@@ -7,7 +7,9 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { PushNotificationsToggle } from '@/components/features/PushNotificationsToggle'
+import { IosInstallPrompt } from '@/components/features/IosInstallPrompt'
 import { CalendarSyncSection } from '@/components/features/CalendarSyncSection'
+import { TradeRecordSection } from '@/components/features/TradeRecordSection'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
@@ -23,6 +25,7 @@ interface UserProfile {
   phone_number: string | null
   notify_via_email: boolean
   notify_via_sms: boolean
+  notify_weekly_digest: boolean
   role: GlobalRole
   is_active: boolean
   created_at: string
@@ -46,6 +49,7 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
   const [displayName, setDisplayName] = useState(user?.display_name ?? '')
   const [phoneNumber, setPhoneNumber] = useState(user?.phone_number ?? '')
   const [notifyEmail, setNotifyEmail] = useState(user?.notify_via_email ?? false)
+  const [notifyDigest, setNotifyDigest] = useState(user?.notify_weekly_digest ?? true)
   const [notifySms] = useState(user?.notify_via_sms ?? false)
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -103,6 +107,7 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
           display_name: displayName,
           phone_number: phoneNumber || null,
           notify_via_email: notifyEmail,
+          notify_weekly_digest: notifyDigest,
           notify_via_sms: notifySms,
         })
         .eq('id', sessionUserId)
@@ -246,9 +251,21 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
               onChange={e => setNotifyEmail(e.target.checked)}
             />
           </label>
+          <label className="flex items-center justify-between gap-4 cursor-pointer min-h-0">
+            <div>
+              <p className="text-sm font-medium text-text">Weekly Digest</p>
+              <p className="text-xs text-text/50">A Sunday summary of new shifts and requests on your boards</p>
+            </div>
+            <Checkbox
+              checked={notifyDigest}
+              onChange={e => setNotifyDigest(e.target.checked)}
+            />
+          </label>
           {/* SMS toggle — hidden until SMS provider is configured */}
           {/* Applies instantly per device — not part of the Save button below */}
           <PushNotificationsToggle />
+          {/* iOS browser tab: toggle hides itself — show install steps instead */}
+          <IosInstallPrompt variant="inline" />
         </div>
         <div className="mt-4 pt-4 border-t border-border">
           <Button onClick={handleSave as unknown as React.MouseEventHandler} loading={saving} size="sm" variant="outline" className="gap-1.5">
@@ -286,6 +303,9 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
           onCreateOpenChange={setCreateBoardOpen}
         />
       </div>
+
+      {/* Trade Record — claims made/received + reliability stats (Task 21) */}
+      <TradeRecordSection userId={sessionUserId} />
 
       {/* Calendar Sync — Pro/Trial only (Task 17) */}
       {isPro && <CalendarSyncSection />}

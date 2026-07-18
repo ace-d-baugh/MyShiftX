@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
-import { Archive, Clock, LayoutGrid, Timer, ShieldCheck, UserX } from 'lucide-react'
+import { Archive, Clock, LayoutGrid, Timer, ShieldCheck, UserX, HeartHandshake as Handshake } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/Badge'
 import type { RemovedReason } from '@/lib/database.types'
@@ -51,18 +51,21 @@ const REASON_LABEL: Record<RemovedReason, string> = {
   expired: 'Expired',
   leader_removed: 'Removed by leader',
   user_removed: 'Removed by owner',
+  covered: 'Covered',
 }
 
 const REASON_ICON: Record<RemovedReason, React.ComponentType<{ className?: string }>> = {
   expired: Timer,
   leader_removed: ShieldCheck,
   user_removed: UserX,
+  covered: Handshake,
 }
 
 const REASON_CLASS: Record<RemovedReason, string> = {
   expired: 'bg-text/10 text-text/60',
   leader_removed: 'bg-warning/20 text-warning',
   user_removed: 'bg-info/20 text-info',
+  covered: 'bg-success/20 text-success',
 }
 
 function RemovalBadge({ reason, remover, ownerName }: { reason: RemovedReason | null; remover: { display_name: string | null } | null; ownerName: string }) {
@@ -82,12 +85,13 @@ function RemovalBadge({ reason, remover, ownerName }: { reason: RemovedReason | 
 type Filter = RemovedReason | 'all'
 
 function FilterBar({ counts, filter, onChange }: { counts: Record<RemovedReason, number>; filter: Filter; onChange: (f: Filter) => void }) {
-  const total = counts.expired + counts.leader_removed + counts.user_removed
+  const total = counts.expired + counts.leader_removed + counts.user_removed + counts.covered
   const options: { key: Filter; label: string; icon: React.ComponentType<{ className?: string }> | null; count: number; activeClass: string }[] = [
     { key: 'all',            label: 'All',                 icon: null,        count: total,                  activeClass: 'bg-primary text-white' },
     { key: 'expired',        label: 'Expired',              icon: Timer,       count: counts.expired,         activeClass: 'bg-text/70 text-white' },
     { key: 'leader_removed', label: 'Removed by leaders',   icon: ShieldCheck, count: counts.leader_removed,  activeClass: 'bg-warning text-white' },
     { key: 'user_removed',   label: 'Removed by owners',    icon: UserX,       count: counts.user_removed,    activeClass: 'bg-info text-white' },
+    { key: 'covered',        label: 'Covered',              icon: Handshake,   count: counts.covered,         activeClass: 'bg-success text-white' },
   ]
   return (
     <div className="flex flex-wrap gap-2 mb-4 text-xs">
