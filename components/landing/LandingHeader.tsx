@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ChevronDown, LayoutGrid, User, LogOut } from 'lucide-react'
+import { ThemedLogo } from '@/components/ui/ThemedLogo'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
@@ -32,14 +32,7 @@ export function LandingHeader({ displayName }: LandingHeaderProps) {
         )}>
         <Link href={isLoggedIn ? '/wall' : '/'} className="flex flex-row items-center gap-0 align-baseline">
           {/* Full logo (icon + wordmark) at every breakpoint — smaller on mobile */}
-          <Image
-            src="/logos/MyShiftX-Full-Logo-Gradient.svg"
-            alt="MyShiftX Logo"
-            width={5000}
-            height={1024}
-            priority
-            className="h-10 md:h-14 w-auto"
-          />
+          <ThemedLogo priority className="h-10 md:h-14 w-auto" />
         </Link>
 
         <nav className={cn(

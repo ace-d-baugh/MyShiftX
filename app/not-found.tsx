@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Home, ArrowRight, Compass, Clock, Star } from 'lucide-react'
+import { ThemedLogo } from '@/components/ui/ThemedLogo'
 
 interface FallingStar {
   id: number
@@ -111,13 +111,7 @@ export default function NotFound() {
       {/* Brand lockup */}
       <header className="relative z-10 px-4 py-6 animate-slide-down">
         <Link href="/" className="inline-flex items-center gap-0 align-baseline">
-          <Image
-            src="/logos/MyShiftX-Full-Logo-Gradient.svg"
-            alt="MyShiftX Logo"
-            width={5000}
-            height={1024}
-            className="h-12 w-auto"
-          />
+          <ThemedLogo className="h-12 w-auto" />
         </Link>
       </header>
 

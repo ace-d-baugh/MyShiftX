@@ -86,6 +86,7 @@ export const TIER_COMPARISON: { feature: string; basic: string | boolean; pro: s
   { feature: 'Live Wall — new posts appear instantly', basic: false, pro: true },
   { feature: 'Instant match alerts by email', basic: false, pro: true },
   { feature: 'Calendar sync (Google · Apple · Outlook)', basic: false, pro: true },
+  { feature: 'Premium themes (Midnight · Cyberpunk · Nordic · Dracula)', basic: false, pro: true },
   { feature: 'SMS match alerts (30/month)', basic: false, pro: true, comingSoon: true },
   { feature: 'Trade preferences — smarter matching', basic: false, pro: true, comingSoon: true },
   { feature: 'Bulk import (CSV & multi-week photos)', basic: false, pro: true, comingSoon: true },

@@ -3,7 +3,6 @@
 import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import Image from 'next/image'
 import {
   CalendarDays,
   LayoutGrid,
@@ -21,6 +20,7 @@ import {
   MessageSquare,
   Star,
 } from 'lucide-react'
+import { ThemedLogo } from '@/components/ui/ThemedLogo'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { GlobalRole } from '@/lib/database.types'
@@ -99,13 +99,7 @@ export function Navbar({
         {/* Top bar: Logo + account button */}
         <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
           <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
-            <Image
-              src="/logos/MyShiftX-Full-Logo-Gradient.svg"
-              alt="MyShiftX Logo"
-              width={5000} height={1024}
-              priority
-              className="h-12 w-auto"
-            />
+            <ThemedLogo priority className="h-12 w-auto" />
           </Link>
 
           {/* Help + Account */}
@@ -223,13 +217,7 @@ export function Navbar({
         <div className="px-4 flex items-center justify-between h-14">
           <Link href="/wall" className="flex flex-row items-center gap-0 align-baseline">
             {/* Full logo (icon + wordmark), matching the login page and desktop */}
-            <Image
-              src="/logos/MyShiftX-Full-Logo-Gradient.svg"
-              alt="MyShiftX Logo"
-              width={5000} height={1024}
-              priority
-              className="h-9 w-auto"
-            />
+            <ThemedLogo priority className="h-9 w-auto" />
           </Link>
 
           <div className="flex items-center gap-1">

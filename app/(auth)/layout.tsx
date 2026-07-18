@@ -1,5 +1,5 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { ThemedLogo } from '@/components/ui/ThemedLogo'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,14 +17,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8 animate-slide-down">
           <Link href="/" className="inline-flex flex-row items-center justify-center gap-0">
-            <Image
-              src="/logos/MyShiftX-Full-Logo-Gradient.svg"
-              alt="MyShiftX"
-              width={5000}
-              height={1024}
-              className="h-14 w-auto"
-              priority
-            />
+            <ThemedLogo priority alt="MyShiftX" className="h-14 w-auto" />
           </Link>
         </div>
 

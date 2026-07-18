@@ -154,6 +154,26 @@
   --color-ring: 150 25% 40%;
 }
 
+/* Dracula — rich slate-purple (#282A36) with pastel mint/pink/coral accents */
+.theme-dracula {
+  --color-primary: 265 89% 78%;
+  --color-primary-light: 232 14% 26%;
+  --color-secondary: 265 30% 40%;
+  --color-accent: 31 100% 71%;
+  --color-secondary-accent: 65 92% 76%;
+  --color-text: 60 30% 96%;
+  --color-success: 135 94% 65%;
+  --color-info: 191 89% 77%;
+  --color-warning: 0 100% 67%;
+  --color-background: 231 15% 18%;
+  --color-foreground: 60 30% 96%;
+  --color-card: 232 16% 23%;
+  --color-card-foreground: 60 30% 96%;
+  --color-border: 232 14% 31%;
+  --color-input: 232 14% 31%;
+  --color-ring: 265 89% 78%;
+}
+
 /*
  * :root prefix outranks the next/font variable classes on <html>
  * ((0,1,1) vs (0,1,0)), so both font vars resolve to monospace everywhere,
@@ -162,6 +182,36 @@
 :root.theme-cyberpunk {
   --font-lato: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
   --font-philosopher: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+/*
+ * ── Theme-aware logo ────────────────────────────────────────────────────────
+ * ThemedLogo renders the gradient artwork plus a hidden silhouette span whose
+ * shape comes from masking the black logo SVG. Light and dark keep the
+ * artwork; each pro theme hides it and tints the silhouette instead.
+ */
+.themed-logo-tinted {
+  display: none;
+  aspect-ratio: 5000 / 1024;
+  -webkit-mask: url('/logos/MyShiftX-Full-Logo-Black.svg') no-repeat center / contain;
+  mask: url('/logos/MyShiftX-Full-Logo-Black.svg') no-repeat center / contain;
+}
+.theme-midnight .themed-logo-default,
+.theme-cyberpunk .themed-logo-default,
+.theme-nordic .themed-logo-default,
+.theme-dracula .themed-logo-default { display: none; }
+.theme-midnight .themed-logo-tinted,
+.theme-cyberpunk .themed-logo-tinted,
+.theme-nordic .themed-logo-tinted,
+.theme-dracula .themed-logo-tinted { display: block; }
+.theme-midnight .themed-logo-tinted,
+.theme-nordic .themed-logo-tinted { background: hsl(var(--color-primary)); }
+.theme-cyberpunk .themed-logo-tinted {
+  background: linear-gradient(90deg, hsl(320 100% 60%), hsl(190 100% 60%));
+  filter: drop-shadow(0 0 10px hsl(320 100% 60% / 0.45));
+}
+.theme-dracula .themed-logo-tinted {
+  background: linear-gradient(90deg, hsl(326 100% 74%), hsl(265 89% 78%));
 }
 
 /* ── Pro theme flourishes ── */
@@ -372,6 +422,17 @@
 }
 .theme-cyberpunk .skeleton-soft {
   background-image: linear-gradient(135deg, hsl(285 35% 10%) 0%, hsl(300 40% 14%) 35%, hsl(320 35% 17%) 50%, hsl(300 40% 14%) 65%, hsl(285 35% 10%) 100%);
+}
+
+/* Dracula: slate shimmer */
+.theme-dracula .skeleton {
+  background-image: linear-gradient(135deg, hsl(232 15% 24%) 0%, hsl(232 15% 29%) 35%, hsl(233 16% 33%) 50%, hsl(232 15% 29%) 65%, hsl(232 15% 24%) 100%);
+}
+.theme-dracula .skeleton-strong {
+  background-image: linear-gradient(135deg, hsl(232 15% 28%) 0%, hsl(233 16% 33%) 35%, hsl(234 17% 38%) 50%, hsl(233 16% 33%) 65%, hsl(232 15% 28%) 100%);
+}
+.theme-dracula .skeleton-soft {
+  background-image: linear-gradient(135deg, hsl(232 15% 21%) 0%, hsl(232 15% 25%) 35%, hsl(233 16% 29%) 50%, hsl(232 15% 25%) 65%, hsl(232 15% 21%) 100%);
 }
 
 /* Nordic: warm beige/sage shimmer */

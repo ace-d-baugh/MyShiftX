@@ -13,6 +13,8 @@ Next.js 14 app, Supabase backend (project `tsnwmbdedatkajyxyvcp` — this is PRO
 npx next dev -p 3111   # run in background; ready in ~1s, serves http://localhost:3111
 ```
 
+Stopping the background task leaves an orphaned node child holding the port (EADDRINUSE on restart) — find it with `Get-NetTCPConnection -LocalPort 3111 -State Listen` and Stop-Process it.
+
 ## Drive
 
 Playwright is available via `@playwright/test` in node_modules (bundled Chromium works for everything except Web Push — see the push memory). From a script outside the repo, require it by absolute path:

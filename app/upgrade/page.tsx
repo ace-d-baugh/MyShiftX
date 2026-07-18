@@ -8,11 +8,12 @@ import { createServerClient } from '@/lib/supabase/server'
 import { getMembership, isProTier } from '@/lib/auth/session'
 import { optionalServerEnv } from '@/lib/env'
 import { PRO_PLANS, TIER_COMPARISON } from '@/lib/pricing'
+import { THEMES } from '@/lib/theme'
 
 export const metadata = {
   title: 'MyShiftX Pro – Put Your Schedule on Autopilot',
   description:
-    'Instant shift-match alerts, a live wall, unlimited photo schedule imports, calendar sync, and zero ads. Pro from $4/month.',
+    'Instant shift-match alerts, a live wall, unlimited photo schedule imports, calendar sync, 4 premium themes, and zero ads. Pro from $4/month.',
 }
 
 // The everyday frustrations Pro removes — the "reasons" half of the pitch.
@@ -182,6 +183,28 @@ export default async function UpgradePage() {
               </div>
             </AnimateIn>
           )}
+
+          {/* Premium themes perk */}
+          <AnimateIn className="mb-10">
+            <div className="max-w-2xl mx-auto flex flex-wrap items-center justify-center gap-2 text-sm text-text/70">
+              <span className="font-medium text-text">Plus, make it yours — 4 premium themes:</span>
+              {THEMES.filter(t => t.pro).map(t => (
+                <span
+                  key={t.id}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-text"
+                  title={t.description}
+                >
+                  <span
+                    className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-black/10"
+                    style={{ backgroundColor: t.preview.bg }}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: t.preview.accent }} />
+                  </span>
+                  {t.label}
+                </span>
+              ))}
+            </div>
+          </AnimateIn>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {PRO_PLANS.map((plan, i) => (
