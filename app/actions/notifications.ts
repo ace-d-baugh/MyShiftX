@@ -3,7 +3,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { sendPushNotification } from '@/lib/push-server'
-import { boardApprovedHtml, interestedHtml, shiftMatchHtml } from '@/components/email-template'
+import { boardApprovedHtml, claimReceivedHtml, claimResultHtml, interestedHtml, shiftMatchHtml } from '@/components/email-template'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
 import type { PreferredTime } from '@/lib/database.types'
@@ -389,6 +389,162 @@ export async function notifyRequestPosted(opts: {
     }
   } catch (err) {
     console.error('[notifyRequestPosted] unexpected error:', err)
+  }
+}
+
+// ── Trade Loop (Task 21) ───────────────────────────────────────────────────────
+
+/**
+ * Fire-and-forget: notify the shift owner that someone claimed their shift.
+ * Push always; email gated on the owner's notify_via_email pref.
+ */
+export async function notifyClaimCreated(claimId: string): Promise<void> {
+  try {
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[notifyClaimCreated] SUPABASE_SERVICE_ROLE_KEY is not set — skipping')
+      return
+    }
+
+    const db = adminDb()
+    const { data: claim, error } = await db
+      .from('shift_claims')
+      .select('owner_id, shifts!shift_id(shift_title), claimant:users!claimant_id(display_name)')
+      .eq('id', claimId)
+      .single()
+
+    if (error || !claim) { console.error('[notifyClaimCreated] claim lookup failed:', error?.message); return }
+
+    const shiftTitle   = (claim.shifts as unknown as { shift_title: string } | null)?.shift_title ?? 'your shift'
+    const claimantName = (claim.claimant as unknown as { display_name: string | null } | null)?.display_name ?? 'Someone'
+    const ownerId      = claim.owner_id as string
+
+    await sendPushNotification(
+      ownerId,
+      `${claimantName} wants your shift`,
+      `${claimantName} tapped "I'll take this shift" on "${shiftTitle}" — accept or decline on the Wall`,
+      '/wall'
+    )
+
+    const { data: owner } = await db
+      .from('users')
+      .select('email, notify_via_email')
+      .eq('id', ownerId)
+      .single()
+
+    if (!owner?.notify_via_email || !owner.email) return
+    if (!optionalServerEnv.RESEND_API_KEY) return
+
+    const { error: sendError } = await resend.emails.send({
+      from: 'MyShiftX <noreply@myshiftx.com>',
+      to: owner.email,
+      subject: `${claimantName} wants to take your shift`,
+      html: claimReceivedHtml({ claimantName, shiftTitle, wallUrl: `${BASE_URL}/wall` }),
+    })
+    if (sendError) console.error('[notifyClaimCreated] Resend error:', sendError)
+  } catch (err) {
+    console.error('[notifyClaimCreated] unexpected error:', err)
+  }
+}
+
+/**
+ * Fire-and-forget: tell the claimant their claim was accepted or declined,
+ * and (on accept) tell auto-declined rival claimants the shift was covered.
+ */
+export async function notifyClaimResolved(
+  claimId: string,
+  accepted: boolean,
+  rivalClaimantIds: string[]
+): Promise<void> {
+  try {
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[notifyClaimResolved] SUPABASE_SERVICE_ROLE_KEY is not set — skipping')
+      return
+    }
+
+    const db = adminDb()
+    const { data: claim, error } = await db
+      .from('shift_claims')
+      .select('claimant_id, shifts!shift_id(shift_title), owner:users!owner_id(display_name)')
+      .eq('id', claimId)
+      .single()
+
+    if (error || !claim) { console.error('[notifyClaimResolved] claim lookup failed:', error?.message); return }
+
+    const shiftTitle = (claim.shifts as unknown as { shift_title: string } | null)?.shift_title ?? 'the shift'
+    const ownerName  = (claim.owner as unknown as { display_name: string | null } | null)?.display_name ?? 'The owner'
+    const claimantId = claim.claimant_id as string
+
+    const sends: Promise<unknown>[] = [
+      sendPushNotification(
+        claimantId,
+        accepted ? 'Your claim was accepted! 🎉' : 'Your claim was declined',
+        accepted
+          ? `${ownerName} accepted your claim on "${shiftTitle}" — complete the trade in your company system`
+          : `${ownerName} declined your claim on "${shiftTitle}"`,
+        accepted ? '/profile' : '/wall'
+      ),
+      ...rivalClaimantIds.map(rid => sendPushNotification(
+        rid,
+        'Shift covered',
+        `"${shiftTitle}" was covered by someone else — more shifts are on the Wall`,
+        '/wall'
+      )),
+    ]
+
+    const { data: claimant } = await db
+      .from('users')
+      .select('email, notify_via_email')
+      .eq('id', claimantId)
+      .single()
+
+    if (claimant?.notify_via_email && claimant.email && optionalServerEnv.RESEND_API_KEY) {
+      sends.push(resend.emails.send({
+        from: 'MyShiftX <noreply@myshiftx.com>',
+        to: claimant.email,
+        subject: accepted ? `Your claim on "${shiftTitle}" was accepted!` : `Update on your claim for "${shiftTitle}"`,
+        html: claimResultHtml({
+          accepted,
+          ownerName,
+          shiftTitle,
+          ctaUrl: accepted ? `${BASE_URL}/profile` : `${BASE_URL}/wall`,
+        }),
+      }).then(({ error: e }) => { if (e) console.error('[notifyClaimResolved] Resend error:', e) }))
+    }
+
+    await Promise.all(sends)
+  } catch (err) {
+    console.error('[notifyClaimResolved] unexpected error:', err)
+  }
+}
+
+/**
+ * Fire-and-forget: tell the claimant the owner recorded the final outcome.
+ * Push only — this is a record-keeping event, not an action request.
+ */
+export async function notifyClaimFinalized(claimId: string, completed: boolean): Promise<void> {
+  try {
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) return
+
+    const db = adminDb()
+    const { data: claim } = await db
+      .from('shift_claims')
+      .select('claimant_id, shifts!shift_id(shift_title)')
+      .eq('id', claimId)
+      .single()
+
+    if (!claim) return
+    const shiftTitle = (claim.shifts as unknown as { shift_title: string } | null)?.shift_title ?? 'the shift'
+
+    await sendPushNotification(
+      claim.claimant_id as string,
+      completed ? 'Trade confirmed ✅' : 'Trade marked as fell through',
+      completed
+        ? `The trade for "${shiftTitle}" was confirmed — it's on your trade record now`
+        : `The owner marked the trade for "${shiftTitle}" as fell through`,
+      '/profile'
+    )
+  } catch (err) {
+    console.error('[notifyClaimFinalized] unexpected error:', err)
   }
 }
 

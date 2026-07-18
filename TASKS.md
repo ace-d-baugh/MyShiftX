@@ -198,7 +198,7 @@ The following Pro and Free features have not been scoped yet and will need dedic
 
 - ~~**Photo schedule import**~~ — ✅ Done (Task 15): user photographs their paper or on-screen schedule and Gemini 2.5 Flash reads it onto their calendar in seconds, with review/conflict handling. The highest-value Free feature and the biggest differentiator from manual entry. 4/month Free, unlimited Pro.
 - ~~**In-app messaging**~~ — ✅ Done (Task 19): real in-app threads between board-mates with Realtime, unread badges, and push notifications. All tiers, shared-board only.
-- **In-app push notifications** — browser-native web push (PWA-style) using the Push API and a service worker. Free tier. Works on desktop Chrome/Edge/Firefox and Android Chrome. Not available on iOS Safari (they have limited support). Supplements or replaces email for non-SMS users. Medium complexity.
+- **In-app push notifications** — browser-native web push (PWA-style) using the Push API and a service worker. Free tier. Works on desktop Chrome/Edge/Firefox, Android Chrome, **and iOS 16.4+ once the PWA is added to the Home Screen** (Task 23 ships a guided install walkthrough; the old "not available on iOS" note was outdated). Supplements or replaces email for non-SMS users. Medium complexity.
 - ~~**Calendar export/sync**~~ — ✅ Done (Task 17): live-sync iCal feed URL + one-click `.ics` download, works with Google Calendar, Apple Calendar, and Outlook. Pro only.
 - **Trade preferences** — users set preferred shift types, days of week, and time windows; the matching engine factors these in when firing notifications. Extends the existing `notifyShiftPosted`/`notifyRequestPosted` logic. Medium complexity.
 - ~~**Direct messaging outside boards**~~ — Removed. Messaging is board-member only for all tiers.
@@ -675,6 +675,85 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 - [ ] Allow uploading up to 4 photos in a single import session (one per schedule week)
 - [ ] Batch the images to Ollama sequentially — collect all returned shifts, deduplicate by date, then show a unified review table
 - [ ] Add a "This is a multi-week schedule" toggle to the import modal (Task 15) that enables multi-photo mode for Pro users
+
+---
+
+### 21 — Trade Loop: Claims, Confirmation & Reliability `CODE COMPLETE — needs your testing`
+
+**Tier:** All tiers (this is core product, not a perk)
+**Why:** The README names ghosting as a core problem, but nothing in the app addresses it — interest is just a comment flag, contact ends in email, and the app never learns whether a trade actually happened. Closing the loop unlocks: (1) a per-user reliability record (the real answer to ghosting), (2) the marketing proof number ("N shifts covered on MyShiftX"), and (3) the "your shift got covered 🎉" retention moment.
+
+**Lifecycle:** claimant taps **"I'll take this shift"** → owner **Accepts** (post auto-archives as "Covered") or **Declines** → after the handshake, owner marks the claim **Completed** (trade went through in the company system) or **Fell through**. Claimant can withdraw a pending claim.
+
+**🤖 Claude handled (all shipped 2026-07-18; migration applied to production):**
+- ✅ Migration `20260717150000_trade_loop_shift_claims.sql` — `shift_claims` table (`id, shift_id, claimant_id, owner_id, board_id, status, created_at, responded_at, finalized_at`) + partial unique indexes (one open claim per user per shift; one accepted claim per shift) + RLS (parties-only SELECT; all writes via RPCs; anon revoked)
+- ✅ RPCs (SECURITY DEFINER, pinned search_path, authenticated-only): `claim_shift` (validates board membership, active post, not-own-shift), `respond_to_claim` (accept auto-declines rivals + archives post as `covered`, returns rival ids for notification), `withdraw_claim`, `finalize_claim`
+- ✅ `get_trade_stats_for_users(uuid[])` — aggregate picked-up/covered/fell-through counts only, no claim details leaked
+- ✅ `removed_reason` CHECK extended with `'covered'`; leader Archive shows a green "Covered 🤝" badge + filter chip
+- ✅ TypeScript types (`ClaimStatus`, `shift_claims`, RPC signatures) in `lib/database.types.ts`
+- ✅ `app/actions/claims.ts` — claimShift / respondToClaim / withdrawClaim / finalizeClaim, notifications fire-and-forget
+- ✅ Notifications: owner push+email on new claim (`claimReceivedHtml`); claimant push+email on accept/decline (`claimResultHtml`); rivals get "shift covered" push; claimant push on finalize. Emails respect `notify_via_email`
+- ✅ `ClaimSection.tsx` on ShiftCard: "I'll take this shift" for non-owners (sent/declined states, withdraw); Accept/Decline panel for owners with each claimant's reliability record inline
+- ✅ Reliability badge (🤝 N completed trades) next to poster name on ShiftCard, batch-fetched in WallClient
+- ✅ `TradeRecordSection.tsx` on Profile (`#trade-record`): stats tiles, "needs your attention" (confirm completed/fell-through as owner, withdraw as claimant), history
+- ✅ Wall banner for owners with accepted claims past shift end → links to Profile Trade Record
+- Verified: `tsc --noEmit` clean, ESLint clean, `next build` passes, RPCs confirmed live in prod, security advisor shows no new issues (pre-existing anon-executable functions flagged as a separate cleanup task)
+- [ ] Follow-up (post-v1): public `get_platform_trade_stats()` for the landing-page proof number; claims on request posts; mod visibility into board claim disputes; realtime on `shift_claims` for live claim updates
+
+**👤 You handle:**
+- [ ] Test the full loop with two accounts: claim → accept → complete, plus decline / withdraw / fell-through paths
+- [ ] (Optional) Enable Realtime replication for `shift_claims` in Supabase dashboard if we want live claim updates without refresh
+
+---
+
+### 22 — Schedule-First Onboarding & Weekly Digest (Cold-Start Fix) `CODE COMPLETE — needs your testing`
+
+**Tier:** All tiers
+**Why:** A new user's wall is empty until their board has density — but the photo schedule import (Task 15) makes the app useful **solo on day one** as a schedule keeper. Put it in the first-session flow instead of buried in the calendar. A weekly digest resurfaces quiet boards instead of letting them die silently.
+
+**🤖 Claude handled (all shipped 2026-07-18; migration applied to production):**
+- ✅ Migration `20260718100000_onboarding_and_weekly_digest.sql` — `users.notify_weekly_digest` (default true) + `users.onboarding_dismissed_at`; types updated
+- ✅ `/welcome` wizard (`app/(dashboard)/welcome/`): Step 1 photo schedule import (embeds the Task 15 `ScheduleImportModal`; falls back to manual-calendar link when `GEMINI_API_KEY` is unset, matching the env-gate pattern), Step 2 join/create board (embeds `MyBoardsSection` — full invite-code flow), Step 3 push notifications (`PushNotificationsToggle`). Steps show live done-states (counts refresh on focus/modal close); "Take me to the Wall" / "Skip for now" both set `onboarding_dismissed_at`
+- ✅ Routing: the Wall server page redirects brand-new users (no boards + no shifts + never dismissed) to `/welcome`; completing either step or skipping ends the redirect — covers email, OAuth, and returning-login paths without touching auth flows
+- ✅ Empty-wall states for no-board users now point at `/welcome` ("Get Set Up") instead of the profile page
+- ✅ Weekly digest: new `/api/cron/weekly-digest` (CRON_SECRET-protected, same pattern as expirations) — pulls posts created in the last 7 days that are still live, aggregates per user across their approved boards, excludes their own posts, skips users with nothing new, caps at 6 items per email. `weeklyDigestHtml` template added
+- ✅ One-click unsubscribe: `/api/digest/unsubscribe?uid&sig` — HMAC-signed (keyed with CRON_SECRET, `lib/digest.ts`), no login needed, flips only `notify_weekly_digest`
+- ✅ Profile → Notifications: "Weekly Digest" toggle, saved with the existing Save button
+- ✅ `vercel.json`: digest cron scheduled `0 22 * * 0` (Sunday 22:00 UTC ≈ 6 PM ET during daylight time)
+- Verified: `tsc` clean, ESLint clean, `next build` passes with `/welcome` + both API routes registered
+
+**👤 You handle:**
+- [ ] Review the /welcome copy and step order (register a fresh test account to see the full flow)
+- [ ] Confirm digest day/time — currently Sunday 22:00 UTC; edit `vercel.json` to change
+- [ ] Test the digest manually once there's recent activity: `curl -H "Authorization: Bearer $CRON_SECRET" https://myshiftx.com/api/cron/weekly-digest`, then click the unsubscribe link in the email and confirm the profile toggle flips off
+
+---
+
+### 23 — iOS Push via Add-to-Home-Screen Flow `CODE COMPLETE — needs your iPhone testing`
+
+**Tier:** Free (extends Task 16 web push)
+**Why:** In a first-come marketplace, notification latency is the product. Since iOS 16.4, web push **works** on iPhone for PWAs added to the home screen — the "no iOS push" note in Task 16 was outdated. A guided install flow unlocks real-time alerts for the biggest platform now, years before the Task 14 native app.
+
+**🤖 Claude handled (shipped 2026-07-18):**
+- ✅ Detection helpers in `lib/push.ts`: `isIOS()` (incl. iPadOS-masquerading-as-Mac), `isStandalone()`, `needsIosInstallForPush()`, `isIosSafari()`
+- ✅ `IosInstallPrompt` component — numbered walkthrough (Share → Add to Home Screen → open from Home Screen and allow notifications), with an extra "open in Safari first" step when browsing from Chrome/Firefox/Edge on iOS. Appears **only** in iOS browser tabs where the Push API is absent
+- ✅ Placements: dismissible banner on the Wall (localStorage-persisted, same pattern as PushPromptBanner) + always-visible inline versions in Welcome step 3 and Profile → Notifications (both spots where the push toggle silently hides itself on iOS)
+- ✅ Installed/standalone mode needs nothing new: once opened from the Home Screen the Push API exists, so the existing Task 16 prompts take over automatically
+- ✅ Manifest verified already correct (`display: standalone`, 512px icon, apple-touch-icon via `app/apple-icon.png`) — no changes needed
+- ✅ Help page + Task 16 note updated to reflect iOS 16.4+ support and the in-app walkthrough
+- Verified: `tsc` clean, ESLint clean, `next build` passes
+
+**👤 You handle:**
+- [ ] Test on a real iPhone (iOS 16.4+): browse the Wall in Safari → walkthrough banner appears → install → open from Home Screen → enable push → have your second account claim one of your shifts and confirm the push arrives
+- [ ] Also glance at the walkthrough from Chrome on iOS — it should add the "open in Safari" step
+
+---
+
+### 24 — Product Analytics & Error Tracking `NEEDS DISCUSSION`
+
+**Why (plain English):** Right now the app has no way to answer questions like "how many people who register actually join a board?", "which upgrade nudge do people click?", or "did anyone hit a crash last night?". Analytics = anonymous event counters that answer the first two; error tracking = automatic crash reports that answer the third. Without them, every pricing/paywall/ad decision in Tasks 7–12 is a guess. Both have free tiers (PostHog, Sentry) and take ~a day to wire in.
+
+**Status:** Ace wants more clarification before green-lighting — discuss before starting. Questions to resolve: which tool(s), what events to track, cookie-consent interaction with the existing CMP setup.
 
 ---
 

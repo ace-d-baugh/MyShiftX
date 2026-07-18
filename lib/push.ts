@@ -26,6 +26,36 @@ export function getPushPermission(): NotificationPermission {
   return isPushSupported() ? Notification.permission : 'denied'
 }
 
+// ── iOS install detection (Task 23) ────────────────────────────────────────────
+// iOS 16.4+ delivers web push only to PWAs opened from the Home Screen. In a
+// regular Safari tab PushManager is absent, so isPushSupported() is false and
+// the standard prompts hide themselves — these helpers let the UI show an
+// "Add to Home Screen" walkthrough instead.
+
+/** Any iOS device — including iPadOS 13+, which masquerades as macOS. */
+export function isIOS(): boolean {
+  if (typeof window === 'undefined') return false
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) return true
+  return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1
+}
+
+/** Running as an installed Home Screen app (standalone display mode)? */
+export function isStandalone(): boolean {
+  if (typeof window === 'undefined') return false
+  if (window.matchMedia('(display-mode: standalone)').matches) return true
+  return (navigator as unknown as { standalone?: boolean }).standalone === true
+}
+
+/** iOS browser tab where installing the PWA would unlock push. */
+export function needsIosInstallForPush(): boolean {
+  return PUSH_CONFIGURED && isIOS() && !isStandalone() && !isPushSupported()
+}
+
+/** True when the iOS browser is Safari itself (vs Chrome/Firefox/Edge shells). */
+export function isIosSafari(): boolean {
+  return isIOS() && !/CriOS|FxiOS|EdgiOS|OPiOS|mercury/.test(navigator.userAgent)
+}
+
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')

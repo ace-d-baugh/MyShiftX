@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
-import { Settings, LayoutGrid, Users, CheckCircle, Search, UserCog, ChevronDown, Check, Star, BarChart3 } from 'lucide-react'
+import { Settings, LayoutGrid, Users, CheckCircle, Search, UserCog, ChevronDown, Check, BarChart3 } from 'lucide-react'
 import { setBoardActive, setUserActive } from '@/app/actions/admin'
 import { Badge } from '@/components/ui/Badge'
 import { AdminCharts } from './AdminCharts'
@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import type { GlobalRole, Membership, BillingCycle } from '@/lib/database.types'
 
 type AdminTab = 'boards' | 'users' | 'charts'
-export type MembershipFilterKey = 'free' | 'trial' | 'monthly' | 'semi_annual' | 'yearly'
+export type MembershipFilterKey = 'free' | 'trial' | 'monthly' | 'quarterly' | 'semi_annual' | 'yearly'
 
 interface Board {
   id: string
@@ -46,9 +46,23 @@ export const MEMBERSHIP_OPTIONS: { key: MembershipFilterKey; label: string }[] =
   { key: 'free',         label: 'Free' },
   { key: 'trial',        label: 'Trial' },
   { key: 'monthly',      label: 'Monthly' },
+  { key: 'quarterly',    label: 'Quarterly' },
   { key: 'semi_annual',  label: 'Semi-Annually' },
   { key: 'yearly',       label: 'Yearly' },
 ]
+
+/** Glance icon per tier — shared by the user list, the legend key, and the charts. */
+export const MEMBERSHIP_ICON: Record<MembershipFilterKey, string> = {
+  free: '📰',
+  trial: '⚖️',
+  monthly: '📅',
+  quarterly: '🌘',
+  semi_annual: '🌓',
+  yearly: '🏆',
+}
+
+/** Global Admins get this instead of their membership icon. */
+export const ADMIN_ICON = '🫅🏼'
 
 export function getMembershipKey(u: UserRow): MembershipFilterKey {
   if (u.membership === 'Basic') return 'free'
@@ -56,26 +70,15 @@ export function getMembershipKey(u: UserRow): MembershipFilterKey {
   return (u.billing_cycle ?? 'monthly') as MembershipFilterKey
 }
 
-/** Small glance icon per membership tier — sized to match the other emoji. */
+/** Small glance icon per billing tier; global Admins override with the admin icon. */
 export function MembershipIcon({ user: u }: { user: UserRow }) {
   const key = getMembershipKey(u)
-  if (key === 'free') {
-    return (
-      <Star
-        fill="#ffea80"
-        strokeWidth={0}
-        className="w-4 h-4 text-[#FFEA80] shrink-0"
-        aria-label="Free"
-      />
-    )
-  }
-  const emoji: Record<Exclude<MembershipFilterKey, 'free'>, string> = {
-    trial: '⚖️',
-    monthly: '📅',
-    semi_annual: '🥈',
-    yearly: '🏆',
-  }
-  return <span className="text-base leading-none shrink-0" role="img" aria-label={key}>{emoji[key]}</span>
+  const isAdmin = u.role === 'Admin'
+  return (
+    <span className="text-base leading-none shrink-0" role="img" aria-label={isAdmin ? 'Admin' : key}>
+      {isAdmin ? ADMIN_ICON : MEMBERSHIP_ICON[key]}
+    </span>
+  )
 }
 
 export function AdminClient({ boards: initBoards, users: initUsers, adminId }: AdminClientProps) {
@@ -255,6 +258,18 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId }: A
       {/* Users Tab */}
       {tab === 'users' && (
         <div className="space-y-4">
+          {/* Icon key */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs text-text/60">
+            {MEMBERSHIP_OPTIONS.map(o => (
+              <span key={o.key} className="flex items-center gap-1">
+                <span role="img" aria-hidden>{MEMBERSHIP_ICON[o.key]}</span>{o.label}
+              </span>
+            ))}
+            <span className="flex items-center gap-1">
+              <span role="img" aria-hidden>{ADMIN_ICON}</span>Admin
+            </span>
+          </div>
+
           <div className="p-4 bg-primary-light/40 rounded-lg space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <select

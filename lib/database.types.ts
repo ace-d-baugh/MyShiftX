@@ -9,9 +9,10 @@ export type PreferredTime   = 'morning' | 'afternoon' | 'evening' | 'late'
 export type CommentPostType = 'shift' | 'request'
 export type JoinOutcome     = 'invalid_code' | 'user_declined' | 'success'
 export type RoadmapColumn   = 'done' | 'in_progress' | 'next' | 'backlog' | 'deferred'
-export type RemovedReason   = 'expired' | 'leader_removed' | 'user_removed'
+export type RemovedReason   = 'expired' | 'leader_removed' | 'user_removed' | 'covered'
+export type ClaimStatus     = 'pending' | 'accepted' | 'declined' | 'withdrawn' | 'completed' | 'fell_through'
 export type MessageReaction = 'thumbs_up' | 'laugh' | 'surprise' | 'sad' | 'mad' | 'star'
-export type BillingCycle    = 'monthly' | 'semi_annual' | 'yearly'
+export type BillingCycle    = 'monthly' | 'quarterly' | 'semi_annual' | 'yearly'
 
 export interface Database {
   public: {
@@ -25,6 +26,8 @@ export interface Database {
           phone_number: string | null
           notify_via_email: boolean
           notify_via_sms: boolean
+          notify_weekly_digest: boolean
+          onboarding_dismissed_at: string | null
           role: GlobalRole
           membership: Membership
           trial_ends_at: string | null
@@ -46,6 +49,8 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
+          notify_weekly_digest?: boolean
+          onboarding_dismissed_at?: string | null
           role?: GlobalRole
           membership?: Membership
           trial_ends_at?: string | null
@@ -67,6 +72,8 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
+          notify_weekly_digest?: boolean
+          onboarding_dismissed_at?: string | null
           role?: GlobalRole
           membership?: Membership
           trial_ends_at?: string | null
@@ -580,6 +587,42 @@ export interface Database {
         }
         Relationships: []
       }
+      shift_claims: {
+        Row: {
+          id: string
+          shift_id: string
+          claimant_id: string
+          owner_id: string
+          board_id: string | null
+          status: ClaimStatus
+          created_at: string
+          responded_at: string | null
+          finalized_at: string | null
+        }
+        Insert: {
+          id?: string
+          shift_id: string
+          claimant_id: string
+          owner_id: string
+          board_id?: string | null
+          status?: ClaimStatus
+          created_at?: string
+          responded_at?: string | null
+          finalized_at?: string | null
+        }
+        Update: {
+          id?: string
+          shift_id?: string
+          claimant_id?: string
+          owner_id?: string
+          board_id?: string | null
+          status?: ClaimStatus
+          created_at?: string
+          responded_at?: string | null
+          finalized_at?: string | null
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           id: string
@@ -764,6 +807,14 @@ export interface Database {
       expire_requests: { Args: Record<string, never>; Returns: void }
       deactivate_own_shift:   { Args: { p_shift_id: string };   Returns: boolean }
       deactivate_own_request: { Args: { p_request_id: string }; Returns: boolean }
+      claim_shift:      { Args: { p_shift_id: string }; Returns: string }
+      respond_to_claim: { Args: { p_claim_id: string; p_accept: boolean }; Returns: string[] }
+      withdraw_claim:   { Args: { p_claim_id: string }; Returns: boolean }
+      finalize_claim:   { Args: { p_claim_id: string; p_completed: boolean }; Returns: boolean }
+      get_trade_stats_for_users: {
+        Args: { p_user_ids: string[] }
+        Returns: { user_id: string; picked_up: number; covered: number; fell_through: number }[]
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>

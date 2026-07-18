@@ -10,11 +10,12 @@ import { getSettings } from '@/lib/settings'
 import { slugify } from '@/lib/slug'
 import {
   Clock, LayoutGrid, User, Flag, Pencil, Trash2,
-  MoreVertical, MessageSquare, Star, Send, ChevronDown,
+  MoreVertical, MessageSquare, Star, Send, ChevronDown, HeartHandshake as Handshake,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { FlagModal } from '@/components/features/FlagModal'
 import { CommentSection } from '@/components/features/CommentSection'
+import { ClaimSection, type MyClaim, type PendingClaim, type TradeStats } from '@/components/features/ClaimSection'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { cn } from '@/lib/utils'
 
@@ -44,9 +45,17 @@ interface ShiftCardProps {
   currentUserId?: string
   currentUserName?: string
   onDeactivate?: (id: string) => void
+  /** Trade Loop (Task 21) — supplied by WallClient */
+  myClaim?: MyClaim | null
+  pendingClaims?: PendingClaim[]
+  posterStats?: TradeStats
+  onClaimChanged?: () => void
 }
 
-export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate }: ShiftCardProps) {
+export function ShiftCard({
+  shift, currentUserId, currentUserName, onDeactivate,
+  myClaim, pendingClaims, posterStats, onClaimChanged,
+}: ShiftCardProps) {
   const router = useRouter()
   const [flagOpen, setFlagOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -99,6 +108,18 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
   const typeColor   = isBoth ? 'text-primary' : isTradeOnly ? 'text-info' : isGiveOnly ? 'text-success' : 'text-text/40'
   const borderColor = isBoth ? 'border-l-primary' : isTradeOnly ? 'border-l-info' : isGiveOnly ? 'border-l-success' : 'border-l-text/20'
 
+  // Completed-trade count badge next to the poster's name (Trade Loop)
+  const posterTrades = posterStats ? posterStats.picked_up + posterStats.covered : 0
+  const tradeBadge = posterTrades > 0 && (
+    <span
+      title={`${posterTrades} completed trade${posterTrades === 1 ? '' : 's'} on MyShiftX`}
+      className="inline-flex items-center gap-0.5 text-[10px] font-semibold bg-success/15 text-success px-1.5 py-0.5 rounded-full leading-none"
+    >
+      <Handshake className="w-2.5 h-2.5" />
+      {posterTrades}
+    </span>
+  )
+
   const menuItemCls = 'flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors text-text/80 hover:bg-primary-light/50 hover:text-text'
   const menuDangerCls = 'flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors text-warning hover:bg-warning/10'
   const menuDisabledCls = 'flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm text-text/25 cursor-not-allowed'
@@ -121,6 +142,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
               <span className="hidden sm:flex text-xs text-text/50 items-center gap-1.5 whitespace-nowrap">
                 <User className={cn('w-3 h-3 shrink-0', typeColor)} />
                 {shift.created_by}
+                {tradeBadge}
                 {isOwner && (
                   <span className="text-[10px] font-semibold bg-primary/15 text-primary px-1.5 py-0.5 rounded-full leading-none">you</span>
                 )}
@@ -136,6 +158,7 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
           <div className="sm:hidden flex items-center gap-1.5 mt-0.5 text-xs text-text/50">
             <User className={cn('w-3 h-3 shrink-0', typeColor)} />
             {shift.created_by}
+            {tradeBadge}
             {isOwner && (
               <span className="text-[10px] font-semibold bg-primary/15 text-primary px-1.5 py-0.5 rounded-full leading-none">you</span>
             )}
@@ -173,6 +196,17 @@ export function ShiftCard({ shift, currentUserId, currentUserName, onDeactivate 
             }
           </div>
         </div>
+
+        {/* Trade Loop: claim button (non-owners) / pending-claims panel (owner) */}
+        {shift.board_id && shift.user_id && currentUserId && (
+          <ClaimSection
+            shiftId={shift.id}
+            isOwner={!!isOwner}
+            myClaim={myClaim}
+            pendingClaims={pendingClaims}
+            onChanged={onClaimChanged}
+          />
+        )}
 
         {/* Comments / Interest / Contact | Badges */}
         <CommentSection

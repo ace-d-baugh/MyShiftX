@@ -267,15 +267,20 @@ npm run db:reset     # Reset local database (dev only)
 ### Phase 2: Beta
 - [ ] Invite-only launch
 - [ ] Push notifications
+- [ ] Trade loop — claim a shift, owner confirms, completion tracked (reliability records that solve ghosting)
+- [ ] Schedule-first onboarding — photo schedule import in the first session, so the app is useful solo on day one
+- [ ] iOS push via guided Add-to-Home-Screen install flow
 - [ ] Performance optimization and monitoring
 
 ### Phase 3: Public Launch
 - [ ] Broader rollout
-- [ ] Marketing to shift-trading communities
+- [ ] Marketing to shift-trading communities ("N shifts covered on MyShiftX" as the proof point)
 - [ ] 500+ verified users
 
 ### Future Enhancements
 - Automated shift matching
+- Weekly board-activity digest emails
+- Product analytics & error tracking (PostHog / Sentry — under discussion)
 - Analytics dashboard for Leaders
 - Multi-language support (Spanish, Portuguese)
 
