@@ -1,26 +1,18 @@
 'use server'
 
-import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { EMAIL_FROM } from '@/lib/email-constants'
 import { sendPushNotification } from '@/lib/push-server'
 import { boardApprovedHtml, claimReceivedHtml, claimResultHtml, interestedHtml, shiftMatchHtml } from '@/components/email-template'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
 import type { PreferredTime } from '@/lib/database.types'
-import { env, optionalServerEnv } from '@/lib/env'
+import { optionalServerEnv } from '@/lib/env'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://myshiftx.com'
 
 const resend = new Resend(optionalServerEnv.RESEND_API_KEY ?? '')
-
-// Service-role client — needed to read another user's email address
-function adminDb() {
-  return createClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY ?? '',
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
-}
 
 /**
  * Fire-and-forget: email the post owner when someone marks interest.
@@ -39,7 +31,7 @@ export async function notifyInterest(opts: {
       return
     }
 
-    const db = adminDb()
+    const db = createAdminClient()
     let ownerId: string | null = null
     let ownerEmail: string | null = null
     let ownerWantsEmail = false
@@ -102,7 +94,7 @@ export async function notifyInterest(opts: {
     }
 
     const { error: sendError } = await resend.emails.send({
-      from: 'MyShiftX <noreply@myshiftx.com>',
+      from: EMAIL_FROM,
       to: ownerEmail,
       subject: `${opts.commenterName} is interested in your ${opts.postType === 'shift' ? 'shift' : 'request'}`,
       html: interestedHtml({
@@ -197,7 +189,7 @@ async function sendMatchNotifications(opts: {
 
   if (opts.requesterNotify && opts.requesterEmail && isProMembership(opts.requesterMembership)) {
     sends.push(resend.emails.send({
-      from: 'MyShiftX <noreply@myshiftx.com>',
+      from: EMAIL_FROM,
       to: opts.requesterEmail,
       subject: `A shift may match your request on ${displayDate}`,
       html: shiftMatchHtml({
@@ -216,7 +208,7 @@ async function sendMatchNotifications(opts: {
 
   if (opts.shiftPosterNotify && opts.shiftPosterEmail && isProMembership(opts.shiftPosterMembership)) {
     sends.push(resend.emails.send({
-      from: 'MyShiftX <noreply@myshiftx.com>',
+      from: EMAIL_FROM,
       to: opts.shiftPosterEmail,
       subject: `Your shift may match a request on ${displayDate}`,
       html: shiftMatchHtml({
@@ -256,7 +248,7 @@ export async function notifyShiftPosted(opts: {
       return
     }
 
-    const db = adminDb()
+    const db = createAdminClient()
     const shiftDate = getETDate(opts.startTimeIso)
 
     // Fetch poster's own email + notify pref + tier (service role bypasses
@@ -333,7 +325,7 @@ export async function notifyRequestPosted(opts: {
       return
     }
 
-    const db = adminDb()
+    const db = createAdminClient()
 
     // Fetch requester's own email + notify pref + tier (match emails are
     // Pro/Trial-only; service role bypasses the membership column lock)
@@ -405,7 +397,7 @@ export async function notifyClaimCreated(claimId: string): Promise<void> {
       return
     }
 
-    const db = adminDb()
+    const db = createAdminClient()
     const { data: claim, error } = await db
       .from('shift_claims')
       .select('owner_id, shifts!shift_id(shift_title), claimant:users!claimant_id(display_name)')
@@ -435,7 +427,7 @@ export async function notifyClaimCreated(claimId: string): Promise<void> {
     if (!optionalServerEnv.RESEND_API_KEY) return
 
     const { error: sendError } = await resend.emails.send({
-      from: 'MyShiftX <noreply@myshiftx.com>',
+      from: EMAIL_FROM,
       to: owner.email,
       subject: `${claimantName} wants to take your shift`,
       html: claimReceivedHtml({ claimantName, shiftTitle, wallUrl: `${BASE_URL}/wall` }),
@@ -461,7 +453,7 @@ export async function notifyClaimResolved(
       return
     }
 
-    const db = adminDb()
+    const db = createAdminClient()
     const { data: claim, error } = await db
       .from('shift_claims')
       .select('claimant_id, shifts!shift_id(shift_title), owner:users!owner_id(display_name)')
@@ -499,7 +491,7 @@ export async function notifyClaimResolved(
 
     if (claimant?.notify_via_email && claimant.email && optionalServerEnv.RESEND_API_KEY) {
       sends.push(resend.emails.send({
-        from: 'MyShiftX <noreply@myshiftx.com>',
+        from: EMAIL_FROM,
         to: claimant.email,
         subject: accepted ? `Your claim on "${shiftTitle}" was accepted!` : `Update on your claim for "${shiftTitle}"`,
         html: claimResultHtml({
@@ -525,7 +517,7 @@ export async function notifyClaimFinalized(claimId: string, completed: boolean):
   try {
     if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) return
 
-    const db = adminDb()
+    const db = createAdminClient()
     const { data: claim } = await db
       .from('shift_claims')
       .select('claimant_id, shifts!shift_id(shift_title)')
@@ -560,7 +552,7 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
       return
     }
 
-    const db = adminDb()
+    const db = createAdminClient()
 
     const { data: ub } = await db
       .from('user_boards')
@@ -591,7 +583,7 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
     }
 
     await resend.emails.send({
-      from: 'noreply@myshiftx.com',
+      from: EMAIL_FROM,
       to: user.email,
       subject: `You've been accepted to ${boardName}!`,
       html: boardApprovedHtml({

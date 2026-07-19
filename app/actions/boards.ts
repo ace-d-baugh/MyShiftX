@@ -28,13 +28,11 @@ export async function createBoard(name: string): Promise<{ error?: string; board
 
     const { supabase, userId } = await getActionSession()
 
-    // Verify global role is User or Admin
-    const { data: profile } = await supabase.from('users').select('role, display_name').eq('id', userId).single()
+    // Verify global role is User or Admin. (Display-name gate removed 2026-07-18:
+    // registration guarantees a name now, and onboarding no longer gatekeeps on it.)
+    const { data: profile } = await supabase.from('users').select('role').eq('id', userId).single()
     if (!profile || !['User', 'Admin'].includes(profile.role)) {
       return { error: 'Only verified users can create boards.' }
-    }
-    if (!profile.display_name || profile.display_name === 'User') {
-      return { error: 'Please set your display name before creating a board.' }
     }
 
     // Generate a unique invite code (retry on collision)
@@ -241,7 +239,7 @@ export async function leaveBoard(boardId: string): Promise<{ error?: string }> {
         .eq('is_approved', true)
 
       if ((count ?? 0) <= 1) {
-        return { error: 'You are the only Leader of this board. Delete the board or promote another member first.' }
+        return { error: 'You are the only Admin of this board. Delete the board or promote another member first.' }
       }
     }
 
@@ -404,7 +402,7 @@ export async function transferBoardOwnership(
       .single()
 
     if (!mine || mine.role !== 'Leader') {
-      return { error: 'Only Leaders can transfer ownership.' }
+      return { error: 'Only board Admins can transfer ownership.' }
     }
 
     // Promote the new leader

@@ -154,24 +154,32 @@
   --color-ring: 150 25% 40%;
 }
 
-/* Dracula — rich slate-purple (#282A36) with pastel mint/pink/coral accents */
-.theme-dracula {
-  --color-primary: 265 89% 78%;
-  --color-primary-light: 232 14% 26%;
-  --color-secondary: 265 30% 40%;
-  --color-accent: 31 100% 71%;
-  --color-secondary-accent: 65 92% 76%;
-  --color-text: 60 30% 96%;
-  --color-success: 135 94% 65%;
-  --color-info: 191 89% 77%;
-  --color-warning: 0 100% 67%;
-  --color-background: 231 15% 18%;
-  --color-foreground: 60 30% 96%;
-  --color-card: 232 16% 23%;
-  --color-card-foreground: 60 30% 96%;
-  --color-border: 232 14% 31%;
-  --color-input: 232 14% 31%;
-  --color-ring: 265 89% 78%;
+/*
+ * Kitty — soft pastel light theme built from four given hexes: mint #DDFFB9,
+ * sky-blue #BEF3FF, lavender #F2E5FF, blush #FFEEEE. primary-light and accent
+ * reproduce the given lavender/blush almost exactly (they're only ever used
+ * as pale backgrounds/tints); success and info use the mint/sky-blue HUES but
+ * at a darker, legible lightness since both colors also serve as plain text
+ * (badge/stat/icon colors elsewhere in the app) — the literal pastel tone
+ * would be unreadable as text on a light background.
+ */
+.theme-kitty {
+  --color-primary: 270 70% 80%;
+  --color-primary-light: 270 100% 95%; /* ≈ #F2E5FF as given */
+  --color-secondary: 270 75% 90%;
+  --color-accent: 0 100% 95%;          /* ≈ #FFEEEE as given */
+  --color-secondary-accent: 45 90% 84%;
+  --color-text: 270 30% 24%;
+  --color-success: 90 55% 62%;         /* mint hue from #DDFFB9 */
+  --color-info: 191 70% 66%;           /* sky-blue hue from #BEF3FF */
+  --color-warning: 355 75% 78%;
+  --color-background: 300 55% 98%;
+  --color-foreground: 270 30% 24%;
+  --color-card: 290 60% 99%;
+  --color-card-foreground: 270 30% 24%;
+  --color-border: 280 45% 90%;
+  --color-input: 280 45% 90%;
+  --color-ring: 270 70% 80%;
 }
 
 /*
@@ -199,19 +207,20 @@
 .theme-midnight .themed-logo-default,
 .theme-cyberpunk .themed-logo-default,
 .theme-nordic .themed-logo-default,
-.theme-dracula .themed-logo-default { display: none; }
+.theme-kitty .themed-logo-default { display: none; }
 .theme-midnight .themed-logo-tinted,
 .theme-cyberpunk .themed-logo-tinted,
 .theme-nordic .themed-logo-tinted,
-.theme-dracula .themed-logo-tinted { display: block; }
+.theme-kitty .themed-logo-tinted { display: block; }
 .theme-midnight .themed-logo-tinted,
 .theme-nordic .themed-logo-tinted { background: hsl(var(--color-primary)); }
 .theme-cyberpunk .themed-logo-tinted {
   background: linear-gradient(90deg, hsl(320 100% 60%), hsl(190 100% 60%));
   filter: drop-shadow(0 0 10px hsl(320 100% 60% / 0.45));
 }
-.theme-dracula .themed-logo-tinted {
-  background: linear-gradient(90deg, hsl(326 100% 74%), hsl(265 89% 78%));
+.theme-kitty .themed-logo-tinted {
+  /* Cycles all four source hues — mint, sky, lavender, blush */
+  background: linear-gradient(90deg, hsl(90 55% 68%), hsl(191 70% 70%), hsl(270 70% 80%), hsl(355 75% 80%));
 }
 
 /* ── Pro theme flourishes ── */
@@ -245,6 +254,11 @@
 }
 .theme-nordic .btn-primary:hover:not(:disabled) {
   box-shadow: 0 4px 18px hsl(150 25% 40% / 0.35);
+}
+
+/* Kitty: a soft pastel glow under cards */
+.theme-kitty .card {
+  box-shadow: 0 2px 12px hsl(var(--color-primary) / 0.12);
 }
 
 @layer components {

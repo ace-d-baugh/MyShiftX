@@ -78,6 +78,12 @@ const shell = (body: string) => `
 
 // ── Primitive helpers ──────────────────────────────────────────────────────────
 
+// User-sourced values (display names, shift titles, board names) MUST pass
+// through esc() before interpolation — otherwise a shift titled
+// "<a href=phish>..." becomes live HTML in someone else's inbox.
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
 const btn = (href: string, label: string) => `
   <table cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0;">
     <tr>
@@ -113,7 +119,7 @@ const highlight = (text: string) =>
 export const verifyEmailHtml = (confirmUrl: string, displayName?: string) =>
   shell(`
     ${h1('Confirm your email address')}
-    ${p(`Hi${displayName ? ` ${displayName}` : ''},`)}
+    ${p(`Hi${displayName ? ` ${esc(displayName)}` : ''},`)}
     ${p('Thanks for signing up! Click the button below to verify your email address and activate your MyShiftX account.')}
     ${btn(confirmUrl, 'Confirm Email Address')}
     ${muted("This link expires in 24 hours. If you didn't create an account, you can safely ignore this email.")}
@@ -136,9 +142,9 @@ export const boardApprovedHtml = (opts: {
 }) =>
   shell(`
     ${h1('You\'re in! 🎉')}
-    ${p(`Hi${opts.displayName ? ` ${opts.displayName}` : ''},`)}
+    ${p(`Hi${opts.displayName ? ` ${esc(opts.displayName)}` : ''},`)}
     ${p(`Congratulations — your request to join has been approved!`)}
-    ${highlight(opts.boardName)}
+    ${highlight(esc(opts.boardName))}
     ${p('Head over to the wall to start browsing shift offers and requests from your new board.')}
     ${btn(opts.wallUrl, 'Go to the Wall')}
     ${muted('You received this because you requested to join a board on MyShiftX.')}
@@ -153,8 +159,8 @@ export const interestedHtml = (opts: {
 }) =>
   shell(`
     ${h1('Someone is interested! ⭐')}
-    ${p(`<strong>${opts.commenterName}</strong> just marked interest in your ${opts.postType === 'shift' ? 'shift offer' : 'shift request'}:`)}
-    ${highlight(opts.postTitle)}
+    ${p(`<strong>${esc(opts.commenterName)}</strong> just marked interest in your ${opts.postType === 'shift' ? 'shift offer' : 'shift request'}:`)}
+    ${highlight(esc(opts.postTitle))}
     ${p('Head to The Wall to connect with them.')}
     ${btn(opts.wallUrl, 'Go to The Wall')}
     ${muted('You can turn off email notifications in your profile settings.')}
@@ -168,8 +174,8 @@ export const claimReceivedHtml = (opts: {
 }) =>
   shell(`
     ${h1('Someone wants your shift! 🤝')}
-    ${p(`<strong>${opts.claimantName}</strong> tapped "I'll take this shift" on your post:`)}
-    ${highlight(opts.shiftTitle)}
+    ${p(`<strong>${esc(opts.claimantName)}</strong> tapped "I'll take this shift" on your post:`)}
+    ${highlight(esc(opts.shiftTitle))}
     ${p('Head to The Wall to accept or decline their claim. Accepting marks your post as covered.')}
     ${btn(opts.wallUrl, 'Review the Claim')}
     ${muted('You can turn off email notifications in your profile settings.')}
@@ -186,16 +192,16 @@ export const claimResultHtml = (opts: {
   opts.accepted
     ? shell(`
         ${h1('Your claim was accepted! 🎉')}
-        ${p(`<strong>${opts.ownerName}</strong> accepted your claim on:`)}
-        ${highlight(opts.shiftTitle)}
+        ${p(`<strong>${esc(opts.ownerName)}</strong> accepted your claim on:`)}
+        ${highlight(esc(opts.shiftTitle))}
         ${p('Now complete the trade in your company\'s scheduling system. Once it goes through, the owner will confirm it and it will count toward your trade record.')}
         ${btn(opts.ctaUrl, 'View Your Trade Record')}
         ${muted('You can turn off email notifications in your profile settings.')}
       `)
     : shell(`
         ${h1('Update on your claim')}
-        ${p(`<strong>${opts.ownerName}</strong> declined your claim on:`)}
-        ${highlight(opts.shiftTitle)}
+        ${p(`<strong>${esc(opts.ownerName)}</strong> declined your claim on:`)}
+        ${highlight(esc(opts.shiftTitle))}
         ${p('No worries — there are more shifts on The Wall.')}
         ${btn(opts.ctaUrl, 'Back to The Wall')}
         ${muted('You can turn off email notifications in your profile settings.')}
@@ -218,15 +224,15 @@ export const weeklyDigestHtml = (opts: {
   const itemRows = opts.items.map(i => `
     <tr>
       <td style="padding:10px 14px;border-bottom:1px solid #E0D8F7;">
-        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:600;color:#2f2040;">${i.title}</p>
-        <p style="margin:2px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9b8ab4;">${i.when} · ${i.board}</p>
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:600;color:#2f2040;">${esc(i.title)}</p>
+        <p style="margin:2px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9b8ab4;">${i.when} · ${esc(i.board)}</p>
       </td>
     </tr>
   `).join('')
 
   return shell(`
     ${h1('This week on your boards 📋')}
-    ${p(`Hi${opts.displayName ? ` ${opts.displayName}` : ''},`)}
+    ${p(`Hi${opts.displayName ? ` ${esc(opts.displayName)}` : ''},`)}
     ${p(`There ${opts.shiftCount + opts.requestCount === 1 ? 'is' : 'are'} <strong>${summary}</strong> on your boards.`)}
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
            style="border:1px solid #E0D8F7;border-radius:8px;margin:0 0 8px;border-collapse:separate;overflow:hidden;">
@@ -252,8 +258,8 @@ export const shiftMatchHtml = (opts: {
     ? 'Your shift may match a request! ⭐'
     : 'A shift may match your request! ⭐'
   const line1 = isShiftPoster
-    ? `<strong>${opts.otherPartyName}</strong> has a shift request on <strong>${opts.boardName}</strong> that may match your shift offer:`
-    : `<strong>${opts.otherPartyName}</strong> just posted a shift offer on <strong>${opts.boardName}</strong> that may match your request:`
+    ? `<strong>${esc(opts.otherPartyName)}</strong> has a shift request on <strong>${esc(opts.boardName)}</strong> that may match your shift offer:`
+    : `<strong>${esc(opts.otherPartyName)}</strong> just posted a shift offer on <strong>${esc(opts.boardName)}</strong> that may match your request:`
   const ownLabel  = isShiftPoster ? 'Your shift offer:' : 'Your request:'
   const otherLabel = isShiftPoster ? 'Their request:' : 'Their shift offer:'
   return shell(`
@@ -263,13 +269,13 @@ export const shiftMatchHtml = (opts: {
       <tr>
         <td style="padding:0 0 8px;">
           <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9b8ab4;text-transform:uppercase;letter-spacing:0.5px;">${ownLabel}</span><br/>
-          <span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:600;color:#2f2040;">${opts.ownPostTitle}</span>
+          <span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:600;color:#2f2040;">${esc(opts.ownPostTitle)}</span>
         </td>
       </tr>
       <tr>
         <td style="padding:0 0 8px;">
           <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9b8ab4;text-transform:uppercase;letter-spacing:0.5px;">${otherLabel}</span><br/>
-          <span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:600;color:#2f2040;">${opts.otherPostTitle}</span>
+          <span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:600;color:#2f2040;">${esc(opts.otherPostTitle)}</span>
         </td>
       </tr>
       <tr>
@@ -285,28 +291,6 @@ export const shiftMatchHtml = (opts: {
   `)
 }
 
-/** Sent once to every beta tester the night the beta closes */
-export const betaClosingHtml = (opts: { displayName?: string; surveyUrl: string; betaTestUrl: string }) =>
-  shell(`
-    ${h1('The beta is wrapping up tonight 💜')}
-    ${p(`Hi${opts.displayName ? ` ${opts.displayName}` : ''},`)}
-    ${p('Beta testing is sadly wrapping up tonight. MyShiftX will go dark while I process everyone’s feedback and get ready for what’s next.')}
-    ${highlight('Goes dark tonight at 11:59 PM')}
-    ${p('If you haven’t already, please fill out the survey — it’s the single biggest thing that shapes what happens next, and it’ll stay open for about a week even after the site goes dark.')}
-    ${btn(opts.surveyUrl, 'Fill Out the Survey')}
-    ${p(`Want the full story on why, and what's next? <a href="${opts.betaTestUrl}" style="color:#BD80FF;">Read the beta wrap-up page</a>.`)}
-    ${muted('Thank you for being some of the very first people to use MyShiftX, break it, and tell me what needed to change. This isn’t goodbye — just see you soon.')}
-  `)
-
-/** Generic notification — available for future use */
-export const notificationHtml = (opts: {
-  title: string
-  body: string
-  ctaLabel?: string
-  ctaUrl?: string
-}) =>
-  shell(`
-    ${h1(opts.title)}
-    ${p(opts.body)}
-    ${opts.ctaLabel && opts.ctaUrl ? btn(opts.ctaUrl, opts.ctaLabel) : ''}
-  `)
+// (betaClosingHtml and a generic notificationHtml used to live here — both
+// had no callers and were removed in the 2026-07-18 code-scan cleanup. Git
+// history has them if a one-off send is ever needed again.)

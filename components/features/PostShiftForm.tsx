@@ -15,7 +15,7 @@ import { notifyShiftPosted } from '@/app/actions/notifications'
 import { deactivateShift } from '@/app/actions/posts'
 import { getSettings } from '@/lib/settings'
 
-interface Board { id: string; name: string }
+import { fetchMyBoards, type MyBoard as Board } from '@/lib/boards'
 
 type ShiftForm = {
   board_id: string
@@ -141,13 +141,9 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
-        .from('user_boards').select('board_id, boards(id, name)')
-        .eq('user_id', userId).eq('is_approved', true)
-      const list = (data ?? [])
-        .map((ub: { board_id: string; boards: Board | null }) => ub.boards)
-        .filter((b): b is Board => !!b)
-        .sort((a, b) => a.name.localeCompare(b.name))
+      // Pending memberships included (Task 22 v3): calendar-only adds work
+      // while a join request awaits approval; wall posting stays gated below.
+      const list = await fetchMyBoards(supabase, userId)
       setBoards(list)
       if (!isEdit && list.length === 1) {
         setForms(prev => prev.map(f => f.board_id ? f : { ...f, board_id: list[0].id }))
@@ -213,30 +209,42 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
 
     setLoading(true)
     try {
+      // Wall flags are calendar-only while board membership is pending —
+      // the DB trigger enforces this too; forcing them off here keeps the
+      // insert from erroring and the UX honest.
+      const wallAllowed = (boardId: string) => !boards.find(b => b.id === boardId)?.pending
+
       if (isEdit) {
         const f = forms[0]
+        const allowWall = wallAllowed(f.board_id)
         const startUTC = f.start_time ? new Date(f.start_time).toISOString() : ''
         const endUTC   = f.end_time   ? new Date(f.end_time).toISOString()   : ''
         const { error } = await supabase.from('shifts').update({
           board_id: f.board_id, shift_title: f.shift_title,
           start_time: startUTC, end_time: endUTC,
-          is_trade: f.is_trade, is_giveaway: f.is_giveaway,
+          is_trade: allowWall && f.is_trade, is_giveaway: allowWall && f.is_giveaway,
           is_overtime_approved: f.is_overtime_approved, details: f.details || null,
         }).eq('id', shiftId!).eq('user_id', userId)
         if (error) throw error
       } else {
         for (const [i, f] of forms.entries()) {
           if (i > 0 && !isTouched(f)) continue
+          const allowWall = wallAllowed(f.board_id)
+          const isTrade    = allowWall && f.is_trade
+          const isGiveaway = allowWall && f.is_giveaway
           const startUTC = f.start_time ? new Date(f.start_time).toISOString() : ''
           const endUTC   = f.end_time   ? new Date(f.end_time).toISOString()   : ''
           const { error } = await supabase.from('shifts').insert({
             created_by: displayName, user_id: userId, board_id: f.board_id,
             shift_title: f.shift_title, start_time: startUTC, end_time: endUTC,
-            is_trade: f.is_trade, is_giveaway: f.is_giveaway,
+            is_trade: isTrade, is_giveaway: isGiveaway,
             is_overtime_approved: f.is_overtime_approved, details: f.details || null, is_active: true,
           })
           if (error) throw error
-          notifyShiftPosted({ boardId: f.board_id, startTimeIso: startUTC, shiftTitle: f.shift_title, posterName: displayName, posterUserId: userId }).catch(() => {})
+          // Match alerts only make sense for posts others can actually see
+          if (isTrade || isGiveaway) {
+            notifyShiftPosted({ boardId: f.board_id, startTimeIso: startUTC, shiftTitle: f.shift_title, posterName: displayName, posterUserId: userId }).catch(() => {})
+          }
         }
       }
       onSuccess?.()
@@ -296,6 +304,8 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
         const errs = formErrors[i] ?? {}
         const partial = i > 0 && isTouched(f) && Object.keys(errs).some(k => errs[k])
         const isPastShift = isEdit && !!f.start_time && new Date(f.start_time).getTime() < Date.now()
+        // Pending board: shifts save to the calendar only — wall posting locked
+        const boardPending = !!boards.find(b => b.id === f.board_id)?.pending
 
         return (
           <div key={i} className="card shadow-sm">
@@ -334,7 +344,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
                   <select name="board_id" value={f.board_id} onChange={onChange(i)}
                     className={`input ${errs.board_id ? 'border-warning' : ''}`}>
                     <option value="">Select board...</option>
-                    {boards.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    {boards.map(b => <option key={b.id} value={b.id}>{b.name}{b.pending ? ' (pending approval)' : ''}</option>)}
                   </select>
                   {errs.board_id && <p className="mt-1 text-xs text-warning">{errs.board_id}</p>}
                 </div>
@@ -400,10 +410,16 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
                 )
               })()}
 
-              {/* Post to Wall + Details — accordion (hidden once the shift is in the past) */}
+              {/* Post to Wall + Details — accordion (hidden once the shift is in the past,
+                  locked while board membership is pending approval) */}
               {isPastShift ? (
                 <div className="rounded-lg border border-border px-3 py-2.5 text-xs text-text/40 bg-primary-light/10">
                   This shift has already passed — Posting to the wall is no longer available.
+                </div>
+              ) : boardPending ? (
+                <div className="rounded-lg border border-info/20 px-3 py-2.5 text-xs text-text/60 bg-info/5">
+                  This board hasn&apos;t approved you yet — this shift will be added to your calendar
+                  only. Posting to the wall unlocks once a board admin approves you.
                 </div>
               ) : (
                 <div className="rounded-lg border border-border overflow-hidden">

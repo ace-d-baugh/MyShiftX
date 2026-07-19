@@ -40,6 +40,21 @@ interface ProfileClientProps {
   trialEndsAt?: string | null
 }
 
+// Theme picker grid placement: mobile is 2 columns / 3 rows, desktop (sm+) is
+// 3 columns / 2 rows, and each wants a DIFFERENT visual grouping (light
+// themes together): mobile = Light,Dark / Nordic,Midnight / Kitty,Cyberpunk;
+// desktop = Light,Nordic,Kitty / Dark,Midnight,Cyberpunk. One flat DOM order
+// can't satisfy both row-major layouts at once, so every swatch gets an
+// explicit grid position per breakpoint instead of relying on source order.
+const THEME_GRID_POSITION: Record<Theme, string> = {
+  light:     'row-start-1 col-start-1 sm:row-start-1 sm:col-start-1',
+  dark:      'row-start-1 col-start-2 sm:row-start-2 sm:col-start-1',
+  nordic:    'row-start-2 col-start-1 sm:row-start-1 sm:col-start-2',
+  midnight:  'row-start-2 col-start-2 sm:row-start-2 sm:col-start-2',
+  kitty:     'row-start-3 col-start-1 sm:row-start-1 sm:col-start-3',
+  cyberpunk: 'row-start-3 col-start-2 sm:row-start-2 sm:col-start-3',
+}
+
 export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Basic', trialEndsAt = null }: ProfileClientProps) {
   const supabase = createClient()
   const router = useRouter()
@@ -83,11 +98,6 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
     syncToDB(siteSettings ?? getSettings(), t)
   }
 
-  // Track whether a valid display name has been saved
-  const [hasDisplayNameSaved, setHasDisplayNameSaved] = useState(
-    !!(user?.display_name && user.display_name !== 'User' && displayNameRegex.test(user.display_name))
-  )
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -114,7 +124,6 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
 
       if (updateError) throw updateError
       setSaveSuccess(true)
-      setHasDisplayNameSaved(displayNameRegex.test(displayName))
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save profile.')
@@ -288,8 +297,7 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
           </div>
           <button
             onClick={() => setCreateBoardOpen(true)}
-            disabled={!hasDisplayNameSaved}
-            className="p-1.5 rounded-md border border-border text-text/40 hover:text-primary hover:border-primary hover:bg-primary-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-0 min-w-0"
+            className="p-1.5 rounded-md border border-border text-text/40 hover:text-primary hover:border-primary hover:bg-primary-light transition-colors min-h-0 min-w-0"
             title="Create a board"
             aria-label="Create a board"
           >
@@ -298,7 +306,6 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
         </div>
         <MyBoardsSection
           userId={sessionUserId}
-          displayNameReady={hasDisplayNameSaved}
           createOpen={createBoardOpen}
           onCreateOpenChange={setCreateBoardOpen}
         />
@@ -356,7 +363,7 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
                       key={t.id}
                       href="/upgrade"
                       title={`${t.description} — Pro theme, tap to upgrade`}
-                      className="flex flex-col gap-1.5 rounded-lg border border-border p-2 opacity-60 hover:opacity-100 hover:border-primary/50 transition-all min-h-0 min-w-0"
+                      className={`flex flex-col gap-1.5 rounded-lg border border-border p-2 opacity-60 hover:opacity-100 hover:border-primary/50 transition-all min-h-0 min-w-0 ${THEME_GRID_POSITION[t.id]}`}
                     >
                       {swatch}
                       {labelRow}
@@ -370,7 +377,7 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
                     onClick={() => selectTheme(t.id)}
                     aria-pressed={selected}
                     title={t.description}
-                    className={`flex flex-col gap-1.5 rounded-lg border p-2 text-left transition-colors min-h-0 min-w-0 ${
+                    className={`flex flex-col gap-1.5 rounded-lg border p-2 text-left transition-colors min-h-0 min-w-0 ${THEME_GRID_POSITION[t.id]} ${
                       selected ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-primary/50'
                     }`}
                   >

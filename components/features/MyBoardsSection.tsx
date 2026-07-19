@@ -9,6 +9,7 @@ import {
   deleteBoard, leaveBoard,
 } from '@/app/actions/boards'
 import { Badge } from '@/components/ui/Badge'
+import { BOARD_ROLE_LABEL } from '@/lib/roles'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { InviteModal } from '@/components/features/InviteModal'
@@ -32,7 +33,6 @@ interface BoardEntry {
 
 interface MyBoardsSectionProps {
   userId: string
-  displayNameReady: boolean
   createOpen: boolean
   onCreateOpenChange: (open: boolean) => void
 }
@@ -41,7 +41,7 @@ const roleVariant: Record<BoardRole, 'user' | 'mod' | 'leader'> = {
   User: 'user', Mod: 'mod', Leader: 'leader',
 }
 
-export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreateOpenChange }: MyBoardsSectionProps) {
+export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBoardsSectionProps) {
   const supabase = createClient()
   const [boards, setBoards] = useState<BoardEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -311,7 +311,7 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
                   <td className="px-3 py-2.5 align-top">
                     {editingId !== board.board_id && (
                       <div className="flex items-center justify-end gap-2">
-                        <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{board.role}</Badge>
+                        <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{BOARD_ROLE_LABEL[board.role]}</Badge>
                         <button
                           onClick={e => openBoardMenu(board, e)}
                           className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0"
@@ -356,33 +356,29 @@ export function MyBoardsSection({ userId, displayNameReady, createOpen, onCreate
       {/* Join with invite code */}
       <div className="pt-2 border-t border-border">
         <p className="text-xs font-medium text-text/50 mb-2 uppercase tracking-wide">Join a Board</p>
-        {!displayNameReady ? (
-          <p className="text-sm text-text/50 italic">To unlock, please save your display name above.</p>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9"
-                placeholder="XXXXXXX"
-                maxLength={7}
-                value={joinCode}
-                onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null) }}
-                onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
-              />
-              <Button
-                size="sm"
-                loading={joinLoading}
-                onClick={handleLookup}
-                className="h-9 min-w-[56px]"
-              >
-                Join
-              </Button>
-            </div>
-            {joinError && <p className="text-xs text-warning">{joinError}</p>}
-            {joinSuccess && <p className="text-xs text-success">{joinSuccess}</p>}
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9"
+              placeholder="XXXXXXX"
+              maxLength={7}
+              value={joinCode}
+              onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null) }}
+              onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
+            />
+            <Button
+              size="sm"
+              loading={joinLoading}
+              onClick={handleLookup}
+              className="h-9 min-w-[56px]"
+            >
+              Join
+            </Button>
           </div>
-        )}
+          {joinError && <p className="text-xs text-warning">{joinError}</p>}
+          {joinSuccess && <p className="text-xs text-success">{joinSuccess}</p>}
+        </div>
       </div>
 
       {/* ── Board Actions Dropdown ───────────────────────────────────────── */}

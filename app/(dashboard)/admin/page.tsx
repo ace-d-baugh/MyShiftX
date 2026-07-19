@@ -4,7 +4,7 @@ import type { GlobalRole, Membership, BillingCycle } from '@/lib/database.types'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = { title: 'Admin – MyShiftX' }
+export const metadata = { title: 'Overlord – MyShiftX' }
 
 export default async function AdminPage() {
   const { supabase, user } = await requireAdmin()

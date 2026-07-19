@@ -1,16 +1,19 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Camera, CalendarDays, LayoutDashboard, Bell, Check, ArrowRight, Plus } from 'lucide-react'
+import { Camera, CalendarDays, LayoutDashboard, Bell, ArrowRight, Plus, Ticket, Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { dismissOnboarding } from '@/app/actions/onboarding'
+import { lookupBoardByCode, confirmJoinBoard } from '@/app/actions/boards'
 import { ScheduleImportModal } from '@/components/features/ScheduleImportModal'
 import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { PushNotificationsToggle } from '@/components/features/PushNotificationsToggle'
 import { IosInstallPrompt } from '@/components/features/IosInstallPrompt'
 import { cn } from '@/lib/utils'
+
+const PENDING_INVITE_KEY = 'myshiftx-pending-invite'
 
 interface WelcomeClientProps {
   userId: string
@@ -20,21 +23,32 @@ interface WelcomeClientProps {
   initialBoardCount: number
 }
 
+/** Number while pending; the site-wide yellow star once the step is done. */
 function StepBadge({ n, done }: { n: number; done: boolean }) {
+  if (done) {
+    return (
+      <div className="w-8 h-8 flex items-center justify-center shrink-0">
+        <Star className="w-7 h-7 text-secondary-accent" fill="#ffea80" strokeWidth={0} />
+      </div>
+    )
+  }
   return (
     <div className={cn(
       'w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm',
-      done ? 'bg-success text-white' : 'bg-primary/15 text-primary'
+      'bg-primary/15 text-primary'
     )}>
-      {done ? <Check className="w-4 h-4" /> : n}
+      {n}
     </div>
   )
 }
 
 /**
- * Task 22: schedule-first onboarding. The app is useful solo on day one —
- * get the user's schedule onto their calendar before they ever see an empty
- * wall, then connect them to a board and turn on notifications.
+ * Task 22 onboarding wizard (v3 — display name comes from registration, so
+ * three easy steps): (1) join or create a board — an invite code carried
+ * through registration (QR / share link) is redeemed automatically,
+ * (2) schedule import (useful solo even while a join request is pending),
+ * (3) push notifications. Completed steps swap their number for the yellow
+ * star used across the site.
  */
 export function WelcomeClient({ userId, displayName, importEnabled, initialShiftCount, initialBoardCount }: WelcomeClientProps) {
   const supabase = createClient()
@@ -45,6 +59,10 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
   const [importOpen, setImportOpen] = useState(false)
   const [createBoardOpen, setCreateBoardOpen] = useState(false)
   const [leaving, setLeaving] = useState(false)
+
+  // Invite code redeemed from registration (QR / share link)
+  const [inviteNotice, setInviteNotice] = useState<string | null>(null)
+  const inviteAttempted = useRef(false)
 
   const refreshCounts = useCallback(async () => {
     const [{ count: sc }, { count: bc }] = await Promise.all([
@@ -63,6 +81,36 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
     return () => window.removeEventListener('focus', onFocus)
   }, [refreshCounts])
 
+  // Redeem a pending invite code once: localStorage first (same-device
+  // registration), signup metadata as the cross-device fallback.
+  useEffect(() => {
+    if (inviteAttempted.current || initialBoardCount > 0) return
+    inviteAttempted.current = true
+
+    const attempt = async () => {
+      let code: string | null = null
+      try { code = localStorage.getItem(PENDING_INVITE_KEY) } catch {}
+      if (!code) {
+        const { data } = await supabase.auth.getUser()
+        code = (data.user?.user_metadata?.invite_code as string | undefined) ?? null
+      }
+      if (!code) return
+
+      const res = await lookupBoardByCode(code)
+      if (res.board) {
+        const join = await confirmJoinBoard(res.board.id, true)
+        if (!join.error) {
+          setInviteNotice(`Your request to join ${res.board.name} was sent — a board admin will approve you shortly.`)
+          await refreshCounts().catch(() => {})
+        }
+      }
+      // One shot either way — clear so a stale/used code never loops.
+      try { localStorage.removeItem(PENDING_INVITE_KEY) } catch {}
+      supabase.auth.updateUser({ data: { invite_code: null } }).catch(() => {})
+    }
+    attempt().catch(() => {})
+  }, [initialBoardCount, supabase, refreshCounts])
+
   const finish = async () => {
     setLeaving(true)
     await dismissOnboarding().catch(() => {})
@@ -71,23 +119,61 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
 
   const scheduleDone = shiftCount > 0
   const boardsDone = boardCount > 0
+  const firstName = displayName.replace(/ [A-Z]\.$/, '')
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="text-center mb-8">
         <h1 className="font-accent text-3xl font-bold text-text mb-2">
-          Welcome{displayName ? `, ${displayName}` : ''}! 👋
+          Welcome{firstName ? `, ${firstName}` : ''}! 👋
         </h1>
         <p className="text-text/60 text-sm">
-          Three quick steps and MyShiftX starts working for you — even before your coworkers show up.
+          Three easy steps and MyShiftX starts working for you.
         </p>
       </div>
 
       <div className="space-y-4">
-        {/* Step 1 — schedule first: useful solo, on day one */}
+        {/* Step 1 — join the crew (invite code input or create a board) */}
         <div className="card shadow-sm">
           <div className="flex items-start gap-3">
-            <StepBadge n={1} done={scheduleDone} />
+            <StepBadge n={1} done={boardsDone} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h2 className="font-accent font-bold text-text flex-1">Join your board</h2>
+                <button
+                  onClick={() => setCreateBoardOpen(true)}
+                  className="p-1.5 rounded-md border border-border text-text/40 hover:text-primary hover:border-primary hover:bg-primary-light transition-colors min-h-0 min-w-0"
+                  title="Create a board"
+                  aria-label="Create a board"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              {inviteNotice && (
+                <div className="mt-2 mb-1 p-2.5 rounded-md bg-success/10 border border-success/20 text-sm flex items-center gap-2">
+                  <Ticket className="w-4 h-4 text-success shrink-0" />
+                  <span className="text-text/80">{inviteNotice}</span>
+                </div>
+              )}
+              <p className="text-sm text-text/60 mt-1 mb-3">
+                Boards are private groups where your coworkers trade shifts. Got a 7-character
+                invite code? Enter it below — or tap <strong>+</strong> to create a board and
+                invite your coworkers.
+              </p>
+              <MyBoardsSection
+                key={inviteNotice ? 'invite-joined' : 'initial'}
+                userId={userId}
+                createOpen={createBoardOpen}
+                onCreateOpenChange={setCreateBoardOpen}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Step 2 — schedule on the calendar (useful even while approval is pending) */}
+        <div className="card shadow-sm">
+          <div className="flex items-start gap-3">
+            <StepBadge n={2} done={scheduleDone} />
             <div className="flex-1 min-w-0">
               <h2 className="font-accent font-bold text-text">Put your schedule on your calendar</h2>
               {scheduleDone ? (
@@ -99,8 +185,8 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
                 <>
                   <p className="text-sm text-text/60 mt-1 mb-3">
                     {importEnabled
-                      ? 'Snap a photo of your work schedule — paper or screen — and watch it land on your calendar in seconds.'
-                      : 'Add your shifts so your schedule is always in your pocket.'}
+                      ? 'Snap a photo of your work schedule — paper or screen — and watch it land on your calendar in seconds. Works even while your join request is pending.'
+                      : 'Add your shifts so your schedule is always in your pocket — even while your join request is pending.'}
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
                     {importEnabled && (
@@ -114,37 +200,6 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
                   </div>
                 </>
               )}
-            </div>
-          </div>
-        </div>
-
-        {/* Step 2 — join the crew */}
-        <div className="card shadow-sm">
-          <div className="flex items-start gap-3">
-            <StepBadge n={2} done={boardsDone} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="font-accent font-bold text-text flex-1">Join your board</h2>
-                <button
-                  onClick={() => setCreateBoardOpen(true)}
-                  disabled={!displayName}
-                  className="p-1.5 rounded-md border border-border text-text/40 hover:text-primary hover:border-primary hover:bg-primary-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-0 min-w-0"
-                  title="Create a board"
-                  aria-label="Create a board"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-              <p className="text-sm text-text/60 mt-1 mb-3">
-                Boards are private groups where your coworkers trade shifts. Got a 7-character invite
-                code from a coworker? Enter it below — or create a board and invite them.
-              </p>
-              <MyBoardsSection
-                userId={userId}
-                displayNameReady={!!displayName}
-                createOpen={createBoardOpen}
-                onCreateOpenChange={setCreateBoardOpen}
-              />
             </div>
           </div>
         </div>

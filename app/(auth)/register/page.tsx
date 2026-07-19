@@ -1,22 +1,17 @@
   'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Eye, EyeOff, UserPlus } from 'lucide-react'
+import { Eye, EyeOff, UserPlus, Ticket } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { registerSchema, type RegisterInput } from '@/lib/validations/auth'
 import { OAuthButtons } from '@/components/ui/OAuthButtons'
+import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter'
+import { REGISTRATION_PAUSED } from '@/lib/registration'
 
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>
-
-// Temporary pause on new sign-ups between the beta wrap-up and launch.
-// Fail-closed: registration is paused unless NEXT_PUBLIC_REGISTRATION_OPEN=1
-// is set for the environment. Currently set in .env.local and Vercel Preview
-// (dev branch) only — leave it unset on Production until launch, then add it
-// there to reopen sign-ups with no code change.
-const REGISTRATION_PAUSED = process.env.NEXT_PUBLIC_REGISTRATION_OPEN !== '1'
 
 export default function RegisterPage() {
   return <Suspense><RegisterForm /></Suspense>
@@ -26,6 +21,7 @@ function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') ?? ''
+  const oauthBlocked = searchParams.get('oauth_blocked') === '1'
   const supabase = createClient()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -33,7 +29,24 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
 
+  // Invite code carried in from a QR scan / share link — either directly
+  // (?code=XXXXXXX) or embedded in the board-page redirect (?redirect=/boards/slug?c=XXXXXXX).
+  // Stored in signup metadata AND localStorage so /welcome can auto-send the
+  // join request even if the redirect chain breaks (e.g. verified on another device).
+  const inviteCode = useMemo(() => {
+    const direct = searchParams.get('code') ?? ''
+    const fromRedirect = /[?&]c=([A-Za-z0-9]{7})/.exec(redirect)?.[1] ?? ''
+    return (direct || fromRedirect).toUpperCase()
+  }, [searchParams, redirect])
+
+  useEffect(() => {
+    if (!inviteCode) return
+    try { localStorage.setItem('myshiftx-pending-invite', inviteCode) } catch {}
+  }, [inviteCode])
+
   const [form, setForm] = useState({
+    first_name: '',
+    last_name: '',
     email: '',
     password: '',
     confirm_password: '',
@@ -76,10 +89,24 @@ function RegisterForm() {
         ? `${verifyBase}?redirect=${encodeURIComponent(redirect)}`
         : verifyBase
 
+      // given_name/family_name use the same metadata keys Google OAuth sends,
+      // so the handle_new_user trigger derives the site display name
+      // ("First L.") identically for both paths. full_name fills the Supabase
+      // auth Display Name; users can still edit theirs later (same convention).
+      const first = parseResult.data.first_name
+      const last = parseResult.data.last_name
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { emailRedirectTo },
+        options: {
+          emailRedirectTo,
+          data: {
+            given_name: first,
+            family_name: last,
+            full_name: `${first} ${last}`,
+            ...(inviteCode && { invite_code: inviteCode }),
+          },
+        },
       })
 
       if (error) {
@@ -110,8 +137,10 @@ function RegisterForm() {
 
       {REGISTRATION_PAUSED && (
         <div className="mb-4 p-3 rounded-md bg-info/10 border border-info/20 text-info text-sm">
-          New registrations are temporarily paused while we get ready for launch — check
-          back soon! Existing members can still{' '}
+          {oauthBlocked
+            ? "We couldn't create your account — new registrations (including sign-in with Google/Facebook/LinkedIn) are temporarily paused while we get ready for launch. Check back soon!"
+            : 'New registrations are temporarily paused while we get ready for launch — check back soon!'}{' '}
+          Existing members can still{' '}
           <Link href="/login" className="font-medium underline min-h-0 min-w-0">log in</Link>.
         </div>
       )}
@@ -122,9 +151,65 @@ function RegisterForm() {
         </div>
       )}
 
+      {!REGISTRATION_PAUSED && inviteCode && (
+        <div className="mb-4 p-3 rounded-md bg-success/10 border border-success/20 text-sm flex items-center gap-2">
+          <Ticket className="w-4 h-4 text-success shrink-0" />
+          <span className="text-text/80">
+            Invite code <strong className="font-mono">{inviteCode}</strong> detected — we&rsquo;ll
+            send your board join request automatically after you sign up.
+          </span>
+        </div>
+      )}
+
       {!REGISTRATION_PAUSED && <OAuthButtons mode="register" />}
 
       <form onSubmit={onSubmit} className="space-y-4 mt-4" noValidate>
+        {/* Name — becomes the Supabase display name; the site name shown to
+            boards is derived as "First L." (editable later, same convention) */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="first_name" className="block text-sm font-medium text-text mb-1">
+              First Name <span className="text-warning">*</span>
+            </label>
+            <input
+              id="first_name"
+              name="first_name"
+              type="text"
+              autoComplete="given-name"
+              className={`input placeholder:text-text/50 ${errors.first_name ? 'border-warning' : ''}`}
+              placeholder="Thomas"
+              value={form.first_name}
+              onChange={handleChange}
+            />
+            {errors.first_name && (
+              <p className="mt-1 text-xs text-warning">{errors.first_name}</p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="last_name" className="block text-sm font-medium text-text mb-1">
+              Last Name <span className="text-warning">*</span>
+            </label>
+            <input
+              id="last_name"
+              name="last_name"
+              type="text"
+              autoComplete="family-name"
+              className={`input placeholder:text-text/50 ${errors.last_name ? 'border-warning' : ''}`}
+              placeholder="Morrow"
+              value={form.last_name}
+              onChange={handleChange}
+            />
+            {errors.last_name && (
+              <p className="mt-1 text-xs text-warning">{errors.last_name}</p>
+            )}
+          </div>
+        </div>
+        <p className="text-xs text-text/50 -mt-2">
+          Boards will see you as &ldquo;{form.first_name.trim() && form.last_name.trim()
+            ? `${form.first_name.trim()} ${form.last_name.trim()[0].toUpperCase()}.`
+            : 'First L.'}&rdquo; — you can adjust this in your profile.
+        </p>
+
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-text mb-1">
@@ -157,7 +242,7 @@ function RegisterForm() {
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               className={`input pr-10 placeholder:text-text/50 ${errors.password ? 'border-warning' : ''}`}
-              placeholder="Min. 8 characters"
+              placeholder="Create a strong password"
               value={form.password}
               onChange={handleChange}
             />
@@ -170,6 +255,7 @@ function RegisterForm() {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+          <PasswordStrengthMeter password={form.password} />
           {errors.password && (
             <p className="mt-1 text-xs text-warning">{errors.password}</p>
           )}

@@ -391,7 +391,7 @@ function buildDropdownItems({
 
   if (isAdmin) {
     items.push({ type: 'separator' })
-    items.push({ type: 'link', href: '/admin',  label: 'Admin Panel', icon: Settings })
+    items.push({ type: 'link', href: '/admin',  label: 'Overlord Panel', icon: Settings })
     items.push({ type: 'link', href: '/kanban', label: 'Roadmap',     icon: Kanban })
   }
 

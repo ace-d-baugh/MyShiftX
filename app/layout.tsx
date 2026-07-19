@@ -58,7 +58,7 @@ export default function RootLayout({
         )}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('myshiftx-theme'),c=document.documentElement.classList;if(['dark','midnight','cyberpunk','dracula'].indexOf(t)>-1)c.add('dark');if(['midnight','cyberpunk','nordic','dracula'].indexOf(t)>-1)c.add('theme-'+t)}catch(e){}`,
+            __html: `try{var t=localStorage.getItem('myshiftx-theme'),c=document.documentElement.classList;if(['dark','midnight','cyberpunk'].indexOf(t)>-1)c.add('dark');if(['midnight','cyberpunk','nordic','kitty'].indexOf(t)>-1)c.add('theme-'+t)}catch(e){}`,
           }}
         />
         {ADSENSE_PUBLISHER_ID && (

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { env, optionalServerEnv } from '@/lib/env'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { optionalServerEnv } from '@/lib/env'
 
 export async function GET(req: NextRequest) {
   // Verify the cron is configured before doing anything else
@@ -13,9 +13,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    })
+    const supabase = createAdminClient()
 
     // Expire shifts where expires_at <= NOW()
     const { error: shiftsError } = await supabase.rpc('expire_shifts')

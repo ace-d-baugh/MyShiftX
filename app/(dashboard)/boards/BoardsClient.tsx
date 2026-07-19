@@ -9,6 +9,7 @@ import {
   LogOut, UserMinus, Flag, UserCog, UserPlus, AlertTriangle,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
+import { BOARD_ROLE_LABEL } from '@/lib/roles'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { FlagModal } from '@/components/features/FlagModal'
@@ -371,7 +372,7 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
 
                               {/* Role pill — far right before menu */}
                               <td className="px-3 py-2.5 w-px whitespace-nowrap text-right">
-                                <Badge variant={roleVariant[member.role]} className="text-xs">{member.role}</Badge>
+                                <Badge variant={roleVariant[member.role]} className="text-xs">{BOARD_ROLE_LABEL[member.role]}</Badge>
                               </td>
 
                               {/* Three-dots menu */}
@@ -449,7 +450,7 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
         {leaveConfirm && (
           <div className="space-y-4">
             <p className="text-sm text-text/70">
-              Are you sure you want to leave <strong>{leaveConfirm.boardName}</strong>? If you are the only Leader, you must transfer ownership first.
+              Are you sure you want to leave <strong>{leaveConfirm.boardName}</strong>? If you are the only Admin, you must transfer ownership first.
             </p>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="flex-1" onClick={() => setLeaveConfirm(null)}>Cancel</Button>
@@ -489,7 +490,7 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin }:
         {transferTarget && (
           <div className="space-y-4">
             <p className="text-sm text-text/70">
-              Make <strong>{transferTarget.member.displayName ?? 'this member'}</strong> the new Leader? You will become a Mod.
+              Make <strong>{transferTarget.member.displayName ?? 'this member'}</strong> the new board Admin? You will become a Mod.
             </p>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="flex-1" onClick={() => setTransferTarget(null)}>Cancel</Button>

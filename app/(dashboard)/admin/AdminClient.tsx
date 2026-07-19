@@ -173,7 +173,7 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId }: A
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="mb-6">
         <h1 className="font-accent text-2xl font-bold text-text flex items-center gap-2">
-          <Settings className="w-6 h-6 text-primary" /> Admin Panel
+          <Settings className="w-6 h-6 text-primary" /> Overlord Panel
         </h1>
         <p className="text-sm text-text/60">Manage boards and users</p>
       </div>
@@ -266,7 +266,7 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId }: A
               </span>
             ))}
             <span className="flex items-center gap-1">
-              <span role="img" aria-hidden>{ADMIN_ICON}</span>Admin
+              <span role="img" aria-hidden>{ADMIN_ICON}</span>Overlord
             </span>
           </div>
 

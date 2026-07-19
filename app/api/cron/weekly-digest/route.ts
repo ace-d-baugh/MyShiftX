@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { EMAIL_FROM } from '@/lib/email-constants'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
 import { weeklyDigestHtml } from '@/components/email-template'
 import { digestUnsubscribeSig } from '@/lib/digest'
-import { env, optionalServerEnv } from '@/lib/env'
+import { optionalServerEnv } from '@/lib/env'
 
 // Task 22: weekly digest — "N new shifts on your boards this week".
 // Scheduled in vercel.json (Sunday evening ET). Skips users with nothing new,
@@ -34,9 +35,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
+    const supabase = createAdminClient()
     const resend = new Resend(optionalServerEnv.RESEND_API_KEY)
 
     const now = new Date()
@@ -127,7 +126,7 @@ export async function GET(req: NextRequest) {
       const sig = digestUnsubscribeSig(u.id as string, optionalServerEnv.CRON_SECRET)
 
       const { error } = await resend.emails.send({
-        from: 'MyShiftX <noreply@myshiftx.com>',
+        from: EMAIL_FROM,
         to: u.email as string,
         subject: shiftCount > 0
           ? `${shiftCount} new shift${shiftCount === 1 ? '' : 's'} on your boards this week`
