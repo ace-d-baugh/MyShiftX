@@ -48,6 +48,7 @@
 - ✅ My Calendar page
 - ✅ 404 page with falling stars and floating compass
 - ✅ Design token system (CSS variables + Tailwind config)
+- ✅ `2026-07-19`: 6 themes (Light, Nordic, Kitty, Dark, Midnight, Cyberpunk — Dracula retired, replaced by Kitty, a soft-pastel light theme built from mint/sky/lavender/blush hexes). Picker grid groups light themes together on both breakpoints (desktop 3×2: Light/Nordic/Kitty over Dark/Midnight/Cyberpunk; mobile 2×3: Light/Dark, Nordic/Midnight, Kitty/Cyberpunk) via explicit per-item grid placement in `ProfileClient.tsx`, since one DOM order can't satisfy two different row-major layouts at once.
 
 ---
 
