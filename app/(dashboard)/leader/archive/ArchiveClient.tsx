@@ -49,7 +49,7 @@ type Tab = 'shifts' | 'requests'
 
 const REASON_LABEL: Record<RemovedReason, string> = {
   expired: 'Expired',
-  leader_removed: 'Removed by leader',
+  leader_removed: 'Removed by admin',
   user_removed: 'Removed by owner',
   covered: 'Covered',
 }
@@ -73,7 +73,7 @@ function RemovalBadge({ reason, remover, ownerName }: { reason: RemovedReason | 
     return <span className="badge text-xs bg-text/10 text-text/40">Unknown</span>
   }
   const Icon = REASON_ICON[reason]
-  const who = reason === 'leader_removed' ? (remover?.display_name ?? 'a leader') : reason === 'user_removed' ? ownerName : null
+  const who = reason === 'leader_removed' ? (remover?.display_name ?? 'an admin') : reason === 'user_removed' ? ownerName : null
   return (
     <span className={cn('badge text-xs gap-1', REASON_CLASS[reason])}>
       <Icon className="w-3 h-3" />
@@ -89,7 +89,7 @@ function FilterBar({ counts, filter, onChange }: { counts: Record<RemovedReason,
   const options: { key: Filter; label: string; icon: React.ComponentType<{ className?: string }> | null; count: number; activeClass: string }[] = [
     { key: 'all',            label: 'All',                 icon: null,        count: total,                  activeClass: 'bg-primary text-white' },
     { key: 'expired',        label: 'Expired',              icon: Timer,       count: counts.expired,         activeClass: 'bg-text/70 text-white' },
-    { key: 'leader_removed', label: 'Removed by leaders',   icon: ShieldCheck, count: counts.leader_removed,  activeClass: 'bg-warning text-white' },
+    { key: 'leader_removed', label: 'Removed by admins',   icon: ShieldCheck, count: counts.leader_removed,  activeClass: 'bg-warning text-white' },
     { key: 'user_removed',   label: 'Removed by owners',    icon: UserX,       count: counts.user_removed,    activeClass: 'bg-info text-white' },
     { key: 'covered',        label: 'Covered',              icon: Handshake,   count: counts.covered,         activeClass: 'bg-success text-white' },
   ]

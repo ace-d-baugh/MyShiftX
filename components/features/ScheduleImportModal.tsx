@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
-interface Board { id: string; name: string; pending?: boolean }
+import { fetchMyBoards, type MyBoard as Board } from '@/lib/boards'
 
 interface ParsedShift {
   date: string
@@ -54,7 +54,14 @@ type Step = 'pick' | 'reading' | 'review' | 'saving' | 'done'
 // Downscale + re-encode to JPEG before upload: keeps HEIC photos out of the
 // pipeline (iOS decodes them locally) and shrinks multi-MB camera shots so
 // uploads stay fast and token costs stay low.
-async function toJpeg(file: File, maxDim = 1600): Promise<Blob> {
+//
+// Scaling is by pixel AREA, not longest side: a 1600px max-dimension cap
+// crushed wide weekly-grid screenshots (e.g. 2000×661 → 1600×529), shrinking
+// the text height until Gemini found zero shifts, while tall list layouts
+// sailed through. Small screenshots now upload untouched; only genuinely
+// large photos shrink — and never below ~720px on the short side, which is
+// where the text height lives.
+async function toJpeg(file: File, maxArea = 1600 * 1750): Promise<Blob> {
   const url = URL.createObjectURL(file)
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -63,11 +70,19 @@ async function toJpeg(file: File, maxDim = 1600): Promise<Blob> {
       el.onerror = () => reject(new Error('Could not read that image. Try a JPEG or PNG photo.'))
       el.src = url
     })
-    const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight))
+    const area = img.naturalWidth * img.naturalHeight
+    let scale = Math.min(1, Math.sqrt(maxArea / area))
+    const shortSide = Math.min(img.naturalWidth, img.naturalHeight)
+    if (shortSide * scale < 720) scale = Math.min(1, 720 / shortSide)
     const canvas = document.createElement('canvas')
     canvas.width = Math.round(img.naturalWidth * scale)
     canvas.height = Math.round(img.naturalHeight * scale)
-    canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+    const ctx = canvas.getContext('2d')!
+    // JPEG has no alpha — transparent PNG screenshots would render on black,
+    // tanking the reader's OCR. Paint white first.
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
     return await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob(b => b ? resolve(b) : reject(new Error('Could not process that image.')), 'image/jpeg', 0.85)
     })
@@ -231,6 +246,29 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
   const [existingShifts, setExistingShifts] = useState<ExistingShift[]>([])
   const [replacedCount, setReplacedCount] = useState(0)
 
+  // "Send this photo to our team" feedback (explicit user action only)
+  const lastJpegRef = useRef<Blob | null>(null)
+  const [reportState, setReportState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
+
+  const sendReport = async (context: 'no_shifts' | 'review') => {
+    const blob = lastJpegRef.current
+    if (!blob || reportState === 'sending' || reportState === 'sent') return
+    setReportState('sending')
+    try {
+      const form = new FormData()
+      form.append('image', blob, 'schedule.jpg')
+      form.append('context', context)
+      if (context === 'review') {
+        form.append('shifts', JSON.stringify(rows.map(({ date, start, end, title }) => ({ date, start, end, title }))))
+      }
+      const res = await fetch('/api/schedule-import/report', { method: 'POST', body: form })
+      if (!res.ok) throw new Error()
+      setReportState('sent')
+    } catch {
+      setReportState('failed')
+    }
+  }
+
   // Revoke the previous object URL whenever it's replaced, and on unmount.
   useEffect(() => {
     if (!previewUrl) return
@@ -245,23 +283,17 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
     setPreviewUrl(null)
     setExistingShifts([])
     setReplacedCount(0)
+    lastJpegRef.current = null
+    setReportState('idle')
     setBoardsLoading(true)
 
     const load = async () => {
       // Pending memberships count too (Task 22 v3): the calendar works while
       // a join request awaits approval — only wall posting stays gated.
-      const [{ data: memberRows }, { data: statusRows }] = await Promise.all([
-        supabase
-          .from('user_boards').select('board_id, is_approved, boards(id, name)')
-          .eq('user_id', userId),
+      const [list, { data: statusRows }] = await Promise.all([
+        fetchMyBoards(supabase, userId),
         supabase.rpc('get_schedule_import_status'),
       ])
-      const list = (memberRows ?? [])
-        .map((ub: { board_id: string; is_approved: boolean; boards: { id: string; name: string } | null }): Board | null =>
-          ub.boards ? { ...ub.boards, pending: !ub.is_approved } : null)
-        .filter((b): b is Board => !!b)
-        .sort((a, b) =>
-          Number(a.pending ?? false) - Number(b.pending ?? false) || a.name.localeCompare(b.name))
       setBoards(list)
       if (list.length === 1) setBoardId(list[0].id)
 
@@ -281,7 +313,10 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
     try {
       const jpeg = await toJpeg(file)
       // Keep the exact image the reader sees so the review step can show it
-      // next to the extracted rows.
+      // next to the extracted rows — and so "send to our team" reports carry
+      // the same pixels the model processed.
+      lastJpegRef.current = jpeg
+      setReportState('idle')
       setPreviewUrl(URL.createObjectURL(jpeg))
       const form = new FormData()
       form.append('image', jpeg, 'schedule.jpg')
@@ -431,8 +466,29 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
   return (
     <Modal open={open} onClose={onClose} title="Import Schedule from Photo" size="lg">
       {error && (
-        <div className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm">
-          {error}
+        <div className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-sm">
+          <p className="text-warning">{error}</p>
+          {step === 'pick' && lastJpegRef.current && (
+            reportState === 'sent' ? (
+              <p className="mt-2 text-xs text-success">
+                Photo sent — thank you! We&apos;ll use it to make the reader better.
+              </p>
+            ) : (
+              <p className="mt-2 text-xs text-text/60">
+                Think the reader should have gotten this one?{' '}
+                <button
+                  type="button"
+                  onClick={() => sendReport('no_shifts')}
+                  disabled={reportState === 'sending'}
+                  className="text-primary underline min-h-0 min-w-0 disabled:opacity-50"
+                >
+                  {reportState === 'sending' ? 'Sending…' : 'Send this photo to our team'}
+                </button>{' '}
+                so we can improve it for everyone.
+                {reportState === 'failed' && <span className="text-warning"> Couldn&apos;t send — please try again.</span>}
+              </p>
+            )
+          )}
         </div>
       )}
 
@@ -510,7 +566,7 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
             {boards.find(b => b.id === boardId)?.pending && (
               <p className="mt-1 text-[11px] text-info">
                 This board hasn&apos;t approved you yet — these shifts go on your calendar now, and
-                posting to the wall unlocks once a leader approves you.
+                posting to the wall unlocks once a board admin approves you.
               </p>
             )}
           </div>
@@ -601,7 +657,24 @@ export function ScheduleImportModal({ userId, displayName, open, onClose }: Sche
 
           <p className="text-xs text-text/40">
             Missing a shift? The reader doesn&apos;t always catch every row on a busy schedule — add it above.
-            Shifts ending at or before their start time are saved as overnight shifts (ending the next day).
+            Shifts ending at or before their start time are saved as overnight shifts (ending the next day).{' '}
+            {reportState === 'sent' ? (
+              <span className="text-success">Photo sent — thank you!</span>
+            ) : (
+              <>
+                Results way off?{' '}
+                <button
+                  type="button"
+                  onClick={() => sendReport('review')}
+                  disabled={reportState === 'sending'}
+                  className="text-primary underline min-h-0 min-w-0 disabled:opacity-50"
+                >
+                  {reportState === 'sending' ? 'Sending…' : 'Send this photo to our team'}
+                </button>{' '}
+                so we can improve the reader.
+                {reportState === 'failed' && <span className="text-warning"> Couldn&apos;t send — please try again.</span>}
+              </>
+            )}
           </p>
 
           <div className="flex justify-end gap-2">

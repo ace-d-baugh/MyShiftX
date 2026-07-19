@@ -15,7 +15,7 @@ import { notifyShiftPosted } from '@/app/actions/notifications'
 import { deactivateShift } from '@/app/actions/posts'
 import { getSettings } from '@/lib/settings'
 
-interface Board { id: string; name: string; pending?: boolean }
+import { fetchMyBoards, type MyBoard as Board } from '@/lib/boards'
 
 type ShiftForm = {
   board_id: string
@@ -143,15 +143,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
     const load = async () => {
       // Pending memberships included (Task 22 v3): calendar-only adds work
       // while a join request awaits approval; wall posting stays gated below.
-      const { data } = await supabase
-        .from('user_boards').select('board_id, is_approved, boards(id, name)')
-        .eq('user_id', userId)
-      const list = (data ?? [])
-        .map((ub: { board_id: string; is_approved: boolean; boards: { id: string; name: string } | null }): Board | null =>
-          ub.boards ? { ...ub.boards, pending: !ub.is_approved } : null)
-        .filter((b): b is Board => !!b)
-        .sort((a, b) =>
-          Number(a.pending ?? false) - Number(b.pending ?? false) || a.name.localeCompare(b.name))
+      const list = await fetchMyBoards(supabase, userId)
       setBoards(list)
       if (!isEdit && list.length === 1) {
         setForms(prev => prev.map(f => f.board_id ? f : { ...f, board_id: list[0].id }))
@@ -427,7 +419,7 @@ export function PostShiftForm({ userId, displayName, onSuccess, shiftId, initial
               ) : boardPending ? (
                 <div className="rounded-lg border border-info/20 px-3 py-2.5 text-xs text-text/60 bg-info/5">
                   This board hasn&apos;t approved you yet — this shift will be added to your calendar
-                  only. Posting to the wall unlocks once a leader approves you.
+                  only. Posting to the wall unlocks once a board admin approves you.
                 </div>
               ) : (
                 <div className="rounded-lg border border-border overflow-hidden">

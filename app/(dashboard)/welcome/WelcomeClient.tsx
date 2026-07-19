@@ -100,7 +100,7 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
       if (res.board) {
         const join = await confirmJoinBoard(res.board.id, true)
         if (!join.error) {
-          setInviteNotice(`Your request to join ${res.board.name} was sent — a board leader will approve you shortly.`)
+          setInviteNotice(`Your request to join ${res.board.name} was sent — a board admin will approve you shortly.`)
           await refreshCounts().catch(() => {})
         }
       }

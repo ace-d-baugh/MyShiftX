@@ -113,13 +113,18 @@ MyShiftX provides:
 
 MyShiftX uses two independent role systems.
 
+> **Naming note:** the labels below are what users see as of 2026-07-18. Internally
+> (DB values, RLS policies, route paths, code) the board "Admin" is still stored as
+> `Leader` and the global "Overlord" as `Admin` — the display mapping lives in
+> `lib/roles.ts`.
+
 ### Global Roles (platform-wide)
 
 | Role | Permissions |
 |------|-------------|
 | **Guest** | View landing page, login, register |
 | **User** | Join boards, view The Wall, post shifts/requests, manage profile |
-| **Admin** | Full platform control — manage users, boards, and global settings |
+| **Overlord** (stored as `Admin`) | Full platform control — manage users, boards, and global settings |
 
 ### Board Roles (per-board)
 
@@ -127,9 +132,9 @@ MyShiftX uses two independent role systems.
 |------|-------------|
 | **User** | View and post on the board |
 | **Mod** | User permissions + moderate posts, manage flags and approvals |
-| **Leader** | Mod permissions + manage invite code, rename board, delete board, promote/demote members |
+| **Admin** (stored as `Leader`) | Mod permissions + manage invite code, rename board, delete board, promote/demote members |
 
-Board roles are independent of Global Roles. A platform User can be a Leader on one board and a Mod on another.
+Board roles are independent of Global Roles. A platform User can be a board Admin on one board and a Mod on another.
 
 ---
 

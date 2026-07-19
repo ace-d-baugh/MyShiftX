@@ -8,15 +8,10 @@ import { createClient } from '@/lib/supabase/client'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { registerSchema, type RegisterInput } from '@/lib/validations/auth'
 import { OAuthButtons } from '@/components/ui/OAuthButtons'
+import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter'
+import { REGISTRATION_PAUSED } from '@/lib/registration'
 
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>
-
-// Temporary pause on new sign-ups between the beta wrap-up and launch.
-// Fail-closed: registration is paused unless NEXT_PUBLIC_REGISTRATION_OPEN=1
-// is set for the environment. Currently set in .env.local and Vercel Preview
-// (dev branch) only — leave it unset on Production until launch, then add it
-// there to reopen sign-ups with no code change.
-const REGISTRATION_PAUSED = process.env.NEXT_PUBLIC_REGISTRATION_OPEN !== '1'
 
 export default function RegisterPage() {
   return <Suspense><RegisterForm /></Suspense>
@@ -26,6 +21,7 @@ function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') ?? ''
+  const oauthBlocked = searchParams.get('oauth_blocked') === '1'
   const supabase = createClient()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -141,8 +137,10 @@ function RegisterForm() {
 
       {REGISTRATION_PAUSED && (
         <div className="mb-4 p-3 rounded-md bg-info/10 border border-info/20 text-info text-sm">
-          New registrations are temporarily paused while we get ready for launch — check
-          back soon! Existing members can still{' '}
+          {oauthBlocked
+            ? "We couldn't create your account — new registrations (including sign-in with Google/Facebook/LinkedIn) are temporarily paused while we get ready for launch. Check back soon!"
+            : 'New registrations are temporarily paused while we get ready for launch — check back soon!'}{' '}
+          Existing members can still{' '}
           <Link href="/login" className="font-medium underline min-h-0 min-w-0">log in</Link>.
         </div>
       )}
@@ -244,7 +242,7 @@ function RegisterForm() {
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               className={`input pr-10 placeholder:text-text/50 ${errors.password ? 'border-warning' : ''}`}
-              placeholder="Min. 8 characters"
+              placeholder="Create a strong password"
               value={form.password}
               onChange={handleChange}
             />
@@ -257,6 +255,7 @@ function RegisterForm() {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+          <PasswordStrengthMeter password={form.password} />
           {errors.password && (
             <p className="mt-1 text-xs text-warning">{errors.password}</p>
           )}

@@ -9,6 +9,7 @@ import {
   deleteBoard, leaveBoard,
 } from '@/app/actions/boards'
 import { Badge } from '@/components/ui/Badge'
+import { BOARD_ROLE_LABEL } from '@/lib/roles'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { InviteModal } from '@/components/features/InviteModal'
@@ -310,7 +311,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBo
                   <td className="px-3 py-2.5 align-top">
                     {editingId !== board.board_id && (
                       <div className="flex items-center justify-end gap-2">
-                        <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{board.role}</Badge>
+                        <Badge variant={roleVariant[board.role]} className="text-xs shrink-0">{BOARD_ROLE_LABEL[board.role]}</Badge>
                         <button
                           onClick={e => openBoardMenu(board, e)}
                           className="p-1 text-text/40 hover:text-primary min-h-0 min-w-0"

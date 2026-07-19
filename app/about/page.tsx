@@ -51,7 +51,7 @@ export default async function AboutPage() {
               seconds and share a secure invite code with their co-workers — no manager
               sign-off, no IT ticket. Once your team is in, anyone can post an offer, claim a
               shift, or coordinate directly on the Wall. Built-in moderation tools keep board
-              leaders in control of who joins and what gets posted, so the board stays as
+              admins in control of who joins and what gets posted, so the board stays as
               trustworthy as the people on it.
             </p>
           </section>

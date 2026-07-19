@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyDigestUnsubscribeSig } from '@/lib/digest'
-import { env, optionalServerEnv } from '@/lib/env'
+import { optionalServerEnv } from '@/lib/env'
 
 // Task 22: one-click unsubscribe from the weekly digest email. The link in
 // the email carries an HMAC signature, so no login is needed and the URL
@@ -35,9 +35,7 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
+  const supabase = createAdminClient()
 
   const { error } = await supabase
     .from('users')

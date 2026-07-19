@@ -7,6 +7,7 @@ import { Eye, EyeOff, KeyRound, CheckCircle, MailX } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { resetPasswordSchema } from '@/lib/validations/auth'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter'
 
 // The recovery link only produces a session when its PKCE code can be
 // exchanged — which requires the same browser that requested the reset and
@@ -155,7 +156,7 @@ export default function ResetPasswordPage() {
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               className={`input pr-10 ${errors.password ? 'border-warning' : ''}`}
-              placeholder="Min. 8 characters"
+              placeholder="Create a strong password"
               value={form.password}
               onChange={handleChange}
             />
@@ -167,6 +168,7 @@ export default function ResetPasswordPage() {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+          <PasswordStrengthMeter password={form.password} />
           {errors.password && <p className="mt-1 text-xs text-warning">{errors.password}</p>}
         </div>
 

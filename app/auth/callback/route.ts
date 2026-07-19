@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { displayNameRegex } from '@/lib/validations/auth'
+import { REGISTRATION_PAUSED } from '@/lib/registration'
 
 function formatOAuthDisplayName(meta: Record<string, unknown>): string | null {
   const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
@@ -50,6 +51,28 @@ export async function GET(request: Request) {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
+        // Registration-paused enforcement: the register page only blocks the
+        // email form + hides the OAuth buttons there, but Supabase's OAuth
+        // exchange above already authenticates via the /login page's OAuth
+        // buttons too — and creates a brand-new account via the handle_new_user
+        // trigger if this email has never signed in before. Since we can't
+        // stop that DB-level account creation from here, we instead refuse to
+        // hand the new account a live session: sign back out and bounce to
+        // /register, same as the email flow.
+        //
+        // created_at ≈ last_sign_in_at (within a few seconds) is the standard
+        // Supabase signal for "this is this account's very first session ever" —
+        // for a returning user those timestamps are seconds/days/years apart.
+        const isNewAccount = Math.abs(
+          new Date(user.created_at).getTime() -
+          new Date(user.last_sign_in_at ?? user.created_at).getTime()
+        ) < 10_000
+
+        if (REGISTRATION_PAUSED && isNewAccount) {
+          await supabase.auth.signOut()
+          return NextResponse.redirect(`${origin}/register?oauth_blocked=1`)
+        }
+
         const { data: profile } = await supabase
           .from('users')
           .select('display_name, email')

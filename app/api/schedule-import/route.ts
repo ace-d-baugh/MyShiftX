@@ -54,11 +54,15 @@ Follow these execution steps precisely:
 3. Explicitly discard all schedule blocks, rows, or tables belonging to any other employee. Do not extract or process any data lines outside of the target user's specific schedule boundaries.
 
 ### Step 2: Date & Shift Cross-Referencing
+Schedule layouts vary. The two most common:
+- Vertical lists: one date per row, reading top to bottom.
+- Weekly grids: dates run across the top as column headers, one column per day — and several week-tables may be stacked vertically in the same image, each with its own header row of dates. In grid layouts, bind every time block to the date in ITS OWN column's header, and process EVERY week-table present, not just the first.
+
 For the isolated data blocks belonging to the target employee, transcribe the following details step-by-step in your raw thinking space:
 - The specific calendar date or day of the week header bound to that entry.
 - The literal raw time window text exactly as written in the cell/block (e.g., "15:30 - 00:30").
 - The literal location, role, or activity text associated with that specific time block.
-Note: If a specific day is explicitly marked "OFF", "RDO", "LOA", or is completely blank, note it as empty and skip it.
+Note: If a specific day is explicitly marked "OFF", "RDO", "LOA", "No Shifts", or is completely blank, note it as empty and skip it.
 
 ### Step 3: Normalization & Structural Rules
 Convert your findings from Step 2 using these strict parameters:

@@ -334,9 +334,11 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
 
   // Refresh claim state whenever the shift list changes (initial load,
   // realtime upserts, and post-action reloads all funnel through setShifts).
+  // Debounced so a burst of realtime events coalesces into one 3-query fetch.
   useEffect(() => {
     if (!hasBoards) return
-    loadClaimData(shifts).catch(() => {})
+    const t = setTimeout(() => { loadClaimData(shifts).catch(() => {}) }, 300)
+    return () => clearTimeout(t)
   }, [hasBoards, shifts, loadClaimData])
 
   const handleClaimChanged = useCallback(() => {
@@ -365,11 +367,18 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
   useEffect(() => {
     if (!hasBoards) return
 
+    // Scope realtime to this user's boards — otherwise every shifts/requests
+    // change site-wide pings every open wall. Trade-off: filtered DELETE
+    // events don't fire (the old row only carries its PK), so a hard delete
+    // (board-deletion cascade) surfaces on the next refresh; normal removals
+    // are soft (is_active UPDATE) and still arrive live.
+    const boardFilter = `board_id=in.(${boards.map(b => b.id).join(',')})`
+
     const shiftsChannel = supabase
       .channel('realtime:shifts')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'shifts' },
+        { event: '*', schema: 'public', table: 'shifts', filter: boardFilter },
         (payload) => {
           if (!liveWall) { setNewActivity(true); return }
           if (payload.eventType === 'DELETE') {
@@ -387,7 +396,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       .channel('realtime:requests')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'requests' },
+        { event: '*', schema: 'public', table: 'requests', filter: boardFilter },
         (payload) => {
           if (!liveWall) { setNewActivity(true); return }
           if (payload.eventType === 'DELETE') {
@@ -405,7 +414,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
       supabase.removeChannel(shiftsChannel)
       supabase.removeChannel(requestsChannel)
     }
-  }, [hasBoards, liveWall, supabase, upsertShift, upsertRequest])
+  }, [hasBoards, boards, liveWall, supabase, upsertShift, upsertRequest])
 
   const handleManualRefresh = () => {
     setNewActivity(false)
@@ -765,7 +774,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
           <EmptyState
             message={hasBoards ? 'No shift offers found' : 'No shifts to see here yet'}
             subtext={!hasBoards
-              ? "You'll see your boards' shift posts once a leader approves you into a board. Haven't joined one yet? Join or create one from your profile."
+              ? "You'll see your boards' shift posts once a board admin approves you into a board. Haven't joined one yet? Join or create one from your profile."
               : 'Be the first to post a shift!'}
             href={hasBoards ? '/wall/new-shift' : '/profile#my-boards'}
             btnLabel={hasBoards ? 'Post a Shift' : 'Join or Create a Board'}
@@ -816,7 +825,7 @@ export function WallClient({ userId, displayName, boards, hasBoards, initialTab 
           <EmptyState
             message={hasBoards ? 'No shift requests found' : 'No requests to see here yet'}
             subtext={!hasBoards
-              ? "You'll see your boards' shift requests once a leader approves you into a board. Haven't joined one yet? Join or create one from your profile."
+              ? "You'll see your boards' shift requests once a board admin approves you into a board. Haven't joined one yet? Join or create one from your profile."
               : 'Need a shift? Post a request!'}
             href={hasBoards ? '/wall/new-request' : '/profile#my-boards'}
             btnLabel={hasBoards ? 'Post a Request' : 'Join or Create a Board'}

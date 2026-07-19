@@ -524,6 +524,10 @@ Because the existing codebase is React/TypeScript, Expo is the natural path — 
 
 ### 15 — Photo Schedule Import (Gemini 2.5 Flash) `CODE COMPLETE — needs Vercel env var`
 
+**Fix 2026-07-18 (found in Ace's onboarding test):** wide weekly-grid screenshots returned "No shifts were found" while tall list layouts worked. Root cause: the client downscale capped the *longest* side at 1600px, so a 2000×661 grid shrank to 1600×529 — crushing the text height (which lives in the short side) below what Gemini could read. `toJpeg` now scales by pixel *area* (small screenshots upload untouched; big photos shrink but never below ~720px on the short side), and the extraction prompt explicitly describes weekly-grid layouts (dates as column headers, multiple stacked week-tables, "No Shifts" cells). Re-test both orientations.
+
+**Feedback loop 2026-07-18:** when the reader disappoints, the user can now send the exact processed photo to support@myshiftx.com with one tap — new `/api/schedule-import/report` route (auth-required, Resend email with the image attached, what the reader returned as JSON, and reply-to set to the user). Links appear in the "no shifts found" error banner and the review-step footer; explicit user action only, never automatic. 👤 Test: trigger a bad import, tap "Send this photo to our team", confirm the email lands in support@ with the attachment.
+
 **Tier:** Free = 4 imports/month · Pro = unlimited
 **Why it matters:** The single biggest UX unlock for Cast Members. Instead of manually entering each shift, they photograph their paper or screen schedule and MyShiftX reads it onto their calendar in seconds.
 
@@ -763,6 +767,35 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 **Why (plain English):** Right now the app has no way to answer questions like "how many people who register actually join a board?", "which upgrade nudge do people click?", or "did anyone hit a crash last night?". Analytics = anonymous event counters that answer the first two; error tracking = automatic crash reports that answer the third. Without them, every pricing/paywall/ad decision in Tasks 7–12 is a guess. Both have free tiers (PostHog, Sentry) and take ~a day to wire in.
 
 **Status:** Ace wants more clarification before green-lighting — discuss before starting. Questions to resolve: which tool(s), what events to track, cookie-consent interaction with the existing CMP setup.
+
+---
+
+## Optional Improvements (Code Scan 2026-07-18)
+
+Full report: [docs/code-scan-2026-07-18.md](docs/code-scan-2026-07-18.md). Serious findings were fixed same-day (email HTML injection, stale createBoard display-name gate, transparent-PNG black-canvas bug, hot-path index gaps — see report). These are the non-urgent leftovers, ordered roughly by value; tackle one at a time.
+
+**Database (Supabase performance advisor):**
+- [x] ✅ `2026-07-19` Wrap `auth.uid()` as `(select auth.uid())` in the 27 RLS policies flagged `auth_rls_initplan` — done via `20260719120000_rls_initplan_auth_wrap.sql` (ALTER POLICY only, expressions otherwise verbatim from pg_policies; all 34 `auth.uid()`/`auth.role()` calls wrapped). Advisor re-run confirms 0 findings remain. Smoke-test the app normally — behavior should be identical, just faster on large scans
+- [x] ✅ `2026-07-19` Consolidate overlapping permissive RLS policies (48 findings) — done via `20260719140000_consolidate_permissive_policies.sql`: merged each action's policies into one with the original expressions OR'd verbatim (comments UPDATE 2→1, requests SELECT 3→1 + UPDATE 2→1, shifts SELECT 4→1 + UPDATE 2→1, user_boards SELECT 4→1 + DELETE 2→1, users UPDATE 3→1), and scoped everything TO authenticated (all expressions are anon-impossible). Verified: exactly 1 policy per table+action, advisor re-run shows 0 findings. 👤 Smoke-test the moderation flows (flag resolution, member role changes, board approvals) plus normal wall/profile use — semantics are preserved by construction, but these paths exercise the merged policies hardest
+- [x] ✅ `2026-07-19` Add covering indexes for the 9 remaining unindexed FKs — `20260719150000_remaining_fk_indexes.sql`, applied to prod; advisor's unindexed_foreign_keys findings now fully cleared
+- [x] ✅ `2026-07-19` Revoke anon EXECUTE on SECURITY DEFINER functions — `20260719151000_function_execute_lockdown.sql`. Root cause found: Task 6's revoke never held because PUBLIC retained EXECUTE (functions default to EXECUTE TO PUBLIC). Now grouped properly: trigger-only fns callable by no one, cron fns service-role-only, user RPCs authenticated-only. Verified: anon-executable 32 → 10, and the 10 are deliberate RLS-predicate exceptions (revoking those would make TO-public policies *error* for anon instead of returning empty — documented in the migration)
+- [ ] 👤 Enable Leaked Password Protection (Supabase dashboard → Authentication → Policies) — open since Task 6
+
+**Application:**
+- [x] ✅ `2026-07-19` Rate-limit `/api/schedule-import/report` — 3 reports per 10 min per user (in-memory per warm instance; blunts rapid-fire spam, documented serverless caveat). Post/comment/flag write paths remain covered by the Ongoing-table rate-limiting item for post-launch
+- [x] ✅ `2026-07-19` Closed the OAuth loophole: `lib/registration.ts` centralizes the `REGISTRATION_PAUSED` flag (was duplicated inline in the register page); `app/auth/callback/route.ts` now detects a brand-new account (`created_at` ≈ `last_sign_in_at`, the standard "first-ever session" signal) and, while paused, signs it back out and bounces to `/register?oauth_blocked=1` instead of granting a session — same as the email flow. Note: the DB account itself still gets created by the `handle_new_user` trigger before this check runs (Supabase creates it during the code exchange) — this closes *session access*, not row creation; the account is otherwise inert (Guest role → redirected to `/verify-email` with no real access, per `app/(dashboard)/layout.tsx`). Register page shows a specific "sign-in with Google/Facebook/LinkedIn is paused too" message when bounced this way
+- [x] ✅ `2026-07-19` Extracted duplicated board-list fetch → `lib/boards.ts` `fetchMyBoards()` (used by ScheduleImportModal + PostShiftForm)
+- [x] ✅ `2026-07-19` Extracted shared service-role client → `lib/supabase/admin.ts` `createAdminClient()`, and sender/support constants → `lib/email-constants.ts` (notifications, both crons, digest unsubscribe, report route, help action all updated; the plain `noreply@` senders unified to the branded one)
+- [x] ✅ `2026-07-19` Wall realtime: shifts/requests channels now filtered to the user's boards (`board_id=in.(…)`), and `loadClaimData` debounced 300ms. Known trade-off (commented in code): filtered DELETE events don't fire, so hard-deleted rows (board-deletion cascade) linger until refresh — soft removals are UPDATEs and stay live
+- [ ] Weekly digest at scale: chunk the members/posts query and batch Resend sends — deferred by design until membership passes a few hundred
+- [x] ✅ `2026-07-19` Removed dead exports `notificationHtml` / `betaClosingHtml` (git history keeps them)
+- [x] ~~`beta_survey_responses` INSERT `WITH CHECK (true)`~~ — reviewed: intentional (anonymous survey), accepted
+
+---
+
+## Vernacular (2026-07-18)
+
+Board role **"Leader" now displays as "Admin"**; global role **"Admin" now displays as "Overlord"**. Display-layer only — DB values, RLS policies, route paths (`/leader/*`, `/admin`), and code comparisons still use `Leader`/`Admin`. The label maps live in `lib/roles.ts`; all user-facing prose (dialogs, empty states, pending-approval notes, archive labels, help copy, nav labels) was updated to match. README documents the stored-vs-displayed mapping.
 
 ---
 

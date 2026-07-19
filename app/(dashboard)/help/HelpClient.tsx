@@ -68,7 +68,7 @@ const FAQS: { q: string; a: string; importOnly?: boolean }[] = [
   },
   {
     q: 'How do I leave a board or delete my account?',
-    a: "To leave a board, go to your Profile → My Boards, tap the × icon on the board row, and confirm. Note: if you're the only Leader on a board, you must transfer leadership to another member first — deleting or leaving without doing so would leave the board without anyone to manage it. To delete your account entirely, scroll to the Danger Zone on your Profile and tap Deactivate Account. All your posts are removed immediately and your personal data is fully purged within 30 days.",
+    a: "To leave a board, go to your Profile → My Boards, tap the × icon on the board row, and confirm. Note: if you're the only Admin on a board, you must transfer ownership to another member first — deleting or leaving without doing so would leave the board without anyone to manage it. To delete your account entirely, scroll to the Danger Zone on your Profile and tap Deactivate Account. All your posts are removed immediately and your personal data is fully purged within 30 days.",
   },
 ]
 

@@ -103,7 +103,7 @@ export function InviteModal({
       {!inviteCodeEnabled && (
         <div className="mb-4 p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning flex items-start gap-2">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-          This invite code is currently paused. It won&apos;t work until {isLeader ? 're-enabled below' : 'a Leader re-enables it'}.
+          This invite code is currently paused. It won&apos;t work until {isLeader ? 're-enabled below' : 'a board Admin re-enables it'}.
         </div>
       )}
 

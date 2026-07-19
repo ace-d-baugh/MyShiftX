@@ -2,6 +2,7 @@
 
 import { Resend } from 'resend'
 import { optionalServerEnv } from '@/lib/env'
+import { EMAIL_FROM, SUPPORT_EMAIL } from '@/lib/email-constants'
 
 const resend = new Resend(optionalServerEnv.RESEND_API_KEY ?? '')
 
@@ -33,8 +34,8 @@ export async function sendSupportMessage(opts: {
 
   try {
     const { error } = await resend.emails.send({
-      from: 'noreply@myshiftx.com',
-      to: 'support@myshiftx.com',
+      from: EMAIL_FROM,
+      to: SUPPORT_EMAIL,
       replyTo: safeReplyTo,
       subject: `[Support] ${safeSubject}`,
       html: `
