@@ -207,6 +207,20 @@ export const claimResultHtml = (opts: {
         ${muted('You can turn off email notifications in your profile settings.')}
       `)
 
+/** Sent when a Pro renewal charge fails, before Stripe exhausts its retries (Task 7) */
+export const paymentFailedHtml = (opts: {
+  displayName?: string
+  amountDue: number
+  billingUrl: string
+}) =>
+  shell(`
+    ${h1('Your Pro payment did not go through')}
+    ${p(`${opts.displayName ? `Hi ${esc(opts.displayName)},` : 'Hi,'} we tried to charge <strong>$${opts.amountDue.toFixed(2)}</strong> for your MyShiftX Pro subscription and your card was declined.`)}
+    ${p('Usually this is just an expired card or a new billing address. We will keep retrying for a few days — updating your payment method now is enough to fix it, and nothing about your account changes in the meantime.')}
+    ${btn(opts.billingUrl, 'Update Payment Method')}
+    ${muted('If the payment ultimately fails, your account returns to Basic. Your boards, shifts, and messages are never deleted.')}
+  `)
+
 /** Weekly digest: new activity on the user's boards this week (Task 22) */
 export const weeklyDigestHtml = (opts: {
   displayName?: string

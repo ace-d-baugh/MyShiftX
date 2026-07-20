@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
+import { isStripeConfigured } from '@/lib/stripe'
 import { ProfileClient } from './ProfileClient'
 
 export const dynamic = 'force-dynamic'
@@ -33,6 +34,7 @@ export default async function ProfilePage() {
       isPro={isPro}
       membershipTier={tier}
       trialEndsAt={membershipRow?.trial_ends_at ?? null}
+      billingEnabled={isStripeConfigured()}
     />
   )
 }

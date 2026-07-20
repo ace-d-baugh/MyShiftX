@@ -241,38 +241,42 @@ The following Pro and Free features have not been scoped yet and will need dedic
 **👤 You handle (do these first):**
 - ✅ Create a Stripe account at **stripe.com** (use your business email)
 - ✅ In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro`
-  - Add price: **$4.99 / month** (recurring, monthly) "Pro Monthly" Badge: None (or "Best for Flexibility") price_1ToeJFAU3r6l3WQNHLgGuwNI
-  - Add price: **$13.99 / 3 month** (recurring, monthly) "6.7% off monthly"
-  - Add price: **$26.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $3." price_1ToeJFAU3r6l3WQNKwVPfbTY
-  - Add price: **$47.99 / year** (recurring, yearly) "Pro Annual" Badge: SAVE 20% BEST VALUE or 2 MONTHS FREE "Billed annually. Saves you $12 compared to monthly." price_1ToeJFAU3r6l3WQNo7RMYlhj
+  - Add price: **$4.99 / month** (recurring, monthly) "Pro Monthly" Badge: None (or "Best for Flexibility") price_1TvLnJRkt6cn1JfFJ9FfomWy
+  - Add price: **$13.99 / 3 month** (recurring, monthly) "6.7% off monthly" price_1TvLnJRkt6cn1JfFxwJwoVZh
+  - Add price: **$26.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $3." price_1TvLnJRkt6cn1JfFOwpqG5xE
+  - Add price: **$47.99 / year** (recurring, yearly) "Pro Annual" Badge: SAVE 20% BEST VALUE or 2 MONTHS FREE "Billed annually. Saves you $12 compared to monthly." price_1TvLnJRkt6cn1JfFBXS1THIJ
   - Note the **Price IDs** for each (format: `price_xxxxx`) — Claude needs these
-- ✅ In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro Trial` 
-  - Add price: **$0.00** (one-time or 14-day free trial on the monthly price — your call on duration) to_1ToeOTAU3r6l3WQNBelGLTaf
+- ⚠️ **`MyShiftX Pro Trial` product / $0.00 price — archive this, it's a trap.** A $0.00 price that recurs every 14 days doesn't convert to paid; it renews at $0.00 forever, so anyone picking it gets permanent free Pro. Stripe deliberately doesn't expose trial days on the Price edit page either — the price-level `trial_from_plan` route is deprecated in favour of `subscription_data.trial_period_days` on the Checkout Session ([docs](https://docs.stripe.com/payments/checkout/free-trials)). The trial now lives as `trialDays: 14` on the Monthly plan in `lib/pricing.ts` and is passed to Stripe at checkout; Stripe still owns the whole trial (card verification, countdown, reminder email, first charge, dunning).
 - ✅ Stripe Dashboard → **Developers → API Keys** → copy **Publishable Key** and **Secret Key**
 - ✅ Add to Vercel environment variables:
   - `STRIPE_SECRET_KEY`
   - `STRIPE_PUBLISHABLE_KEY`
   - `STRIPE_WEBHOOK_SECRET` *(generate after Claude sets up the webhook endpoint)*
-- [ ] Stripe Dashboard → **Developers → Webhooks** → **Add endpoint**:
+- ✅ Stripe Dashboard → **Developers → Webhooks** → **Add endpoint**:
   - URL: `https://myshiftx.com/api/webhooks/stripe`
   - Events to listen for: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`
   - Copy the **Signing Secret** → add as `STRIPE_WEBHOOK_SECRET` in Vercel
 
-**🤖 Claude handles:**
-- [ ] Install `stripe` npm package
-- [ ] Create `/api/checkout/route.ts` — creates a Stripe Checkout Session for a given Price ID, attaches the user's ID in metadata
-- [ ] Create `/api/webhooks/stripe/route.ts` — verifies Stripe signature, handles events:
-  - `checkout.session.completed` → set `membership = 'Pro'`, clear `trial_ends_at`
-  - `customer.subscription.updated` → sync status changes (e.g., paused, unpaid)
-  - `customer.subscription.deleted` → set `membership = 'Basic'`
-  - `invoice.payment_failed` → optionally send a warning email via Resend
-- [ ] Create `/api/customer-portal/route.ts` — redirects authenticated users to Stripe's hosted Customer Portal (manage billing, cancel, download invoices)
-- [ ] Store `stripe_customer_id` on the user record so future webhook events can be matched back to the correct user
-- [ ] Add `stripe_customer_id` and `stripe_subscription_id` columns to users table
+**🤖 Claude handled (shipped `2026-07-20`; code complete, migration NOT yet applied):**
+- ✅ `stripe` npm package (v22.3.2). Client in `lib/stripe.ts`, pinned to API version `2026-06-24.dahlia` so a future `npm update` can't shift response shapes under the webhook. Whole surface gated on `STRIPE_SECRET_KEY` via `isStripeConfigured()` — same env-flip pattern as AdSense/push/Gemini
+- ✅ Migration `20260720120000_stripe_customer_columns.sql` — `stripe_customer_id` (partial unique) + `stripe_subscription_id` (partial index) on `users`. Both deliberately left OUT of the client SELECT grant (the Task 6 lockdown made grants an explicit column list, so new columns are private by default). Also extends `protect_membership_fields()` + its trigger WHEN clause to cover both columns, so `authenticated` can't repoint their row at someone else's Stripe customer
+- ✅ `/api/checkout` — client posts a plan **key**, never a Price ID, so a tampered request can't check out against an arbitrary price. Reuses an existing `stripe_customer_id` rather than minting duplicate customers; blocks if already Pro; `allow_promotion_codes: true` so Task 9's coupons work with no further code; omits `payment_method_types` entirely per Stripe guidance (dynamic payment methods convert better than hardcoded card-only)
+- ✅ `/api/webhooks/stripe` — signature-verified against the raw body (`req.text()`, not `req.json()`). Handles `checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.payment_failed`. Status→tier map: `trialing`→Trial, `active`/`past_due`→Pro, everything else→Basic. **`past_due` deliberately keeps Pro** — Stripe is still retrying, and revoking features mid-dunning punishes someone for an expired card. DB write failures throw a 500 so Stripe retries rather than silently leaving a paying customer on Basic
+- ✅ `trial_used` is burned the moment a trialing subscription exists, so cancel-and-resubscribe can't farm free months
+- ✅ `/api/customer-portal` — Stripe-hosted portal for plan changes, card updates, **invoice downloads**, and cancellation. Nothing transactional is rebuilt in-app
+- ✅ `paymentFailedHtml` email template (Resend), respects `notify_via_email`; a send failure never fails the webhook
+- ✅ UI: `CheckoutButton` on all four `/upgrade` cards (Monthly reads "Start Free Trial" + a "Start with 14 days free" line), new `/upgrade/success` page that reports actual DB state rather than assuming the webhook already landed, `MembershipSection` card on Profile (`#membership`) with the Manage Billing button, new trial FAQ
+- ✅ Verified: `tsc --noEmit` clean, `next lint` clean, `next build` passes with all three API routes registered
 
 **👤 You handle (after Claude ships the code):**
-- [ ] Use **Stripe CLI** (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`) to test webhooks locally
-- [ ] Run a test purchase with Stripe's test card `4242 4242 4242 4242` and confirm `membership` flips to `'Pro'` in the DB
+- [ ] **Apply the migration** — `20260720120000_stripe_customer_columns.sql` is written but NOT yet applied to production. Nothing works until it is
+- [ ] **Switch to test-mode keys before testing.** `.env.local` currently holds `sk_live_`/`pk_live_` keys — `4242 4242 4242 4242` only works in test mode, and a real card against live keys is a real charge. Note **Price IDs are mode-specific**: the four `STRIPE_PRICE_*` values in `.env.local` are live-mode IDs and need test-mode equivalents when you flip
+- [ ] Add to Vercel env: `STRIPE_PRICE_PRO_MONTHLY`, `_QUARTERLY`, `_SEMIANNUAL`, `_ANNUAL` (live-mode IDs are already in `.env.local`)
+- ✅ Add `customer.subscription.created` to the webhook endpoint's event list in the Stripe Dashboard — the handler covers it, but the endpoint was configured before it existed
+- [ ] Enable the Customer Portal once in Stripe Dashboard → Settings → Billing → Customer portal (it's off by default; `/api/customer-portal` 500s until you save that config)
+- [ ] Archive the `MyShiftX Pro Trial` product and its $0.00 price (see the ⚠️ note above)
+- [ ] Use **Stripe CLI** (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`) to test webhooks locally — it prints a `whsec_` for local use that differs from the production one
+- [ ] Run a test purchase with `4242 4242 4242 4242` and confirm `membership` flips to `'Trial'` (monthly) or `'Pro'` in the DB
 - [ ] Test cancellation flow via Customer Portal — confirm `membership` flips back to `'Basic'`
 - [ ] Test failed payment via test card `4000 0000 0000 9995` — confirm warning email arrives
 

@@ -39,6 +39,12 @@ export const optionalServerEnv = {
   // Stripe (Task 7) — checkout stays in "launching soon" mode until this is
   // set, which also gates the upgrade entry points (nav link, Wall banner).
   get STRIPE_SECRET_KEY() { return process.env.STRIPE_SECRET_KEY },
+  // Signing secret for /api/webhooks/stripe. Without it the webhook refuses
+  // every request rather than trusting unverified event payloads.
+  get STRIPE_WEBHOOK_SECRET() { return process.env.STRIPE_WEBHOOK_SECRET },
+  // Per-plan Price IDs are read via lib/stripe.ts `priceIdForPlan()`, keyed off
+  // the `priceIdEnv` name each plan carries in lib/pricing.ts:
+  //   STRIPE_PRICE_PRO_MONTHLY / _QUARTERLY / _SEMIANNUAL / _ANNUAL
   // Web Push (Task 16) — VAPID key pair. The public key is also read
   // client-side as NEXT_PUBLIC_VAPID_PUBLIC_KEY; push features stay fully
   // hidden until both are set.

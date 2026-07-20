@@ -3,6 +3,8 @@
 // Price IDs once they exist in Vercel env vars. Keep the numbers in sync with
 // Stripe Dashboard → Products → MyShiftX Pro (see TASKS.md Task 7).
 
+import type { BillingCycle } from '@/lib/database.types'
+
 export interface ProPlan {
   key: 'monthly' | 'quarterly' | 'semiannual' | 'annual'
   name: string
@@ -22,6 +24,24 @@ export interface ProPlan {
   finePrint: string
   /** Env var that will hold this plan's Stripe Price ID. */
   priceIdEnv: string
+  /** Value written to `users.billing_cycle` when this plan is active. */
+  billingCycle: BillingCycle
+  /**
+   * Free trial length in days, or undefined for no trial. This is the ONLY
+   * place the trial is configured — the checkout route passes it straight to
+   * Stripe as `subscription_data.trial_period_days`, and Stripe then owns the
+   * whole trial: card verification up front, the countdown, the reminder
+   * email, the automatic first charge, and dunning if that charge fails.
+   *
+   * Trials are deliberately monthly-only. The longer plans are already
+   * discounted commitments — someone choosing annual has decided, and a trial
+   * on a $47.99 charge reads as friction rather than reassurance.
+   *
+   * (Stripe has no dashboard-level trial setting for Prices used with
+   * Checkout: the price-level `trial_from_plan` route is deprecated in favour
+   * of this parameter. See docs.stripe.com/payments/checkout/free-trials.)
+   */
+  trialDays?: number
 }
 
 export const PRO_PLANS: ProPlan[] = [
@@ -34,8 +54,10 @@ export const PRO_PLANS: ProPlan[] = [
     badge: null,
     featured: false,
     hook: 'Total flexibility',
-    finePrint: 'Billed monthly. Cancel anytime in two clicks.',
+    finePrint: 'Billed monthly after your free trial. Cancel anytime in two clicks.',
     priceIdEnv: 'STRIPE_PRICE_PRO_MONTHLY',
+    billingCycle: 'monthly',
+    trialDays: 14,
   },
   {
     key: 'quarterly',
@@ -48,6 +70,7 @@ export const PRO_PLANS: ProPlan[] = [
     hook: 'A full season of Pro',
     finePrint: 'Billed $13.99 quarterly. Ideal for seasonal or part-time schedules.',
     priceIdEnv: 'STRIPE_PRICE_PRO_QUARTERLY',
+    billingCycle: 'quarterly',
   },
   {
     key: 'semiannual',
@@ -60,6 +83,7 @@ export const PRO_PLANS: ProPlan[] = [
     hook: 'Set it and forget it',
     finePrint: 'Billed $26.99 every 6 months. Lock in your schedule for the next half-year.',
     priceIdEnv: 'STRIPE_PRICE_PRO_SEMIANNUAL',
+    billingCycle: 'semi_annual',
   },
   {
     key: 'annual',
@@ -72,6 +96,7 @@ export const PRO_PLANS: ProPlan[] = [
     hook: 'The one most people pick',
     finePrint: 'Billed $47.99 annually — less than one shift\'s pay to protect your schedule all year.',
     priceIdEnv: 'STRIPE_PRICE_PRO_ANNUAL',
+    billingCycle: 'yearly',
   },
 ]
 
