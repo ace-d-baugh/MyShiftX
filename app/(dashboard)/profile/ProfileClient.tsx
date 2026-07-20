@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
 import { getSettings, saveSettings, type UserSettings, type WeekStart, type DateFormat, type TimeFormat, DEFAULT_SETTINGS } from '@/lib/settings'
-import { getStoredTheme, applyTheme, THEMES, isProTheme, type Theme } from '@/lib/theme'
+import { getStoredTheme, applyTheme, THEMES, isProTheme, type Theme, type ThemeInfo } from '@/lib/theme'
 import { upsertPreferences } from '@/lib/preferences'
 import type { GlobalRole } from '@/lib/database.types'
 
@@ -46,7 +46,9 @@ interface ProfileClientProps {
 // desktop = Light,Nordic,Kitty / Dark,Midnight,Cyberpunk. One flat DOM order
 // can't satisfy both row-major layouts at once, so every swatch gets an
 // explicit grid position per breakpoint instead of relying on source order.
-const THEME_GRID_POSITION: Record<Theme, string> = {
+// Partial: the 3 Overlord-only seasonal themes render in their own plain
+// (unpositioned) grid, so they never need an entry here.
+const THEME_GRID_POSITION: Partial<Record<Theme, string>> = {
   light:     'row-start-1 col-start-1 sm:row-start-1 sm:col-start-1',
   dark:      'row-start-1 col-start-2 sm:row-start-2 sm:col-start-1',
   nordic:    'row-start-2 col-start-1 sm:row-start-1 sm:col-start-2',
@@ -155,6 +157,67 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
   const trialDaysLeft = trialEndsAt
     ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000))
     : null
+
+  // Global Admin ("Overlord") only — gates the 3 seasonal themes below.
+  // Not a Pro perk: even a Basic-tier Overlord sees them; every other role,
+  // regardless of membership tier, never sees them rendered at all.
+  const isOverlord = user?.role === 'Admin'
+  const mainThemes = THEMES.filter(t => !t.adminOnly)
+  const overlordThemes = THEMES.filter(t => t.adminOnly)
+
+  // Shared swatch/label/lock rendering for both the main grid and the
+  // Overlord-only section below. positionClass only matters for the main
+  // grid, which needs one to satisfy its breakpoint-aware layout — the
+  // Overlord section is a plain grid with natural left-to-right order.
+  const renderThemeOption = (t: ThemeInfo, positionClass = '') => {
+    const locked = t.pro && !isPro
+    const selected = theme === t.id
+    const swatch = (
+      <span
+        className="flex h-9 w-full items-center justify-center gap-1.5 rounded-md border border-black/10"
+        style={{ backgroundColor: t.preview.bg }}
+      >
+        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.preview.accent }} />
+        <span className="h-1.5 w-7 rounded-full opacity-70" style={{ backgroundColor: t.preview.text }} />
+      </span>
+    )
+    const labelRow = (
+      <span className="flex items-center justify-between gap-1">
+        <span className="text-xs font-medium text-text truncate">{t.label}</span>
+        {locked
+          ? <Lock className="w-3 h-3 text-text/40 shrink-0" />
+          : selected && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+      </span>
+    )
+    if (locked) {
+      return (
+        <Link
+          key={t.id}
+          href="/upgrade"
+          title={`${t.description} — Pro theme, tap to upgrade`}
+          className={`flex flex-col gap-1.5 rounded-lg border border-border p-2 opacity-60 hover:opacity-100 hover:border-primary/50 transition-all min-h-0 min-w-0 ${positionClass}`}
+        >
+          {swatch}
+          {labelRow}
+        </Link>
+      )
+    }
+    return (
+      <button
+        key={t.id}
+        type="button"
+        onClick={() => selectTheme(t.id)}
+        aria-pressed={selected}
+        title={t.description}
+        className={`flex flex-col gap-1.5 rounded-lg border p-2 text-left transition-colors min-h-0 min-w-0 ${positionClass} ${
+          selected ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-primary/50'
+        }`}
+      >
+        {swatch}
+        {labelRow}
+      </button>
+    )
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
@@ -337,56 +400,18 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
               {isPro ? 'Pick how MyShiftX looks' : 'Pick how MyShiftX looks — unlock 4 premium themes with Pro ⭐'}
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {THEMES.map(t => {
-                const locked = t.pro && !isPro
-                const selected = theme === t.id
-                const swatch = (
-                  <span
-                    className="flex h-9 w-full items-center justify-center gap-1.5 rounded-md border border-black/10"
-                    style={{ backgroundColor: t.preview.bg }}
-                  >
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: t.preview.accent }} />
-                    <span className="h-1.5 w-7 rounded-full opacity-70" style={{ backgroundColor: t.preview.text }} />
-                  </span>
-                )
-                const labelRow = (
-                  <span className="flex items-center justify-between gap-1">
-                    <span className="text-xs font-medium text-text truncate">{t.label}</span>
-                    {locked
-                      ? <Lock className="w-3 h-3 text-text/40 shrink-0" />
-                      : selected && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
-                  </span>
-                )
-                if (locked) {
-                  return (
-                    <Link
-                      key={t.id}
-                      href="/upgrade"
-                      title={`${t.description} — Pro theme, tap to upgrade`}
-                      className={`flex flex-col gap-1.5 rounded-lg border border-border p-2 opacity-60 hover:opacity-100 hover:border-primary/50 transition-all min-h-0 min-w-0 ${THEME_GRID_POSITION[t.id]}`}
-                    >
-                      {swatch}
-                      {labelRow}
-                    </Link>
-                  )
-                }
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => selectTheme(t.id)}
-                    aria-pressed={selected}
-                    title={t.description}
-                    className={`flex flex-col gap-1.5 rounded-lg border p-2 text-left transition-colors min-h-0 min-w-0 ${THEME_GRID_POSITION[t.id]} ${
-                      selected ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    {swatch}
-                    {labelRow}
-                  </button>
-                )
-              })}
+              {mainThemes.map(t => renderThemeOption(t, THEME_GRID_POSITION[t.id] ?? ''))}
             </div>
+
+            {/* Overlord-only seasonal themes — never rendered for anyone else, Pro or not */}
+            {isOverlord && overlordThemes.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border">
+                <p className="text-xs font-medium text-text/50 mb-2">Seasonal (Overlord only)</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {overlordThemes.map(t => renderThemeOption(t))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Week Start */}
