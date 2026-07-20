@@ -33,6 +33,8 @@ export interface Database {
           trial_ends_at: string | null
           trial_used: boolean
           billing_cycle: BillingCycle | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           schedule_import_count: number
           schedule_import_month: string | null
           ical_token: string | null
@@ -56,6 +58,8 @@ export interface Database {
           trial_ends_at?: string | null
           trial_used?: boolean
           billing_cycle?: BillingCycle | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           schedule_import_count?: number
           schedule_import_month?: string | null
           ical_token?: string | null
@@ -79,6 +83,8 @@ export interface Database {
           trial_ends_at?: string | null
           trial_used?: boolean
           billing_cycle?: BillingCycle | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           schedule_import_count?: number
           schedule_import_month?: string | null
           ical_token?: string | null

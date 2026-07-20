@@ -4,6 +4,7 @@ import {
 import { AnimateIn } from '@/components/landing/AnimateIn'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
+import { CheckoutButton } from '@/components/features/CheckoutButton'
 import { createServerClient } from '@/lib/supabase/server'
 import { getMembership, isProTier } from '@/lib/auth/session'
 import { optionalServerEnv } from '@/lib/env'
@@ -45,6 +46,10 @@ const PAIN_POINTS = [
 ]
 
 const FAQS = [
+  {
+    q: 'How does the free trial work?',
+    a: "The Monthly plan starts with 14 days free. You enter a card up front so there's no interruption when the trial ends, but nothing is charged until day 15 — cancel any time before then and you pay nothing at all. Stripe emails you a reminder before the first charge. One trial per account.",
+  },
   {
     q: 'Can I cancel anytime?',
     a: "Yes — two clicks in the billing portal, no phone calls, no guilt trips. You keep Pro until the end of the period you've paid for, then drop back to Basic automatically.",
@@ -231,11 +236,23 @@ export default async function UpgradePage() {
                     <span className="font-accent text-4xl font-bold text-text">{plan.perMonth}</span>
                     <span className="text-text/50 text-sm">/mo</span>
                   </div>
+                  {plan.trialDays && !alreadyPro && (
+                    <p className="text-xs font-medium text-success mb-2">
+                      Start with {plan.trialDays} days free
+                    </p>
+                  )}
                   <p className="text-xs text-text/50 mb-6 flex-1">{plan.finePrint}</p>
                   {checkoutEnabled ? (
-                    <button className={`btn w-full gap-2 ${plan.featured ? 'btn-primary' : 'btn-outline'}`}>
-                      Go Pro {plan.name === 'Monthly' ? '' : `· ${plan.name}`}
-                    </button>
+                    <CheckoutButton
+                      planKey={plan.key}
+                      loggedIn={Boolean(user)}
+                      featured={plan.featured}
+                      label={
+                        plan.trialDays && !alreadyPro
+                          ? 'Start Free Trial'
+                          : `Go Pro${plan.name === 'Monthly' ? '' : ` · ${plan.name}`}`
+                      }
+                    />
                   ) : (
                     <button
                       disabled

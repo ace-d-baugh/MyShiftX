@@ -9,6 +9,7 @@ import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { PushNotificationsToggle } from '@/components/features/PushNotificationsToggle'
 import { IosInstallPrompt } from '@/components/features/IosInstallPrompt'
 import { CalendarSyncSection } from '@/components/features/CalendarSyncSection'
+import { MembershipSection } from '@/components/features/MembershipSection'
 import { TradeRecordSection } from '@/components/features/TradeRecordSection'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
@@ -38,6 +39,8 @@ interface ProfileClientProps {
   membershipTier?: 'Basic' | 'Pro' | 'Trial'
   /** ISO timestamp — only set while membershipTier is 'Trial'. */
   trialEndsAt?: string | null
+  /** False until STRIPE_SECRET_KEY is set — hides the billing portal button. */
+  billingEnabled?: boolean
 }
 
 // Theme picker grid placement: mobile is 2 columns / 3 rows, desktop (sm+) is
@@ -57,7 +60,7 @@ const THEME_GRID_POSITION: Partial<Record<Theme, string>> = {
   cyberpunk: 'row-start-3 col-start-2 sm:row-start-2 sm:col-start-3',
 }
 
-export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Basic', trialEndsAt = null }: ProfileClientProps) {
+export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Basic', trialEndsAt = null, billingEnabled = false }: ProfileClientProps) {
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -249,6 +252,12 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
           Welcome! Set a display name below before posting or joining boards.
         </div>
       )}
+
+      <MembershipSection
+        tier={membershipTier}
+        trialEndsAt={trialEndsAt}
+        billingEnabled={billingEnabled}
+      />
 
       {/* Account Info */}
       <div className="card shadow-sm">
