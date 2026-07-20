@@ -183,6 +183,89 @@
 }
 
 /*
+ * ── Overlord-only seasonal themes ───────────────────────────────────────────
+ * Christmas, Halloween, and Fourth of July. Never rendered in the picker for
+ * anyone but the global Admin ("Overlord") role — see visibleThemes() in
+ * lib/theme.ts. These CSS rules ship in the normal stylesheet like every
+ * other theme (no per-role bundle splitting); they simply never get their
+ * class applied to <html> for anyone else, so nothing here is ever visible
+ * to a non-Overlord user.
+ */
+
+/* Christmas — pine-dark background, candy-cane red, gold string-light accents */
+.theme-christmas {
+  --color-primary: 355 65% 50%;
+  --color-primary-light: 355 40% 20%;
+  --color-secondary: 140 30% 25%;
+  --color-accent: 45 80% 55%;
+  --color-secondary-accent: 45 90% 65%;
+  --color-text: 40 20% 92%;
+  --color-success: 140 55% 50%;
+  --color-info: 200 70% 60%;
+  --color-warning: 355 75% 60%;
+  --color-background: 150 25% 8%;
+  --color-foreground: 40 20% 92%;
+  --color-card: 150 20% 12%;
+  --color-card-foreground: 40 20% 92%;
+  --color-border: 150 15% 22%;
+  --color-input: 150 15% 22%;
+  --color-ring: 355 65% 50%;
+}
+
+/*
+ * Halloween — graveyard-purple-black background, pumpkin orange, eerie glow
+ * accents. --color-accent drives the Request-card title/border/icon color
+ * (see RequestCard.tsx) — it was purple (270°), nearly indistinguishable
+ * from --color-info (also 270°, which Trade badges use via .badge-trade).
+ * Moved to yellow (48°) so Requests and Trades read as clearly different
+ * colors, matching every other theme's Request-vs-Trade contrast.
+ */
+.theme-halloween {
+  --color-primary: 25 90% 55%;
+  --color-primary-light: 25 50% 18%;
+  --color-secondary: 270 35% 25%;
+  --color-accent: 48 90% 55%;
+  --color-secondary-accent: 80 70% 55%;
+  --color-text: 30 15% 92%;
+  --color-success: 100 50% 45%;
+  --color-info: 270 55% 65%;
+  --color-warning: 15 90% 55%;
+  --color-background: 270 30% 6%;
+  --color-foreground: 30 15% 92%;
+  --color-card: 270 25% 10%;
+  --color-card-foreground: 30 15% 92%;
+  --color-border: 270 20% 20%;
+  --color-input: 270 20% 20%;
+  --color-ring: 25 90% 55%;
+}
+
+/*
+ * Patriotic — crisp white background, Old Glory blue primary. --color-accent
+ * (Request color) is Old Glory red #DD3C4A; --color-info (Trade color) is a
+ * rich gold — the logo's body/star fills reference these same two variables
+ * directly (see themed-logo-tinted/-stars below) so the mark, Requests, and
+ * Trades all stay in exact lockstep with no duplicated color values.
+ */
+.theme-patriotic {
+  --color-primary: 220 75% 45%;
+  --color-primary-light: 220 70% 93%;
+  --color-secondary: 220 60% 85%;
+  --color-accent: 355 70% 55%;       /* #DD3C4A — Requests */
+  --color-secondary-accent: 45 85% 50%;
+  --color-text: 220 30% 20%;
+  --color-success: 145 55% 45%;
+  --color-info: 46 95% 45%;          /* patriotic gold — Trades */
+  --color-warning: 355 70% 50%;
+  --color-background: 0 0% 99%;
+  --color-foreground: 220 30% 20%;
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 220 30% 20%;
+  --color-border: 220 25% 88%;
+  --color-input: 220 25% 88%;
+  --color-ring: 220 75% 45%;
+}
+
+/*
  * :root prefix outranks the next/font variable classes on <html>
  * ((0,1,1) vs (0,1,0)), so both font vars resolve to monospace everywhere,
  * including `font-accent` headings.
@@ -194,33 +277,129 @@
 
 /*
  * ── Theme-aware logo ────────────────────────────────────────────────────────
- * ThemedLogo renders the gradient artwork plus a hidden silhouette span whose
- * shape comes from masking the black logo SVG. Light and dark keep the
- * artwork; each pro theme hides it and tints the silhouette instead.
+ * ThemedLogo renders the gradient artwork plus two hidden silhouette layers
+ * stacked in the same box: .themed-logo-tinted (masked from the full logo)
+ * for the main body, and .themed-logo-stars (masked from a stars-only SVG,
+ * pixel-aligned with the same star shapes) painted on top so a theme can
+ * give the stars their own color without a third logo asset — the star
+ * layer simply covers the matching stars in the body layer beneath it.
+ * Light and dark show the plain gradient artwork; every other theme hides it
+ * and shows the tinted layer(s) instead. Themes that don't need a distinct
+ * star color just leave .themed-logo-stars at its default display:none.
  */
-.themed-logo-tinted {
-  display: none;
+.themed-logo-wrap {
+  position: relative;
+  display: inline-block;
   aspect-ratio: 5000 / 1024;
+}
+.themed-logo-wrap .themed-logo-default,
+.themed-logo-wrap .themed-logo-tinted,
+.themed-logo-wrap .themed-logo-stars {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.themed-logo-tinted,
+.themed-logo-stars {
+  display: none;
+}
+.themed-logo-tinted {
   -webkit-mask: url('/logos/MyShiftX-Full-Logo-Black.svg') no-repeat center / contain;
   mask: url('/logos/MyShiftX-Full-Logo-Black.svg') no-repeat center / contain;
+}
+.themed-logo-stars {
+  -webkit-mask: url('/logos/MyShiftX-Stars-Only-Black.svg') no-repeat center / contain;
+  mask: url('/logos/MyShiftX-Stars-Only-Black.svg') no-repeat center / contain;
 }
 .theme-midnight .themed-logo-default,
 .theme-cyberpunk .themed-logo-default,
 .theme-nordic .themed-logo-default,
-.theme-kitty .themed-logo-default { display: none; }
+.theme-kitty .themed-logo-default,
+.theme-christmas .themed-logo-default,
+.theme-halloween .themed-logo-default,
+.theme-patriotic .themed-logo-default { display: none; }
 .theme-midnight .themed-logo-tinted,
 .theme-cyberpunk .themed-logo-tinted,
 .theme-nordic .themed-logo-tinted,
-.theme-kitty .themed-logo-tinted { display: block; }
+.theme-kitty .themed-logo-tinted,
+.theme-christmas .themed-logo-tinted,
+.theme-halloween .themed-logo-tinted,
+.theme-patriotic .themed-logo-tinted { display: block; }
+
 .theme-midnight .themed-logo-tinted,
 .theme-nordic .themed-logo-tinted { background: hsl(var(--color-primary)); }
+
+/*
+ * Cyberpunk: transparent fill, neon outline + glow in the theme's text color.
+ *
+ * First attempt used a filled mask + background:transparent + drop-shadow()
+ * to fake a stroke — that doesn't work: drop-shadow() shadows an element's
+ * own rendered (post-mask) pixels, and a fully transparent fill has none,
+ * so the "outline" was invisible everywhere, not just faint. A masked shape
+ * also has no CSS border/stroke property to fall back on.
+ *
+ * Fixed by masking with an actual stroke-only SVG instead of the filled one
+ * (MyShiftX-Full-Logo-Outline-Black.svg — same paths, fill:none/stroke:black
+ * cascaded from the root svg element, so the mask itself only has alpha
+ * along a thin ring per letter/star, leaving the interior genuinely
+ * unmasked/invisible). background is a real solid color now — visible only
+ * where the mask reveals it, i.e. the outline — plus one blurred drop-shadow
+ * for the glow, which now has real opaque pixels to shadow.
+ */
 .theme-cyberpunk .themed-logo-tinted {
-  background: linear-gradient(90deg, hsl(320 100% 60%), hsl(190 100% 60%));
-  filter: drop-shadow(0 0 10px hsl(320 100% 60% / 0.45));
+  -webkit-mask-image: url('/logos/MyShiftX-Full-Logo-Outline-Black.svg');
+  mask-image: url('/logos/MyShiftX-Full-Logo-Outline-Black.svg');
+  background: hsl(var(--color-text));
 }
+/* Stars break from the outline treatment — solid filled magenta, no border.
+   This layer is masked from the filled (not stroke) stars-only SVG and sits
+   on top of the outlined body above, fully covering the outlined star shape
+   beneath it. */
+.theme-cyberpunk .themed-logo-stars {
+  display: block;
+  background: #FF33BB;
+}
+/* One glow around the whole composite (outline body + solid stars), matching
+   the h1/h2/h3 heading treatment exactly (same color/blur/opacity) rather
+   than each layer glowing separately. Applied on the wrapper, since filter
+   on a parent shadows the rendered result of all its children as one shape. */
+.theme-cyberpunk .themed-logo-wrap {
+  filter: drop-shadow(0 0 14px hsl(var(--color-primary) / 0.45));
+}
+
 .theme-kitty .themed-logo-tinted {
   /* Cycles all four source hues — mint, sky, lavender, blush */
   background: linear-gradient(90deg, hsl(90 55% 68%), hsl(191 70% 70%), hsl(270 70% 80%), hsl(355 75% 80%));
+}
+
+/* Christmas: solid red body, gold stars (reuses the existing primary/star tokens) */
+.theme-christmas .themed-logo-tinted {
+  background: hsl(var(--color-primary));
+}
+.theme-christmas .themed-logo-stars {
+  display: block;
+  background: hsl(var(--color-secondary-accent));
+  filter: drop-shadow(0 0 6px hsl(var(--color-secondary-accent) / 0.55));
+}
+
+/* Halloween: solid purple body, pumpkin-orange glowing stars (exact hexes given) */
+.theme-halloween .themed-logo-tinted {
+  background: #A675D7;
+}
+.theme-halloween .themed-logo-stars {
+  display: block;
+  background: #F37B25;
+  filter: drop-shadow(0 0 6px rgba(243, 123, 37, 0.55));
+}
+
+/* Patriotic: body = Request red, stars = Trade gold — same tokens as the wall badges */
+.theme-patriotic .themed-logo-tinted {
+  background: hsl(var(--color-accent));
+}
+.theme-patriotic .themed-logo-stars {
+  display: block;
+  background: hsl(var(--color-info));
 }
 
 /* ── Pro theme flourishes ── */
@@ -259,6 +438,26 @@
 /* Kitty: a soft pastel glow under cards */
 .theme-kitty .card {
   box-shadow: 0 2px 12px hsl(var(--color-primary) / 0.12);
+}
+
+/* Christmas: warm gold string-light glow on primary buttons */
+.theme-christmas .btn-primary {
+  box-shadow: 0 0 12px hsl(45 85% 55% / 0.35);
+}
+.theme-christmas .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 0 20px hsl(45 85% 55% / 0.5);
+}
+
+/* Halloween: eerie glow on headings, witching-hour purple */
+.theme-halloween h1,
+.theme-halloween h2,
+.theme-halloween h3 {
+  text-shadow: 0 0 12px hsl(270 60% 55% / 0.4);
+}
+
+/* Patriotic: crisp blue pop on hover, matches the Nordic/Kitty treatment */
+.theme-patriotic .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 18px hsl(220 75% 45% / 0.3);
 }
 
 @layer components {
@@ -436,17 +635,6 @@
 }
 .theme-cyberpunk .skeleton-soft {
   background-image: linear-gradient(135deg, hsl(285 35% 10%) 0%, hsl(300 40% 14%) 35%, hsl(320 35% 17%) 50%, hsl(300 40% 14%) 65%, hsl(285 35% 10%) 100%);
-}
-
-/* Dracula: slate shimmer */
-.theme-dracula .skeleton {
-  background-image: linear-gradient(135deg, hsl(232 15% 24%) 0%, hsl(232 15% 29%) 35%, hsl(233 16% 33%) 50%, hsl(232 15% 29%) 65%, hsl(232 15% 24%) 100%);
-}
-.theme-dracula .skeleton-strong {
-  background-image: linear-gradient(135deg, hsl(232 15% 28%) 0%, hsl(233 16% 33%) 35%, hsl(234 17% 38%) 50%, hsl(233 16% 33%) 65%, hsl(232 15% 28%) 100%);
-}
-.theme-dracula .skeleton-soft {
-  background-image: linear-gradient(135deg, hsl(232 15% 21%) 0%, hsl(232 15% 25%) 35%, hsl(233 16% 29%) 50%, hsl(232 15% 25%) 65%, hsl(232 15% 21%) 100%);
 }
 
 /* Nordic: warm beige/sage shimmer */
