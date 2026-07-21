@@ -55,3 +55,7 @@ docs/
 schedule-from-image.md
 Test-Schedule-Image.png
 .next-build/
+
+# Claude Code
+.agents/
+.claude/

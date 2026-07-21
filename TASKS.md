@@ -246,7 +246,7 @@ The following Pro and Free features have not been scoped yet and will need dedic
   - Add price: **$26.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $3." price_1TvLnJRkt6cn1JfFOwpqG5xE
   - Add price: **$47.99 / year** (recurring, yearly) "Pro Annual" Badge: SAVE 20% BEST VALUE or 2 MONTHS FREE "Billed annually. Saves you $12 compared to monthly." price_1TvLnJRkt6cn1JfFBXS1THIJ
   - Note the **Price IDs** for each (format: `price_xxxxx`) — Claude needs these
-- ⚠️ **`MyShiftX Pro Trial` product / $0.00 price — archive this, it's a trap.** A $0.00 price that recurs every 14 days doesn't convert to paid; it renews at $0.00 forever, so anyone picking it gets permanent free Pro. Stripe deliberately doesn't expose trial days on the Price edit page either — the price-level `trial_from_plan` route is deprecated in favour of `subscription_data.trial_period_days` on the Checkout Session ([docs](https://docs.stripe.com/payments/checkout/free-trials)). The trial now lives as `trialDays: 14` on the Monthly plan in `lib/pricing.ts` and is passed to Stripe at checkout; Stripe still owns the whole trial (card verification, countdown, reminder email, first charge, dunning).
+- ✅ **`MyShiftX Pro Trial` product / $0.00 price — archive this, it's a trap.** A $0.00 price that recurs every 14 days doesn't convert to paid; it renews at $0.00 forever, so anyone picking it gets permanent free Pro. Stripe deliberately doesn't expose trial days on the Price edit page either — the price-level `trial_from_plan` route is deprecated in favour of `subscription_data.trial_period_days` on the Checkout Session ([docs](https://docs.stripe.com/payments/checkout/free-trials)). The trial now lives as `trialDays: 14` on the Monthly plan in `lib/pricing.ts` and is passed to Stripe at checkout; Stripe still owns the whole trial (card verification, countdown, reminder email, first charge, dunning).
 - ✅ Stripe Dashboard → **Developers → API Keys** → copy **Publishable Key** and **Secret Key**
 - ✅ Add to Vercel environment variables:
   - `STRIPE_SECRET_KEY`
@@ -256,6 +256,15 @@ The following Pro and Free features have not been scoped yet and will need dedic
   - URL: `https://myshiftx.com/api/webhooks/stripe`
   - Events to listen for: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`
   - Copy the **Signing Secret** → add as `STRIPE_WEBHOOK_SECRET` in Vercel
+- ✅ In Stripe Dashboard → **Products** → **Add product**: `MyShiftX Pro`
+  - Add test price: **$4.99 / month** (recurring, monthly) "Pro Monthly" Badge: None (or "Best for Flexibility") price_1TvRbbRkt6cn1JfFLHAmjG3N
+  - Add test price: **$13.99 / 3 month** (recurring, monthly) "6.7% off monthly" price_1TvRbVRkt6cn1JfFWzCnDWPX
+  - Add test price: **$26.99 / 6 months** (recurring, every 6 months) "Pro Semi-Annual" Badge: SAVE 10% "Billed every 6 months. Saves you $3." price_1TvRbKRkt6cn1JfFmxAKX8VX
+  - Add test price: **$47.99 / year** (recurring, yearly) "Pro Annual" Badge: SAVE 20% BEST VALUE or 2 MONTHS FREE "Billed annually. Saves you $12 compared to monthly." price_1TvRb1Rkt6cn1JfFSWmXBHJ4
+- ✅ In Stripe Create Test API Keys → copy **Publishable Key** and **Secret Key**
+  - Add to Vercel env: `STRIPE_SECRET_KEY`
+  - Add to Vercel env: `STRIPE_PUBLISHABLE_KEY`
+
 
 **🤖 Claude handled (shipped `2026-07-20`; code complete, migration NOT yet applied):**
 - ✅ `stripe` npm package (v22.3.2). Client in `lib/stripe.ts`, pinned to API version `2026-06-24.dahlia` so a future `npm update` can't shift response shapes under the webhook. Whole surface gated on `STRIPE_SECRET_KEY` via `isStripeConfigured()` — same env-flip pattern as AdSense/push/Gemini
@@ -269,9 +278,9 @@ The following Pro and Free features have not been scoped yet and will need dedic
 - ✅ Verified: `tsc --noEmit` clean, `next lint` clean, `next build` passes with all three API routes registered
 
 **👤 You handle (after Claude ships the code):**
-- [ ] **Apply the migration** — `20260720120000_stripe_customer_columns.sql` is written but NOT yet applied to production. Nothing works until it is
+- ✅ **Apply the migration** — `20260720120000_stripe_customer_columns.sql`. Applied to prod `2026-07-20` via Supabase MCP (`apply_migration`) after a first checkout test proved the columns were missing — every webhook was 500ing on `column users.stripe_customer_id does not exist`. Columns + trigger now confirmed live
 - [ ] **Switch to test-mode keys before testing.** `.env.local` currently holds `sk_live_`/`pk_live_` keys — `4242 4242 4242 4242` only works in test mode, and a real card against live keys is a real charge. Note **Price IDs are mode-specific**: the four `STRIPE_PRICE_*` values in `.env.local` are live-mode IDs and need test-mode equivalents when you flip
-- [ ] Add to Vercel env: `STRIPE_PRICE_PRO_MONTHLY`, `_QUARTERLY`, `_SEMIANNUAL`, `_ANNUAL` (live-mode IDs are already in `.env.local`)
+- ✅ Add to Vercel env: `STRIPE_PRICE_PRO_MONTHLY`, `_QUARTERLY`, `_SEMIANNUAL`, `_ANNUAL` (live-mode IDs are already in `.env.local`)
 - ✅ Add `customer.subscription.created` to the webhook endpoint's event list in the Stripe Dashboard — the handler covers it, but the endpoint was configured before it existed
 - [ ] Enable the Customer Portal once in Stripe Dashboard → Settings → Billing → Customer portal (it's off by default; `/api/customer-portal` 500s until you save that config)
 - [ ] Archive the `MyShiftX Pro Trial` product and its $0.00 price (see the ⚠️ note above)
