@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { displayNameRegex } from '@/lib/validations/auth'
 import { getSettings, saveSettings, type UserSettings, type WeekStart, type DateFormat, type TimeFormat, DEFAULT_SETTINGS } from '@/lib/settings'
-import { getStoredTheme, applyTheme, THEMES, isProTheme, type Theme, type ThemeInfo } from '@/lib/theme'
+import { getStoredTheme, applyTheme, freeThemeFallback, THEMES, isProTheme, type Theme, type ThemeInfo } from '@/lib/theme'
 import { upsertPreferences } from '@/lib/preferences'
 import type { GlobalRole } from '@/lib/database.types'
 
@@ -82,9 +82,21 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
   const [siteSettings, setSiteSettings] = useState<UserSettings | null>(null)
   const [theme, setTheme] = useState<Theme>('light')
   useEffect(() => {
-    setSiteSettings(getSettings())
-    setTheme(getStoredTheme())
-  }, [])
+    const settings = getSettings()
+    setSiteSettings(settings)
+    const stored = getStoredTheme()
+    // Profile is the enforcement point for Pro themes: a downgraded member
+    // keeps their look everywhere else, but landing here re-checks Pro status
+    // and reverts a now-locked theme to its free equivalent (Nordic/Kitty →
+    // Light, Midnight/Cyberpunk → Dark). Persist so the revert sticks and
+    // syncs across devices.
+    const effective = isPro ? stored : freeThemeFallback(stored)
+    setTheme(effective)
+    if (effective !== stored) {
+      applyTheme(effective)
+      upsertPreferences(sessionUserId, { ...settings, theme: effective })
+    }
+  }, [isPro, sessionUserId])
 
   const syncToDB = (settings: UserSettings, t: Theme) => {
     upsertPreferences(sessionUserId, { ...settings, theme: t })

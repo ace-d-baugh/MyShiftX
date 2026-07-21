@@ -54,6 +54,19 @@ export function isProTheme(theme: Theme): boolean {
   return THEMES.find(t => t.id === theme)?.pro ?? false
 }
 
+/**
+ * The free theme a Pro theme falls back to when a non-Pro user lands on it
+ * (e.g. after downgrading). A downgraded member keeps their look everywhere
+ * else — this only fires on the Profile page, which re-checks Pro status and
+ * reverts. Dark-based Pro themes (Midnight, Cyberpunk) fall back to Dark;
+ * light-based ones (Nordic, Kitty) fall back to Light. Non-Pro themes are
+ * returned unchanged.
+ */
+export function freeThemeFallback(theme: Theme): Theme {
+  if (!isProTheme(theme)) return theme
+  return DARK_BASED.includes(theme) ? 'dark' : 'light'
+}
+
 export function getStoredTheme(): Theme {
   if (typeof window === 'undefined') return 'light'
   const stored = localStorage.getItem(THEME_STORAGE_KEY)

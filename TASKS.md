@@ -290,7 +290,7 @@ The following Pro and Free features have not been scoped yet and will need dedic
 - ✅ Renewal-failure path: forced a real `invoice.payment_failed` (attached Stripe's always-fails card `pm_card_chargeCustomerFail`, ended the trial early). Email **delivered** via Resend ("Your MyShiftX Pro payment did not go through"); member correctly **stayed Pro** (`past_due` keeps Pro by design). Note: the $2.25 charge in that test was a proration artifact of ending the trial early — a real trial user is charged the full $4.99 on day 14, no proration
 - ✅ Cancel path: immediate cancel → `customer.subscription.deleted` → `membership` back to `Basic`, `billing_cycle`/`stripe_subscription_id` cleared, `stripe_customer_id` retained (so a re-subscribe reuses the same customer)
 - ✅ Fixed along the way: canceled users no longer keep a stale `trial_ends_at` (webhook now nulls it for Basic). Duplicate test subs (from pre-fix retries) all shared one `user_id`, so deleting them fired delete-webhooks that flipped the user to Basic — a test-only artifact, impossible in prod where the "already Pro" guard blocks a second sub
-- [ ] Test the Customer **Portal** UI itself once in the browser (Manage Billing → cancel / update card / download invoice) — the cancel path was verified via API, but clicking through the hosted portal is worth doing once
+- ✅ Test the Customer **Portal** UI itself once in the browser (Manage Billing → cancel / update card / download invoice) — the cancel path was verified via API, but clicking through the hosted portal is worth doing once
 
 ---
 
@@ -299,18 +299,18 @@ The following Pro and Free features have not been scoped yet and will need dedic
 Everything above was **test mode**. Live mode is a completely separate world in Stripe: separate keys, separate products/prices, separate webhook endpoint, separate portal config. Nothing configured in the sandbox carries over.
 
 **Stripe Dashboard — switch to LIVE mode (toggle off "Test mode" top-right):**
-- [ ] Confirm the live `MyShiftX Pro` product exists with all four live prices (the live Price IDs are already in TASKS.md / commented in `.env.local`: monthly `price_1TvLnJ…FJ9FfomWy`, quarterly `…FxwJwoVZh`, semiannual `…FOwpqG5xE`, annual `…FBXS1THIJ`)
-- [ ] Archive the live `MyShiftX Pro Trial` $0.00 product (the trap price) if it still exists in live mode
-- [ ] **Developers → Webhooks → Add endpoint** (live mode): URL `https://myshiftx.com/api/webhooks/stripe`, events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`. Copy that endpoint's **live** `whsec_` — it is NOT the local `stripe listen` one
-- [ ] **Settings → Billing → Customer portal** (live mode): enable Cancel subscription, Update payment method, Invoice history, then **Save** (portal config is per-mode; the test-mode save doesn't count)
-- [ ] Confirm business/branding is set for live invoices: **Settings → Branding** (logo, accent color, support email) so live invoice PDFs read "MyShiftX"
+- ✅ Confirm the live `MyShiftX Pro` product exists with all four live prices (the live Price IDs are already in TASKS.md / commented in `.env.local`: monthly `price_1TvLnJ…FJ9FfomWy`, quarterly `…FxwJwoVZh`, semiannual `…FOwpqG5xE`, annual `…FBXS1THIJ`)
+- ✅ Archive the live `MyShiftX Pro Trial` $0.00 product (the trap price) if it still exists in live mode
+- ✅ **Developers → Webhooks → Add endpoint** (live mode): URL `https://myshiftx.com/api/webhooks/stripe`, events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`. Copy that endpoint's **live** `whsec_` — it is NOT the local `stripe listen` one
+- ✅ **Settings → Billing → Customer portal** (live mode): enable Cancel subscription, Update payment method, Invoice history, then **Save** (portal config is per-mode; the test-mode save doesn't count)
+- ✅ Confirm business/branding is set for live invoices: **Settings → Branding** (logo, accent color, support email) so live invoice PDFs read "MyShiftX"
 
 **Vercel → Project → Settings → Environment Variables (Production):**
-- [ ] `STRIPE_SECRET_KEY` = the **live** `sk_live_…` key
-- [ ] `STRIPE_PUBLISHABLE_KEY` = the **live** `pk_live_…` key
-- [ ] `STRIPE_WEBHOOK_SECRET` = the **live** endpoint's `whsec_…` (from the step above — not the CLI one)
-- [ ] `STRIPE_PRICE_PRO_MONTHLY` / `_QUARTERLY` / `_SEMIANNUAL` / `_ANNUAL` = the four **live** Price IDs
-- [ ] Redeploy so the new env vars take effect (Vercel doesn't apply env changes to the running deployment automatically)
+- ✅ `STRIPE_SECRET_KEY` = the **live** `sk_live_…` key
+- ✅ `STRIPE_PUBLISHABLE_KEY` = the **live** `pk_live_…` key
+- ✅ `STRIPE_WEBHOOK_SECRET` = the **live** endpoint's `whsec_…` (from the step above — not the CLI one)
+- ✅ `STRIPE_PRICE_PRO_MONTHLY` / `_QUARTERLY` / `_SEMIANNUAL` / `_ANNUAL` = the four **live** Price IDs
+- ✅ Redeploy so the new env vars take effect (Vercel doesn't apply env changes to the running deployment automatically)
 
 **Post-deploy smoke test (live mode, real card, small commitment):**
 - [ ] On production, run one real checkout on the **Monthly** plan (real card, you can cancel immediately after) → confirm you land on `/upgrade/success` as Trial and your DB row flips
@@ -326,16 +326,16 @@ Everything above was **test mode**. Live mode is a completely separate world in 
 
 **🤖 Claude handles:**
 - ✅ `2026-07-09`: `/upgrade` page built — hero ("Stop Refreshing. Start Swapping."), 4 pain-point cards, 4-card pricing grid (Monthly/3-Month/6-Month/Annual with per-month framing + savings badges, Annual featured), Basic-vs-Pro comparison table (coming-soon rows labeled honestly), FAQ accordion, footer CTA. Plan data + comparison rows live in `lib/pricing.ts` (single source of truth; each plan carries its future `STRIPE_PRICE_*` env name). Buy buttons render "Launching Soon" until `STRIPE_SECRET_KEY` is set — same env-flip pattern as everything else. Already-Pro members see a thank-you ribbon instead of CTAs. Added to sitemap.
-- [ ] Wire each "Go Pro" button to `/api/checkout` with the correct Price ID (blocked on Task 7 Stripe setup — buttons + price IDs are staged in `lib/pricing.ts`)
+- ✅ Wire each "Go Pro" button to `/api/checkout` with the correct Price ID (blocked on Task 7 Stripe setup — buttons + price IDs are staged in `lib/pricing.ts`)
 - ✅ `2026-07-09`: "Upgrade to Pro" ⭐ entry in the account dropdown for Basic users (`showUpgrade` prop on Navbar, driven by the tier signal in the dashboard layout)
 - ✅ `2026-07-09`: Dismissible-per-session upgrade nudge banner on the Wall for Basic users (`UpgradeNudge`, sessionStorage)
-- [ ] Post-purchase: redirect to a `/upgrade/success` confirmation page (with Task 7)
+- ✅ Post-purchase: redirect to a `/upgrade/success` confirmation page (with Task 7)
 
 **👤 You handle:**
-- [ ] Review the copy Claude writes — adjust any phrasing to match your voice
-- [ ] Approve the design before Claude calls it done
-- [ ] Decide trial length: 7 days, 14 days, or 30 days
-- [ ] Decide whether trial requires a credit card upfront (Stripe supports both options)
+- ✅ Review the copy Claude writes — adjust any phrasing to match your voice
+- ✅ Approve the design before Claude calls it done
+- ✅ Decide trial length: 7 days, 14 days, or 30 days
+- ✅ Decide whether trial requires a credit card upfront (Stripe supports both options)
 
 ---
 
@@ -365,7 +365,7 @@ Everything above was **test mode**. Live mode is a completely separate world in 
 - ✅ `2026-07-09`: **Wall auto-refresh (Realtime)** — Basic users' realtime events raise a "New activity — refresh to see it" banner (with a "Pro members see new posts instantly" upsell link) instead of applying live; Pro/Trial get the live Wall via the `liveWall` prop
 - ✅ **Ad suppression** — already live via `getShowAds()` + `AdRail` (Task 12)
 - ✅ **Trial expiration** — handled by the existing daily expirations cron (demotes Trial→Basic and clears `trial_ends_at`); the profile badge shows days remaining, so no separate page-load gate/modal needed
-- [ ] **Trial eligibility check** (`trial_used`) — lands with the trial start flow in Task 7 (Stripe); `getMembership()` already surfaces `trialUsed`
+- ✅ **Trial eligibility check** (`trial_used`) — lands with the trial start flow in Task 7 (Stripe); `getMembership()` already surfaces `trialUsed`
 - ✅ `2026-07-09`: Membership badge on Profile — Basic shows "Basic · Upgrade ⭐" linking to /upgrade; Pro shows "⭐ Pro"; Trial shows "⭐ Trial · N days left"
 
 **👤 You handle:**
