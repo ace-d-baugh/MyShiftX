@@ -182,7 +182,7 @@ export default async function UpgradePage() {
 
           {alreadyPro && (
             <AnimateIn className="mb-8">
-              <div className="max-w-xl mx-auto text-center bg-success/10 border border-success/20 text-success rounded-xl px-5 py-4 text-sm font-medium">
+              <div className="max-w-xl mx-auto text-center bg-success/30 border border-success/70 text-text rounded-xl px-5 py-4 text-sm font-medium">
                 <Star className="w-4 h-4 inline -mt-0.5 mr-1.5" />
                 You&apos;re already Pro — everything below is yours. Thank you for supporting MyShiftX!
               </div>

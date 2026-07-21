@@ -282,12 +282,41 @@ The following Pro and Free features have not been scoped yet and will need dedic
 - [ ] **Switch to test-mode keys before testing.** `.env.local` currently holds `sk_live_`/`pk_live_` keys — `4242 4242 4242 4242` only works in test mode, and a real card against live keys is a real charge. Note **Price IDs are mode-specific**: the four `STRIPE_PRICE_*` values in `.env.local` are live-mode IDs and need test-mode equivalents when you flip
 - ✅ Add to Vercel env: `STRIPE_PRICE_PRO_MONTHLY`, `_QUARTERLY`, `_SEMIANNUAL`, `_ANNUAL` (live-mode IDs are already in `.env.local`)
 - ✅ Add `customer.subscription.created` to the webhook endpoint's event list in the Stripe Dashboard — the handler covers it, but the endpoint was configured before it existed
-- [ ] Enable the Customer Portal once in Stripe Dashboard → Settings → Billing → Customer portal (it's off by default; `/api/customer-portal` 500s until you save that config)
 - [ ] Archive the `MyShiftX Pro Trial` product and its $0.00 price (see the ⚠️ note above)
-- [ ] Use **Stripe CLI** (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`) to test webhooks locally — it prints a `whsec_` for local use that differs from the production one
-- [ ] Run a test purchase with `4242 4242 4242 4242` and confirm `membership` flips to `'Trial'` (monthly) or `'Pro'` in the DB
-- [ ] Test cancellation flow via Customer Portal — confirm `membership` flips back to `'Basic'`
-- [ ] Test failed payment via test card `4000 0000 0000 9995` — confirm warning email arrives
+
+**✅ Local sandbox testing — all four flows verified end-to-end `2026-07-20` (test user Lucas Hayes):**
+- ✅ Checkout → Stripe → webhook → DB: `membership` flips to `Trial` (monthly), `billing_cycle=monthly`, `trial_used=true`, customer + subscription IDs linked
+- ✅ First real gotcha caught: every webhook was 500ing because migration `20260720120000` had been marked done but never applied — fixed by applying it (see the migration line above)
+- ✅ Renewal-failure path: forced a real `invoice.payment_failed` (attached Stripe's always-fails card `pm_card_chargeCustomerFail`, ended the trial early). Email **delivered** via Resend ("Your MyShiftX Pro payment did not go through"); member correctly **stayed Pro** (`past_due` keeps Pro by design). Note: the $2.25 charge in that test was a proration artifact of ending the trial early — a real trial user is charged the full $4.99 on day 14, no proration
+- ✅ Cancel path: immediate cancel → `customer.subscription.deleted` → `membership` back to `Basic`, `billing_cycle`/`stripe_subscription_id` cleared, `stripe_customer_id` retained (so a re-subscribe reuses the same customer)
+- ✅ Fixed along the way: canceled users no longer keep a stale `trial_ends_at` (webhook now nulls it for Basic). Duplicate test subs (from pre-fix retries) all shared one `user_id`, so deleting them fired delete-webhooks that flipped the user to Basic — a test-only artifact, impossible in prod where the "already Pro" guard blocks a second sub
+- [ ] Test the Customer **Portal** UI itself once in the browser (Manage Billing → cancel / update card / download invoice) — the cancel path was verified via API, but clicking through the hosted portal is worth doing once
+
+---
+
+#### 🚀 Production go-live checklist (Stripe + Vercel) — do these before real customers
+
+Everything above was **test mode**. Live mode is a completely separate world in Stripe: separate keys, separate products/prices, separate webhook endpoint, separate portal config. Nothing configured in the sandbox carries over.
+
+**Stripe Dashboard — switch to LIVE mode (toggle off "Test mode" top-right):**
+- [ ] Confirm the live `MyShiftX Pro` product exists with all four live prices (the live Price IDs are already in TASKS.md / commented in `.env.local`: monthly `price_1TvLnJ…FJ9FfomWy`, quarterly `…FxwJwoVZh`, semiannual `…FOwpqG5xE`, annual `…FBXS1THIJ`)
+- [ ] Archive the live `MyShiftX Pro Trial` $0.00 product (the trap price) if it still exists in live mode
+- [ ] **Developers → Webhooks → Add endpoint** (live mode): URL `https://myshiftx.com/api/webhooks/stripe`, events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`. Copy that endpoint's **live** `whsec_` — it is NOT the local `stripe listen` one
+- [ ] **Settings → Billing → Customer portal** (live mode): enable Cancel subscription, Update payment method, Invoice history, then **Save** (portal config is per-mode; the test-mode save doesn't count)
+- [ ] Confirm business/branding is set for live invoices: **Settings → Branding** (logo, accent color, support email) so live invoice PDFs read "MyShiftX"
+
+**Vercel → Project → Settings → Environment Variables (Production):**
+- [ ] `STRIPE_SECRET_KEY` = the **live** `sk_live_…` key
+- [ ] `STRIPE_PUBLISHABLE_KEY` = the **live** `pk_live_…` key
+- [ ] `STRIPE_WEBHOOK_SECRET` = the **live** endpoint's `whsec_…` (from the step above — not the CLI one)
+- [ ] `STRIPE_PRICE_PRO_MONTHLY` / `_QUARTERLY` / `_SEMIANNUAL` / `_ANNUAL` = the four **live** Price IDs
+- [ ] Redeploy so the new env vars take effect (Vercel doesn't apply env changes to the running deployment automatically)
+
+**Post-deploy smoke test (live mode, real card, small commitment):**
+- [ ] On production, run one real checkout on the **Monthly** plan (real card, you can cancel immediately after) → confirm you land on `/upgrade/success` as Trial and your DB row flips
+- [ ] In Stripe live **Developers → Webhooks**, confirm the endpoint shows recent `200` deliveries (not `4xx`/`5xx`)
+- [ ] Cancel that subscription via Manage Billing → confirm you return to Basic
+- [ ] (Optional) Refund the proration/charge from the live Dashboard if you charged yourself
 
 ---
 

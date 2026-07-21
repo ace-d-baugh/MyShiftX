@@ -89,7 +89,11 @@ async function syncSubscription(
     membership: tier,
     // An unrecognized price still grants Pro; we just don't guess the cycle.
     billing_cycle: tier === 'Basic' ? null : plan?.billingCycle ?? null,
-    trial_ends_at: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
+    // A canceled/expired sub keeps a trial_end timestamp on the Stripe object;
+    // don't carry it onto a Basic user, or their record looks like it has a
+    // pending trial. Only Trial/Pro rows keep the date.
+    trial_ends_at:
+      tier === 'Basic' ? null : sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
     stripe_subscription_id: tier === 'Basic' ? null : sub.id,
   }
 
