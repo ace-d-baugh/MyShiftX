@@ -844,7 +844,15 @@ Board role **"Leader" now displays as "Admin"**; global role **"Admin" now displ
 
 ## 🔒 Security & Stability Fixes — Audit of 2026-07-27
 
-### 📊 Progress at a glance — last updated 2026-07-27 03:05
+### ✅ ALL ITEMS COMPLETE — 2026-07-27 04:40
+
+Every issue from the audit is fixed on **both** apps, plus one Critical (S16) found during the work that the audit had mis-rated. All database changes are applied and verified on both projects. **The only thing left is to deploy** the final batch of code (S9/S10/S12/S13/S14) — none of it depends on a database step, so it can go whenever suits you.
+
+**Two findings were caught only because the fix was tested rather than read.** Both looked correct on the page:
+- The `invite_code` revoke did nothing — a column-level `REVOKE` can't subtract from a table-level grant.
+- S16 wasn't "can queue a join request without a code" at all; it let any account make itself **Admin of any board**.
+
+### 📊 Progress at a glance — last updated 2026-07-27 04:40
 
 | Item | MyShiftX | WDWShiftX | Notes |
 |---|---|---|---|
@@ -859,7 +867,11 @@ Board role **"Leader" now displays as "Admin"**; global role **"Admin" now displ
 | **S15** silent notify failures 🟢 | ✅ `7047edf` | ✅ `0b73827` | Shipped with S1 |
 | SQL files for WDW's database | n/a | ✅ `6ae7247` | 👤 **Two files to run — see below** |
 | **S6** Stripe event ordering 🟡 | ✅ `0d5487b` | ❌ n/a (no billing) | DB applied; also makes Stripe retries idempotent |
-| S9, S10, S12, S13, S14 | ⏳ not started | ⏳ not started | |
+| **S9** realtime storm 🟡 | ✅ `79f297a` | ✅ `d5a5561` | Scoped subscription + coalesced refresh |
+| **S10** sequential fan-out 🟡 | ✅ `79f297a` | ✅ `d5a5561` | Batches of 8, `allSettled` |
+| **S12** middleware allowlist 🟡 | ✅ `79f297a` | ✅ `d5a5561` | Inverted — private by default |
+| **S13** cron leaks + timing 🟢 | ✅ `79f297a` | ✅ `d5a5561` | Constant-time compare, no raw errors |
+| **S14** silent no-op 🟢 | ✅ `79f297a` | ✅ `d5a5561` | Returns proper not-found |
 | **S16** self-promote to board Admin 🔴 | ✅ `42775d1` | ⛔ **run STEP3 now** | Critical, not High — see below |
 | **S8** column lock | ✅ deployed + applied | ✅ deployed + applied | Both verified PASS |
 
