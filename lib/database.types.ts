@@ -240,6 +240,7 @@ export interface Database {
           expires_at: string
           removed_reason: RemovedReason | null
           removed_by_user_id: string | null
+          bundle_id: string | null
         }
         Insert: {
           id?: string
@@ -257,6 +258,7 @@ export interface Database {
           created_at?: string
           removed_reason?: RemovedReason | null
           removed_by_user_id?: string | null
+          bundle_id?: string | null
         }
         Update: {
           id?: string
@@ -274,6 +276,7 @@ export interface Database {
           created_at?: string
           removed_reason?: RemovedReason | null
           removed_by_user_id?: string | null
+          bundle_id?: string | null
         }
         Relationships: [
           {
@@ -600,6 +603,7 @@ export interface Database {
           claimant_id: string
           owner_id: string
           board_id: string | null
+          bundle_id: string | null
           status: ClaimStatus
           created_at: string
           responded_at: string | null
@@ -611,6 +615,7 @@ export interface Database {
           claimant_id: string
           owner_id: string
           board_id?: string | null
+          bundle_id?: string | null
           status?: ClaimStatus
           created_at?: string
           responded_at?: string | null
@@ -622,10 +627,32 @@ export interface Database {
           claimant_id?: string
           owner_id?: string
           board_id?: string | null
+          bundle_id?: string | null
           status?: ClaimStatus
           created_at?: string
           responded_at?: string | null
           finalized_at?: string | null
+        }
+        Relationships: []
+      }
+      shift_bundles: {
+        Row: {
+          id: string
+          user_id: string
+          board_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          board_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          board_id?: string
+          created_at?: string
         }
         Relationships: []
       }
@@ -825,6 +852,11 @@ export interface Database {
       get_shift_claim_counts: {
         Args: { p_shift_ids: string[] }
         Returns: { shift_id: string; pending_count: number }[]
+      }
+      claim_bundle: { Args: { p_bundle_id: string }; Returns: string }
+      get_bundle_claim_counts: {
+        Args: { p_bundle_ids: string[] }
+        Returns: { bundle_id: string; pending_count: number }[]
       }
       get_post_stats_admin: {
         Args: Record<string, never>

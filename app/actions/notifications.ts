@@ -400,20 +400,38 @@ export async function notifyClaimCreated(claimId: string): Promise<void> {
     const db = createAdminClient()
     const { data: claim, error } = await db
       .from('shift_claims')
-      .select('owner_id, shifts!shift_id(shift_title), claimant:users!claimant_id(display_name)')
+      .select('owner_id, bundle_id, shifts!shift_id(shift_title), claimant:users!claimant_id(display_name)')
       .eq('id', claimId)
       .single()
 
     if (error || !claim) { console.error('[notifyClaimCreated] claim lookup failed:', error?.message); return }
 
-    const shiftTitle   = (claim.shifts as unknown as { shift_title: string } | null)?.shift_title ?? 'your shift'
+    const anchorTitle  = (claim.shifts as unknown as { shift_title: string } | null)?.shift_title ?? 'your shift'
     const claimantName = (claim.claimant as unknown as { display_name: string | null } | null)?.display_name ?? 'Someone'
     const ownerId      = claim.owner_id as string
+    const bundleId     = claim.bundle_id as string | null
+
+    // A bundle claim covers every shift in the set — say so, or the owner sees
+    // only the anchor shift's title and misses the scope of what they'd accept.
+    let bundleSize = 0
+    if (bundleId) {
+      const { count } = await db
+        .from('shifts')
+        .select('id', { count: 'exact', head: true })
+        .eq('bundle_id', bundleId)
+        .eq('is_active', true)
+      bundleSize = count ?? 0
+    }
+    const shiftTitle = bundleSize > 1
+      ? `${anchorTitle} + ${bundleSize - 1} more`
+      : anchorTitle
 
     await sendPushNotification(
       ownerId,
-      `${claimantName} wants your shift`,
-      `${claimantName} tapped "I'll take this shift" on "${shiftTitle}" — accept or decline on the Wall`,
+      bundleSize > 1 ? `${claimantName} wants all ${bundleSize} of your shifts` : `${claimantName} wants your shift`,
+      bundleSize > 1
+        ? `${claimantName} tapped "I'll take all" on your ${bundleSize}-shift bundle — accept or decline on the Wall`
+        : `${claimantName} tapped "I'll take this shift" on "${anchorTitle}" — accept or decline on the Wall`,
       '/wall'
     )
 
