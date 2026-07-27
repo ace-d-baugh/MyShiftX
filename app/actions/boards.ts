@@ -48,14 +48,11 @@ export async function createBoard(name: string): Promise<{ error?: string; board
       return { error: 'Only verified users can create boards.' }
     }
 
-    // Generate a unique invite code (retry on collision)
-    let invite_code = ''
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const candidate = generateInviteCode()
-      const { data: existing } = await supabase.from('boards').select('id').eq('invite_code', candidate).single()
-      if (!existing) { invite_code = candidate; break }
-    }
-    if (!invite_code) return { error: 'Failed to generate a unique invite code. Please try again.' }
+    // No pre-flight collision check: reading or filtering on invite_code needs
+    // SELECT privilege on that column, which clients no longer have (S8). The
+    // UNIQUE constraint is the real guard anyway, and the insert below already
+    // handles 23505 — at 2^50 a collision is not a practical concern.
+    const invite_code = generateInviteCode()
 
     // Generate a unique slug from the board name — one query for all
     // potentially-colliding slugs instead of a lookup per candidate
@@ -176,9 +173,11 @@ export async function confirmJoinBoard(boardId: string, confirmed: boolean): Pro
   try {
     const { supabase, userId } = await getActionSession()
 
-    // Get the board's invite code for logging
-    const { data: board } = await supabase.from('boards').select('invite_code').eq('id', boardId).single()
-    const code = board?.invite_code ?? ''
+    // The code is only used as a label on the join-attempt log row. Reading it
+    // needs column privilege the client no longer has (S8), and this path runs
+    // for people who are NOT yet members — exactly who must not see it. Log the
+    // board id instead, which is just as useful for tracing an attempt.
+    const code = `board:${boardId}`
 
     if (!confirmed) {
       await recordAttempt(supabase, userId, code, 'user_declined')
@@ -328,16 +327,19 @@ export async function regenerateInviteCode(boardId: string): Promise<{ error?: s
   try {
     const { supabase } = await getActionSession()
 
+    // As in createBoard: no pre-flight collision check, because filtering on
+    // invite_code needs SELECT privilege the client no longer has (S8). Retry
+    // on the UNIQUE violation instead, which is the authoritative check.
     let invite_code = ''
     for (let attempt = 0; attempt < 5; attempt++) {
       const candidate = generateInviteCode()
-      const { data: existing } = await supabase.from('boards').select('id').eq('invite_code', candidate).single()
-      if (!existing) { invite_code = candidate; break }
+      const { error: updateErr } = await supabase
+        .from('boards').update({ invite_code: candidate }).eq('id', boardId)
+      if (!updateErr) { invite_code = candidate; break }
+      if (updateErr.code !== '23505') return { error: updateErr.message }
     }
     if (!invite_code) return { error: 'Failed to generate a unique code. Please try again.' }
 
-    const { error } = await supabase.from('boards').update({ invite_code }).eq('id', boardId)
-    if (error) return { error: error.message }
     revalidatePath('/profile')
     return { code: invite_code }
   } catch (e) {
