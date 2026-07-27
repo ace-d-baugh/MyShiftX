@@ -150,6 +150,9 @@ function isProMembership(membership: string | null | undefined): boolean {
 }
 
 async function sendMatchNotifications(opts: {
+  boardId: string
+  shiftId: string
+  requestId: string
   shiftTitle: string
   requestTitle: string
   boardName: string
@@ -168,6 +171,23 @@ async function sendMatchNotifications(opts: {
   const wallUrl = `${BASE_URL}/wall`
   const displayDate = formatDisplayDate(opts.shiftDate)
   const sends: Promise<void>[] = []
+
+  // Record that this match happened at all — previously nothing was ever
+  // stored, so admin stats had no way to answer "how many matches were made."
+  // Fire-and-forget: a logging failure should never block the notifications
+  // below, and the unique index quietly absorbs a re-fired duplicate.
+  createAdminClient()
+    .from('match_events')
+    .insert({
+      board_id: opts.boardId,
+      shift_id: opts.shiftId,
+      request_id: opts.requestId,
+      shift_poster_id: opts.shiftPosterUserId,
+      requester_id: opts.requesterUserId,
+    })
+    .then(({ error }) => {
+      if (error && error.code !== '23505') console.error('[sendMatchNotifications] match_events insert failed:', error.message)
+    })
 
   // Web push to both parties — independent of the notify_via_email pref
   if (opts.requesterUserId) {
@@ -237,6 +257,7 @@ async function sendMatchNotifications(opts: {
  */
 export async function notifyShiftPosted(opts: {
   boardId: string
+  shiftId: string
   startTimeIso: string
   shiftTitle: string
   posterName: string
@@ -262,7 +283,7 @@ export async function notifyShiftPosted(opts: {
     // Fetch active requests on the same board for the same date
     const { data: requests, error } = await db
       .from('requests')
-      .select('request_title, preferred_times, user_id, users!user_id(email, display_name, notify_via_email, membership), boards!board_id(name)')
+      .select('id, request_title, preferred_times, user_id, users!user_id(email, display_name, notify_via_email, membership), boards!board_id(name)')
       .eq('board_id', opts.boardId)
       .eq('requested_date', shiftDate)
       .eq('is_active', true)
@@ -285,6 +306,9 @@ export async function notifyShiftPosted(opts: {
       const board     = (req.boards as unknown) as { name: string } | null
 
       await sendMatchNotifications({
+        boardId:           opts.boardId,
+        shiftId:           opts.shiftId,
+        requestId:         req.id as string,
         shiftTitle:        opts.shiftTitle,
         requestTitle:      req.request_title as string,
         boardName:         board?.name ?? 'your board',
@@ -313,6 +337,7 @@ export async function notifyShiftPosted(opts: {
  */
 export async function notifyRequestPosted(opts: {
   boardId: string
+  requestId: string
   requestedDate: string
   preferredTimes: PreferredTime[]
   requestTitle: string
@@ -340,7 +365,7 @@ export async function notifyRequestPosted(opts: {
     //  getETDate() does the correct ET date comparison instead.)
     const { data: shifts, error } = await db
       .from('shifts')
-      .select('shift_title, start_time, user_id, users!user_id(email, display_name, notify_via_email, membership), boards!board_id(name)')
+      .select('id, shift_title, start_time, user_id, users!user_id(email, display_name, notify_via_email, membership), boards!board_id(name)')
       .eq('board_id', opts.boardId)
       .eq('is_active', true)
       .gt('expires_at', new Date().toISOString())
@@ -363,6 +388,9 @@ export async function notifyRequestPosted(opts: {
       const board  = (shift.boards as unknown) as { name: string } | null
 
       await sendMatchNotifications({
+        boardId:           opts.boardId,
+        shiftId:           shift.id as string,
+        requestId:         opts.requestId,
         shiftTitle:        shift.shift_title as string,
         requestTitle:      opts.requestTitle,
         boardName:         board?.name ?? 'your board',
