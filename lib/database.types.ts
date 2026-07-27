@@ -820,6 +820,11 @@ export interface Database {
         Args: Record<string, never>
         Returns: { membership: Membership; trial_ends_at: string | null; trial_used: boolean; billing_cycle: BillingCycle | null }[]
       }
+      reserve_schedule_import: {
+        Args: Record<string, never>
+        Returns: { reserved: boolean; used: number; import_limit: number }[]
+      }
+      release_schedule_import: { Args: Record<string, never>; Returns: undefined }
       get_schedule_import_status: {
         Args: Record<string, never>
         Returns: { membership: Membership; used: number; import_limit: number }[]
