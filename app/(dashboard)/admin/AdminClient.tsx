@@ -2,19 +2,20 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
-import { Settings, LayoutGrid, Users, CheckCircle, Search, UserCog, ChevronDown, Check, BarChart3, UserMinus } from 'lucide-react'
+import { Settings, LayoutGrid, Users, CheckCircle, Search, UserCog, ChevronDown, Check, BarChart3, PieChart, UserMinus } from 'lucide-react'
 import { setBoardActive, setUserActive } from '@/app/actions/admin'
 import { removeUserFromBoard } from '@/app/actions/boards'
 import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/ui/Badge'
 import { AdminCharts } from './AdminCharts'
+import { AdminStats, type PostStats } from './AdminStats'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { BOARD_ROLE_LABEL } from '@/lib/roles'
 import { cn } from '@/lib/utils'
 import type { GlobalRole, Membership, BillingCycle, BoardRole } from '@/lib/database.types'
 
-type AdminTab = 'boards' | 'users' | 'charts'
+type AdminTab = 'boards' | 'users' | 'charts' | 'stats'
 export type MembershipFilterKey = 'free' | 'trial' | 'monthly' | 'quarterly' | 'semi_annual' | 'yearly'
 
 interface Board {
@@ -63,6 +64,7 @@ interface AdminClientProps {
   boards: Board[]
   users: UserRow[]
   adminId: string
+  postStats: PostStats | null
 }
 
 const roleVariant: Record<GlobalRole, 'guest' | 'user' | 'admin'> = {
@@ -114,7 +116,7 @@ export function MembershipIcon({ user: u }: { user: UserRow }) {
   )
 }
 
-export function AdminClient({ boards: initBoards, users: initUsers, adminId }: AdminClientProps) {
+export function AdminClient({ boards: initBoards, users: initUsers, adminId, postStats }: AdminClientProps) {
   const supabase = createClient()
   const [tab, setTab] = useState<AdminTab>('users')
   const [boards, setBoards] = useState(initBoards)
@@ -320,6 +322,7 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId }: A
     { key: 'boards', label: 'Boards', icon: <LayoutGrid className="w-4 h-4" />, count: boards.length },
     { key: 'users',  label: 'Users',  icon: <Users className="w-4 h-4" />,     count: users.length },
     { key: 'charts', label: 'Charts', icon: <BarChart3 className="w-4 h-4" />, count: null },
+    { key: 'stats',  label: 'Stats',  icon: <PieChart className="w-4 h-4" />,  count: null },
   ]
 
   return (
@@ -613,8 +616,11 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId }: A
         </div>
       )}
 
-      {/* Charts Tab */}
+      {/* Charts Tab — membership / revenue breakdowns */}
       {tab === 'charts' && <AdminCharts users={users} />}
+
+      {/* Stats Tab — post-outcome aggregates */}
+      {tab === 'stats' && <AdminStats stats={postStats} />}
 
       {/* ── Remove-from-board confirmation / last-Admin reassignment ────── */}
       {removeTarget && (

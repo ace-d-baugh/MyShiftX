@@ -1,5 +1,6 @@
 import { requireAdmin } from '@/lib/auth/session'
 import { AdminClient } from './AdminClient'
+import type { PostStats } from './AdminStats'
 import type { GlobalRole, Membership, BillingCycle } from '@/lib/database.types'
 
 export const dynamic = 'force-dynamic'
@@ -9,7 +10,7 @@ export const metadata = { title: 'Overlord – MyShiftX' }
 export default async function AdminPage() {
   const { supabase, user } = await requireAdmin()
 
-  const [boardsRes, usersRes, memberRowsRes] = await Promise.all([
+  const [boardsRes, usersRes, memberRowsRes, postStatsRes] = await Promise.all([
     supabase
       .from('boards')
       .select('id, name, slug, invite_code_enabled, is_active, created_at')
@@ -27,6 +28,8 @@ export default async function AdminPage() {
       .eq('is_approved', true)
       .eq('is_hidden', false)
       .limit(2000),
+    // Also internally gated to Admins only — see get_post_stats_admin().
+    supabase.rpc('get_post_stats_admin').single(),
   ])
 
   const memberCounts = new Map<string, number>()
@@ -41,6 +44,7 @@ export default async function AdminPage() {
       boards={boards as { id: string; name: string; slug: string; invite_code_enabled: boolean; is_active: boolean; created_at: string; member_count: number }[]}
       users={(usersRes.data ?? []) as unknown as { id: string; display_name: string | null; role: GlobalRole; is_active: boolean; created_at: string; membership: Membership; billing_cycle: BillingCycle | null }[]}
       adminId={user.id}
+      postStats={postStatsRes.data as PostStats | null}
     />
   )
 }
