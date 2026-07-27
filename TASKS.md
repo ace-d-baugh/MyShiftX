@@ -860,15 +860,25 @@ Board role **"Leader" now displays as "Admin"**; global role **"Admin" now displ
 | SQL files for WDW's database | n/a | ✅ `6ae7247` | 👤 **Two files to run — see below** |
 | **S6** Stripe event ordering 🟡 | ✅ `0d5487b` | ❌ n/a (no billing) | DB applied; also makes Stripe retries idempotent |
 | S9, S10, S12, S13, S14 | ⏳ not started | ⏳ not started | |
-| **S16** *(new — found during S8)* | ⏳ not started | ⏳ not started | See below |
+| **S16** self-promote to board Admin 🔴 | ✅ `42775d1` | ⛔ **run STEP3 now** | Critical, not High — see below |
+| **S8** column lock | ✅ deployed + applied | ✅ deployed + applied | Both verified PASS |
 
 **👤 Your one job right now: run `WDWShiftX/APPLY_TO_DATABASE_STEP1.sql`.** WDW's database is behind its code — Claude can reach MyShiftX's Supabase but not WDW's. Open Supabase → SQL Editor → paste the file → Run. It's safe with the site live (nothing dropped, no data touched) and the last query prints PASS/FAIL for each fix. There's a `STEP2` file too — **leave it alone for now**; its own header explains when it's due.
 
 **⚠️ S8 is deliberately half-finished — do not "finish" it by running the last migration yet.**
 The database function is in place and safe. The final step (`20260730003000_lock_invite_code_column.sql`) revokes column access and **will break every board page** unless the app code that reads codes through the new function is deployed first. That code change is still to do. Correct order: deploy code → *then* run that migration.
 
-**🔴 S16 — NEW, found while fixing S8. Any user can join any board's approval queue without an invite code.**
-The database rule for creating a membership only checks "is this row yours?" — it never checks the invite code or which board. So any verified account can insert itself as *pending* on any board it can name, and `/boards/[slug]` hands that board's id to non-members. Two consequences: it was the first step in the invite-code leak (now blocked at the second step), and on its own it lets someone flood a board's approval queue with junk requests. **Not yet fixed.** The fix is to route joining through a function that checks the code, and drop the direct insert permission. Rated 🟠 High.
+**🔴 S16 — ✅ FIXED 2026-07-27 04:12 on MyShiftX (`42775d1`). ⛔ WDWShiftX still exposed until STEP3 is run.**
+
+*Originally logged as "can queue a join request without a code" (High). That badly undersold it — it was Critical.*
+
+The database rule for adding yourself to a board checked only that the row was **yours**. It never checked what **role** you gave yourself, or whether you marked yourself **already approved**. So any logged-in account could add itself as an approved **Leader of any board** and instantly: read every post on it, see the full member list, remove members, change roles, transfer ownership, delete the board, and read its invite code. It also defeated the S8 invite-code lock, since a self-promoted Leader counts as an approved member.
+
+Confirmed by actually performing the attack as an ordinary test user in a rolled-back transaction — it worked.
+
+The rule now permits only what the app really does: a pending plain-member join request, or Leader on a board you just created. Verified afterwards that all three attack shapes are refused and a normal join still works. **No sign anyone used it on MyShiftX** — every approved membership is a global Overlord auto-added for oversight, a board creator, or carries a recorded approver.
+
+**👤 WDWShiftX: run `APPLY_TO_DATABASE_STEP3_URGENT.sql` as soon as you can.** Unlike STEP2 it is safe immediately and does *not* wait for a deploy. It also prints a list of any self-granted memberships so that project can be checked the same way.
 
 
 
