@@ -818,20 +818,20 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 Full report: [docs/code-scan-2026-07-18.md](docs/code-scan-2026-07-18.md). Serious findings were fixed same-day (email HTML injection, stale createBoard display-name gate, transparent-PNG black-canvas bug, hot-path index gaps — see report). These are the non-urgent leftovers, ordered roughly by value; tackle one at a time.
 
 **Database (Supabase performance advisor):**
-- [x] ✅ `2026-07-19` Wrap `auth.uid()` as `(select auth.uid())` in the 27 RLS policies flagged `auth_rls_initplan` — done via `20260719120000_rls_initplan_auth_wrap.sql` (ALTER POLICY only, expressions otherwise verbatim from pg_policies; all 34 `auth.uid()`/`auth.role()` calls wrapped). Advisor re-run confirms 0 findings remain. Smoke-test the app normally — behavior should be identical, just faster on large scans
-- [x] ✅ `2026-07-19` Consolidate overlapping permissive RLS policies (48 findings) — done via `20260719140000_consolidate_permissive_policies.sql`: merged each action's policies into one with the original expressions OR'd verbatim (comments UPDATE 2→1, requests SELECT 3→1 + UPDATE 2→1, shifts SELECT 4→1 + UPDATE 2→1, user_boards SELECT 4→1 + DELETE 2→1, users UPDATE 3→1), and scoped everything TO authenticated (all expressions are anon-impossible). Verified: exactly 1 policy per table+action, advisor re-run shows 0 findings. 👤 Smoke-test the moderation flows (flag resolution, member role changes, board approvals) plus normal wall/profile use — semantics are preserved by construction, but these paths exercise the merged policies hardest
-- [x] ✅ `2026-07-19` Add covering indexes for the 9 remaining unindexed FKs — `20260719150000_remaining_fk_indexes.sql`, applied to prod; advisor's unindexed_foreign_keys findings now fully cleared
-- [x] ✅ `2026-07-19` Revoke anon EXECUTE on SECURITY DEFINER functions — `20260719151000_function_execute_lockdown.sql`. Root cause found: Task 6's revoke never held because PUBLIC retained EXECUTE (functions default to EXECUTE TO PUBLIC). Now grouped properly: trigger-only fns callable by no one, cron fns service-role-only, user RPCs authenticated-only. Verified: anon-executable 32 → 10, and the 10 are deliberate RLS-predicate exceptions (revoking those would make TO-public policies *error* for anon instead of returning empty — documented in the migration)
+- ✅ `2026-07-19` Wrap `auth.uid()` as `(select auth.uid())` in the 27 RLS policies flagged `auth_rls_initplan` — done via `20260719120000_rls_initplan_auth_wrap.sql` (ALTER POLICY only, expressions otherwise verbatim from pg_policies; all 34 `auth.uid()`/`auth.role()` calls wrapped). Advisor re-run confirms 0 findings remain. Smoke-test the app normally — behavior should be identical, just faster on large scans
+- ✅ `2026-07-19` Consolidate overlapping permissive RLS policies (48 findings) — done via `20260719140000_consolidate_permissive_policies.sql`: merged each action's policies into one with the original expressions OR'd verbatim (comments UPDATE 2→1, requests SELECT 3→1 + UPDATE 2→1, shifts SELECT 4→1 + UPDATE 2→1, user_boards SELECT 4→1 + DELETE 2→1, users UPDATE 3→1), and scoped everything TO authenticated (all expressions are anon-impossible). Verified: exactly 1 policy per table+action, advisor re-run shows 0 findings. 👤 Smoke-test the moderation flows (flag resolution, member role changes, board approvals) plus normal wall/profile use — semantics are preserved by construction, but these paths exercise the merged policies hardest
+- ✅ `2026-07-19` Add covering indexes for the 9 remaining unindexed FKs — `20260719150000_remaining_fk_indexes.sql`, applied to prod; advisor's unindexed_foreign_keys findings now fully cleared
+- ✅ `2026-07-19` Revoke anon EXECUTE on SECURITY DEFINER functions — `20260719151000_function_execute_lockdown.sql`. Root cause found: Task 6's revoke never held because PUBLIC retained EXECUTE (functions default to EXECUTE TO PUBLIC). Now grouped properly: trigger-only fns callable by no one, cron fns service-role-only, user RPCs authenticated-only. Verified: anon-executable 32 → 10, and the 10 are deliberate RLS-predicate exceptions (revoking those would make TO-public policies *error* for anon instead of returning empty — documented in the migration)
 - [ ] 👤 Enable Leaked Password Protection (Supabase dashboard → Authentication → Policies) — open since Task 6
 
 **Application:**
-- [x] ✅ `2026-07-19` Rate-limit `/api/schedule-import/report` — 3 reports per 10 min per user (in-memory per warm instance; blunts rapid-fire spam, documented serverless caveat). Post/comment/flag write paths remain covered by the Ongoing-table rate-limiting item for post-launch
-- [x] ✅ `2026-07-19` Closed the OAuth loophole: `lib/registration.ts` centralizes the `REGISTRATION_PAUSED` flag (was duplicated inline in the register page); `app/auth/callback/route.ts` now detects a brand-new account (`created_at` ≈ `last_sign_in_at`, the standard "first-ever session" signal) and, while paused, signs it back out and bounces to `/register?oauth_blocked=1` instead of granting a session — same as the email flow. Note: the DB account itself still gets created by the `handle_new_user` trigger before this check runs (Supabase creates it during the code exchange) — this closes *session access*, not row creation; the account is otherwise inert (Guest role → redirected to `/verify-email` with no real access, per `app/(dashboard)/layout.tsx`). Register page shows a specific "sign-in with Google/Facebook/LinkedIn is paused too" message when bounced this way
-- [x] ✅ `2026-07-19` Extracted duplicated board-list fetch → `lib/boards.ts` `fetchMyBoards()` (used by ScheduleImportModal + PostShiftForm)
-- [x] ✅ `2026-07-19` Extracted shared service-role client → `lib/supabase/admin.ts` `createAdminClient()`, and sender/support constants → `lib/email-constants.ts` (notifications, both crons, digest unsubscribe, report route, help action all updated; the plain `noreply@` senders unified to the branded one)
-- [x] ✅ `2026-07-19` Wall realtime: shifts/requests channels now filtered to the user's boards (`board_id=in.(…)`), and `loadClaimData` debounced 300ms. Known trade-off (commented in code): filtered DELETE events don't fire, so hard-deleted rows (board-deletion cascade) linger until refresh — soft removals are UPDATEs and stay live
+- ✅ `2026-07-19` Rate-limit `/api/schedule-import/report` — 3 reports per 10 min per user (in-memory per warm instance; blunts rapid-fire spam, documented serverless caveat). Post/comment/flag write paths remain covered by the Ongoing-table rate-limiting item for post-launch
+- ✅ `2026-07-19` Closed the OAuth loophole: `lib/registration.ts` centralizes the `REGISTRATION_PAUSED` flag (was duplicated inline in the register page); `app/auth/callback/route.ts` now detects a brand-new account (`created_at` ≈ `last_sign_in_at`, the standard "first-ever session" signal) and, while paused, signs it back out and bounces to `/register?oauth_blocked=1` instead of granting a session — same as the email flow. Note: the DB account itself still gets created by the `handle_new_user` trigger before this check runs (Supabase creates it during the code exchange) — this closes *session access*, not row creation; the account is otherwise inert (Guest role → redirected to `/verify-email` with no real access, per `app/(dashboard)/layout.tsx`). Register page shows a specific "sign-in with Google/Facebook/LinkedIn is paused too" message when bounced this way
+- ✅ `2026-07-19` Extracted duplicated board-list fetch → `lib/boards.ts` `fetchMyBoards()` (used by ScheduleImportModal + PostShiftForm)
+- ✅ `2026-07-19` Extracted shared service-role client → `lib/supabase/admin.ts` `createAdminClient()`, and sender/support constants → `lib/email-constants.ts` (notifications, both crons, digest unsubscribe, report route, help action all updated; the plain `noreply@` senders unified to the branded one)
+- ✅ `2026-07-19` Wall realtime: shifts/requests channels now filtered to the user's boards (`board_id=in.(…)`), and `loadClaimData` debounced 300ms. Known trade-off (commented in code): filtered DELETE events don't fire, so hard-deleted rows (board-deletion cascade) linger until refresh — soft removals are UPDATEs and stay live
 - [ ] Weekly digest at scale: chunk the members/posts query and batch Resend sends — deferred by design until membership passes a few hundred
-- [x] ✅ `2026-07-19` Removed dead exports `notificationHtml` / `betaClosingHtml` (git history keeps them)
+- ✅ `2026-07-19` Removed dead exports `notificationHtml` / `betaClosingHtml` (git history keeps them)
 - [x] ~~`beta_survey_responses` INSERT `WITH CHECK (true)`~~ — reviewed: intentional (anonymous survey), accepted
 
 ---
@@ -839,6 +839,168 @@ Full report: [docs/code-scan-2026-07-18.md](docs/code-scan-2026-07-18.md). Serio
 ## Vernacular (2026-07-18)
 
 Board role **"Leader" now displays as "Admin"**; global role **"Admin" now displays as "Overlord"**. Display-layer only — DB values, RLS policies, route paths (`/leader/*`, `/admin`), and code comparisons still use `Leader`/`Admin`. The label maps live in `lib/roles.ts`; all user-facing prose (dialogs, empty states, pending-approval notes, archive labels, help copy, nav labels) was updated to match. README documents the stored-vs-displayed mapping.
+
+---
+
+## 🔒 Security & Stability Fixes — Audit of 2026-07-27
+
+### 📊 Progress at a glance — last updated 2026-07-27 03:05
+
+| Item | MyShiftX | WDWShiftX | Notes |
+|---|---|---|---|
+| **S1** fake emails/alerts 🔴 | ✅ `7047edf` | ✅ `0b73827` | Done. Two extra holes found and closed while in there |
+| **S2** import quota bypass 🟠 | ✅ `932a7f3` | ✅ `8e5d008` | DB applied on MyShiftX; **WDW needs SQL run** |
+| **S3** guessable invite codes 🟠 | ✅ `9492612` + codes rotated | ✅ `a361be7` | WDW codes left alone per your call |
+| **S4** trade stats exposure 🟠 | ✅ `30dbab6` | ✅ `3234c39` | Owner-only as instructed; **WDW needs SQL run** |
+| **S5** inert REVOKE 🟡 | ✅ `57ad936` | ✅ committed | **WDW needs SQL run** |
+| **S7** claim-count scoping 🟡 | ✅ `57ad936` | ✅ committed | **WDW needs SQL run** |
+| **S8** invite code leak 🟡→🟠 | ⚠️ **half done** | ⚠️ **half done** | See warning below — severity increased |
+| **S11** memory/timeout 🟡 | ✅ `932a7f3` | ✅ `8e5d008` | Sized for your 2 GB functions |
+| **S15** silent notify failures 🟢 | ✅ `7047edf` | ✅ `0b73827` | Shipped with S1 |
+| SQL files for WDW's database | n/a | ✅ `6ae7247` | 👤 **Two files to run — see below** |
+| **S6** Stripe event ordering 🟡 | ⏳ not started | ❌ n/a (no billing) | |
+| S9, S10, S12, S13, S14 | ⏳ not started | ⏳ not started | |
+| **S16** *(new — found during S8)* | ⏳ not started | ⏳ not started | See below |
+
+**👤 Your one job right now: run `WDWShiftX/APPLY_TO_DATABASE_STEP1.sql`.** WDW's database is behind its code — Claude can reach MyShiftX's Supabase but not WDW's. Open Supabase → SQL Editor → paste the file → Run. It's safe with the site live (nothing dropped, no data touched) and the last query prints PASS/FAIL for each fix. There's a `STEP2` file too — **leave it alone for now**; its own header explains when it's due.
+
+**⚠️ S8 is deliberately half-finished — do not "finish" it by running the last migration yet.**
+The database function is in place and safe. The final step (`20260730003000_lock_invite_code_column.sql`) revokes column access and **will break every board page** unless the app code that reads codes through the new function is deployed first. That code change is still to do. Correct order: deploy code → *then* run that migration.
+
+**🔴 S16 — NEW, found while fixing S8. Any user can join any board's approval queue without an invite code.**
+The database rule for creating a membership only checks "is this row yours?" — it never checks the invite code or which board. So any verified account can insert itself as *pending* on any board it can name, and `/boards/[slug]` hands that board's id to non-members. Two consequences: it was the first step in the invite-code leak (now blocked at the second step), and on its own it lets someone flood a board's approval queue with junk requests. **Not yet fixed.** The fix is to route joining through a function that checks the code, and drop the direct insert permission. Rated 🟠 High.
+
+
+
+**Applies to BOTH apps.** A full security and architecture review turned up 17 issues. Fifteen of them exist in *both* MyShiftX and WDWShiftX, because WDWShiftX was forked from this code. Fixing one does **not** fix the other — each needs its own change.
+
+**Plain-English summary of where things stand:** the apps are in better shape than most. Every database table already blocks unauthorised access, payments are handled correctly, and the calendar-feed links are properly locked down. But there is **one serious hole that needs fixing this week**, three more worth doing soon, and a batch of smaller cleanups.
+
+**How to read this:** 🤖 = I do it, no action from you. 👤 = only you can do it. Severity means: **Critical** = fix now; **High** = fix this month; **Medium** = fix when convenient; **Low** = tidy-up.
+
+---
+
+### 🔴 CRITICAL — Fix first
+
+#### S1 — Anyone can send fake emails and alerts from the app
+
+**What's wrong, in plain English:** When you post a shift, the app emails people whose requests match it. The code that sends those emails never checks *who asked it to*. It just trusts whatever it's told — including the sender's name and the shift title.
+
+**Why it matters:** Someone with an ordinary free account could make the app send emails and phone alerts to your users, from your real email address, saying anything they want — for example a fake "MyShiftX Security: verify your account here" message with a link to a scam site. Because the email genuinely comes from your system, spam filters let it through and it looks completely legitimate. They could also do this to boards they aren't even a member of.
+
+**This is worse on WDWShiftX.** Because Pro was removed there, nothing limits how many people a fake email reaches. And since every WDW user is a real coworker at one employer, a fake internal-looking message is far more convincing.
+
+**🤖 Claude handles:** ✅ **DONE — 2026-07-27 02:14**
+- ✅ Added a login check to all 7 notification functions in `app/actions/notifications.ts` — MyShiftX (commit `7047edf`)
+- ✅ Same fix in WDWShiftX (commit `0b73827`) — done first, as agreed, since it was the more exposed of the two
+- ✅ Sender name, shift title, board and date are now all read from the database row, and the caller must own that row. A forged payload no longer reaches anyone
+- ✅ Two extra holes found and closed while in there: the "tell the other people who missed out" list was also caller-supplied (so it could push to anyone) and is now read from the database; and the trade outcome in the "did it go through?" alert was a caller-supplied yes/no that could contradict what actually happened — it now reads the real recorded result
+- ✅ Silent notification failures fixed at the same time (that was S15 — see below)
+- ⏳ *Automated safety net still to come — it lands with S5's check, which covers the same class of mistake*
+
+**Verified:** type-check, lint and full build clean on both apps.
+
+**👤 You handle:**
+- ✅ **Check whether this has already been abused.** Log in to Resend → Emails, and look for match-alert emails you can't account for, especially bursts to many recipients at once, or odd sender names / shift titles. Same for any push-notification logs. *(If you see nothing unusual, you're almost certainly fine — this is confirmation, not a fire drill.)*
+- ✅ Tell me what you find before I deploy, so I know whether we're patching a hole or cleaning up after one. *** This secure and has not been exploited yet. ***
+
+---
+
+### 🟠 HIGH — Fix this month
+
+#### S2 — The photo-import limit can be bypassed, and it costs you money
+
+**What's wrong:** Free accounts get 4 schedule-photo imports a month. The app checks your remaining count, then reads the photo, then subtracts one. If someone uploads 50 photos at the exact same moment, all 50 pass the check before any of them subtract — so they get 50 imports instead of 4.
+
+**Why it matters:** Every one of those reads is a paid call to Google's AI service on your account. Someone could run up your Google bill deliberately, and the only sign would be the invoice.
+
+**🤖 Claude handles:**
+- [ ] Reserve the import slot *before* reading the photo instead of after, so simultaneous uploads can't all slip through — both apps
+- [ ] Keep the current behaviour where a failed read doesn't cost you an import
+- [ ] Also reject files that claim to be photos but aren't (right now the app takes the uploader's word for it)
+
+**👤 You handle:**
+- ✅ Check your Google Cloud billing for the Gemini API over the last few months. Any unexplained spike would mean this has already been exploited *** This has not been exploited yet. ***
+- ✅ Confirm the free-tier limit should stay at 4/month, or tell me a different number *** This is set to 4/month. ***
+
+---
+
+#### S3 — Board invite codes are guessable
+
+**What's wrong:** Invite codes are built with a random-number generator that isn't designed for security. It's predictable if someone collects enough samples. The codes are also fairly short.
+
+**Why it matters:** The invite code is the only thing standing between an outsider and a private workplace board.
+
+**On WDWShiftX this is much less urgent** — board creation is switched off there, so nobody can generate samples to study. But your two existing board codes were still made the old way.
+
+**🤖 Claude handles:**
+- [ ] Switch to a proper cryptographic random generator and lengthen codes from 7 to 10 characters — both apps
+- [ ] Existing codes keep working; nothing breaks on deploy
+
+**👤 You handle:**
+- ✅ **Decide: rotate the existing codes or not?** Rotating is safest but **invalidates every invite link already shared** — anyone mid-signup would need a new link. My recommendation: rotate MyShiftX's boards (low usage so far), and rotate WDW's two codes during a quiet period with a heads-up to the board Admins *** Rotate codes for myshiftx but leave the invites for wdwshiftx. Those invites are just easy to share, and the codes are not sensitive. ***
+- ✅ If you rotate, message board Admins so they can re-share *** Rotate for myshiftx but no need to send messages as all users are fake users at the moment. ***
+
+---
+
+#### S4 — Members' reliability stats are visible to people who shouldn't see them
+
+**What's wrong:** There's a behind-the-scenes function that returns someone's trade history — how many shifts they completed, and how many they backed out of. It doesn't check whether you're allowed to ask about that person. Any logged-in user can request it for anyone.
+
+**Why it matters:** In a workplace, "backed out 6 times" is effectively a disciplinary record. Someone could keep pulling that up about former coworkers long after leaving a board.
+
+**🤖 Claude handles:**
+- ✅ Restrict it so you only get stats for people you currently share a board with — both apps *** =Let's change it so only the owner of the stats can see their stats. This seems mean to share this with other users. But keep the stats for the user and also for the overlord to see in the overlord panel. ***
+- ✅ Add a cap so nobody can request thousands of records at once *** This is not a problem. See above ***
+
+**👤 You handle:**
+- ✅ Nothing, unless you *want* stats visible more widely — tell me if so *** This is not a problem. See above ***
+
+---
+
+### 🟡 MEDIUM — Fix when convenient
+
+| # | Issue in plain English | Apps | 🤖 Claude | 👤 You |
+|---|---|---|---|---|
+| S5 | A database lock-down that was supposed to be applied never actually took effect (the command used doesn't do what it looks like it does). Not currently exploitable, but the same mistake would be dangerous elsewhere. **This one came from WDWShiftX's own code and I copied it across during the backport.** | Both | Apply the correct command; add an automated check so it can't silently fail again | — |
+| S6 | Stripe sometimes delivers events out of order. If a "cancelled" arrives before a delayed "active", someone could stay on Pro for free — or a paying customer could be wrongly downgraded | MyShiftX only *(WDW has no billing)* | Track which update is newest and ignore stale ones | Nothing |
+| S7 | The "how many people want this shift" counter can be queried for boards you don't belong to, and can be asked for huge batches at once | Both | Restrict to your own boards; cap the batch size | Nothing |
+| S8 | Someone whose join request is still **pending approval** can read the board's invite code | Both | Lock the code down so only approved members can read it | Confirm whether someone can request to join *without* a code — this decides how serious it is |
+| S9 | Every open browser tab listens to *every* message sent anywhere in the app, then reloads the whole page each time one arrives. Wasteful, and gets worse as you grow | Both | Listen only to the user's own conversations; batch the refreshes | Nothing |
+| S10 | When a shift matches many requests, notifications are sent one at a time. On a busy board this can time out partway, so later people silently never get told | Both | Send them in small parallel batches | Nothing |
+| S11 | Photo import holds about 30 MB of memory per upload, and its time limit is set shorter than the work it may attempt | Both | Free memory earlier; fix the time budget | Confirm your Vercel plan's memory limit (1 GB or 3 GB) — I'll size it accordingly |
+| S12 | Some pages are protected only because each one remembers to protect itself. There's no automatic backstop, and the list that's meant to be one is already out of date | Both | Flip it so new pages are private by default and must be *explicitly* made public | Nothing |
+
+---
+
+### 🟢 LOW — Tidy-up
+
+| # | Issue in plain English | Apps | 🤖 Claude |
+|---|---|---|---|
+| S13 | The nightly cleanup job returns raw database error text to whoever calls it, and compares its password in a way that leaks tiny timing hints | Both | Hide the error detail; use a secure comparison |
+| S14 | "Break up this bundle" reports success even when it did nothing | Both | Return a proper "not found" instead |
+| S15 ✅ | Notification failures are thrown away silently, so a broken alert looks like a working one | Both | ✅ **DONE 2026-07-27 02:14** — shipped with S1 (`7047edf` / `0b73827`). Both post forms and the interest action now log the failure instead of discarding it |
+
+---
+
+### 📋 Suggested order
+
+1. **S1 on WDWShiftX**, then **S1 on MyShiftX** — the only genuinely urgent item
+2. **S2 + S11** together (same file)
+3. **S3** — once you've decided about rotating codes
+4. **S4, S7, S8** together (one database change each app)
+5. **S5** — quick, and stops the mistake recurring
+6. Everything else as normal work
+
+### 📋 What I need from you before starting
+
+- ✅ **Resend / push logs check** (S1) — the one thing that changes what we're doing rather than just when *** This is not a problem. All Clear ***
+- ✅ **Google Cloud billing check** (S2)
+- ✅ **Decision on rotating invite codes** (S3)
+- ✅ **Vercel memory limit** (S11) *** a default function memory size of 2 GB (1 vCPU), and 8 GB of build memory. ***
+- ✅ **Access to the WDWShiftX database** — I can read and change MyShiftX's database directly, but WDWShiftX's is on a different Supabase account I can't reach. Either add it to the same account/token, or you run the database parts yourself and I'll hand you the exact commands. *Until this is sorted, I can fix WDWShiftX's code but not its database (S4, S5, S7, S8).* *** Give me a sql file with the database changes you need to make. ***
+
+**None of the above blocks me from starting on S1**, which is the item that matters most.
 
 ---
 
@@ -851,6 +1013,7 @@ Board role **"Leader" now displays as "Admin"**; global role **"Admin" now displ
 | Accessibility audit (WCAG 2.1 AA) | 🤖 Claude | Can audit and fix after core features are stable |
 | Rate limiting on post/flag endpoints | 🤖 Claude | Add after real users are on the platform |
 | User acceptance testing with a pilot group | 👤 You | Pick 5–10 coworkers to test before wider rollout |
+| Dependency vulnerabilities (`npm audit`, 2026-07-22) | 🤖 Claude | 20 findings, none in shipped runtime code. Safe now via `npm audit fix` (non-breaking): `picomatch` (high, ReDoS in glob matching — jest/chokidar dev-time only), `yaml` (moderate, stack overflow on deep nesting). Needs a breaking bump + regression testing later: Next.js 14→16 (fixes a `postcss` XSS chain), Supabase CLI bump (fixes a critical `tar` path-traversal chain, dev-tooling only, not shipped). Same lockfile as WDWShiftX — fix once, apply to both. |
 
 ---
 
