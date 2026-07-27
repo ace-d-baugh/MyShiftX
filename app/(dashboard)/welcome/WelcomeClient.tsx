@@ -156,7 +156,7 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
                 </div>
               )}
               <p className="text-sm text-text/60 mt-1 mb-3">
-                Boards are private groups where your coworkers trade shifts. Got a 7-character
+                Boards are private groups where your coworkers trade shifts. Got an
                 invite code? Enter it below — or tap <strong>+</strong> to create a board and
                 invite your coworkers.
               </p>

@@ -1,5 +1,6 @@
 'use server'
 
+import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { getActionSession } from '@/lib/auth/session'
@@ -9,11 +10,23 @@ import { createBoardSchema } from '@/lib/validations/boards'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+// The invite code is the only credential guarding a private board, so it must
+// come from the CSPRNG. Math.random() is xorshift128+: its internal state is
+// recoverable from a run of outputs, and board creation is user-triggerable,
+// so an attacker could create boards to harvest samples and then predict codes
+// minted for other boards in the same server process.
+//
+// The alphabet is exactly 32 characters = 5 bits each, so masking a random
+// byte with 0x1f is uniform — no modulo bias. 10 chars = 50 bits (~1.1e15),
+// versus 35 bits before.
+const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no O/0, I/1 ambiguity
+const CODE_LENGTH = 10
+
 function generateInviteCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no O/0, I/1 ambiguity
+  const bytes = randomBytes(CODE_LENGTH)
   let code = ''
-  for (let i = 0; i < 7; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)]
+  for (let i = 0; i < CODE_LENGTH; i++) {
+    code += CODE_ALPHABET[bytes[i] & 0x1f]
   }
   return code
 }

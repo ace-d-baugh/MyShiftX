@@ -91,7 +91,7 @@ MyShiftX provides:
 - Auto-expires at end of requested date
 
 ### 🏷️ Board System
-- Private boards joined via 7-character invite codes
+- Private boards joined via single-use-style invite codes
 - Leaders create boards and manage invite codes (pause/resume, regenerate)
 - Users can leave boards; Leaders can delete boards
 - Pending join requests shown to Mods/Leaders for approval
@@ -234,7 +234,7 @@ npm run db:reset     # Reset local database (dev only)
 
 - **Soft Deletes:** `is_active` flags preserve audit trails on posts and comments
 - **RLS via SECURITY DEFINER helpers:** `is_board_member()`, `is_board_moderator()`, `is_board_leader()`, and `is_any_board_moderator()` prevent RLS recursion while enforcing board-scoped access
-- **Invite Code Format:** 7-character alphanumeric using an unambiguous charset (no O/0, I/1 confusion)
+- **Invite Code Format:** 10-character alphanumeric from an unambiguous 32-char charset (no O/0, I/1 confusion), generated with `crypto.randomBytes` and masked to 5 bits per character so there is no modulo bias. Codes issued before 2026-07-27 are 7 characters and remain valid; the join flow accepts 7–10.
 - **Generated Columns:** `expires_at` auto-calculated for shifts and requests
 
 ---
