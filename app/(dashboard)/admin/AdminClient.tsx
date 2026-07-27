@@ -2,20 +2,21 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
-import { Settings, LayoutGrid, Users, CheckCircle, Search, UserCog, ChevronDown, Check, BarChart3, PieChart, UserMinus } from 'lucide-react'
+import { Settings, LayoutGrid, Users, CheckCircle, Search, UserCog, ChevronDown, Check, BarChart3, PieChart, Trophy, UserMinus } from 'lucide-react'
 import { setBoardActive, setUserActive } from '@/app/actions/admin'
 import { removeUserFromBoard } from '@/app/actions/boards'
 import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/ui/Badge'
 import { AdminCharts } from './AdminCharts'
 import { AdminStats, type PostStats } from './AdminStats'
+import { AdminLeaderboard } from './AdminLeaderboard'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { BOARD_ROLE_LABEL } from '@/lib/roles'
 import { cn } from '@/lib/utils'
 import type { GlobalRole, Membership, BillingCycle, BoardRole } from '@/lib/database.types'
 
-type AdminTab = 'boards' | 'users' | 'charts' | 'stats'
+type AdminTab = 'boards' | 'users' | 'charts' | 'stats' | 'leaderboard'
 export type MembershipFilterKey = 'free' | 'trial' | 'monthly' | 'quarterly' | 'semi_annual' | 'yearly'
 
 interface Board {
@@ -323,6 +324,7 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId, pos
     { key: 'users',  label: 'Users',  icon: <Users className="w-4 h-4" />,     count: users.length },
     { key: 'charts', label: 'Charts', icon: <BarChart3 className="w-4 h-4" />, count: null },
     { key: 'stats',  label: 'Stats',  icon: <PieChart className="w-4 h-4" />,  count: null },
+    { key: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-4 h-4" />, count: null },
   ]
 
   return (
@@ -620,7 +622,10 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId, pos
       {tab === 'charts' && <AdminCharts users={users} />}
 
       {/* Stats Tab — post-outcome aggregates */}
-      {tab === 'stats' && <AdminStats stats={postStats} />}
+      {tab === 'stats' && <AdminStats stats={postStats} boards={boards} />}
+
+      {/* Leaderboard Tab — SQL-ranked Top 10s */}
+      {tab === 'leaderboard' && <AdminLeaderboard boards={boards} />}
 
       {/* ── Remove-from-board confirmation / last-Admin reassignment ────── */}
       {removeTarget && (
