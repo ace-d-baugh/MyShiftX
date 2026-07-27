@@ -858,7 +858,7 @@ Board role **"Leader" now displays as "Admin"**; global role **"Admin" now displ
 | **S11** memory/timeout 🟡 | ✅ `932a7f3` | ✅ `8e5d008` | Sized for your 2 GB functions |
 | **S15** silent notify failures 🟢 | ✅ `7047edf` | ✅ `0b73827` | Shipped with S1 |
 | SQL files for WDW's database | n/a | ✅ `6ae7247` | 👤 **Two files to run — see below** |
-| **S6** Stripe event ordering 🟡 | ⏳ not started | ❌ n/a (no billing) | |
+| **S6** Stripe event ordering 🟡 | ✅ `0d5487b` | ❌ n/a (no billing) | DB applied; also makes Stripe retries idempotent |
 | S9, S10, S12, S13, S14 | ⏳ not started | ⏳ not started | |
 | **S16** *(new — found during S8)* | ⏳ not started | ⏳ not started | See below |
 
