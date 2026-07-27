@@ -29,6 +29,7 @@ type UserPatch = {
   trial_used?: boolean
   stripe_subscription_id?: string | null
   stripe_customer_id?: string | null
+  stripe_event_at?: string
 }
 
 /**
@@ -70,10 +71,19 @@ async function findUserId(
   return data?.id ?? null
 }
 
-/** Apply a subscription's current state to the user record. */
+/**
+ * Apply a subscription's current state to the user record.
+ *
+ * `eventCreated` is the Stripe event's own timestamp, not ours. Stripe makes no
+ * ordering guarantee and a 500 requeues an event that may then land after a
+ * newer one, so the write is conditional on being newer than whatever was last
+ * applied. Without that, a delayed "active" arriving after a "canceled" hands
+ * back Pro indefinitely and unpaid.
+ */
 async function syncSubscription(
   admin: ReturnType<typeof createAdminClient>,
-  sub: Stripe.Subscription
+  sub: Stripe.Subscription,
+  eventCreated: number
 ): Promise<void> {
   const userId = await findUserId(admin, sub)
   if (!userId) {
@@ -101,11 +111,29 @@ async function syncSubscription(
   // cancelling during the trial and resubscribing doesn't hand out another.
   if (sub.status === 'trialing') patch.trial_used = true
 
-  const { error } = await admin.from('users').update(patch).eq('id', userId)
+  const eventAt = new Date(eventCreated * 1000).toISOString()
+  patch.stripe_event_at = eventAt
+
+  // Only apply if this event is newer than the last one we applied. `.or`
+  // covers the first write, where nothing has been recorded yet. This also
+  // makes Stripe's retries idempotent: a redelivered event has the same
+  // created timestamp, so it is not strictly newer and lands as a no-op.
+  const { data, error } = await admin
+    .from('users')
+    .update(patch)
+    .eq('id', userId)
+    .or(`stripe_event_at.is.null,stripe_event_at.lt.${eventAt}`)
+    .select('id')
+
   if (error) {
     // Throw so Stripe records a delivery failure and retries — silently
     // swallowing this would leave a paying customer on Basic.
     throw new Error(`Failed to update user ${userId}: ${error.message}`)
+  }
+  if (!data?.length) {
+    console.warn(
+      `[stripe-webhook] Ignored stale/duplicate event for user ${userId} (event created ${eventAt})`
+    )
   }
 }
 
@@ -196,7 +224,7 @@ export async function POST(req: NextRequest) {
             await admin.from('users').update({ stripe_customer_id: customerId }).eq('id', userId)
           }
         }
-        await syncSubscription(admin, sub)
+        await syncSubscription(admin, sub, event.created)
         break
       }
 
@@ -205,7 +233,7 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.deleted': {
         // deleted carries the final state (status: 'canceled'), so the same
         // sync path correctly drops the user to Basic.
-        await syncSubscription(admin, event.data.object)
+        await syncSubscription(admin, event.data.object, event.created)
         break
       }
 

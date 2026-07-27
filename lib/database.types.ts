@@ -35,6 +35,7 @@ export interface Database {
           billing_cycle: BillingCycle | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
+          stripe_event_at: string | null
           schedule_import_count: number
           schedule_import_month: string | null
           ical_token: string | null
@@ -60,6 +61,7 @@ export interface Database {
           billing_cycle?: BillingCycle | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          stripe_event_at?: string | null
           schedule_import_count?: number
           schedule_import_month?: string | null
           ical_token?: string | null
@@ -85,6 +87,7 @@ export interface Database {
           billing_cycle?: BillingCycle | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          stripe_event_at?: string | null
           schedule_import_count?: number
           schedule_import_month?: string | null
           ical_token?: string | null
