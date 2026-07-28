@@ -3,6 +3,8 @@
 import { Resend } from 'resend'
 import { optionalServerEnv } from '@/lib/env'
 import { EMAIL_FROM, SUPPORT_EMAIL } from '@/lib/email-constants'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
+import { SHOWCASE_WRITE_MESSAGE } from '@/lib/showcase/guard'
 
 const resend = new Resend(optionalServerEnv.RESEND_API_KEY ?? '')
 
@@ -12,6 +14,11 @@ export async function sendSupportMessage(opts: {
   message: string
 }): Promise<{ error?: string }> {
   const { fromEmail, subject, message } = opts
+
+  // No DB write, but showcase mode means the site produces no side effects at
+  // all — including outbound mail. Reachable only behind auth, so this only
+  // ever fires for a signed-in owner, who can still email support directly.
+  if (SHOWCASE_MODE) return { error: SHOWCASE_WRITE_MESSAGE }
 
   if (!optionalServerEnv.RESEND_API_KEY) {
     console.error('[sendSupportMessage] RESEND_API_KEY is not set — cannot send support message')

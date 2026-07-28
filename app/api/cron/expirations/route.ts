@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { timingSafeEqual } from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { optionalServerEnv } from '@/lib/env'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 
 /**
  * Constant-time comparison of the bearer token. `!==` short-circuits on the
@@ -27,6 +28,14 @@ export async function GET(req: NextRequest) {
   // "unauthorized" (401) and learn something about the deployment.
   if (!configured || !authorized(req.headers.get('authorization'), optionalServerEnv.CRON_SECRET ?? '')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Showcase mode: this job writes (it deactivates expired rows), and it's a
+  // GET, so the middleware's non-GET block doesn't cover it. Checked after
+  // auth for the same reason the config check is — an unauthenticated caller
+  // shouldn't be able to learn anything about the deployment's state.
+  if (SHOWCASE_MODE) {
+    return NextResponse.json({ skipped: 'showcase mode' }, { status: 200 })
   }
 
   try {

@@ -7,6 +7,7 @@ import { parseISO } from 'date-fns'
 import { weeklyDigestHtml } from '@/components/email-template'
 import { digestUnsubscribeSig } from '@/lib/digest'
 import { optionalServerEnv } from '@/lib/env'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 
 // Task 22: weekly digest — "N new shifts on your boards this week".
 // Scheduled in vercel.json (Sunday evening ET). Skips users with nothing new,
@@ -32,6 +33,12 @@ export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
   if (authHeader !== `Bearer ${optionalServerEnv.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Showcase mode: no outbound mail, and this job marks users as digested.
+  // A GET, so the middleware's non-GET block doesn't cover it.
+  if (SHOWCASE_MODE) {
+    return NextResponse.json({ skipped: 'showcase mode' }, { status: 200 })
   }
 
   try {

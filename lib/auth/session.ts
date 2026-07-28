@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
+import { assertWritesEnabled } from '@/lib/showcase/guard'
 import type { GlobalRole } from '@/lib/database.types'
 
 type Supabase = ReturnType<typeof createServerClient>
@@ -16,8 +17,13 @@ export async function requireUser() {
  * For use in server actions: returns the session or throws. Callers should
  * wrap in try/catch and surface `{ error: e.message }` rather than redirect,
  * since actions run in response to a UI interaction, not a page load.
+ *
+ * Also the chokepoint for showcase mode's write kill-switch: every
+ * authenticated server action funnels through here, so one check disables
+ * them all. See lib/showcase/guard.ts.
  */
 export async function getActionSession() {
+  assertWritesEnabled()
   const supabase = createServerClient()
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) throw new Error('Not authenticated')

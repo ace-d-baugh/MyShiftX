@@ -1,5 +1,20 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
+
+// Log In is dropped in showcase mode — the route still works, it's just not
+// advertised, so nothing a crawler follows dead-ends at an auth wall. Blog and
+// FAQ stay in both modes; they're permanent content, not part of the demo.
+const LINKS = [
+  { href: '/about', label: 'About' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/faq', label: 'FAQ' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/terms', label: 'Terms' },
+  { href: '/privacy', label: 'Privacy' },
+  { href: '/data-deletion', label: 'Data Deletion' },
+  ...(SHOWCASE_MODE ? [] : [{ href: '/login', label: 'Log In' }]),
+]
 
 export function Footer() {
   return (
@@ -16,12 +31,11 @@ export function Footer() {
             />
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
-            <Link href="/about" className="hover:text-white transition-colors">About</Link>
-            <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="/data-deletion" className="hover:text-white transition-colors">Data Deletion</Link>
-            <Link href="/login" className="hover:text-white transition-colors">Log In</Link>
+            {LINKS.map(link => (
+              <Link key={link.href} href={link.href} className="hover:text-white transition-colors">
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
         <div className="mt-6 pt-6 border-t border-white/10 text-xs text-center text-white/40">

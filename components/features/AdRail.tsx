@@ -22,6 +22,15 @@ const AD_ENABLED_PATHS = new Set([
   '/data-deletion',
   '/about',
   '/contact',
+  '/faq',
+  '/blog',
+  // Showcase mode serves these at /wall, /calendar and /messages via an
+  // internal rewrite. usePathname() reports the rewritten path on the server
+  // and the browser path on the client, so both spellings have to be listed
+  // or the two disagree and hydration blows up.
+  '/preview/wall',
+  '/preview/calendar',
+  '/preview/messages',
 ])
 
 function isAdEnabledPath(pathname: string): boolean {

@@ -1,6 +1,8 @@
 'use server'
 
 import { createServerClient } from '@/lib/supabase/server'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
+import { SHOWCASE_WRITE_MESSAGE } from '@/lib/showcase/guard'
 
 export type SurveyPayload = {
   heard_from:               string | null
@@ -41,6 +43,11 @@ export type SurveyPayload = {
 // handled client-side only (localStorage), not by tying responses to an
 // account.
 export async function submitSurvey(data: SurveyPayload): Promise<{ error?: string }> {
+  // Anonymous and unauthenticated, so it never passes through
+  // getActionSession() — showcase mode has to stop it here. Returns the error
+  // rather than throwing, matching how the rest of this action reports failure.
+  if (SHOWCASE_MODE) return { error: SHOWCASE_WRITE_MESSAGE }
+
   const supabase = createServerClient()
 
   try {

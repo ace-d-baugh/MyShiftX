@@ -7,7 +7,9 @@ import { PhotoImportHighlight } from '@/components/landing/PhotoImportHighlight'
 import { createServerClient } from '@/lib/supabase/server'
 import { getShowAds } from '@/lib/auth/session'
 import { optionalServerEnv } from '@/lib/env'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 import { INDUSTRIES } from '@/lib/landing/industries'
+import { BLOG_POSTS, formatPostDate } from '@/lib/blog'
 import type { GlobalRole } from '@/lib/database.types'
 
 export const metadata = {
@@ -244,18 +246,22 @@ export default async function HomePage() {
             </p>
           </div>
 
-          {/* CTAs */}
+          {/* CTAs — showcase mode has nothing to sign up for, so it points at
+              the demo and the blog instead of register/login. */}
           <div className="animate-fade-in-up" style={{ animationDelay: '480ms' }}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/register"
+                href={SHOWCASE_MODE ? '/wall' : '/register'}
                 className="btn btn-primary text-base px-8 py-3 min-h-0 h-12 gap-2 group"
               >
-                Start Trading Shifts
+                {SHOWCASE_MODE ? 'See the Live Demo' : 'Start Trading Shifts'}
                 <ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
-              <Link href="/login" className="btn btn-outline text-base px-8 py-3 min-h-0 h-12">
-                Log In
+              <Link
+                href={SHOWCASE_MODE ? '/blog' : '/login'}
+                className="btn btn-outline text-base px-8 py-3 min-h-0 h-12"
+              >
+                {SHOWCASE_MODE ? 'Read the Blog' : 'Log In'}
               </Link>
             </div>
           </div>
@@ -323,6 +329,54 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── From the blog ── */}
+      <section className="py-20 px-4 bg-background">
+        <div className="max-w-6xl mx-auto">
+          <AnimateIn className="text-center mb-14">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold text-text mb-4">
+              From the Blog
+            </h2>
+            <p className="text-text/60 text-lg max-w-xl mx-auto">
+              Practical writing for people who work shifts — trading well, tracking a rotation,
+              and why the group chat was never going to work.
+            </p>
+          </AnimateIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {BLOG_POSTS.slice(0, 3).map((post, i) => (
+              <AnimateIn key={post.slug} delay={i * 90}>
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="flex flex-col card h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
+                >
+                  <div className="flex flex-wrap gap-2 mb-2 text-[11px] text-text/40">
+                    {post.tags.map(t => <span key={t}>{t}</span>)}
+                  </div>
+                  <h3 className="font-accent text-xl font-bold text-text mb-2 group-hover:text-primary transition-colors">
+                    {post.title}
+                  </h3>
+                  <p className="text-text/60 text-sm leading-relaxed flex-1">{post.description}</p>
+                  <div className="flex items-center gap-3 text-xs text-text/45 mt-4 pt-3 border-t border-border">
+                    <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
+                    <span>{post.readingMinutes} min read</span>
+                  </div>
+                </Link>
+              </AnimateIn>
+            ))}
+          </div>
+
+          <AnimateIn className="text-center mt-10">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all"
+            >
+              All posts
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </AnimateIn>
+        </div>
+      </section>
+
       {/* ── Reviews — hidden until real user reviews are collected ── */}
       <section className="hidden py-20 px-4 bg-background">
         <div className="max-w-6xl mx-auto">
@@ -380,13 +434,15 @@ export default async function HomePage() {
               Take Control of Your Work Week
             </h2>
             <p className="text-white/80 text-lg mb-8">
-              Set up a private board for your workplace in less than two minutes.
+              {SHOWCASE_MODE
+                ? 'Walk through the Wall, the calendar, and how a trade actually gets settled.'
+                : 'Set up a private board for your workplace in less than two minutes.'}
             </p>
             <Link
-              href="/register"
+              href={SHOWCASE_MODE ? '/wall' : '/register'}
               className="inline-flex items-center gap-2 bg-white text-primary font-bold rounded-md px-8 py-3 text-base hover:bg-white/90 hover:scale-105 transition-all duration-200 group"
             >
-              Get Started Free
+              {SHOWCASE_MODE ? 'Explore the Demo' : 'Get Started Free'}
               <ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </AnimateIn>

@@ -6,8 +6,20 @@ import Link from 'next/link'
 import { ThemedLogo } from '@/components/ui/ThemedLogo'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 import type { GlobalRole } from '@/lib/database.types'
 import { buildRoleDropdownItems, DropdownContent, fmtBadge, type DropdownItemDef } from '@/components/layout/AccountDropdown'
+
+/** Public nav shown to signed-out visitors while the site is in showcase mode. */
+const PUBLIC_NAV = [
+  { href: '/wall', label: 'The Wall' },
+  { href: '/calendar', label: 'Calendar' },
+  { href: '/messages', label: 'Messages' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/faq', label: 'FAQ' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+] as const
 
 interface LandingHeaderProps {
   displayName: string | null
@@ -108,6 +120,27 @@ export function LandingHeader({
                   </div>
                 </>
               )}
+            </div>
+          ) : SHOWCASE_MODE ? (
+            /* Showcase mode: a real topic-organised nav instead of auth CTAs.
+             * AdSense asks for "an accessible, easy-to-use navigation bar
+             * organized by topic", and there is nothing to sign into anyway. */
+            <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1">
+              {PUBLIC_NAV.map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="px-3 py-2 rounded-md text-sm font-medium text-text/70 hover:text-primary hover:bg-primary-light/50 transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <Link
+                href="/wall"
+                className="btn btn-primary text-sm px-4 py-2 min-h-0 h-10 ml-1"
+              >
+                Live Demo
+              </Link>
             </div>
           ) : (
             <>
