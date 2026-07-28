@@ -7,7 +7,7 @@
 
 **Status:** Beta — core product (auth, boards, wall, moderation, notifications, calendar sync, in-app messaging) is feature-complete. Monetization (Stripe checkout) and legal/business formation are still in progress ahead of public launch (`1.0.0`). See [TASKS.md](TASKS.md) for the full breakdown.
 
-**⚠️ Disclaimer:** MyShiftX is an independent platform and is not affiliated with, sponsored by, or endorsed by any specific employer.
+**⚠️ Disclaimer:** MyShiftX is an independent platform and is not affiliated with, sponsored by, or endorsed by any specific employer. It was build for fun.
 
 ---
 
