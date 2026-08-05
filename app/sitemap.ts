@@ -1,5 +1,4 @@
 import type { MetadataRoute } from 'next'
-import { INDUSTRIES } from '@/lib/landing/industries'
 import { BLOG_POSTS } from '@/lib/blog'
 import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 
@@ -12,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     '',
     '/about', '/blog', '/faq', '/contact', '/upgrade', '/terms', '/privacy', '/data-deletion',
-    ...INDUSTRIES.map(i => `/for/${i.slug}`),
+    '/for',
     ...BLOG_POSTS.map(p => `/blog/${p.slug}`),
     // Showcase mode: the demo is public and served at these canonical URLs
     // (middleware rewrites them to /preview/*, which is itself excluded in

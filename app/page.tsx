@@ -318,7 +318,7 @@ export default async function HomePage() {
             {INDUSTRIES.map((industry, i) => (
               <AnimateIn key={industry.slug} animation="fade-in" delay={i * 70}>
                 <Link
-                  href={`/for/${industry.slug}`}
+                  href={`/for#${industry.slug}`}
                   className="inline-block bg-card border border-primary/20 text-text rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-200"
                 >
                   {industry.shortName}

@@ -7,6 +7,7 @@ import { Eye, EyeOff, LogIn, Clock, AlertTriangle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { loginSchema } from '@/lib/validations/auth'
 import { OAuthButtons } from '@/components/ui/OAuthButtons'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 
 const REASON_MESSAGES: Record<string, { icon: typeof Clock; text: string; style: string }> = {
   session_expired: {
@@ -171,12 +172,15 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <p className="text-center text-sm text-text/60 mt-6">
-        Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-primary font-medium hover:underline min-h-0 min-w-0">
-          Register here
-        </Link>
-      </p>
+      {/* Showcase mode: /register 404s by design, so don't offer a link into it. */}
+      {!SHOWCASE_MODE && (
+        <p className="text-center text-sm text-text/60 mt-6">
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className="text-primary font-medium hover:underline min-h-0 min-w-0">
+            Register here
+          </Link>
+        </p>
+      )}
     </div>
   )
 }

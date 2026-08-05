@@ -8,6 +8,7 @@ import { AdRail } from '@/components/features/AdRail'
 import { BoardsClient } from '@/app/(dashboard)/boards/BoardsClient'
 import { groupMembersByBoard } from '@/app/(dashboard)/boards/utils'
 import { JoinBoardClient } from './JoinBoardClient'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 import type { ManagedBoard } from '@/app/(dashboard)/boards/types'
 import type { BoardRole, GlobalRole } from '@/lib/database.types'
 
@@ -31,9 +32,11 @@ export default async function BoardSlugPage({ params, searchParams }: Props) {
   const inviteCode = searchParams.c ?? ''
   const thisPath = `/boards/${params.slug}${inviteCode ? `?c=${inviteCode}` : ''}`
 
-  // Not authenticated — redirect to register, threading the board URL through
+  // Not authenticated — redirect to register, threading the board URL through.
+  // In showcase mode /register 404s, so an invite link would dead-end; send
+  // those visitors to the public demo instead.
   if (!user) {
-    redirect(`/register?redirect=${encodeURIComponent(thisPath)}`)
+    redirect(SHOWCASE_MODE ? '/wall' : `/register?redirect=${encodeURIComponent(thisPath)}`)
   }
 
   const { data: profile } = await supabase

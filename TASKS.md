@@ -1,5 +1,24 @@
 # MyShiftX — Task Board
 
+## Where things stand — `2026-07-28`
+
+**The product is built.** Auth, boards, the Wall, messaging, claims, bundles, photo import, push, calendar sync, Stripe, feature gating, ads, and the full security audit are all shipped and live. What's left is not "finish the app" — it's **get the front door open and start charging**.
+
+**Blocking everything commercial:**
+
+| # | What | Who | Note |
+|---|---|---|---|
+| **25** | AdSense re-review — showcase mode is live, needs Search Console check + resubmit | 👤 You | Registration is **404 while showcase mode is on**. Nobody can sign up until it's reverted |
+| **7** | One real-card checkout on production to prove the live Stripe path | 👤 You | Everything else about Stripe is done and configured |
+
+**✅ The security audit is fully closed on both apps** as of `2026-07-28` — S8's column lock applied and verified on MyShiftX, and all three WDWShiftX database steps run and PASSing. No security work is outstanding.
+
+**Genuinely not started** (everything else is done or deferred): **9** discount codes · **11** SMS/Twilio · **18** trade preferences · **20** bulk import · **24** analytics *(awaiting your decision)*.
+
+**Deferred by choice:** **13** the remaining IP/legal filings · **14** the native app *(Year 2+)* · Facebook OAuth.
+
+---
+
 ## What's Done ✅
 
 ### Auth & Access
@@ -49,6 +68,22 @@
 - ✅ 404 page with falling stars and floating compass
 - ✅ Design token system (CSS variables + Tailwind config)
 - ✅ `2026-07-19`: 6 themes (Light, Nordic, Kitty, Dark, Midnight, Cyberpunk — Dracula retired, replaced by Kitty, a soft-pastel light theme built from mint/sky/lavender/blush hexes). Picker grid groups light themes together on both breakpoints (desktop 3×2: Light/Nordic/Kitty over Dark/Midnight/Cyberpunk; mobile 2×3: Light/Dark, Nordic/Midnight, Kitty/Cyberpunk) via explicit per-item grid placement in `ProfileClient.tsx`, since one DOM order can't satisfy two different row-major layouts at once.
+
+### Trade Loop v2 — bundles & claim rework (`2026-07-22` → `07-26`, ported from WDWShiftX)
+
+This wave shipped after the last TASKS.md update and had no entry until `2026-07-28`. Every item is merged to `main` and its migration applied to production.
+
+- ✅ **Shift bundles** (`bc7a3d4`) — a `shift_bundles` parent row ties two or more shifts together so a claimant takes all of them or none. Post/edit offers "Bundle with other shifts?" with three ways to add members (pick from your own upcoming schedule, add a new shift inline, or join another of your bundles on the same board). A DB trigger enforces that every bundled shift shares the bundle's board and owner, so claim eligibility stays one membership check. Bundled shifts show a Layers icon that filters the Wall to that bundle; claiming needs an all-or-nothing confirmation and accepting archives every member at once. Departure dissolves the bundle via an AFTER UPDATE/DELETE trigger pair
+- ✅ **Claiming no longer removes the post** (`bc7a3d4`) — "I'll take this" now registers interest and leaves the post standing, so several people can independently signal on the same shift
+- ✅ **"Interested" star retired on shifts** (`7eb8527`) — the one-tap star and the claim system were doing the same job with different amounts of structure. The star survives on **requests** (which have no claim system) behind a `showInterest` prop. The claim control moved into the post's action row as a real toggle (outlined → filled, click again to withdraw) with a live claim count for every viewer, via the new `get_shift_claim_counts()` SECURITY DEFINER aggregate — bare per-post counts with no identity attached, since `shift_claims_select_parties` only exposes individual rows to the claimant and owner
+- ✅ **Mark Fulfilled on requests** (`b3fa3d4`) — requests had no "someone actually covered this" outcome, only expired / self-deleted / mod-removed. Owner's menu gained a confirmed action backed by a narrow `fulfill_own_request()` RPC; the `removed_reason` constraint was widened to accept it
+- ✅ **Match logging** (`b3fa3d4`) — matches were computed to fire a notification and then thrown away. `match_events` now logs one row per match (board, shift, request, poster, requester), written only by the server-side notification path. RLS on with **no policies at all**, so it's service-role write / admin-RPC read only; a unique index on `(shift_id, request_id)` makes retries idempotent. Matches before this ships can't be reconstructed — the count starts at zero
+- ✅ **Admin Leaderboard + Stats redesign** (`07596e8`) — new Leaderboard tab with three ranked Top 10 lists (most shifts posted, most claims followed through, most backed out of), ranked entirely in SQL via a partitioned window function rather than shipping every user's totals to the client. Stats gained a board filter, pie charts with per-slice counts and percentages, a real "No data yet" empty state, and the two new match metrics
+- ✅ **Calendar List view** (`37fc2a6`) — vertical day-by-day list alongside the month grid, with a Grid/List toggle persisted in localStorage per user id. Both views gained click-anywhere-on-a-future-day to open the create form prefilled with that date (a per-day "+" icon was tried and rejected as clutter), and both show the bundle Layers icon
+- ✅ **Role-aware nav dropdown** (`d46cfe5`) — the dropdown builder moved out of `Navbar` into a shared `components/layout/AccountDropdown`, so the marketing header and the app header stopped duplicating role-branching logic. Approvals, Flags, and Messages each carry their own badge tied to their own pending count, with a dot on the trigger when any is non-zero
+- ✅ **Schedule-import polish** — named absence codes (Holiday, FMLA, ADO, Vacation, PTO, Sick) added to the prompt's skip list (`ffe03cd`); a friendly message instead of a raw error when Gemini's rate limit is hit (`94c087c`)
+- ✅ **`@disney.com` signups blocked** (`527846f`) — rejected in both the client-side Zod schema (generic message, no reason given) and the `handle_new_user()` DB trigger, so calling the Auth API directly doesn't bypass it. Verified the deployed predicate blocks `someone@disney.com` and `someone@Disney.COM` while leaving `someone@mydisney.com` and `someone@disney.com.evil.net` unaffected
+- ✅ **Help page brought current** (`2fa7fa2`) — bundles, interest-based claiming, List view, and Mark Fulfilled
 
 ---
 
@@ -108,16 +143,10 @@ Tasks are ordered by impact. Each has a **🤖 Claude handles** section (code I 
 
 ---
 
-### 4 — SMS Notifications *(Revived — now a Pro-tier feature)*
-
-SMS is now part of the Pro subscription. See **Task 11** for the full implementation plan.
-
----
-
-### 5 — OAuth Login (Google + Facebook + LinkedIn) `IN PROGRESS`
+### 4 — OAuth Login (Google + LinkedIn) ✅ DONE
 
 **🤖 Claude handled:**
-- ✅ `OAuthButtons` component — branded Google, Facebook, LinkedIn buttons with SVG icons
+- ✅ `OAuthButtons` component — branded Google LinkedIn buttons with SVG icons
 - ✅ Buttons added to login and register pages with a divider
 - ✅ `/auth/callback` route — exchanges code, sends new OAuth users to profile to set display name
 - ✅ Profile page welcome banner for first-time OAuth arrivals
@@ -135,20 +164,6 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 - ✅ Supabase Dashboard → **Authentication → Providers → Google** → Enable → paste both → Save
 - ✅ Test: click Google on the login page, sign in, verify you land on profile or wall
 
-#### Facebook
-- ✅ Go to **developers.facebook.com** → My Apps → **Create App**
-  - Use case: **Authenticate and request data from users** → Next
-  - App name: `MyShiftX` → Create app
-- ✅ On the app dashboard: Add product → **Facebook Login** → **Web**
-  - Site URL: `https://myshiftx.com` → Save
-- [ ] Left sidebar: Facebook Login → **Settings**
-  - Valid OAuth Redirect URIs → Add: `https://<your-supabase-ref>.supabase.co/auth/v1/callback` → Save
-- [ ] Left sidebar: **App Settings → Basic** → copy **App ID** and **App Secret**
-- [ ] Supabase Dashboard → **Authentication → Providers → Facebook** → Enable → paste both → Save
-- [ ] To test in Development mode: **App Roles → Roles → Add Testers** → add your personal Facebook account
-- [ ] When ready for public users: complete **App Review** and switch Mode from Development to **Live**
-- [ ] Test: click Facebook on the login page
-
 #### LinkedIn
 - ✅ Go to **linkedin.com/developers** → **Create app**
   - App name: `MyShiftX`, LinkedIn Page: create/use a company page (required by LinkedIn), upload logo
@@ -162,7 +177,7 @@ SMS is now part of the Pro subscription. See **Task 11** for the full implementa
 
 ---
 
-### Feature Tier Reference 🗂️
+### 5 — Feature Tier Reference 🗂️
 
 This is the canonical Free vs Pro feature list. Use this when building the upgrade funnel (Task 8), feature gating (Task 10), and the ad system (Task 12). Emoji key: ✅ already built · 🔲 planned in task list · 🆕 new — not yet in roadmap
 
@@ -177,21 +192,25 @@ This is the canonical Free vs Pro feature list. Use this when building the upgra
 | Manual shift entry & calendar view | ✅ |
 | In-app comments & flagging | ✅ |
 | In-app messaging with anyone in the same board | ✅ |
-| In-app push notifications (web push / PWA) | 🆕 |
-| 4 photo schedule imports per month (OCR → auto-creates shifts) | 🆕 |
-| Ads displayed (right sidebar on desktop, static at bottom of screen on mobile) | 🔲 Task 12 |
+| Claim a shift ("I'll take this") + per-user reliability record | ✅ |
+| Shift bundles — take all of them or none | ✅ |
+| In-app push notifications (web push / PWA, incl. iOS 16.4+) | ✅ Tasks 16 + 23 |
+| 4 photo schedule imports per month (Gemini → auto-creates shifts) | ✅ Task 15 |
+| Ads displayed (right sidebar on desktop, static at bottom of screen on mobile) | ⚠️ Built — blocked on AdSense approval (Tasks 12 + 25) |
 
-#### ⭐ Pro — $4.99/mo · $26.99/6 mo · $47.99/year
+#### ⭐ Pro — $4.99/mo · $13.99/3 mo · $26.99/6 mo · $47.99/year
 
 | Feature | Status |
 |---|---|
 | Everything in Free | — |
-| **Ad-free experience** | 🔲 Task 10 |
-| **SMS notifications** for shift matches (up to 30/mo) | 🔲 Task 11 |
-| **Unlimited photo schedule imports** | 🆕 |
-| **Calendar export & sync** (Google Calendar, Apple iCal) | ✅ |
-| **Trade preferences** — set preferred shift types, time of day, etc. for smarter matching | 🆕 |
-| **Bulk shift import** — CSV upload or multi-week photo scan | 🆕 |
+| **Ad-free experience** | ✅ Task 10 |
+| **Match alert emails** (web push stays free for everyone) | ✅ Task 10 |
+| **Live-updating Wall** (Basic gets a "refresh to see it" banner instead) | ✅ Task 10 |
+| **SMS notifications** for shift matches (up to 30/mo) | 🔲 Task 11 — not started |
+| **Unlimited photo schedule imports** | ✅ Task 15 |
+| **Calendar export & sync** (Google Calendar, Apple iCal) | ✅ Task 17 |
+| **Trade preferences** — set preferred shift types, time of day, etc. for smarter matching | 🔲 Task 18 — not started |
+| **Bulk shift import** — CSV upload or multi-week photo scan | 🔲 Task 20 — not started |
 
 #### 🆕 New features not yet in the roadmap
 
@@ -234,9 +253,11 @@ The following Pro and Free features have not been scoped yet and will need dedic
 
 ---
 
-### 7 — Stripe Integration & Checkout `NEXT`
+### 7 — Stripe Integration & Checkout ✅ LIVE — *live-mode smoke test still outstanding*
 
 **Why now:** The database schema is live; now wire up real payments before building the sales page around it.
+
+**Status `2026-07-28`:** code shipped, migration applied, all four flows verified end-to-end in the sandbox, and live-mode keys/prices/webhook/portal are all configured on Vercel. What's left is the **post-deploy smoke test with a real card** at the bottom of this task, plus archiving the `MyShiftX Pro Trial` $0.00 trap price. Note the two test-mode items below are now moot — the account is on live keys.
 
 **👤 You handle (do these first):**
 - ✅ Create a Stripe account at **stripe.com** (use your business email)
@@ -320,7 +341,7 @@ Everything above was **test mode**. Live mode is a completely separate world in 
 
 ---
 
-### 8 — Subscription Sales / Upgrade Page `NEXT`
+### 8 — Subscription Sales / Upgrade Page ✅ DONE
 
 **Why now:** Users need a destination to convert. Build this alongside Stripe so the checkout button has somewhere to go.
 
@@ -355,7 +376,7 @@ Everything above was **test mode**. Live mode is a completely separate world in 
 
 ---
 
-### 10 — Feature Gating (Pro vs Basic) `NEXT`
+### 10 — Feature Gating (Pro vs Basic) ✅ CODE COMPLETE — *needs your testing*
 
 **Why now:** The membership column exists and Stripe is wired up — now enforce the tiers in the app.
 
@@ -369,7 +390,7 @@ Everything above was **test mode**. Live mode is a completely separate world in 
 - ✅ `2026-07-09`: Membership badge on Profile — Basic shows "Basic · Upgrade ⭐" linking to /upgrade; Pro shows "⭐ Pro"; Trial shows "⭐ Trial · N days left"
 
 **👤 You handle:**
-- [ ] Test each gated feature as a Basic user (create a second test account)
+- ✅ Test each gated feature as a Basic user (create a second test account)
 - [ ] Test trial expiration by temporarily setting `trial_ends_at` to a past timestamp in the DB
 
 ---
@@ -402,9 +423,11 @@ Everything above was **test mode**. Live mode is a completely separate world in 
 
 ---
 
-### 12 — Ad System (Placeholders + Google AdSense) `IN PROGRESS`
+### 12 — Ad System (Placeholders + Google AdSense) `BLOCKED ON ADSENSE RE-REVIEW`
 
 **Why last:** Ads are a Basic-tier experience. Get subscriptions shipping first; then monetize the free tier.
+
+**⚠️ Status as of `2026-07-28`: AdSense REJECTED the site, and the fix is deployed but not yet resubmitted.** The code below is all correct and has been for weeks — the blocker was never the integration. See Task 25 for the current state and the remaining steps.
 
 **Placement (as of 2026-07-01):** Wall, My Calendar, Profile, individual Board (Members) page, Approvals, Flags, Archive, Help & Support. Sticky right rail on desktop/tablet (≥ 1024px, reserves real layout space so it never overlaps page content), sticky bar just above the mobile bottom nav on phones. No ads on the landing/marketing pages or any auth/OAuth page.
 
@@ -428,7 +451,9 @@ Everything above was **test mode**. Live mode is a completely separate world in 
 - ✅ Review the placeholder layout — confirm sizing/placement (300×600 desktop rail, mobile bar above the bottom nav) feels right before real ad units go live
 - ✅ Google flagged crawl trouble — **Vercel Authentication** was on for Production, blocking Googlebot entirely; scoped it to Preview deployments only so myshiftx.com is publicly crawlable again (Wall/Calendar/Profile/etc. still require login, so Google can only ever crawl the public marketing/legal pages — expected)
 - ✅ `2026-07-08`: Went through AdSense's site-readiness checklist — found two gaps (no standalone About/Contact pages; footer only linked Terms/Privacy/Log In). Claude built `/about` and `/contact`, extracted the previously-duplicated landing footer into `components/landing/Footer.tsx`, and added About/Contact/Data Deletion links to it (Data Deletion existed but was never linked from anywhere public-facing). Both new pages are in the sitemap and ad-enabled, matching Terms/Privacy
-- [ ] Confirm ads are now working
+- [ ] Confirm ads are now working — **blocked**: no ad can fill until the site is approved. See Task 25
+
+---
 
 ### 13 — Business Entity & Legal Protection `PARALLEL`
 
@@ -600,7 +625,9 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 
 ---
 
-### 16 — In-App Push Notifications (Web Push) `CODE COMPLETE — needs Vercel env vars`
+### 16 — In-App Push Notifications (Web Push) ✅ DONE
+
+*(Header was stale: the VAPID env vars were added to Vercel on `2026-07-01` — see the ✅ items under "You handle" below. Extended on iOS by Task 23's install walkthrough.)*
 
 **Tier:** Free (Basic and Pro both get push)
 **Why it matters:** Silent real-time alerts without SMS cost. Works on desktop and Android Chrome; limited on iOS Safari (supported since iOS 16.4 via PWA install).
@@ -646,13 +673,27 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 
 ---
 
-### 18 — Trade Preferences (Smart Matching) `WITH PRO LAUNCH`
+### 18 — Trade Preferences (Smart Matching) `WITH PRO LAUNCH` — **not started; scope corrected 2026-07-28**
 
 **Tier:** Pro only
 **Why:** Extends the shift matching system so Pro users only get notified for shifts that actually fit their preferences — reducing notification fatigue.
 
+**Accuracy check `2026-07-28` — nothing here is built.** `trade_preferences` appears nowhere outside this file: no column, no migration, no UI, no reference in `notifications.ts`. Four things in the original plan were wrong or out of date, and one design decision has to be made before any code gets written.
+
+**1. Half of this already exists — at the post level, not the user level.** `requests.preferred_times` (`'morning' | 'afternoon' | 'evening' | 'late'`, see `lib/database.types.ts:8`) is already stored per request and already filters matching in **both** directions via `shiftMatchesPreferences()` in `app/actions/notifications.ts:156`. So a user-level `preferred_times` adds nothing for a **requester** — they set it every time they post — and would quietly contradict the per-request value when the two disagree. The real gap is the **shift poster**, who has no preference input at all today. Either scope this to shift posters only, or define the precedence rule (recommendation: the per-post value always wins; the user-level value is the default the form is seeded with).
+
+**2. There is no shift `type` field.** Shifts carry two independent booleans, `is_trade` and `is_giveaway`, and both can be true at once. `"preferred_types": ["trade", "giveaway"]` should be phrased against those booleans, and the UI's "Trade / Giveaway / Either" needs a fourth state for "both flags set."
+
+**3. The new `users` column needs an explicit `GRANT SELECT`.** Task 6's lockdown replaced the table-wide grant with an explicit column list, so any new column is unreadable by clients by default — that is exactly what broke Profile and the Wall in Task 22 (`20260718140000_grant_select_onboarding_columns.sql`). Profile reads this column, so the migration must grant it.
+
+**4. Both notify functions were rewritten by S1 and now take only an ID.** They read everything server-side through `createAdminClient()`. Preferences get added to the existing `users` selects (`email, notify_via_email, membership`) in both functions — no signature change, no caller change.
+
+**⚠️ Decide first: which channel does the filter apply to?** Match **emails** are already Pro/Trial-only (Task 10); web **push** is free for everyone. If trade preferences are a Pro perk that only suppresses email, a Pro user still gets the push for every match and the feature barely registers. Recommendation: **apply the filter to both channels for users who have set preferences**, and keep the preference *UI* Pro-only. That makes it a real quieting feature rather than a technicality.
+
+**Note:** this reduces *match* notifications only. Since `7eb8527`/`bc7a3d4`, most Wall noise is claim traffic ("someone wants your shift"), which is a different notification path and is deliberately not filtered — you always want to hear that.
+
 **🤖 Claude handles:**
-- [ ] Add `trade_preferences` JSONB column to `users` (nullable):
+- [ ] Add `trade_preferences` JSONB column to `users` (nullable) **plus `GRANT SELECT` on it** (see #3 above). Null and `{}` both mean "no filtering" — never fail closed, or a lookup hiccup silently stops someone's alerts:
   ```json
   {
     "preferred_types": ["trade", "giveaway"],
@@ -661,10 +702,12 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
   }
   ```
 - [ ] Add Trade Preferences section to Profile → Notifications for Pro users:
-  - Preferred shift types (Trade / Giveaway / Either)
-  - Preferred time of day (Morning / Afternoon / Evening / Late Night / Any)
-  - Preferred days of week (multi-select Mon–Sun)
+  - Preferred shift types (Trade / Giveaway / Both flags / Any) — mapped to `is_trade` / `is_giveaway`, not a `type` enum
+  - Preferred time of day (Morning / Afternoon / Evening / Late Night / Any) — reuse the exact `PreferredTime` union and the 6/12/18/24 ET hour boundaries from `shiftMatchesPreferences()` rather than defining a second set
+  - Preferred days of week (multi-select Mon–Sun) — evaluated on the **ET** date, same as `getETDate()`, not the server's local day
 - [ ] Update `notifyShiftPosted()` and `notifyRequestPosted()` — before sending match notifications, check if the recipient has trade preferences set and whether the shift/request satisfies them. If preferences are set and the match doesn't fit, skip the notification.
+- [ ] **Keep logging suppressed matches to `match_events`.** That table (added `b3fa3d4`) is what feeds the admin "matches made" stat. A match that happened but wasn't announced is still a match; dropping the row would make the Stats page under-report as soon as anyone sets a preference. Skip the send, not the insert.
+- [ ] Seed the Post Request form's `preferred_times` from the user-level value so the two never silently disagree (see #1)
 
 ---
 
@@ -711,21 +754,37 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 **Tier:** Pro only — extends Task 15 (Photo Import)
 **Why:** Power users with multi-week schedules don't want to import one photo at a time. CSV gives IT-minded users a clean path; multi-photo handles paper schedules.
 
+**Rescoped `2026-07-28` against the shipped Task 15 code.** The original plan was written before the import pipeline existed and assumed a server-side batch endpoint and a `type` column. Neither survives contact with the code:
+
+- **Imported shifts are calendar-only.** `ScheduleImportModal.handleSave()` inserts with `is_trade: false, is_giveaway: false, is_overtime_approved: false` — an import has never posted to the Wall, deliberately (the `enforce_wall_post_membership` trigger blocks those flags on boards you're only pending in). So the CSV template must **not** have a `type` column; it would promise Wall posting that the import path doesn't do. Wall posting stays a separate, deliberate action.
+- **Multi-photo must loop on the client, not batch on the server.** `/api/schedule-import` is one image per request by design: `maxDuration = 90`, `MODEL_BUDGET_MS = 75_000` shared across the two Gemini endpoint attempts, an 8 MB cap, and a comment explaining the memory drop for a single 8 MB upload. Four photos in one request is 4× the memory and blows the time budget on a slow inference. Uploading them **sequentially from the modal** to the existing route needs no route change, gets per-photo progress for free, and lets one bad photo fail without losing the other three.
+- **Quota is a non-issue for Pro but the reservation still runs.** `reserve_schedule_import` returns `import_limit = -1` for Pro/Trial, so N photos cost nothing — but each photo is still one round trip through reserve/release. Confirm a Pro loop of 4 doesn't trip the release path on a zero-shift photo.
+
 **🤖 Claude handles:**
 
 **CSV import:**
-- [ ] Create a CSV template for download: `date, start_time, end_time, title, type`
-- [ ] Build CSV upload UI — parse client-side with PapaParse, show preview table, validate each row (past dates, valid times, required fields), then bulk-insert approved rows
-- [ ] Handle errors gracefully: flag individual bad rows and let user fix or skip before importing
+- [ ] CSV template for download: `date, start_time, end_time, title` — no `type` column (see above). Document the accepted formats: `date` as `YYYY-MM-DD`, times as 24-hour `HH:MM`, `title` optional and capped at **35 chars** (the same `parsedShiftSchema` limit the photo path enforces)
+- [ ] Add `papaparse` (not currently a dependency) and build the upload UI — parse client-side, then hand the rows to the **same review table `ScheduleImportModal` already renders**, so CSV and photo share conflict detection, keep/replace/edit, overnight handling, and the manual add-a-row. Two entry points, one review step
+- [ ] Overnight rows come from the same rule as the photo path — `end <= start` means the shift ends the next day. Don't invent an `end_date` column in the CSV
+- [ ] Per-row validation with inline fix-or-skip: malformed date/time, `title` over 35 chars, and rows colliding with an existing shift (reuse `conflictsFor()` + the `deactivate_own_shift` RPC for replace)
+- [ ] Gate on Pro/Trial with `isProTier()` from `lib/auth/session.ts`, and show Basic users the upgrade path rather than a dead button
+- [ ] Decide the row cap before building. `handleSave()` does one `supabase.from('shifts').insert(rows)` — fine for a week, untested for a year of shifts. Suggest capping at ~200 rows per file and chunking the insert
 
 **Multi-week photo import:**
-- [ ] Allow uploading up to 4 photos in a single import session (one per schedule week)
-- [ ] Batch the images to Ollama sequentially — collect all returned shifts, deduplicate by date, then show a unified review table
-- [ ] Add a "This is a multi-week schedule" toggle to the import modal (Task 15) that enables multi-photo mode for Pro users
+- [ ] "This is a multi-week schedule" toggle in `ScheduleImportModal`, Pro/Trial only — switches the file picker to accept up to 4 images
+- [ ] Upload them **sequentially to the existing `/api/schedule-import`** (one per request), showing per-photo progress; a failed or empty photo reports itself and the others still land
+- [ ] Merge the returned shifts into one review table, deduplicating on `date + start_time` (overlapping week photos routinely repeat a day)
+- [ ] Run the existing conflict check across the merged set — including **row-vs-row** collisions between two photos, which the single-photo path never had to handle
+
+**Open questions before starting:**
+- [ ] Do bundled shifts (`shift_bundles`) participate? Recommendation: no — bulk import creates plain calendar shifts, and bundling stays a deliberate act on the post form
+- [ ] Is CSV worth it at all for this audience? Cast Members photograph a posted schedule; almost none will have a CSV. Consider shipping multi-week photo first and holding CSV until someone asks
 
 ---
 
-### 21 — Trade Loop: Claims, Confirmation & Reliability `CODE COMPLETE — needs your testing`
+### 21 — Trade Loop: Claims, Confirmation & Reliability ✅ DONE — *tested; superseded in part by Trade Loop v2*
+
+**Note `2026-07-28`:** the claim mechanic described below was reworked after this task closed. Claiming no longer removes the post, the "Interested" star is retired on shifts, and bundles added all-or-nothing claiming — see **Trade Loop v2** in What's Done. The post-v1 follow-up list at the end of this task is still open and still accurate.
 
 **Tier:** All tiers (this is core product, not a perk)
 **Why:** The README names ghosting as a core problem, but nothing in the app addresses it — interest is just a comment flag, contact ends in email, and the app never learns whether a trade actually happened. Closing the loop unlocks: (1) a per-user reliability record (the real answer to ghosting), (2) the marketing proof number ("N shifts covered on MyShiftX"), and (3) the "your shift got covered 🎉" retention moment.
@@ -748,12 +807,12 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 - [ ] Follow-up (post-v1): public `get_platform_trade_stats()` for the landing-page proof number; claims on request posts; mod visibility into board claim disputes; realtime on `shift_claims` for live claim updates
 
 **👤 You handle:**
-- [ ] Test the full loop with two accounts: claim → accept → complete, plus decline / withdraw / fell-through paths
-- [ ] (Optional) Enable Realtime replication for `shift_claims` in Supabase dashboard if we want live claim updates without refresh
+- ✅ Test the full loop with two accounts: claim → accept → complete, plus decline / withdraw / fell-through paths
+- ✅ (Optional) Enable Realtime replication for `shift_claims` in Supabase dashboard if we want live claim updates without refresh
 
 ---
 
-### 22 — Schedule-First Onboarding & Weekly Digest (Cold-Start Fix) `CODE COMPLETE — needs your testing`
+### 22 — Schedule-First Onboarding & Weekly Digest (Cold-Start Fix) ✅ DONE — *tested*
 
 **Tier:** All tiers
 **Why:** A new user's wall is empty until their board has density — but the photo schedule import (Task 15) makes the app useful **solo on day one** as a schedule keeper. Put it in the first-session flow instead of buried in the calendar. A weekly digest resurfaces quiet boards instead of letting them die silently.
@@ -778,14 +837,14 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 - ✅ **Pending members can build their calendar (v3, found in Ace's onboarding test):** schedule import + manual shift adds failed for users whose join request was still awaiting approval (both flows listed approved boards only, and the shifts INSERT policy required approved membership). Fixed end to end — migration `20260718160000_pending_member_calendar_shifts.sql` (applied to prod): INSERT policy now accepts pending-member boards (+ personal `board_id NULL` shifts), and a new `enforce_wall_post_membership` trigger blocks trade/giveaway flags on boards the user isn't approved in (insert AND later flag-flips; cron/service-role safe). Import modal + PostShiftForm list pending boards with "(pending approval)" labels, lock the Post-to-Wall section with an explainer, force wall flags off client-side, and match alerts now fire only for actual wall posts. Wall empty state for unapproved users says posts appear after leader approval, with a Join-or-Create button → `/profile#my-boards`.
 
 **👤 You handle:**
-- [ ] Re-test the new-user flow end to end: register with first/last name → verify → land on /welcome with display name pre-filled → join or create a board (should work now that the grants bug is fixed)
-- [ ] Test the QR path: scan a board QR while logged out → register → confirm the join request fires automatically on /welcome
-- [ ] Confirm digest day/time — currently Sunday 22:00 UTC; edit `vercel.json` to change
-- [ ] Test the digest manually once there's recent activity: `curl -H "Authorization: Bearer $CRON_SECRET" https://myshiftx.com/api/cron/weekly-digest`, then click the unsubscribe link in the email and confirm the profile toggle flips off
+- ✅ Re-test the new-user flow end to end: register with first/last name → verify → land on /welcome with display name pre-filled → join or create a board (should work now that the grants bug is fixed)
+- ✅ Test the QR path: scan a board QR while logged out → register → confirm the join request fires automatically on /welcome
+- ✅ Confirm digest day/time — currently Sunday 22:00 UTC; edit `vercel.json` to change
+- ✅ Test the digest manually once there's recent activity: `curl -H "Authorization: Bearer $CRON_SECRET" https://myshiftx.com/api/cron/weekly-digest`, then click the unsubscribe link in the email and confirm the profile toggle flips off
 
 ---
 
-### 23 — iOS Push via Add-to-Home-Screen Flow `CODE COMPLETE — needs your iPhone testing`
+### 23 — iOS Push via Add-to-Home-Screen Flow ✅ DONE — *tested on a real iPhone*
 
 **Tier:** Free (extends Task 16 web push)
 **Why:** In a first-come marketplace, notification latency is the product. Since iOS 16.4, web push **works** on iPhone for PWAs added to the home screen — the "no iOS push" note in Task 16 was outdated. A guided install flow unlocks real-time alerts for the biggest platform now, years before the Task 14 native app.
@@ -800,8 +859,8 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 - Verified: `tsc` clean, ESLint clean, `next build` passes
 
 **👤 You handle:**
-- [ ] Test on a real iPhone (iOS 16.4+): browse the Wall in Safari → walkthrough banner appears → install → open from Home Screen → enable push → have your second account claim one of your shifts and confirm the push arrives
-- [ ] Also glance at the walkthrough from Chrome on iOS — it should add the "open in Safari" step
+- ✅ Test on a real iPhone (iOS 16.4+): browse the Wall in Safari → walkthrough banner appears → install → open from Home Screen → enable push → have your second account claim one of your shifts and confirm the push arrives
+- ✅ Also glance at the walkthrough from Chrome on iOS — it should add the "open in Safari" step
 
 ---
 
@@ -810,6 +869,32 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 **Why (plain English):** Right now the app has no way to answer questions like "how many people who register actually join a board?", "which upgrade nudge do people click?", or "did anyone hit a crash last night?". Analytics = anonymous event counters that answer the first two; error tracking = automatic crash reports that answer the third. Without them, every pricing/paywall/ad decision in Tasks 7–12 is a guess. Both have free tiers (PostHog, Sentry) and take ~a day to wire in.
 
 **Status:** Ace wants more clarification before green-lighting — discuss before starting. Questions to resolve: which tool(s), what events to track, cookie-consent interaction with the existing CMP setup.
+
+---
+
+### 25 — Showcase Mode & AdSense Re-Review `LIVE — awaiting resubmission`
+
+**Why:** After ~4 weeks in review, AdSense **rejected** myshiftx.com on `2026-07-27`. The headline reason: the site is **login-gated**. `middleware.ts` denies by default, so Googlebot and the human reviewer only ever saw `/login`. Nothing was wrong with the ad integration (Task 12) — there was simply no crawlable product to review.
+
+**🤖 Claude handled (`0cfc998`, merged to main, live on production `2026-07-28`):**
+- ✅ **Showcase mode**, gated on `NEXT_PUBLIC_SHOWCASE_MODE` (`lib/showcase/mode.ts`, documented in `.env.example`) — the same env-flip pattern as AdSense/push/Gemini, so it reverts without a code change
+- ✅ With it on: `/wall`, `/calendar`, `/messages` are public and served from **hand-written fixtures** via an internal rewrite to `app/preview/*`, so the canonical URLs a crawler indexes stay `/wall` etc. The demo reads no database at all
+- ✅ Registration and account-recovery routes 404; `/login` still works but is linked nowhere; every private route sends signed-out visitors to `/` rather than `/login`, so no crawlable path dead-ends at an auth wall
+- ✅ **Nothing writes:** `assertWritesEnabled()` guards `getActionSession()` (the chokepoint for 51 of 53 server actions), plus survey, help, and both cron jobs; middleware 503s any non-GET to `/api/*`
+- ✅ Every demo page carries a permanent "Interactive demo — sample data" banner. This is deliberate and non-negotiable: Google's Publisher Policies **Misrepresentation** clause forbids presenting fabricated activity as a genuine community
+- ✅ **Permanent additions that survive the revert:** a six-post blog (`app/blog`), a public `/faq`, and an expanded `/about`. *This is the part that actually clears Google's content bar* — the demo surface is thin content on its own
+- ✅ Verified on production after deploy: `/wall` `/calendar` `/messages` `/blog` `/faq` all 200; `/register` `/forgot-password` `/survey` 404; `/profile` 307 → `/`; `/preview/wall` 307 → `/wall`; `POST /api/push/subscribe` 503; `robots.txt` disallows `/preview/`; sitemap has 23 URLs with no `/login` or `/register`
+- ✅ README disclaimer updated for showcase mode (`6429fd1`)
+
+**👤 You handle — next steps, in order:**
+- [ ] **Search Console → URL Inspection** on `/`, `/wall`, `/blog` — confirm Google fetches a real page, not a redirect
+- [ ] **Request the AdSense re-review** once URL Inspection looks clean
+- [ ] After approval: **unset `NEXT_PUBLIC_SHOWCASE_MODE` in Vercel and redeploy.** No code change. Both directions were verified locally on `2026-07-27`
+
+**Notes for whoever picks this up:**
+- If a **second** rejection comes, the next lever is **more written content, not more demo surface**
+- Do **not** un-hide the placeholder testimonials in `app/page.tsx` (they sit behind `className="hidden"`) — fabricated reviews are a direct Misrepresentation hit
+- Registration being 404 in showcase mode means **no one can sign up while this is on**. That's the deliberate trade: the site can't grow and get approved at the same time. Weigh that if approval drags on
 
 ---
 
@@ -846,7 +931,14 @@ Board role **"Leader" now displays as "Admin"**; global role **"Admin" now displ
 
 ### ✅ ALL ITEMS COMPLETE — 2026-07-27 04:40
 
-Every issue from the audit is fixed on **both** apps, plus one Critical (S16) found during the work that the audit had mis-rated. All database changes are applied and verified on both projects. **The only thing left is to deploy** the final batch of code (S9/S10/S12/S13/S14) — none of it depends on a database step, so it can go whenever suits you.
+Every issue from the audit is fixed on **both** apps, plus one Critical (S16) found during the work that the audit had mis-rated. All database changes are applied and verified on both projects.
+
+**✅ Update `2026-07-28` — the audit is now fully closed on both apps. Nothing is outstanding.**
+- The final code batch (S9/S10/S12/S13/S14, `79f297a`) is **deployed** — it shipped ahead of showcase mode (`0cfc998`)
+- The S8 column lock (`20260730003000`) is **applied and verified on MyShiftX** (see the S8 note below)
+- **WDWShiftX's `STEP1`, `STEP2` and `STEP3_URGENT` were all run by Ace, all reporting PASS** — so that project's database has caught up with its code, including the S16 Critical
+
+*One thing worth an eyeball on WDWShiftX (see the S8 note below): `STEP2`'s PASS proves the privilege change took, not that its board pages still render — those are different claims.*
 
 **Two findings were caught only because the fix was tested rather than read.** Both looked correct on the page:
 - The `invite_code` revoke did nothing — a column-level `REVOKE` can't subtract from a table-level grant.
@@ -857,11 +949,11 @@ Every issue from the audit is fixed on **both** apps, plus one Critical (S16) fo
 | Item | MyShiftX | WDWShiftX | Notes |
 |---|---|---|---|
 | **S1** fake emails/alerts 🔴 | ✅ `7047edf` | ✅ `0b73827` | Done. Two extra holes found and closed while in there |
-| **S2** import quota bypass 🟠 | ✅ `932a7f3` | ✅ `8e5d008` | DB applied on MyShiftX; **WDW needs SQL run** |
+| **S2** import quota bypass 🟠 | ✅ `932a7f3` | ✅ `8e5d008` | DB applied on both (WDW via `STEP1`) |
 | **S3** guessable invite codes 🟠 | ✅ `9492612` + codes rotated | ✅ `a361be7` | WDW codes left alone per your call |
-| **S4** trade stats exposure 🟠 | ✅ `30dbab6` | ✅ `3234c39` | Owner-only as instructed; **WDW needs SQL run** |
-| **S5** inert REVOKE 🟡 | ✅ `57ad936` | ✅ committed | **WDW needs SQL run** |
-| **S7** claim-count scoping 🟡 | ✅ `57ad936` | ✅ committed | **WDW needs SQL run** |
+| **S4** trade stats exposure 🟠 | ✅ `30dbab6` | ✅ `3234c39` | Owner-only as instructed; DB applied on both |
+| **S5** inert REVOKE 🟡 | ✅ `57ad936` | ✅ committed + applied | WDW DB caught up via `STEP1` |
+| **S7** claim-count scoping 🟡 | ✅ `57ad936` | ✅ committed + applied | WDW DB caught up via `STEP1` |
 | **S8** invite code leak 🟡→🟠 | ⚠️ **half done** | ⚠️ **half done** | See warning below — severity increased |
 | **S11** memory/timeout 🟡 | ✅ `932a7f3` | ✅ `8e5d008` | Sized for your 2 GB functions |
 | **S15** silent notify failures 🟢 | ✅ `7047edf` | ✅ `0b73827` | Shipped with S1 |
@@ -872,15 +964,22 @@ Every issue from the audit is fixed on **both** apps, plus one Critical (S16) fo
 | **S12** middleware allowlist 🟡 | ✅ `79f297a` | ✅ `d5a5561` | Inverted — private by default |
 | **S13** cron leaks + timing 🟢 | ✅ `79f297a` | ✅ `d5a5561` | Constant-time compare, no raw errors |
 | **S14** silent no-op 🟢 | ✅ `79f297a` | ✅ `d5a5561` | Returns proper not-found |
-| **S16** self-promote to board Admin 🔴 | ✅ `42775d1` | ⛔ **run STEP3 now** | Critical, not High — see below |
-| **S8** column lock | ✅ deployed + applied | ✅ deployed + applied | Both verified PASS |
+| **S16** self-promote to board Admin 🔴 | ✅ `42775d1` | ✅ `STEP3_URGENT` run, PASS | Critical, not High — see below |
+| **S8** column lock | ✅ applied + verified `2026-07-28` | ✅ `STEP2` run, PASS | MyShiftX verified by role impersonation |
 
-**👤 Your one job right now: run `WDWShiftX/APPLY_TO_DATABASE_STEP1.sql`.** WDW's database is behind its code — Claude can reach MyShiftX's Supabase but not WDW's. Open Supabase → SQL Editor → paste the file → Run. It's safe with the site live (nothing dropped, no data touched) and the last query prints PASS/FAIL for each fix. There's a `STEP2` file too — **leave it alone for now**; its own header explains when it's due.
+**✅ WDWShiftX's database steps are done.** All three files (`APPLY_TO_DATABASE_STEP1.sql`, `STEP2`, `STEP3_URGENT`) were run by Ace and every check reported PASS, so that project's database is no longer behind its code. *(Claude can reach MyShiftX's Supabase but not WDW's, which is why these were hand-run.)*
 
-**⚠️ S8 is deliberately half-finished — do not "finish" it by running the last migration yet.**
-The database function is in place and safe. The final step (`20260730003000_lock_invite_code_column.sql`) revokes column access and **will break every board page** unless the app code that reads codes through the new function is deployed first. That code change is still to do. Correct order: deploy code → *then* run that migration.
+**✅ S8 is COMPLETE on MyShiftX — `2026-07-28`.**
 
-**🔴 S16 — ✅ FIXED 2026-07-27 04:12 on MyShiftX (`42775d1`). ⛔ WDWShiftX still exposed until STEP3 is run.**
+The warning that used to sit here said "do not run the last migration yet, the app code isn't deployed." That precondition was met by `4756960` ("read invite codes through the membership-gated function"), live since the `0cfc998` deploy.
+
+- ✅ 🤖 **`20260730003000_lock_invite_code_column.sql` applied to production `2026-07-28`.** Pre-flight checks first: the live `boards` table has exactly the 8 granted columns + `invite_code` (no drift, which the migration's own header warns is the failure mode), `get_board_invite_codes()` confirmed live, both board pages confirmed reading through it, and neither `createBoard` nor `regenerateInviteCode` still filters on the column
+- ✅ Verified after applying, with role-impersonated SQL: `authenticated` and `anon` can no longer **read** `invite_code` **or use it in a `WHERE`** (the second one is the part a plain column REVOKE would have missed); the exact column list the board pages select still reads fine; `service_role` is unaffected so crons and webhooks keep working; an **approved** member still gets the code back from the RPC, and a **pending** member gets nothing — which is the actual S8 hole, now closed
+- ✅ Recorded version corrected to `20260730003000` to match the repo filename — `apply_migration` had stamped it `20260728165623`, which would have left the CLI thinking the file was unapplied and re-running it on the next `db push`
+- ✅ 👤 Same migration on WDWShiftX — its `STEP2` file was run by Ace and reported PASS
+- [ ] 👤 **Worth one look on WDWShiftX:** `STEP2`'s PASS asserts the *privilege state*, not that the app still works. Open a WDW board page as an approved member and confirm the invite code still displays. If it's blank, that project's app-half code (reading codes via `get_board_invite_codes()`) isn't deployed yet — the fix is to deploy it, not to roll back the migration
+
+**🔴 S16 — ✅ FIXED on both apps.** MyShiftX `2026-07-27 04:12` (`42775d1`); WDWShiftX via `APPLY_TO_DATABASE_STEP3_URGENT.sql`, run by Ace and reporting PASS.
 
 *Originally logged as "can queue a join request without a code" (High). That badly undersold it — it was Critical.*
 
@@ -890,7 +989,7 @@ Confirmed by actually performing the attack as an ordinary test user in a rolled
 
 The rule now permits only what the app really does: a pending plain-member join request, or Leader on a board you just created. Verified afterwards that all three attack shapes are refused and a normal join still works. **No sign anyone used it on MyShiftX** — every approved membership is a global Overlord auto-added for oversight, a board creator, or carries a recorded approver.
 
-**👤 WDWShiftX: run `APPLY_TO_DATABASE_STEP3_URGENT.sql` as soon as you can.** Unlike STEP2 it is safe immediately and does *not* wait for a deploy. It also prints a list of any self-granted memberships so that project can be checked the same way.
+**✅ WDWShiftX: `APPLY_TO_DATABASE_STEP3_URGENT.sql` was run and passed.** It also prints any self-granted memberships — worth a glance at that output if you still have it, since it's the only record of whether the hole was ever used on that project.
 
 
 
@@ -936,10 +1035,10 @@ The rule now permits only what the app really does: a pending plain-member join 
 
 **Why it matters:** Every one of those reads is a paid call to Google's AI service on your account. Someone could run up your Google bill deliberately, and the only sign would be the invoice.
 
-**🤖 Claude handles:**
-- [ ] Reserve the import slot *before* reading the photo instead of after, so simultaneous uploads can't all slip through — both apps
-- [ ] Keep the current behaviour where a failed read doesn't cost you an import
-- [ ] Also reject files that claim to be photos but aren't (right now the app takes the uploader's word for it)
+**🤖 Claude handles:** ✅ **DONE — `932a7f3`** (MyShiftX) / `8e5d008` (WDWShiftX)
+- ✅ Reserve the import slot *before* reading the photo instead of after, so simultaneous uploads can't all slip through — both apps. The new `reserve_schedule_import` RPC checks and spends in one locked statement
+- ✅ Keep the current behaviour where a failed read doesn't cost you an import — a `finally` block calls `release_schedule_import` on every exit path that isn't a successful read, so no early return has to remember
+- ✅ Also reject files that claim to be photos but aren't — `sniffImageType()` reads the actual magic bytes for JPEG/PNG/WebP instead of trusting the browser-supplied `file.type`, and the sniffed type is what's sent downstream
 
 **👤 You handle:**
 - ✅ Check your Google Cloud billing for the Gemini API over the last few months. Any unexplained spike would mean this has already been exploited *** This has not been exploited yet. ***
@@ -955,9 +1054,9 @@ The rule now permits only what the app really does: a pending plain-member join 
 
 **On WDWShiftX this is much less urgent** — board creation is switched off there, so nobody can generate samples to study. But your two existing board codes were still made the old way.
 
-**🤖 Claude handles:**
-- [ ] Switch to a proper cryptographic random generator and lengthen codes from 7 to 10 characters — both apps
-- [ ] Existing codes keep working; nothing breaks on deploy
+**🤖 Claude handles:** ✅ **DONE — `9492612`** (MyShiftX, codes rotated) / `a361be7` (WDWShiftX, codes left alone per your call)
+- ✅ Switch to a proper cryptographic random generator and lengthen codes from 7 to 10 characters — both apps. `crypto.randomBytes` over a 32-char alphabet, masked to 5 bits per character so the distribution is uniform (32 divides 256 exactly — no modulo bias). Keyspace 2^35 → 2^50
+- ✅ Existing codes keep working; nothing breaks on deploy — the join path accepts 7–10 characters rather than exactly 7, in the Zod schema and both client-side length checks
 
 **👤 You handle:**
 - ✅ **Decide: rotate the existing codes or not?** Rotating is safest but **invalidates every invite link already shared** — anyone mid-signup would need a new link. My recommendation: rotate MyShiftX's boards (low usage so far), and rotate WDW's two codes during a quiet period with a heads-up to the board Admins *** Rotate codes for myshiftx but leave the invites for wdwshiftx. Those invites are just easy to share, and the codes are not sensitive. ***
@@ -982,16 +1081,18 @@ The rule now permits only what the app really does: a pending plain-member join 
 
 ### 🟡 MEDIUM — Fix when convenient
 
+**All eight are ✅ complete on both apps.** WDWShiftX's code was committed for all of them and its database half (S5, S7, S8) caught up via the `STEP1`/`STEP2` files, all PASSing.
+
 | # | Issue in plain English | Apps | 🤖 Claude | 👤 You |
 |---|---|---|---|---|
-| S5 | A database lock-down that was supposed to be applied never actually took effect (the command used doesn't do what it looks like it does). Not currently exploitable, but the same mistake would be dangerous elsewhere. **This one came from WDWShiftX's own code and I copied it across during the backport.** | Both | Apply the correct command; add an automated check so it can't silently fail again | — |
-| S6 | Stripe sometimes delivers events out of order. If a "cancelled" arrives before a delayed "active", someone could stay on Pro for free — or a paying customer could be wrongly downgraded | MyShiftX only *(WDW has no billing)* | Track which update is newest and ignore stale ones | Nothing |
-| S7 | The "how many people want this shift" counter can be queried for boards you don't belong to, and can be asked for huge batches at once | Both | Restrict to your own boards; cap the batch size | Nothing |
-| S8 | Someone whose join request is still **pending approval** can read the board's invite code | Both | Lock the code down so only approved members can read it | Confirm whether someone can request to join *without* a code — this decides how serious it is |
-| S9 | Every open browser tab listens to *every* message sent anywhere in the app, then reloads the whole page each time one arrives. Wasteful, and gets worse as you grow | Both | Listen only to the user's own conversations; batch the refreshes | Nothing |
-| S10 | When a shift matches many requests, notifications are sent one at a time. On a busy board this can time out partway, so later people silently never get told | Both | Send them in small parallel batches | Nothing |
-| S11 | Photo import holds about 30 MB of memory per upload, and its time limit is set shorter than the work it may attempt | Both | Free memory earlier; fix the time budget | Confirm your Vercel plan's memory limit (1 GB or 3 GB) — I'll size it accordingly |
-| S12 | Some pages are protected only because each one remembers to protect itself. There's no automatic backstop, and the list that's meant to be one is already out of date | Both | Flip it so new pages are private by default and must be *explicitly* made public | Nothing |
+| S5 ✅ | A database lock-down that was supposed to be applied never actually took effect (the command used doesn't do what it looks like it does). Not currently exploitable, but the same mistake would be dangerous elsewhere. **This one came from WDWShiftX's own code and I copied it across during the backport.** | Both | ✅ `57ad936` — applied the correct command; added an automated check so it can't silently fail again | — |
+| S6 ✅ | Stripe sometimes delivers events out of order. If a "cancelled" arrives before a delayed "active", someone could stay on Pro for free — or a paying customer could be wrongly downgraded | MyShiftX only *(WDW has no billing)* | ✅ `0d5487b` — tracks which update is newest and ignores stale ones; also makes Stripe retries idempotent | Nothing |
+| S7 ✅ | The "how many people want this shift" counter can be queried for boards you don't belong to, and can be asked for huge batches at once | Both | ✅ `57ad936` — restricted to your own boards; batch size capped | Nothing |
+| S8 ✅ | Someone whose join request is still **pending approval** can read the board's invite code | Both | ✅ **Complete on both `2026-07-28`** — DB function (`57ad936`), app code reading through it (`4756960`), and the column lock (`20260730003000`) applied and verified on MyShiftX; WDW's `STEP2` run and PASSing | Confirm whether someone can request to join *without* a code — this decides how serious it is |
+| S9 ✅ | Every open browser tab listens to *every* message sent anywhere in the app, then reloads the whole page each time one arrives. Wasteful, and gets worse as you grow | Both | ✅ `79f297a` — scoped the subscription to the user's own conversations; coalesced the refreshes | Nothing |
+| S10 ✅ | When a shift matches many requests, notifications are sent one at a time. On a busy board this can time out partway, so later people silently never get told | Both | ✅ `79f297a` — batches of 8 via `Promise.allSettled`, so one unreachable recipient can't abort the rest | Nothing |
+| S11 ✅ | Photo import holds about 30 MB of memory per upload, and its time limit is set shorter than the work it may attempt | Both | ✅ `932a7f3` — drops the large intermediates before the network wait; `MODEL_BUDGET_MS = 75s` shared across both endpoint attempts under a 90s `maxDuration`. Sized for your 2 GB functions | ✅ Confirmed: 2 GB default (1 vCPU) |
+| S12 ✅ | Some pages are protected only because each one remembers to protect itself. There's no automatic backstop, and the list that's meant to be one is already out of date | Both | ✅ `79f297a` — inverted: private by default, public routes must be explicitly listed | Nothing |
 
 ---
 
@@ -999,13 +1100,13 @@ The rule now permits only what the app really does: a pending plain-member join 
 
 | # | Issue in plain English | Apps | 🤖 Claude |
 |---|---|---|---|
-| S13 | The nightly cleanup job returns raw database error text to whoever calls it, and compares its password in a way that leaks tiny timing hints | Both | Hide the error detail; use a secure comparison |
-| S14 | "Break up this bundle" reports success even when it did nothing | Both | Return a proper "not found" instead |
+| S13 ✅ | The nightly cleanup job returns raw database error text to whoever calls it, and compares its password in a way that leaks tiny timing hints | Both | ✅ **DONE `79f297a`** / `d5a5561` — constant-time compare, no raw errors returned |
+| S14 ✅ | "Break up this bundle" reports success even when it did nothing | Both | ✅ **DONE `79f297a`** / `d5a5561` — returns a proper not-found |
 | S15 ✅ | Notification failures are thrown away silently, so a broken alert looks like a working one | Both | ✅ **DONE 2026-07-27 02:14** — shipped with S1 (`7047edf` / `0b73827`). Both post forms and the interest action now log the failure instead of discarding it |
 
 ---
 
-### 📋 Suggested order
+### 📋 Suggested order *(historical — this plan was executed in full; kept for the record)*
 
 1. **S1 on WDWShiftX**, then **S1 on MyShiftX** — the only genuinely urgent item
 2. **S2 + S11** together (same file)

@@ -8,6 +8,10 @@ const nextConfig = {
     return [
       { source: '/board',          destination: '/wall',          permanent: true },
       { source: '/board/:path*',   destination: '/wall/:path*',   permanent: true },
+      // The six per-industry landing pages were consolidated into /for. These
+      // URLs were indexed, so they redirect rather than 404 — "links leading to
+      // missing pages" is itself one of the low-value-content triggers.
+      { source: '/for/:slug',      destination: '/for',           permanent: true },
     ]
   },
   experimental: {

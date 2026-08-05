@@ -123,7 +123,7 @@ export default async function AboutPage() {
               {INDUSTRIES.map(industry => (
                 <Link
                   key={industry.slug}
-                  href={`/for/${industry.slug}`}
+                  href={`/for#${industry.slug}`}
                   className="inline-block bg-background border border-primary/20 text-text rounded-full px-4 py-1.5 text-sm font-medium hover:border-primary/50 hover:shadow-sm transition-all duration-200 min-h-0 min-w-0"
                 >
                   {industry.shortName}

@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { getPublicShowAds } from '@/lib/auth/session'
 import { AdRail } from '@/components/features/AdRail'
+import { PRO_PLANS } from '@/lib/pricing'
 
 export const metadata = { title: 'Terms & Conditions – MyShiftX' }
 
@@ -170,10 +171,15 @@ export default async function TermsPage() {
               MyShiftX offers a free Basic tier and a paid Pro tier. Pro membership is available on the
               following billing cycles, billed in advance:
             </p>
+            {/* Rendered from PRO_PLANS — the same source /upgrade prices from.
+                These were hardcoded and had drifted to three stale figures,
+                which made the legal text contradict what the checkout charges. */}
             <ul className="list-disc list-inside mt-2 space-y-1">
-              <li><strong>Monthly:</strong> $5.99 / month</li>
-              <li><strong>6-Month:</strong> $31.99 every 6 months</li>
-              <li><strong>Annual:</strong> $53.99 / year</li>
+              {PRO_PLANS.map(plan => (
+                <li key={plan.key}>
+                  <strong>{plan.name}:</strong> ${plan.price.toFixed(2)} {plan.per}
+                </li>
+              ))}
             </ul>
             <p className="mt-3">
               All payments are processed securely through Stripe. By providing payment information, you

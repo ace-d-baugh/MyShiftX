@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { displayNameRegex } from '@/lib/validations/auth'
 import { REGISTRATION_PAUSED } from '@/lib/registration'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 
 function formatOAuthDisplayName(meta: Record<string, unknown>): string | null {
   const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
@@ -70,7 +71,11 @@ export async function GET(request: Request) {
 
         if (REGISTRATION_PAUSED && isNewAccount) {
           await supabase.auth.signOut()
-          return NextResponse.redirect(`${origin}/register?oauth_blocked=1`)
+          // /register 404s in showcase mode, so the explanatory banner there
+          // has nowhere to render — send them home rather than to a dead end.
+          return NextResponse.redirect(
+            SHOWCASE_MODE ? `${origin}/` : `${origin}/register?oauth_blocked=1`
+          )
         }
 
         const { data: profile } = await supabase
