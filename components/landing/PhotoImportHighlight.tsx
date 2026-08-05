@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight, Camera, ScanLine, CalendarCheck, Sparkles } from 'lucide-react'
 import { AnimateIn } from '@/components/landing/AnimateIn'
+import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 
 interface PhotoImportHighlightProps {
   /**
@@ -57,8 +58,11 @@ export function PhotoImportHighlight({ industryName, scheduleApps }: PhotoImport
                   <li className="flex gap-2"><CalendarCheck className="w-4 h-4 text-success shrink-0 mt-0.5" /> You review every shift next to your photo before anything saves</li>
                   <li className="flex gap-2"><CalendarCheck className="w-4 h-4 text-success shrink-0 mt-0.5" /> Spots overlaps with shifts already on your calendar</li>
                 </ul>
-                <Link href="/register" className="btn btn-primary min-h-0 h-11 px-6 gap-2 group">
-                  Get Started Free
+                <Link
+                  href={SHOWCASE_MODE ? '/wall' : '/register'}
+                  className="btn btn-primary min-h-0 h-11 px-6 gap-2 group"
+                >
+                  {SHOWCASE_MODE ? 'See the Live Demo' : 'Get Started Free'}
                   <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Link>
               </div>
