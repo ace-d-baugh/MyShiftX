@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.7.0--beta-orange.svg)](package.json)
 
-**Status:** Beta — core product (auth, boards, wall, moderation, notifications, calendar sync, in-app messaging) is feature-complete. Monetization (Stripe checkout) and legal/business formation are still in progress ahead of public launch (`1.0.0`). See [TASKS.md](TASKS.md) for the full breakdown.
+**Status:** Beta — core product (auth, boards, wall, moderation, notifications, calendar sync, in-app messaging) is feature-complete, and **monetization is done**: Stripe checkout, the four Pro plans, the 14-day trial, the customer portal, and the webhook→membership pipeline are all live, with the live-mode checkout verified on production `2026-08-05`. What remains before public launch (`1.0.0`) is opening the front door — AdSense review is in progress and signups are currently closed while the site runs in showcase mode. Legal/business formation is still outstanding. See [TASKS.md](TASKS.md) for the full breakdown.
 
 **⚠️ Disclaimer:** MyShiftX is an independent platform and is not affiliated with, sponsored by, or endorsed by any specific employer. It was build for fun.
 
@@ -270,6 +270,7 @@ npm run db:reset     # Reset local database (dev only)
 - [x] PWA support
 
 ### Phase 2: Beta
+- [x] Monetization — Stripe checkout, four Pro plans, 14-day trial, customer portal, webhook→membership pipeline (live checkout verified on production `2026-08-05`)
 - [ ] Invite-only launch
 - [ ] Push notifications
 - [ ] Trade loop — claim a shift, owner confirms, completion tracked (reliability records that solve ghosting)

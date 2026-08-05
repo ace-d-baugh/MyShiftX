@@ -5,15 +5,110 @@ import RotatingScheduleBody from '@/lib/blog/posts/reading-a-rotating-schedule'
 import FairTradeBody from '@/lib/blog/posts/what-makes-a-trade-fair'
 import CoverageApprovedBody from '@/lib/blog/posts/getting-coverage-approved'
 import NightsBody from '@/lib/blog/posts/working-nights-without-wrecking-your-week'
+import ShiftPostBody from '@/lib/blog/posts/writing-a-shift-post-that-gets-answered'
+import GhostingBody from '@/lib/blog/posts/when-someone-ghosts-a-shift-trade'
+import StartingBoardBody from '@/lib/blog/posts/starting-a-shift-board-at-work'
+import ExtraHoursBody from '@/lib/blog/posts/picking-up-extra-hours-without-burning-out'
+import ShiftPayBody from '@/lib/blog/posts/checking-your-shift-pay'
+import TimeOffBody from '@/lib/blog/posts/asking-for-time-off'
+import NewOnRotaBody from '@/lib/blog/posts/new-on-the-rota'
 
 const AUTHOR = 'The MyShiftX Team'
 
 /**
- * Posts, newest first. Plain TS modules rather than MDX — six articles do not
- * justify a content pipeline, and this way the bodies are ordinary components
- * that typecheck with everything else.
+ * Posts, newest first. Plain TS modules rather than MDX — thirteen articles do
+ * not justify a content pipeline, and this way the bodies are ordinary
+ * components that typecheck with everything else.
+ *
+ * The blog index, the sitemap, and the prev/next links all derive from this
+ * array, so adding a post is: write the body module, import it, add an entry
+ * here in date order. Nothing else needs touching.
  */
 export const BLOG_POSTS: BlogPost[] = [
+  {
+    slug: 'new-on-the-rota',
+    title: 'New on the Rota: What Nobody Tells You in the First Month',
+    description:
+      'The job you will pick up. The scheduling culture takes longer — when the rota is really built, how swaps actually work here, and which of your shifts are worth more than they look.',
+    publishedAt: '2026-08-04',
+    updatedAt: '2026-08-04',
+    author: AUTHOR,
+    tags: ['Starting out', 'Scheduling'],
+    readingMinutes: 7,
+    Body: NewOnRotaBody,
+  },
+  {
+    slug: 'asking-for-time-off',
+    title: 'Asking for Time Off and Actually Getting It',
+    description:
+      'Leave is not granted on the strength of your reason — it is granted on whether saying yes creates a problem. Find out when the rota is built, and ask before that.',
+    publishedAt: '2026-08-01',
+    updatedAt: '2026-08-01',
+    author: AUTHOR,
+    tags: ['Time off', 'At work'],
+    readingMinutes: 7,
+    Body: TimeOffBody,
+  },
+  {
+    slug: 'checking-your-shift-pay',
+    title: 'Checking Your Shift Pay: What to Look For and How to Query It',
+    description:
+      'A salary is self-checking; a rota with premiums, swaps, and overtime thresholds is not. The payslip lines where errors actually live, and how to raise one so it gets fixed.',
+    publishedAt: '2026-07-29',
+    updatedAt: '2026-07-29',
+    author: AUTHOR,
+    tags: ['Pay', 'Getting organised'],
+    readingMinutes: 8,
+    Body: ShiftPayBody,
+  },
+  {
+    slug: 'picking-up-extra-hours-without-burning-out',
+    title: 'Picking Up Extra Hours Without Burning Out',
+    description:
+      'Extra shifts are the most available pay rise most shift workers have — and the cost arrives weeks after the money does. Count rest rather than hours, and set the ceiling before anyone asks.',
+    publishedAt: '2026-07-26',
+    updatedAt: '2026-07-26',
+    author: AUTHOR,
+    tags: ['Overtime', 'Recovery'],
+    readingMinutes: 8,
+    Body: ExtraHoursBody,
+  },
+  {
+    slug: 'starting-a-shift-board-at-work',
+    title: 'Starting a Shift-Trading Board at Your Workplace',
+    description:
+      'The technology is the easy part. Who gets in, what counts as a yes, who files the paperwork, and why you should tell your manager — the decisions that determine whether a board works.',
+    publishedAt: '2026-07-23',
+    updatedAt: '2026-07-23',
+    author: AUTHOR,
+    tags: ['Boards', 'Workplace tools'],
+    readingMinutes: 8,
+    Body: StartingBoardBody,
+  },
+  {
+    slug: 'when-someone-ghosts-a-shift-trade',
+    title: 'When Someone Ghosts a Shift Trade',
+    description:
+      'Three different failures get called ghosting, and only one of them is. How to get an unambiguous yes, what to do when the shift is tomorrow and still yours, and when to escalate.',
+    publishedAt: '2026-07-21',
+    updatedAt: '2026-07-21',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Working with people'],
+    readingMinutes: 8,
+    Body: GhostingBody,
+  },
+  {
+    slug: 'writing-a-shift-post-that-gets-answered',
+    title: 'How to Write a Shift Post People Actually Answer',
+    description:
+      '“Anyone want Friday?” gets nothing. Seven details, forty seconds — date, hours, position, giveaway or swap, overtime status, the context only you have, and who does the paperwork.',
+    publishedAt: '2026-07-17',
+    updatedAt: '2026-07-17',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Getting organised'],
+    readingMinutes: 7,
+    Body: ShiftPostBody,
+  },
   {
     slug: 'group-chats-fail-shift-workers',
     title: 'Why Facebook Groups and Group Chats Keep Failing Shift Workers',

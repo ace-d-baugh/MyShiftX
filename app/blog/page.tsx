@@ -8,7 +8,7 @@ import { BLOG_POSTS, formatPostDate } from '@/lib/blog'
 export const metadata = {
   title: 'The MyShiftX Blog — Writing for Shift Workers',
   description:
-    'Practical writing for people who work shifts: trading etiquette, reading a rotating schedule, what a shift is actually worth, getting coverage approved, and surviving night blocks.',
+    'Practical writing for people who work shifts: trading etiquette, reading a rotating schedule, what a shift is actually worth, checking your pay, asking for time off, picking up overtime without burning out, and getting coverage approved.',
   alternates: { canonical: '/blog' },
 }
 
@@ -29,8 +29,8 @@ export default function BlogIndexPage() {
               </h1>
               <p className="text-lg text-text/60 max-w-2xl leading-relaxed">
                 Writing for people who work shifts. How to trade well, how to keep track of a
-                rotation, what a shift is actually worth, and why the group chat was never going to
-                work.
+                rotation, what a shift is actually worth, how to check you were paid for it, and
+                why the group chat was never going to work.
               </p>
             </header>
 
