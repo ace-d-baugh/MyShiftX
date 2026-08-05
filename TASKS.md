@@ -1,15 +1,17 @@
 # MyShiftX — Task Board
 
-## Where things stand — `2026-07-28`
+## Where things stand — `2026-08-05`
 
-**The product is built.** Auth, boards, the Wall, messaging, claims, bundles, photo import, push, calendar sync, Stripe, feature gating, ads, and the full security audit are all shipped and live. What's left is not "finish the app" — it's **get the front door open and start charging**.
+**The product is built and Stripe is closed.** Auth, boards, the Wall, messaging, claims, bundles, photo import, push, calendar sync, Stripe (live checkout verified on production `2026-08-05`), feature gating, ads, and the full security audit are all shipped and live. What's left is not "finish the app" — it's **get the front door open**.
 
 **Blocking everything commercial:**
 
 | # | What | Who | Note |
 |---|---|---|---|
 | **25** | AdSense re-review — showcase mode is live, needs Search Console check + resubmit | 👤 You | Registration is **404 while showcase mode is on**. Nobody can sign up until it's reverted |
-| **7** | One real-card checkout on production to prove the live Stripe path | 👤 You | Everything else about Stripe is done and configured |
+| **25** | Open the site for real signups (unset `NEXT_PUBLIC_SHOWCASE_MODE`) | 👤 You | See the deadlock note below — this, not Stripe, is now the actual bottleneck |
+
+> **⚠️ The launch deadlock.** As of `2026-08-05` nobody is using MyShiftX, because launch is being held until ads work. That is circular: ad revenue is pageviews × RPM, and pageviews are currently zero, so AdSense approval on every page in the site would still earn exactly $0. Stripe is now proven and a handful of $4.99 subscribers would out-earn the ads by an order of magnitude. The recommended order is **launch first, monetise second**: open signups → grow real traffic and blog content → get AdSense approved on the public surface → add a crawler login and enable the Wall ad slot once there is traffic worth serving.
 
 **✅ The security audit is fully closed on both apps** as of `2026-07-28` — S8's column lock applied and verified on MyShiftX, and all three WDWShiftX database steps run and PASSing. No security work is outstanding.
 
@@ -253,11 +255,11 @@ The following Pro and Free features have not been scoped yet and will need dedic
 
 ---
 
-### 7 — Stripe Integration & Checkout ✅ LIVE — *live-mode smoke test still outstanding*
+### 7 — Stripe Integration & Checkout ✅ DONE
 
 **Why now:** The database schema is live; now wire up real payments before building the sales page around it.
 
-**Status `2026-07-28`:** code shipped, migration applied, all four flows verified end-to-end in the sandbox, and live-mode keys/prices/webhook/portal are all configured on Vercel. What's left is the **post-deploy smoke test with a real card** at the bottom of this task, plus archiving the `MyShiftX Pro Trial` $0.00 trap price. Note the two test-mode items below are now moot — the account is on live keys.
+**Status `2026-08-05`: closed.** Code shipped, migration applied, all four flows verified end-to-end in the sandbox, live-mode keys/prices/webhook/portal all configured on Vercel, and Ace has now run the live-mode checkout on production himself and confirmed the flow works end to end. Nothing about Stripe is blocking launch. The two test-mode items below are moot — the account is on live keys.
 
 **👤 You handle (do these first):**
 - ✅ Create a Stripe account at **stripe.com** (use your business email)
@@ -300,7 +302,7 @@ The following Pro and Free features have not been scoped yet and will need dedic
 
 **👤 You handle (after Claude ships the code):**
 - ✅ **Apply the migration** — `20260720120000_stripe_customer_columns.sql`. Applied to prod `2026-07-20` via Supabase MCP (`apply_migration`) after a first checkout test proved the columns were missing — every webhook was 500ing on `column users.stripe_customer_id does not exist`. Columns + trigger now confirmed live
-- [ ] **Switch to test-mode keys before testing.** `.env.local` currently holds `sk_live_`/`pk_live_` keys — `4242 4242 4242 4242` only works in test mode, and a real card against live keys is a real charge. Note **Price IDs are mode-specific**: the four `STRIPE_PRICE_*` values in `.env.local` are live-mode IDs and need test-mode equivalents when you flip
+- ~~Switch to test-mode keys before testing.~~ **Moot** — sandbox testing is finished and the account is on live keys. Kept for the note that **Price IDs are mode-specific**, which matters again if you ever need to re-test in the sandbox: the four `STRIPE_PRICE_*` values need test-mode equivalents when you flip
 - ✅ Add to Vercel env: `STRIPE_PRICE_PRO_MONTHLY`, `_QUARTERLY`, `_SEMIANNUAL`, `_ANNUAL` (live-mode IDs are already in `.env.local`)
 - ✅ Add `customer.subscription.created` to the webhook endpoint's event list in the Stripe Dashboard — the handler covers it, but the endpoint was configured before it existed
 - [ ] Archive the `MyShiftX Pro Trial` product and its $0.00 price (see the ⚠️ note above)
@@ -334,9 +336,10 @@ Everything above was **test mode**. Live mode is a completely separate world in 
 - ✅ Redeploy so the new env vars take effect (Vercel doesn't apply env changes to the running deployment automatically)
 
 **Post-deploy smoke test (live mode, real card, small commitment):**
-- [ ] On production, run one real checkout on the **Monthly** plan (real card, you can cancel immediately after) → confirm you land on `/upgrade/success` as Trial and your DB row flips
-- [ ] In Stripe live **Developers → Webhooks**, confirm the endpoint shows recent `200` deliveries (not `4xx`/`5xx`)
-- [ ] Cancel that subscription via Manage Billing → confirm you return to Basic
+- ✅ `2026-08-05` — Ace ran the live checkout on production and reported the flow working end to end. Marking this closed on his verification rather than a transcript of each step; if a real customer ever hits a checkout problem, re-verify the four sub-steps below individually before assuming a code regression
+- ✅ On production, run one real checkout on the **Monthly** plan → land on `/upgrade/success` as Trial, DB row flips
+- ✅ In Stripe live **Developers → Webhooks**, endpoint shows recent `200` deliveries (not `4xx`/`5xx`)
+- ✅ Cancel that subscription via Manage Billing → return to Basic
 - [ ] (Optional) Refund the proration/charge from the live Dashboard if you charged yourself
 
 ---
@@ -882,19 +885,28 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 - ✅ Registration and account-recovery routes 404; `/login` still works but is linked nowhere; every private route sends signed-out visitors to `/` rather than `/login`, so no crawlable path dead-ends at an auth wall
 - ✅ **Nothing writes:** `assertWritesEnabled()` guards `getActionSession()` (the chokepoint for 51 of 53 server actions), plus survey, help, and both cron jobs; middleware 503s any non-GET to `/api/*`
 - ✅ Every demo page carries a permanent "Interactive demo — sample data" banner. This is deliberate and non-negotiable: Google's Publisher Policies **Misrepresentation** clause forbids presenting fabricated activity as a genuine community
-- ✅ **Permanent additions that survive the revert:** a six-post blog (`app/blog`), a public `/faq`, and an expanded `/about`. *This is the part that actually clears Google's content bar* — the demo surface is thin content on its own
+- ✅ **Permanent additions that survive the revert:** a blog (`app/blog` — six posts at launch, thirteen as of `2026-08-05`), a public `/faq`, and an expanded `/about`. *This is the part that actually clears Google's content bar* — the demo surface is thin content on its own. The demo pages are now intended to stay public **permanently** rather than being reverted: AdSense's [UGC forum-app rules](https://support.google.com/adsense/answer/9640027) want "equivalent web content for each page that sends ad requests", and a public `/preview/wall` is exactly that for the gated Wall
 - ✅ Verified on production after deploy: `/wall` `/calendar` `/messages` `/blog` `/faq` all 200; `/register` `/forgot-password` `/survey` 404; `/profile` 307 → `/`; `/preview/wall` 307 → `/wall`; `POST /api/push/subscribe` 503; `robots.txt` disallows `/preview/`; sitemap has 23 URLs with no `/login` or `/register`
 - ✅ README disclaimer updated for showcase mode (`6429fd1`)
+
+**🤖 Claude handled (`2026-08-05`) — ad placement narrowed and the blog doubled:**
+- ✅ **Ads removed from Calendar and Messages**, both the live dashboard routes and the public demos. Google's [ads on screens without publisher-content](https://support.google.com/publisherpolicies/answer/11112688) policy bars ads on screens that carry no publisher content or exist "for alerts, navigation or other behavioral purposes" — a month grid is a navigation surface and a private inbox has no publisher content at all. `/messages/[id]` conversation threads dropped too. The exclusions and the reasoning live in a comment on `AD_ENABLED_PATHS` in `components/features/AdRail.tsx`; the `AdRail` wrapper was removed outright from `app/preview/calendar` and `app/preview/messages` so no page claims ads it will never show
+- ✅ **The Wall keeps its ad slot.** A UGC feed is a forum, which is an established permitted category — this was re-checked rather than assumed. It cannot serve *targeted* ads once the app is gated again until an AdSense **crawler login** is configured, and that setting only exists after the account is approved ([docs](https://support.google.com/adsense/answer/161351)) — so it is a post-approval step, not a blocker now
+- ✅ **Seven new blog posts**, taking the blog from six to thirteen (~1,200 words each): writing a shift post that gets answered, when someone ghosts a trade, starting a board at your workplace, picking up extra hours without burning out, checking your shift pay, asking for time off, and what nobody tells you in your first month on a rota. Index, sitemap, and prev/next links all derive from `BLOG_POSTS`, so nothing else needed touching. Sitemap is now 26 URLs, 13 of them posts
+- ✅ Every new post links only to routes that are public in **both** modes (`/about`, `/wall`, `/calendar`) — `/boards` was deliberately avoided because it is dashboard-only and would recreate the "links leading to missing pages" citation from `10e4483`
+- ✅ Verified: `tsc --noEmit` clean, `next lint` clean
 
 **👤 You handle — next steps, in order:**
 - [ ] **Search Console → URL Inspection** on `/`, `/wall`, `/blog` — confirm Google fetches a real page, not a redirect
 - [ ] **Request the AdSense re-review** once URL Inspection looks clean
 - [ ] After approval: **unset `NEXT_PUBLIC_SHOWCASE_MODE` in Vercel and redeploy.** No code change. Both directions were verified locally on `2026-07-27`
+- [ ] After approval: configure the **AdSense crawler login** (AdSense → Crawler access + Search Console verification) so the gated Wall serves targeted ads instead of remnant fill
 
 **Notes for whoever picks this up:**
 - If a **second** rejection comes, the next lever is **more written content, not more demo surface**
 - Do **not** un-hide the placeholder testimonials in `app/page.tsx` (they sit behind `className="hidden"`) — fabricated reviews are a direct Misrepresentation hit
-- Registration being 404 in showcase mode means **no one can sign up while this is on**. That's the deliberate trade: the site can't grow and get approved at the same time. Weigh that if approval drags on
+- Registration being 404 in showcase mode means **no one can sign up while this is on**. That's the deliberate trade: the site can't grow and get approved at the same time. Weigh that if approval drags on — and see the launch-deadlock note at the top of this file, because "wait for ads before launching" is currently costing more than it earns
+- **Ad networks other than AdSense were evaluated on `2026-08-05` and none of them fit.** Ezoic now requires 250k monthly users, Raptive 25k pageviews plus long-form content on the *majority* of pages, Mediavine's main network $5k/yr in ad revenue. Only Newor Media (no minimum) is a realistic fallback if AdSense rejects again, and Mediavine Journey (1,000 sessions/mo) is the milestone worth aiming at if the blog keeps growing. **PropellerAds is a hard no** — its demand is popunder/push, which would wreck a product whose pitch is being more trustworthy than a Facebook group. AdMob is not an option either: PWAs aren't a supported Google Mobile Ads SDK platform, and the same publisher policies would bar the calendar/messages screens anyway
 
 ---
 

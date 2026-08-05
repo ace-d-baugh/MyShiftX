@@ -8,11 +8,24 @@ import { cn } from '@/lib/utils'
 
 // Pages that get an ad slot. Everything else (landing pages, auth/OAuth
 // pages, admin tools, the Kanban roadmap) stays ad-free.
+//
+// Deliberately EXCLUDED, and not to be re-added without re-reading the policy:
+// Google's "Google-served ads on screens without publisher-content" policy
+// (support.google.com/publisherpolicies/answer/11112688 — it governs AdSense,
+// AdMob and Ad Manager alike) bars ads on screens that carry no publisher
+// content or exist "for alerts, navigation or other behavioral purposes".
+//   - /calendar + /preview/calendar — a month grid is a navigation surface
+//   - /messages + /messages/[id] + /preview/messages — a private inbox has no
+//     publisher content at all, and ads against private mail cost user trust
+//     in a product whose whole pitch is being more trustworthy than a group chat
+//   - shift create/edit — forms are dead-end/behavioral screens
+// The Wall stays: a UGC feed is a forum, which is an established permitted
+// category. It still needs an AdSense crawler login before it can serve
+// targeted ads once the app is gated again (that's configurable only after
+// the account is approved — support.google.com/adsense/answer/161351).
 const AD_ENABLED_PATHS = new Set([
   '/wall',
-  '/calendar',
   '/profile',
-  '/messages',
   '/leader/approvals',
   '/leader/flags',
   '/leader/archive',
@@ -24,19 +37,16 @@ const AD_ENABLED_PATHS = new Set([
   '/contact',
   '/faq',
   '/blog',
-  // Showcase mode serves these at /wall, /calendar and /messages via an
-  // internal rewrite. usePathname() reports the rewritten path on the server
-  // and the browser path on the client, so both spellings have to be listed
-  // or the two disagree and hydration blows up.
+  // Showcase mode serves the demo Wall at /wall via an internal rewrite.
+  // usePathname() reports the rewritten path on the server and the browser
+  // path on the client, so both spellings have to be listed or the two
+  // disagree and hydration blows up.
   '/preview/wall',
-  '/preview/calendar',
-  '/preview/messages',
 ])
 
 function isAdEnabledPath(pathname: string): boolean {
   if (AD_ENABLED_PATHS.has(pathname)) return true
   if (/^\/boards\/[^/]+$/.test(pathname)) return true // individual board (members) page, not the /boards list
-  if (/^\/messages\/[^/]+$/.test(pathname)) return true // individual conversation threads
   return false
 }
 
