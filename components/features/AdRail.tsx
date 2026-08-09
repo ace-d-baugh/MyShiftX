@@ -76,7 +76,10 @@ export function AdRail({ showAds, children, hasBottomNav = true }: AdRailProps) 
     <div className="flex">
       <div className="flex-1 min-w-0">
         {children}
-        {enabled && <div className="lg:hidden h-24" aria-hidden="true" />}
+        {/* Clearance so the fixed bottom bar never covers the end of the page.
+         * Sized to the bar itself (50px ad + 8px padding + 1px border) plus the
+         * "Remove Ads" tab that perches above it. */}
+        {enabled && <div className="lg:hidden h-20" aria-hidden="true" />}
       </div>
 
       {enabled && (
@@ -97,7 +100,11 @@ export function AdRail({ showAds, children, hasBottomNav = true }: AdRailProps) 
       {enabled && (
         <div
           className={cn(
-            'lg:hidden fixed inset-x-0 z-40 px-2 py-1 bg-card/95 backdrop-blur-sm border-t border-border',
+            // No horizontal padding: the ad below is a fixed 320px unit, and
+            // on a 320px-wide phone any padding would push it into overflow.
+            // flex+justify-center centers the inline-block <ins> (mx-auto
+            // does not, which is why this isn't just a text-center block).
+            'lg:hidden fixed inset-x-0 z-40 flex justify-center py-1 bg-card/95 backdrop-blur-sm border-t border-border',
             // The bottom tab nav is md:hidden, so only offset above it below
             // md; from md to lg the bar sits flush with the bottom edge.
             hasBottomNav ? 'bottom-14 md:bottom-0' : 'bottom-0'
@@ -128,7 +135,13 @@ export function AdRail({ showAds, children, hasBottomNav = true }: AdRailProps) 
             <Crown className="w-3.5 h-3.5 text-secondary-accent" fill="#ffea80" strokeWidth={0} aria-hidden="true" />
             Remove Ads
           </Link>
-          <AdSlot slotId={STICKY_MOBILE_SLOT} className="w-full max-w-md mx-auto h-16" />
+          {/* Fixed 320x50 anchor banner, NOT a responsive/auto unit. An auto
+           * unit with data-full-width-responsive lets AdSense pick the size,
+           * and on a phone it picks a large rectangle — which is how this bar
+           * grew to half the viewport. A fixed size is also the only way to
+           * bound it honestly: clipping an oversized ad with overflow-hidden
+           * would breach the policy against obscuring ads. */}
+          <AdSlot slotId={STICKY_MOBILE_SLOT} width={320} height={50} />
         </div>
       )}
     </div>

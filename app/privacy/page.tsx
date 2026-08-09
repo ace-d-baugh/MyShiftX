@@ -155,13 +155,14 @@ export default async function PrivacyPage() {
               <li><strong>Session cookies:</strong> Required to keep you logged in while you use the Service. These are deleted when you close your browser or log out.</li>
               <li><strong>Preference cookies:</strong> Store your display preferences (dark mode, time format, timezone) locally on your device.</li>
               <li><strong>Security cookies:</strong> Used to detect and prevent fraud and unauthorized access.</li>
-              <li><strong>Third-party cookies (Basic tier only):</strong> Google AdSense may set cookies for ad personalization. You can manage these through our cookie consent banner or your browser settings.</li>
+              <li><strong>Third-party cookies (Basic tier only):</strong> Google AdSense may set cookies for ad personalization. You can manage these through our cookie consent banner, your browser settings, or the opt-outs in <Link href="/privacy#your-privacy-choices" className="text-primary hover:underline">Your Privacy Choices</Link>.</li>
             </ul>
             <p className="mt-3">
-              We do not use tracking pixels, cross-site tracking, or behavioral advertising cookies for
-              our own marketing. You can instruct your browser to refuse all cookies or to indicate when
-              a cookie is being sent; however, some features of the Service may not function properly
-              without cookies.
+              We do not use tracking pixels or cross-site tracking for our own marketing — we run no
+              retargeting and no analytics pixels of our own. The only third-party advertising
+              technology on the Service is Google AdSense, and only for Basic-tier users. You can
+              instruct your browser to refuse all cookies or to indicate when a cookie is being sent;
+              however, some features of the Service may not function properly without cookies.
             </p>
           </section>
 
@@ -260,7 +261,7 @@ export default async function PrivacyPage() {
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li><strong>Right to Know:</strong> The categories and specific pieces of personal information we collect, use, disclose, and sell (we do not sell personal information)</li>
               <li><strong>Right to Delete:</strong> Request deletion of personal information we have collected from you, subject to certain exceptions</li>
-              <li><strong>Right to Opt-Out of Sale:</strong> We do not sell personal information, so no opt-out is required</li>
+              <li><strong>Right to Opt-Out of Sale or Sharing:</strong> We do not sell personal information. We do serve personalised ads to Basic-tier users, which California law treats as &ldquo;sharing&rdquo; for cross-context behavioural advertising — see <Link href="/privacy#your-privacy-choices" className="text-primary hover:underline">Your Privacy Choices</Link> for how to opt out</li>
               <li><strong>Right to Non-Discrimination:</strong> We will not discriminate against you for exercising your CCPA rights</li>
               <li><strong>Shine the Light:</strong> California Civil Code Section 1798.83 permits California residents to request information about our disclosure of personal information to third parties for their direct marketing purposes. We do not share personal information for third-party direct marketing.</li>
             </ul>
@@ -280,6 +281,71 @@ export default async function PrivacyPage() {
               <a href="mailto:support@myshiftx.com" className="text-primary hover:underline">support@myshiftx.com</a>.
               We will respond within 30 days (or 45 days for complex requests). We may need to verify
               your identity before processing your request.
+            </p>
+          </section>
+
+          {/* Anchored: the "Your Privacy Choices" link in the footer points here.
+            * US state privacy laws (CPRA and the dozen-plus that follow it) treat
+            * serving personalised ads as "sharing" for cross-context behavioural
+            * advertising, which carries an opt-out right even though no money
+            * changes hands. This section is that opt-out. If AdSense is ever
+            * removed, this section and the footer link can go with it. */}
+          <section id="your-privacy-choices" className="scroll-mt-24">
+            <h2 className="font-accent text-xl font-bold text-text mb-3">
+              12a. Your Privacy Choices (Advertising)
+            </h2>
+            <p>
+              <strong>We do not sell your personal information</strong>, and we never have. We do
+              not accept money for your data, and we do not pass your name, email, or phone number
+              to advertisers.
+            </p>
+            <p className="mt-3">
+              We do show ads to Basic (free) tier users through Google AdSense. Those ads can be
+              personalised, which means Google may use cookies and similar technologies to show you
+              ads based on your browsing. Several US state privacy laws classify that as{' '}
+              <strong>&ldquo;sharing&rdquo; for cross-context behavioural advertising</strong> and
+              give you the right to opt out of it — even where, as here, no sale takes place. We
+              would rather explain that plainly than hide behind the fact that we are not selling
+              anything.
+            </p>
+            <p className="mt-3">You have three ways to opt out:</p>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li>
+                <strong>Turn off ad personalisation at Google.</strong> Visit{' '}
+                <a
+                  href="https://myadcenter.google.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Google My Ad Center
+                </a>{' '}
+                and switch off personalised ads. This applies across every site that uses Google
+                ads, not just ours.
+              </li>
+              <li>
+                <strong>Opt out industry-wide.</strong> Use the{' '}
+                <a
+                  href="https://optout.aboutads.info/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Digital Advertising Alliance opt-out
+                </a>{' '}
+                or your browser&apos;s cookie and tracking controls.
+              </li>
+              <li>
+                <strong>Remove ads entirely.</strong> MyShiftX Pro members see no ads at all and are
+                not subject to any AdSense data collection. See{' '}
+                <Link href="/upgrade" className="text-primary hover:underline">upgrade options</Link>.
+              </li>
+            </ul>
+            <p className="mt-3">
+              If you would like us to confirm what we hold or to action a request under your
+              state&apos;s privacy law, email{' '}
+              <a href="mailto:support@myshiftx.com" className="text-primary hover:underline">support@myshiftx.com</a>{' '}
+              and we will respond within 30 days.
             </p>
           </section>
 
@@ -315,8 +381,13 @@ export default async function PrivacyPage() {
             <p>
               Some browsers send &ldquo;Do Not Track&rdquo; (DNT) signals to websites. Because there is no
               industry-standard interpretation of DNT signals, we do not currently alter our data
-              collection practices in response to DNT signals. However, we do not engage in cross-site
-              behavioral tracking.
+              collection practices in response to DNT signals.
+            </p>
+            <p className="mt-3">
+              MyShiftX itself does no cross-site tracking. However, the Google AdSense ads shown to
+              Basic-tier users may involve cross-context behavioural advertising by Google. To turn
+              that off, see{' '}
+              <Link href="/privacy#your-privacy-choices" className="text-primary hover:underline">Your Privacy Choices</Link>.
             </p>
           </section>
 
