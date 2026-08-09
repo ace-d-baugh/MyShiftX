@@ -12,7 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '',
     '/about', '/blog', '/faq', '/contact', '/upgrade', '/terms', '/privacy', '/data-deletion',
     '/for',
-    ...BLOG_POSTS.map(p => `/blog/${p.slug}`),
     // Showcase mode: the demo is public and served at these canonical URLs
     // (middleware rewrites them to /preview/*, which is itself excluded in
     // robots.ts). Registration and login are dropped — they either 404 or are
@@ -22,8 +21,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       : ['/login', '/register']),
   ]
 
-  return routes.map(route => ({
+  // lastModified is deliberately OMITTED for these. It used to be `new Date()`,
+  // which stamped every URL with the build timestamp — so all 26 entries
+  // claimed to have changed at the same millisecond on every single deploy.
+  // Google discounts lastmod it can tell is unreliable, and that pattern is the
+  // textbook example, so it was costing us the signal on the pages where we do
+  // have a real date. No lastmod is strictly better than a false one.
+  const staticEntries: MetadataRoute.Sitemap = routes.map(route => ({
     url: `${base}${route}`,
-    lastModified: new Date(),
   }))
+
+  // Posts carry a genuine edit date, so they get a real, stable lastmod that
+  // only moves when the post actually changes.
+  const postEntries: MetadataRoute.Sitemap = BLOG_POSTS.map(p => ({
+    url: `${base}/blog/${p.slug}`,
+    lastModified: new Date(`${p.updatedAt}T12:00:00Z`),
+  }))
+
+  return [...staticEntries, ...postEntries]
 }
