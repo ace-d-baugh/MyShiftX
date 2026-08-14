@@ -41,7 +41,7 @@ export default function Body() {
       <ul>
         <li>
           <strong>A giveaway.</strong> You are handing the shift over and want nothing back. The
-          reader is doing you a favour or picking up wanted hours, and either way there is no
+          reader is doing you a favor or picking up wanted hours, and either way there is no
           negotiation to have.
         </li>
         <li>
@@ -64,7 +64,7 @@ export default function Body() {
       <h2>Include the position, not just the hours</h2>
       <p>
         In most workplaces, hours are the easy part and qualification is the hard part. If your
-        shift needs a certification, a till code, a licence, a sign-off, or simply a person who has
+        shift needs a certification, a register code, a license, a sign-off, or simply a person who has
         been trained on that station, then the number of people who can actually take it is far
         smaller than the number of people who are free.
       </p>

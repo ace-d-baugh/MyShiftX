@@ -32,7 +32,7 @@ export default function Body() {
       </p>
       <p>
         The reason to do it at the time is that memory for this is far worse than people expect.
-        Trying to reconstruct six weeks of shifts from a group chat and a photo of a rota is
+        Trying to reconstruct six weeks of shifts from a group chat and a photo of a schedule is
         miserable, and it is exactly the situation you are in when you finally suspect something is
         wrong.
       </p>
@@ -70,12 +70,12 @@ export default function Body() {
 
       <h2>The errors that specifically affect traded shifts</h2>
       <p>
-        If you trade shifts, there is a category of problem that people who work a fixed rota never
+        If you trade shifts, there is a category of problem that people who work a fixed schedule never
         encounter, and it is worth knowing what to look for.
       </p>
       <p>
         <strong>The swap that was never recorded.</strong> Two people agree, both work the right
-        shifts, and payroll pays them for the original rota. Depending on the shifts involved this
+        shifts, and payroll pays them for the original schedule. Depending on the shifts involved this
         can go either way, and the person who was underpaid usually only finds out weeks later.
       </p>
       <p>
@@ -140,7 +140,7 @@ export default function Body() {
       </p>
       <p>
         <strong>Know where it escalates.</strong> If it is not resolved after two cycles, find out
-        who owns payroll disputes — usually HR rather than your line manager, and in unionised
+        who owns payroll disputes — usually HR rather than your line manager, and in unionized
         workplaces your rep will have seen the same error before and will know exactly which system
         causes it.
       </p>
@@ -161,7 +161,7 @@ export default function Body() {
       <p>
         It matters more for shift workers than for almost anyone else, because the variability that
         makes the work flexible is the same variability that hides mistakes. A fixed salary is
-        self-checking. A rota that changes every fortnight, with premiums and swaps and overtime
+        self-checking. A schedule that changes every two weeks, with premiums and swaps and overtime
         thresholds layered on top, is not — and nobody else is going to check it for you.
       </p>
       <p>

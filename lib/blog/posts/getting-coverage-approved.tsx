@@ -29,7 +29,7 @@ export default function Body() {
       </p>
       <p>
         If the answer is &ldquo;approval&rdquo;, find out who can give it, whether a shift lead
-        counts or it has to be a manager, and what happens when that person is on holiday.
+        counts or it has to be a manager, and what happens when that person is on vacation.
       </p>
 
       <h3>What is the deadline?</h3>
@@ -98,7 +98,7 @@ export default function Body() {
 
       <h2>Put it in writing, even when a conversation is enough</h2>
       <p>
-        If the approval happens verbally in a corridor, send a short follow-up confirming it. Not
+        If the approval happens verbally in a hallway, send a short follow-up confirming it. Not
         because you expect to be doubted, but because schedulers manage a lot of people and
         genuinely forget, and a two-line message with a date on it resolves the whole thing
         instantly if it comes up.
@@ -121,12 +121,12 @@ export default function Body() {
         The constructive move is usually to ask for the policy in writing — not as a challenge, but
         as a straightforward request. Somewhere, written down, is what the process is supposed to
         be. Having it makes the inconsistency visible and gives you something to point at. If you
-        are in a unionised workplace, your representative will already know the answers to most of
+        are in a unionized workplace, your representative will already know the answers to most of
         the questions on this page, and asking them is faster than working it out yourself.
       </p>
       <p>
         For anything touching your legal rights — minimum rest, overtime entitlement, what can
-        happen if a trade fails — talk to your union or an employment adviser in your jurisdiction.
+        happen if a trade fails — talk to your union or an employment advisor in your jurisdiction.
         Those rules vary far too much for anyone to summarise them usefully in a blog post,
         including us.
       </p>

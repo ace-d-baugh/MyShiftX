@@ -28,7 +28,7 @@ export default function Body() {
           because it is closer to the direction the body drifts naturally.
         </li>
         <li>
-          <strong>Rota-published.</strong> No fixed pattern at all — a manager builds each period by
+          <strong>Posted schedule.</strong> No fixed pattern at all — a manager builds each period by
           hand and posts it two or three weeks out. Common in hospitality and retail. Least
           predictable, and the one where trading matters most.
         </li>
@@ -45,8 +45,8 @@ export default function Body() {
 
       <h2>Find your anchor days</h2>
       <p>
-        The trick that makes a rotation manageable is to stop memorising the whole pattern and
-        memorise two or three anchor points instead.
+        The trick that makes a rotation manageable is to stop memorizing the whole pattern and
+        memorize two or three anchor points instead.
       </p>
       <p>
         On a four-on-four-off cycle, for instance, your pattern shifts by four days each time
@@ -63,7 +63,7 @@ export default function Body() {
       <h2>Get it out of your head and into one calendar</h2>
       <p>
         The most common failure mode is not forgetting a shift. It is holding the schedule in three
-        incompatible places: a photo of the printed rota, whatever the work system says, and your
+        incompatible places: a photo of the printed schedule, whatever the work system says, and your
         own memory. When those three disagree — and they will, the moment anyone trades anything —
         you have no way to know which one is right.
       </p>
@@ -80,9 +80,9 @@ export default function Body() {
         a schedule you will double-book.
       </p>
 
-      <h2>Photograph the rota the day it goes up</h2>
+      <h2>Photograph the schedule the day it goes up</h2>
       <p>
-        Do this even if the schedule is also available digitally. Rotas get changed, and the version
+        Do this even if the schedule is also available digitally. Schedules get changed, and the version
         that was posted on the 1st is evidence of what you were originally given. It has resolved a
         lot of disputes about who agreed to what.
       </p>
@@ -111,7 +111,7 @@ export default function Body() {
       <p>
         Every pattern has a bad seam. On a forward rotation it is usually the turnaround from the
         last late to the first early. On four-on-four-off it is the fourth night. On a
-        rota-published schedule it is whenever two blocks get stitched together with a single day
+        posted schedule it is whenever two blocks get stitched together with a single day
         between them.
       </p>
       <p>
@@ -126,11 +126,11 @@ export default function Body() {
         <a href="/blog/working-nights-without-wrecking-your-week">managing night blocks</a>.
       </p>
 
-      <h2>Check the rota against your own record every time it is published</h2>
+      <h2>Check the schedule against your own record every time it is published</h2>
       <p>
         Two minutes, every publication. Compare what they have given you against what you expected
         from the pattern and against any approved time off. Errors are common, they are almost
-        always innocent, and they are enormously easier to fix in the week the rota goes up than in
+        always innocent, and they are enormously easier to fix in the week the schedule goes up than in
         the week it takes effect.
       </p>
       <p>
@@ -141,10 +141,10 @@ export default function Body() {
 
       <h2>The short version</h2>
       <p>
-        Identify your pattern and its cycle length. Memorise two anchor days rather than the whole
-        thing. Keep one authoritative calendar you can check in eight seconds. Photograph the rota
+        Identify your pattern and its cycle length. Memorize two anchor days rather than the whole
+        thing. Keep one authoritative calendar you can check in eight seconds. Photograph the schedule
         when it is posted. Book life into your reliable rest blocks. Know your pinch point and
-        protect it. Audit every published rota against your own record.
+        protect it. Audit every published schedule against your own record.
       </p>
       <p>
         None of this makes a rotating schedule pleasant. It does make it something you manage rather

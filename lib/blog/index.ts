@@ -27,9 +27,9 @@ const AUTHOR = 'The MyShiftX Team'
 export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'new-on-the-rota',
-    title: 'New on the Rota: What Nobody Tells You in the First Month',
+    title: 'New on the Schedule: What Nobody Tells You in the First Month',
     description:
-      'The job you will pick up. The scheduling culture takes longer — when the rota is really built, how swaps actually work here, and which of your shifts are worth more than they look.',
+      'The job you will pick up. The scheduling culture takes longer — when the schedule is really built, how swaps actually work here, and which of your shifts are worth more than they look.',
     publishedAt: '2026-08-04',
     updatedAt: '2026-08-04',
     author: AUTHOR,
@@ -41,7 +41,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'asking-for-time-off',
     title: 'Asking for Time Off and Actually Getting It',
     description:
-      'Leave is not granted on the strength of your reason — it is granted on whether saying yes creates a problem. Find out when the rota is built, and ask before that.',
+      'Leave is not granted on the strength of your reason — it is granted on whether saying yes creates a problem. Find out when the schedule is built, and ask before that.',
     publishedAt: '2026-08-01',
     updatedAt: '2026-08-01',
     author: AUTHOR,
@@ -53,11 +53,11 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'checking-your-shift-pay',
     title: 'Checking Your Shift Pay: What to Look For and How to Query It',
     description:
-      'A salary is self-checking; a rota with premiums, swaps, and overtime thresholds is not. The payslip lines where errors actually live, and how to raise one so it gets fixed.',
+      'A salary is self-checking; a schedule with premiums, swaps, and overtime thresholds is not. The payslip lines where errors actually live, and how to raise one so it gets fixed.',
     publishedAt: '2026-07-29',
     updatedAt: '2026-07-29',
     author: AUTHOR,
-    tags: ['Pay', 'Getting organised'],
+    tags: ['Pay', 'Getting organized'],
     readingMinutes: 8,
     Body: ShiftPayBody,
   },
@@ -105,7 +105,7 @@ export const BLOG_POSTS: BlogPost[] = [
     publishedAt: '2026-07-17',
     updatedAt: '2026-07-17',
     author: AUTHOR,
-    tags: ['Shift trading', 'Getting organised'],
+    tags: ['Shift trading', 'Getting organized'],
     readingMinutes: 7,
     Body: ShiftPostBody,
   },
@@ -149,11 +149,11 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'reading-a-rotating-schedule',
     title: 'How to Read a Rotating Schedule Without Losing Track of Your Life',
     description:
-      'Find your cycle length, memorise two anchor days instead of twenty-eight, and keep one calendar that wins. A practical guide to staying on top of a rotation.',
+      'Find your cycle length, memorize two anchor days instead of twenty-eight, and keep one calendar that wins. A practical guide to staying on top of a rotation.',
     publishedAt: '2026-04-28',
     updatedAt: '2026-04-28',
     author: AUTHOR,
-    tags: ['Scheduling', 'Getting organised'],
+    tags: ['Scheduling', 'Getting organized'],
     readingMinutes: 7,
     Body: RotatingScheduleBody,
   },

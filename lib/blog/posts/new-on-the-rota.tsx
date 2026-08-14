@@ -2,7 +2,7 @@ export default function Body() {
   return (
     <>
       <p>
-        The first few weeks on a new rota are strange in a way that nobody warns you about. The job
+        The first few weeks on a new schedule are strange in a way that nobody warns you about. The job
         itself you will pick up. What takes longer is everything around it: which days are actually
         hard, who to ask when something goes wrong, why everybody groans about the Thursday
         handover, and how people arrange cover when they cannot work.
@@ -16,9 +16,9 @@ export default function Body() {
         Here is a shortcut for the scheduling half of it.
       </p>
 
-      <h2>Learn the rota&rsquo;s shape before you learn its details</h2>
+      <h2>Learn the schedule&rsquo;s shape before you learn its details</h2>
       <p>
-        Do not try to memorise your shifts. Work out the pattern instead — how many weeks before it
+        Do not try to memorize your shifts. Work out the pattern instead — how many weeks before it
         repeats, and which two or three days are the anchors. Almost every rotating schedule has a
         structure, and once you have the structure you can derive any week rather than remembering
         all of them.
@@ -28,7 +28,7 @@ export default function Body() {
       </p>
       <ul>
         <li>How long the cycle is before it repeats</li>
-        <li>Which day the rota is published, and how far ahead</li>
+        <li>Which day the schedule is published, and how far ahead</li>
         <li>Which day it is actually <em>built</em> — usually well before it is published</li>
         <li>Whether the pattern is fixed or gets adjusted each cycle</li>
       </ul>
@@ -63,7 +63,7 @@ export default function Body() {
       <p>
         There is a real dynamic in the first couple of months where covering a shift or two buys
         you a disproportionate amount of goodwill. It is not fair exactly, but it is how informal
-        reciprocity gets started, and you cannot draw on a favour bank you have never put anything
+        reciprocity gets started, and you cannot draw on a favor bank you have never put anything
         into.
       </p>
       <p>
@@ -104,7 +104,7 @@ export default function Body() {
         A shift with a night premium, a weekend differential, or one that pushes you over an
         overtime threshold is worth materially more than an ordinary weekday of identical length.
         Handing one over in exchange for a quiet Tuesday is not an even swap, even though it looks
-        like one on the rota.
+        like one on the schedule.
       </p>
       <p>
         Find out early which of your shifts carry a premium and how your overtime threshold is
@@ -132,7 +132,7 @@ export default function Body() {
         payslip looks wrong or somebody remembers an agreement differently.
       </p>
       <p>
-        It also builds the thing you most lack, which is data about your own rota. After two cycles
+        It also builds the thing you most lack, which is data about your own schedule. After two cycles
         you will be able to see which weeks are consistently heavy, which is when planning stops
         feeling like guesswork.
       </p>
@@ -140,7 +140,7 @@ export default function Body() {
       <h2>Be the person who is easy to trade with</h2>
       <p>
         Whatever else, this is the reputation worth having, and it is built out of very ordinary
-        behaviour:
+        behavior:
       </p>
       <ul>
         <li>Give as much notice as you possibly can</li>
