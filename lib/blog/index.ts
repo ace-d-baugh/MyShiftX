@@ -1,4 +1,34 @@
 import type { BlogPost } from '@/lib/blog/types'
+import FirstBusySeasonBody from '@/lib/blog/posts/first-busy-season-what-shift-workers-wish-they-knew'
+import HotelsThemeParksBody from '@/lib/blog/posts/shift-trading-in-hotels-and-theme-parks'
+import RestaurantsQsrBody from '@/lib/blog/posts/shift-trading-in-restaurants-and-quick-service'
+import CommonMythsBody from '@/lib/blog/posts/common-myths-about-shift-trading'
+import GroupChatsUpdatedBody from '@/lib/blog/posts/why-group-chats-keep-failing-shift-workers-updated'
+import SchedulingSoftwareBody from '@/lib/blog/posts/what-scheduling-software-doesnt-solve'
+import BurnoutSignalsBody from '@/lib/blog/posts/burnout-signals-for-heavy-traders'
+import HolidayPeakSeasonBody from '@/lib/blog/posts/holiday-and-peak-season-coverage-strategies'
+import MixedShiftsSleepBody from '@/lib/blog/posts/protecting-sleep-when-trading-mixed-shifts'
+import SustainableRotationBody from '@/lib/blog/posts/building-a-sustainable-rotation'
+import EscalatingTradeBody from '@/lib/blog/posts/escalating-a-problem-trade'
+import InviteOnlyExpandingBody from '@/lib/blog/posts/invite-only-or-expanding-a-board'
+import OnboardingNewHiresBody from '@/lib/blog/posts/onboarding-new-hires-to-the-board'
+import SamePeoplePickUpBody from '@/lib/blog/posts/same-people-always-pick-up-dynamic'
+import BoardRulesBody from '@/lib/blog/posts/board-rules-that-prevent-common-problems'
+import ManagerBuyInBody from '@/lib/blog/posts/getting-manager-buy-in-for-a-shift-board'
+import PayslipErrorsBody from '@/lib/blog/posts/fixing-payslip-errors-after-swaps'
+import TrackingHoursBody from '@/lib/blog/posts/tracking-hours-overtime-and-premiums'
+import CannotMakeShiftBody from '@/lib/blog/posts/what-to-do-when-you-cannot-make-a-shift'
+import SayNoCleanlyBody from '@/lib/blog/posts/how-to-say-no-to-covering-a-shift'
+import MessageTemplatesBody from '@/lib/blog/posts/shift-trading-message-templates'
+import PhotoToCalendarBody from '@/lib/blog/posts/using-photo-to-calendar-effectively'
+import MultiplePropertiesBody from '@/lib/blog/posts/finding-open-shifts-across-multiple-properties'
+import PersonalRulesBody from '@/lib/blog/posts/setting-personal-rules-for-shifts'
+import TrueCostBody from '@/lib/blog/posts/calculating-the-true-cost-of-a-shift'
+import TradeLedgerBody from '@/lib/blog/posts/keeping-a-simple-trade-ledger'
+import ShiftTradeChecklistBody from '@/lib/blog/posts/the-shift-trade-checklist'
+import TradeFallsThroughBody from '@/lib/blog/posts/shift-trade-falls-through-day-before'
+import PostForCoverageBody from '@/lib/blog/posts/how-to-post-a-shift-for-coverage'
+import SwapVsGiveawayBody from '@/lib/blog/posts/shift-swap-vs-giveaway-vs-coverage-request'
 import GroupChatsBody from '@/lib/blog/posts/group-chats-fail-shift-workers'
 import EtiquetteBody from '@/lib/blog/posts/shift-trading-etiquette'
 import RotatingScheduleBody from '@/lib/blog/posts/reading-a-rotating-schedule'
@@ -16,8 +46,8 @@ import NewOnRotaBody from '@/lib/blog/posts/new-on-the-rota'
 const AUTHOR = 'The MyShiftX Team'
 
 /**
- * Posts, newest first. Plain TS modules rather than MDX — thirteen articles do
- * not justify a content pipeline, and this way the bodies are ordinary
+ * Posts, newest first. Plain TS modules rather than MDX — forty-three articles
+ * do not justify a content pipeline, and this way the bodies are ordinary
  * components that typecheck with everything else.
  *
  * The blog index, the sitemap, and the prev/next links all derive from this
@@ -25,6 +55,366 @@ const AUTHOR = 'The MyShiftX Team'
  * here in date order. Nothing else needs touching.
  */
 export const BLOG_POSTS: BlogPost[] = [
+  {
+    slug: 'first-busy-season-what-shift-workers-wish-they-knew',
+    title: 'What Shift Workers Wish They Knew Before Their First Busy Season',
+    description:
+      'An evergreen guide for new workers facing peak pressure, unfamiliar trade norms, and the first time the schedule stops being theoretical.',
+    publishedAt: '2026-08-14',
+    updatedAt: '2026-08-14',
+    author: AUTHOR,
+    tags: ['Starting out', 'Scheduling'],
+    readingMinutes: 6,
+    Body: FirstBusySeasonBody,
+  },
+  {
+    slug: 'shift-trading-in-hotels-and-theme-parks',
+    title: 'Shift Trading in Hotels, Theme Parks, Attractions & Event Venues',
+    description:
+      '24/7 operations, seasonal peaks, multi-property work, guest-facing roles, and event-driven demand.',
+    publishedAt: '2026-08-14',
+    updatedAt: '2026-08-14',
+    author: AUTHOR,
+    tags: ['Industry', 'Hospitality & Attractions'],
+    readingMinutes: 6,
+    Body: HotelsThemeParksBody,
+  },
+  {
+    slug: 'shift-trading-in-restaurants-and-quick-service',
+    title: 'Shift Trading Realities in Restaurants & Quick Service',
+    description:
+      'Split shifts, late closes, weekend demand, floor coverage, and the speed at which last-minute changes move.',
+    publishedAt: '2026-08-14',
+    updatedAt: '2026-08-14',
+    author: AUTHOR,
+    tags: ['Industry', 'Restaurants'],
+    readingMinutes: 6,
+    Body: RestaurantsQsrBody,
+  },
+  {
+    slug: 'common-myths-about-shift-trading',
+    title: 'Common Myths About Shift Trading',
+    description:
+      'It always creates overtime problems. Only unreliable people trade. Managers hate it. The reality is more ordinary and more useful.',
+    publishedAt: '2026-08-13',
+    updatedAt: '2026-08-13',
+    author: AUTHOR,
+    tags: ['Shift trading', 'At work'],
+    readingMinutes: 6,
+    Body: CommonMythsBody,
+  },
+  {
+    slug: 'why-group-chats-keep-failing-shift-workers-updated',
+    title: 'Why Group Chats and Facebook Groups Keep Failing Shift Workers (Updated)',
+    description:
+      'Stale posts, missing details, no verification, notification chaos. The structural reasons a stream ordered by time cannot do the job of a board ordered by relevance.',
+    publishedAt: '2026-08-13',
+    updatedAt: '2026-08-13',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Workplace tools'],
+    readingMinutes: 7,
+    Body: GroupChatsUpdatedBody,
+  },
+  {
+    slug: 'what-scheduling-software-doesnt-solve',
+    title: 'What Good Scheduling Software Still Doesn’t Solve for Shift Workers',
+    description:
+      'Corporate tools publish the schedule. Workers still need a structured way to offer, request, discuss, and confirm cover with each other.',
+    publishedAt: '2026-08-13',
+    updatedAt: '2026-08-13',
+    author: AUTHOR,
+    tags: ['Workplace tools', 'Boards'],
+    readingMinutes: 6,
+    Body: SchedulingSoftwareBody,
+  },
+  {
+    slug: 'burnout-signals-for-heavy-traders',
+    title: 'Recognizing Early Burnout Signals Specific to Heavy Traders',
+    description:
+      'The patterns that appear weeks after the extra money lands — and what to do before they become a resignation.',
+    publishedAt: '2026-08-12',
+    updatedAt: '2026-08-12',
+    author: AUTHOR,
+    tags: ['Overtime', 'Recovery'],
+    readingMinutes: 6,
+    Body: BurnoutSignalsBody,
+  },
+  {
+    slug: 'holiday-and-peak-season-coverage-strategies',
+    title: 'Holiday and Peak-Season Coverage Strategies',
+    description:
+      'How to plan months ahead, post early, and share the load when everyone wants the same days off.',
+    publishedAt: '2026-08-12',
+    updatedAt: '2026-08-12',
+    author: AUTHOR,
+    tags: ['Scheduling', 'At work'],
+    readingMinutes: 6,
+    Body: HolidayPeakSeasonBody,
+  },
+  {
+    slug: 'protecting-sleep-when-trading-mixed-shifts',
+    title: 'Protecting Sleep and Recovery When You Mix Days, Evenings, and Nights Through Trading',
+    description:
+      'Practical tactics for mixed schedules created by trading, not just for permanent night workers.',
+    publishedAt: '2026-08-12',
+    updatedAt: '2026-08-12',
+    author: AUTHOR,
+    tags: ['Night shift', 'Recovery'],
+    readingMinutes: 6,
+    Body: MixedShiftsSleepBody,
+  },
+  {
+    slug: 'building-a-sustainable-rotation',
+    title: 'Building a Sustainable Rotation When the Schedule Changes Every Week or Two',
+    description:
+      'Anchor days, protected rest blocks, and routines that make an irregular schedule feel less like guesswork.',
+    publishedAt: '2026-08-11',
+    updatedAt: '2026-08-11',
+    author: AUTHOR,
+    tags: ['Scheduling', 'Recovery'],
+    readingMinutes: 6,
+    Body: SustainableRotationBody,
+  },
+  {
+    slug: 'escalating-a-problem-trade',
+    title: 'Escalating a Problem Trade Without Burning Bridges',
+    description:
+      'When to involve a supervisor, how to document cleanly, and how to keep the focus on the shift rather than the person.',
+    publishedAt: '2026-08-11',
+    updatedAt: '2026-08-11',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Working with people'],
+    readingMinutes: 6,
+    Body: EscalatingTradeBody,
+  },
+  {
+    slug: 'invite-only-or-expanding-a-board',
+    title: 'Invite-Only or Expanding: How to Choose the Right Board Setup',
+    description:
+      'Trust, privacy, verification, and workplace size. The trade-offs that decide whether a board stays tight or grows.',
+    publishedAt: '2026-08-11',
+    updatedAt: '2026-08-11',
+    author: AUTHOR,
+    tags: ['Boards', 'Workplace tools'],
+    readingMinutes: 6,
+    Body: InviteOnlyExpandingBody,
+  },
+  {
+    slug: 'onboarding-new-hires-to-the-board',
+    title: 'How to Onboard New Hires to the Board Without Overwhelming Them',
+    description:
+      'A short, low-pressure introduction that gets new people using the board correctly before they learn the hard way.',
+    publishedAt: '2026-08-10',
+    updatedAt: '2026-08-10',
+    author: AUTHOR,
+    tags: ['Boards', 'Workplace tools'],
+    readingMinutes: 6,
+    Body: OnboardingNewHiresBody,
+  },
+  {
+    slug: 'same-people-always-pick-up-dynamic',
+    title: 'Handling the “Same People Always Pick Up” Dynamic Fairly',
+    description:
+      'When a few names appear on every open shift, resentment builds on both sides. Practical ways to widen the pool without forcing anyone.',
+    publishedAt: '2026-08-10',
+    updatedAt: '2026-08-10',
+    author: AUTHOR,
+    tags: ['Boards', 'Working with people'],
+    readingMinutes: 6,
+    Body: SamePeoplePickUpBody,
+  },
+  {
+    slug: 'board-rules-that-prevent-common-problems',
+    title: 'The Board Rules That Prevent Most Common Problems',
+    description:
+      'Eligibility, confirmations, qualifications, last-minute posts, no-shows, and escalation. A practical template you can adapt.',
+    publishedAt: '2026-08-10',
+    updatedAt: '2026-08-10',
+    author: AUTHOR,
+    tags: ['Boards', 'Workplace tools'],
+    readingMinutes: 6,
+    Body: BoardRulesBody,
+  },
+  {
+    slug: 'getting-manager-buy-in-for-a-shift-board',
+    title: 'How to Get Manager Buy-In (or at Least Non-Interference) for a Worker-Run Board',
+    description:
+      'How to present a shift board to management as a low-risk tool that reduces last-minute scrambles rather than as an unofficial parallel system.',
+    publishedAt: '2026-08-09',
+    updatedAt: '2026-08-09',
+    author: AUTHOR,
+    tags: ['Boards', 'Workplace tools'],
+    readingMinutes: 6,
+    Body: ManagerBuyInBody,
+  },
+  {
+    slug: 'fixing-payslip-errors-after-swaps',
+    title: 'How to Spot and Fix Common Payslip Errors After Swaps or Overtime',
+    description:
+      'The lines where mistakes actually live, and how to raise a query that gets fixed instead of ignored.',
+    publishedAt: '2026-08-09',
+    updatedAt: '2026-08-09',
+    author: AUTHOR,
+    tags: ['Pay', 'Getting organized'],
+    readingMinutes: 6,
+    Body: PayslipErrorsBody,
+  },
+  {
+    slug: 'tracking-hours-overtime-and-premiums',
+    title: 'How to Track Hours, Overtime, and Premiums Across Multiple Locations',
+    description:
+      'A simple personal system for people who work more than one property or department so the numbers stay visible before the payslip arrives.',
+    publishedAt: '2026-08-09',
+    updatedAt: '2026-08-09',
+    author: AUTHOR,
+    tags: ['Pay', 'Getting organized'],
+    readingMinutes: 6,
+    Body: TrackingHoursBody,
+  },
+  {
+    slug: 'what-to-do-when-you-cannot-make-a-shift',
+    title: 'What to Do When You Cannot Make a Shift (Full Workflow)',
+    description:
+      'Notify the right person, follow the process, post coverage, confirm the handoff, keep a record. The sequence that keeps your record clean.',
+    publishedAt: '2026-08-08',
+    updatedAt: '2026-08-08',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Working with people'],
+    readingMinutes: 6,
+    Body: CannotMakeShiftBody,
+  },
+  {
+    slug: 'how-to-say-no-to-covering-a-shift',
+    title: 'How to Say No Cleanly When Someone Asks You to Cover',
+    description:
+      'Polite, firm language that protects your boundaries and still leaves the relationship intact.',
+    publishedAt: '2026-08-08',
+    updatedAt: '2026-08-08',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Working with people'],
+    readingMinutes: 5,
+    Body: SayNoCleanlyBody,
+  },
+  {
+    slug: 'shift-trading-message-templates',
+    title: 'Copy-and-Paste Templates for Asking to Swap, Give Away, or Request Coverage',
+    description:
+      'Ready-to-adapt messages that stay clear and professional without sounding desperate or vague.',
+    publishedAt: '2026-08-08',
+    updatedAt: '2026-08-08',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Working with people'],
+    readingMinutes: 6,
+    Body: MessageTemplatesBody,
+  },
+  {
+    slug: 'using-photo-to-calendar-effectively',
+    title: 'Using the Photo-to-Calendar Feature Effectively (and What to Double-Check)',
+    description:
+      'Snap the schedule, review the extracted shifts, and keep one calendar that actually wins. The small checks that stop a wrong import becoming a missed shift.',
+    publishedAt: '2026-08-07',
+    updatedAt: '2026-08-07',
+    author: AUTHOR,
+    tags: ['Scheduling', 'Getting organized'],
+    readingMinutes: 6,
+    Body: PhotoToCalendarBody,
+  },
+  {
+    slug: 'finding-open-shifts-across-multiple-properties',
+    title: 'How to Find Relevant Open Shifts When You Work Multiple Properties or Roles',
+    description:
+      'Filters exist for a reason. How to see only the shifts you can actually take when you work across sites, departments, or skill sets.',
+    publishedAt: '2026-08-07',
+    updatedAt: '2026-08-07',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Workplace tools'],
+    readingMinutes: 6,
+    Body: MultiplePropertiesBody,
+  },
+  {
+    slug: 'setting-personal-rules-for-shifts',
+    title: 'How to Set Personal Rules for Which Shifts You’ll Post or Claim',
+    description:
+      'Overtime thresholds, minimum rest, commute limits, and the days you protect. A short personal policy that stops you deciding the same questions under pressure every week.',
+    publishedAt: '2026-08-07',
+    updatedAt: '2026-08-07',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Getting organized'],
+    readingMinutes: 6,
+    Body: PersonalRulesBody,
+  },
+  {
+    slug: 'calculating-the-true-cost-of-a-shift',
+    title: 'Calculating the True Cost of a Shift (Beyond the Hourly Rate)',
+    description:
+      'Premiums, travel, lost rest, childcare, meals. Two shifts of the same length can cost very different amounts. How to see the real number before you agree.',
+    publishedAt: '2026-08-06',
+    updatedAt: '2026-08-06',
+    author: AUTHOR,
+    tags: ['Pay', 'Getting organized'],
+    readingMinutes: 7,
+    Body: TrueCostBody,
+  },
+  {
+    slug: 'keeping-a-simple-trade-ledger',
+    title: 'How to Keep a Simple Trade Ledger So Favors Stay Balanced',
+    description:
+      'A lightweight way to track who has covered whom without turning every shift into a transaction or a score-settling exercise.',
+    publishedAt: '2026-08-06',
+    updatedAt: '2026-08-06',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Working with people'],
+    readingMinutes: 6,
+    Body: TradeLedgerBody,
+  },
+  {
+    slug: 'the-shift-trade-checklist',
+    title: 'The Shift-Trade Checklist: What to Confirm Before You Say Yes',
+    description:
+      'Six questions that take thirty seconds. The difference between a trade you are glad you took and one you regret for a month.',
+    publishedAt: '2026-08-06',
+    updatedAt: '2026-08-06',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Getting organized'],
+    readingMinutes: 7,
+    Body: ShiftTradeChecklistBody,
+  },
+  {
+    slug: 'shift-trade-falls-through-day-before',
+    title: 'What to Do When a Shift Trade Falls Through the Day Before (or Morning Of)',
+    description:
+      'The shift is still yours, the person who agreed has gone quiet, and the clock is running. A practical order of operations that protects your record and your reputation.',
+    publishedAt: '2026-08-05',
+    updatedAt: '2026-08-05',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Working with people'],
+    readingMinutes: 7,
+    Body: TradeFallsThroughBody,
+  },
+  {
+    slug: 'how-to-post-a-shift-for-coverage',
+    title: 'How to Post a Shift for Coverage: A Template That Gets Faster Replies',
+    description:
+      'Seven details, roughly forty seconds. The difference between a post that gets answered and one that sits there until you end up working it yourself.',
+    publishedAt: '2026-08-05',
+    updatedAt: '2026-08-05',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Getting organized'],
+    readingMinutes: 7,
+    Body: PostForCoverageBody,
+  },
+  {
+    slug: 'shift-swap-vs-giveaway-vs-coverage-request',
+    title: 'Shift Swap vs. Shift Giveaway vs. Coverage Request: What’s the Difference?',
+    description:
+      'Three different posts that all look the same from the outside. The details that tell people which one they’re actually answering.',
+    publishedAt: '2026-08-05',
+    updatedAt: '2026-08-05',
+    author: AUTHOR,
+    tags: ['Shift trading', 'Getting organized'],
+    readingMinutes: 7,
+    Body: SwapVsGiveawayBody,
+  },
   {
     slug: 'new-on-the-rota',
     title: 'New on the Schedule: What Nobody Tells You in the First Month',
@@ -187,7 +577,7 @@ export function getPost(slug: string): BlogPost | undefined {
   return BLOG_POSTS.find(p => p.slug === slug)
 }
 
-/** Newer/older neighbours for the prev-next links at the foot of a post. */
+/** Newer/older neighbors for the prev-next links at the foot of a post. */
 export function adjacentPosts(slug: string): { newer?: BlogPost; older?: BlogPost } {
   const i = BLOG_POSTS.findIndex(p => p.slug === slug)
   if (i === -1) return {}
