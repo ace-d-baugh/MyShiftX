@@ -3,7 +3,6 @@ import FirstBusySeasonBody from '@/lib/blog/posts/first-busy-season-what-shift-w
 import HotelsThemeParksBody from '@/lib/blog/posts/shift-trading-in-hotels-and-theme-parks'
 import RestaurantsQsrBody from '@/lib/blog/posts/shift-trading-in-restaurants-and-quick-service'
 import CommonMythsBody from '@/lib/blog/posts/common-myths-about-shift-trading'
-import GroupChatsUpdatedBody from '@/lib/blog/posts/why-group-chats-keep-failing-shift-workers-updated'
 import SchedulingSoftwareBody from '@/lib/blog/posts/what-scheduling-software-doesnt-solve'
 import BurnoutSignalsBody from '@/lib/blog/posts/burnout-signals-for-heavy-traders'
 import HolidayPeakSeasonBody from '@/lib/blog/posts/holiday-and-peak-season-coverage-strategies'
@@ -46,7 +45,7 @@ import NewOnRotaBody from '@/lib/blog/posts/new-on-the-rota'
 const AUTHOR = 'The MyShiftX Team'
 
 /**
- * Posts, newest first. Plain TS modules rather than MDX — forty-three articles
+ * Posts, newest first. Plain TS modules rather than MDX — forty-two articles
  * do not justify a content pipeline, and this way the bodies are ordinary
  * components that typecheck with everything else.
  *
@@ -102,18 +101,6 @@ export const BLOG_POSTS: BlogPost[] = [
     tags: ['Shift trading', 'At work'],
     readingMinutes: 6,
     Body: CommonMythsBody,
-  },
-  {
-    slug: 'why-group-chats-keep-failing-shift-workers-updated',
-    title: 'Why Group Chats and Facebook Groups Keep Failing Shift Workers (Updated)',
-    description:
-      'Stale posts, missing details, no verification, notification chaos. The structural reasons a stream ordered by time cannot do the job of a board ordered by relevance.',
-    publishedAt: '2026-08-13',
-    updatedAt: '2026-08-13',
-    author: AUTHOR,
-    tags: ['Shift trading', 'Workplace tools'],
-    readingMinutes: 7,
-    Body: GroupChatsUpdatedBody,
   },
   {
     slug: 'what-scheduling-software-doesnt-solve',
