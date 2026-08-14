@@ -5,7 +5,7 @@ export default function Body() {
         Every workplace that trades shifts develops an unwritten code. Nobody hands it to you on
         your first day. You learn it by breaking it — by being the person who backed out on a
         Friday, or who took a shift and then quietly asked someone else to cover it, or who never
-        returns a favour.
+        returns a favor.
       </p>
       <p>
         Reputation matters more here than in almost any other part of the job, because shift
@@ -103,7 +103,7 @@ export default function Body() {
         hours when you want them.
       </p>
 
-      <h2>8. Return favours, and keep rough count</h2>
+      <h2>8. Return favors, and keep rough count</h2>
       <p>
         Nobody wants a ledger. But people do keep an informal tally, and you are on it whether you
         like it or not. If somebody has covered for you twice and you have never covered for them,
@@ -131,7 +131,7 @@ export default function Body() {
       <p>
         Post early. Be clear about trade versus giveaway. Do not double-book people. Once you accept,
         it is yours. Tell the scheduler. Know what you are taking. Stay in your certifications.
-        Return favours. Reply to messages.
+        Return favors. Reply to messages.
       </p>
       <p>
         Do those nine things and you will find your shifts get covered, which is genuinely most of

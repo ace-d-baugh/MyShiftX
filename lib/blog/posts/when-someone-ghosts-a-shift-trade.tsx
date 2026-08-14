@@ -23,7 +23,7 @@ export default function Body() {
         <li>
           <strong>The vanish.</strong> Somebody agreed and then stopped responding entirely. Often
           this is not malice — they got a better offer, or their own schedule changed, or they
-          realised they could not do it and felt too awkward to say so. The outcome is the same
+          realized they could not do it and felt too awkward to say so. The outcome is the same
           either way.
         </li>
         <li>

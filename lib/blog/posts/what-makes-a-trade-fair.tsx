@@ -25,7 +25,7 @@ export default function Body() {
       <p>
         Most workplaces recognise this implicitly — the unpopular slots are the ones that are hard
         to fill. Trading pretends the difference does not exist. It does. If somebody takes your
-        Saturday and gives you their Wednesday, they have done you a favour, and it is worth saying
+        Saturday and gives you their Wednesday, they have done you a favor, and it is worth saying
         so out loud rather than treating it as an even swap.
       </p>
 
@@ -57,7 +57,7 @@ export default function Body() {
       </ul>
       <p>
         None of this is a reason to refuse a trade. It is a reason to know the number before you
-        agree, so you are choosing to do somebody a favour rather than discovering afterwards that
+        agree, so you are choosing to do somebody a favor rather than discovering afterwards that
         you did.
       </p>
 

@@ -107,8 +107,8 @@ export default function Body() {
 
       <h2>What actually solves it</h2>
       <p>
-        None of the above is an argument that shift workers should be more organised. People are
-        already organised; they are working two jobs and coordinating childcare. The tool is what is
+        None of the above is an argument that shift workers should be more organized. People are
+        already organized; they are working two jobs and coordinating childcare. The tool is what is
         failing, and it is failing because it was built for group conversation and pressed into
         service as scheduling infrastructure.
       </p>

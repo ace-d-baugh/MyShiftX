@@ -9,7 +9,7 @@ export default function Body() {
       <p>
         If you are the person thinking about setting up something better, the technology is the
         easy part. What determines whether it works is a handful of decisions you make in the first
-        fortnight, most of which are social rather than technical.
+        two weeks, most of which are social rather than technical.
       </p>
 
       <h2>Decide who it is for before you invite anyone</h2>
@@ -20,7 +20,7 @@ export default function Body() {
       <p>
         The test is not who works for the same employer. It is <em>who can actually work each
         other&rsquo;s shifts</em>. If somebody cannot cover your position, at your site, on your
-        rota, then their presence adds noise to your feed and yours adds noise to theirs. Two
+        schedule, then their presence adds noise to your feed and yours adds noise to theirs. Two
         departments who never overlap should be two boards.
       </p>
       <p>
@@ -59,7 +59,7 @@ export default function Body() {
         From a scheduler&rsquo;s point of view, a functioning trade board is unambiguously good
         news: fewer last-minute call-outs, fewer gaps, fewer frantic phone calls on a Saturday
         morning. The version they object to is the one they find out about accidentally, or the one
-        that produces swaps they have to unpick. Framed as &ldquo;we are organising cover among
+        that produces swaps they have to unpick. Framed as &ldquo;we are organizing cover among
         ourselves so you get fewer holes, and every swap still comes to you for approval&rdquo;, it
         is a very easy conversation.
       </p>
@@ -79,7 +79,7 @@ export default function Body() {
         <li>Who files the paperwork and by when</li>
         <li>How much notice is expected, and what counts as an emergency</li>
         <li>That the shift stays yours until the swap is actually approved</li>
-        <li>What the board is not for — rotas are not the place for grievances about management</li>
+        <li>What the board is not for — schedules are not the place for grievances about management</li>
       </ol>
       <p>
         Post them once, pin them, and point new members at them. A board with five written rules
@@ -103,7 +103,7 @@ export default function Body() {
 
       <h2>Have more than one moderator</h2>
       <p>
-        Boards die when the person running them goes on holiday, changes departments, or gets tired
+        Boards die when the person running them goes on vacation, changes departments, or gets tired
         of it. Appoint at least two other people who can approve joiners and clear out stale posts,
         and do it in the first month while it still feels unnecessary.
       </p>
@@ -151,12 +151,12 @@ export default function Body() {
       <p>
         Early on you will have people giving shifts away and nobody picking them up, or the
         reverse. This is normal and it is a liquidity problem, not a sign the idea is wrong. It
-        resolves once enough of a rota is represented that most posts have a plausible taker.
+        resolves once enough of a schedule is represented that most posts have a plausible taker.
       </p>
       <p>
         The failure mode to watch for is the board where three people do all the giving and nobody
         reciprocates. Name it early if it happens — usually it is because the other members have
-        not realised they are allowed to ask for what they want rather than only responding to
+        not realized they are allowed to ask for what they want rather than only responding to
         offers.
       </p>
 

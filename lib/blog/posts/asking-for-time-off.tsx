@@ -4,7 +4,7 @@ export default function Body() {
       <p>
         There is a particular kind of unfairness in shift work that people notice early and rarely
         talk about: the same request, for the same days, gets approved for one person and declined
-        for another. Not because of favouritism, usually. Because one of them asked in a way that
+        for another. Not because of favoritism, usually. Because one of them asked in a way that
         was easy to say yes to.
       </p>
       <p>
@@ -33,13 +33,13 @@ export default function Body() {
         that early requests are rewarded for virtue. It is that early requests are cheap.
       </p>
       <p>
-        A request made before the rota is built is a constraint the scheduler works around. A
+        A request made before the schedule is built is a constraint the scheduler works around. A
         request made after it is published is a change they have to make, which means finding
         cover, adjusting somebody else, and possibly a second conversation with the person they
         move. The first costs nothing. The second costs an afternoon.
       </p>
       <p>
-        Find out when your rota is actually built — not when it is published, when it is
+        Find out when your schedule is actually built — not when it is published, when it is
         <em> built</em>, which is often two or three weeks earlier — and get requests in before
         that point. This single piece of information is worth more than every other technique
         combined, and most people never ask for it.
@@ -104,7 +104,7 @@ export default function Body() {
       <h2>Give a reason, briefly, and stop</h2>
       <p>
         Reasons matter less than people think, but they are not irrelevant — they help a scheduler
-        prioritise between competing requests, and a genuinely fixed date (a wedding, a court date,
+        prioritize between competing requests, and a genuinely fixed date (a wedding, a court date,
         a booked medical appointment) is worth flagging as fixed.
       </p>
       <p>
@@ -119,8 +119,8 @@ export default function Body() {
 
       <h2>Put it through the actual system</h2>
       <p>
-        A verbal yes from a manager in a corridor is not time off. It is an intention that will
-        evaporate the moment that manager is on holiday themselves, or moves department, or simply
+        A verbal yes from a manager in a hallway is not time off. It is an intention that will
+        evaporate the moment that manager is on vacation themselves, or moves department, or simply
         forgets — and there will be nothing to point at.
       </p>
       <p>
@@ -164,14 +164,14 @@ export default function Body() {
       <p>
         Which is worth knowing early, because it means the way you handle the ordinary weeks is
         part of how the important request goes. The colleague who picked up your shift in February
-        is also the reason your October is possible — and the board where those favours get done in
+        is also the reason your October is possible — and the board where those favors get done in
         public is the same board you will be posting to when you need the Thursday covered.
       </p>
       <p>
         If you are trying to make a leave request work, the practical sequence is: find out when
-        the rota is built, get the request in before that, be specific about dates, say what you
+        the schedule is built, get the request in before that, be specific about dates, say what you
         can flex on, and post the awkward shifts early on{' '}
-        <a href="/wall">your board</a> rather than a fortnight out. Most declined requests were not
+        <a href="/wall">your board</a> rather than two weeks out. Most declined requests were not
         refused on merit. They were refused because by the time anyone looked at them, saying yes
         had become expensive.
       </p>

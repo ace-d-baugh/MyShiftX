@@ -71,7 +71,7 @@ export default function Body() {
         <li>
           <strong>The extended run.</strong> Picking up a shift that turns a comfortable four-day
           stretch into an unbroken nine is a much bigger commitment than the single shift it looks
-          like on the rota.
+          like on the schedule.
         </li>
         <li>
           <strong>The direction change.</strong> A night in the middle of a run of days, or the
@@ -112,7 +112,7 @@ export default function Body() {
       <ul>
         <li>&ldquo;I am at my limit this week, but post it and I will take one next week if it is still open.&rdquo;</li>
         <li>&ldquo;Cannot do that one — it breaks my only rest block. Ask me about anything Tue&ndash;Thu.&rdquo;</li>
-        <li>&ldquo;Not this time. I have done three already this fortnight and I will be useless.&rdquo;</li>
+        <li>&ldquo;Not this time. I have done three already in the last two weeks and I will be useless.&rdquo;</li>
       </ul>
       <p>
         Each of these declines the shift while keeping the relationship and, importantly, tells the
@@ -158,7 +158,7 @@ export default function Body() {
       <h2>The one that is genuinely worth taking</h2>
       <p>
         None of this means being precious about extra shifts. Covering for somebody who is stuck is
-        how a rota full of people becomes a team, and it is the reason anybody covers for you.
+        how a schedule full of people becomes a team, and it is the reason anybody covers for you.
       </p>
       <p>
         The distinction worth holding is between <em>choosing</em> to take a hard shift because it
@@ -167,7 +167,7 @@ export default function Body() {
       </p>
       <p>
         Six questions before you say yes: does this change my pay or not, does it break a rest
-        block, does it extend a run, am I already over my limit for the fortnight, do I actually
+        block, does it extend a run, am I already over my limit for the two weeks, do I actually
         want the money for something, and would I take this shift if a stranger had posted it?
       </p>
       <p>

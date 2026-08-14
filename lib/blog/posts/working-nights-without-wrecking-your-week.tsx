@@ -123,7 +123,7 @@ export default function Body() {
       </p>
       <p>
         Realistic mitigations: share a lift, take transport, keep the drive short by living close if
-        you have the choice, and give yourself permission to sleep in the car park for twenty
+        you have the choice, and give yourself permission to sleep in the parking lot for twenty
         minutes before setting off. Nobody has ever regretted the twenty minutes.
       </p>
 
