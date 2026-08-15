@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { ShowcaseNav } from '@/components/showcase/ShowcaseNav'
 import { ShowcaseBanner } from '@/components/showcase/ShowcaseBanner'
 import { ShowcaseMessages } from '@/components/showcase/ShowcaseMessages'
 import { Prose } from '@/components/ui/Prose'
@@ -19,7 +18,6 @@ export default function PreviewMessagesPage() {
 
   return (
     <>
-      <ShowcaseNav active="/messages" />
       {/* No AdRail here by design — a private inbox carries no publisher
        * content, so it is off the ad-enabled list in AdRail.tsx. */}
       <div className="max-w-6xl mx-auto px-4 py-8">

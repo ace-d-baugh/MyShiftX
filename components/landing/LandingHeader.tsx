@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronDown, LayoutGrid, CalendarDays, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { ThemedLogo } from '@/components/ui/ThemedLogo'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -15,11 +16,15 @@ const PUBLIC_NAV = [
   { href: '/wall', label: 'The Wall' },
   { href: '/calendar', label: 'Calendar' },
   { href: '/messages', label: 'Messages' },
+  { href: '/for', label: 'Industries' },
   { href: '/blog', label: 'Blog' },
   { href: '/faq', label: 'FAQ' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ] as const
+
+/** The demo sections — where the "Live Demo" CTA would just point at itself. */
+const DEMO_ROUTES = ['/wall', '/calendar', '/messages']
 
 interface LandingHeaderProps {
   displayName: string | null
@@ -30,6 +35,16 @@ interface LandingHeaderProps {
   pendingFlagsCount?: number
   unreadMessagesCount?: number
   showUpgrade?: boolean
+  /**
+   * Current section, e.g. '/wall'. Highlights the matching nav item and sets
+   * aria-current. Defaults to the live pathname, so callers rendering this in
+   * a layout get it for free — only pass it to override.
+   *
+   * The demo pages used to ship their own header (ShowcaseNav) purely to get
+   * this highlight, at the cost of showing a different, much shorter nav than
+   * the rest of the site.
+   */
+  active?: string
 }
 
 export function LandingHeader({
@@ -41,10 +56,16 @@ export function LandingHeader({
   pendingFlagsCount = 0,
   unreadMessagesCount = 0,
   showUpgrade = false,
+  active,
 }: LandingHeaderProps) {
   const supabase = createClient()
   const [menuOpen, setMenuOpen] = useState(false)
   const isLoggedIn = !!displayName
+  // The demo is served by rewriting /wall → /preview/wall, so the path seen
+  // here depends on whether it's the server or the client asking. Strip the
+  // prefix so both agree on /wall and the highlight doesn't flip on hydration.
+  const pathname = usePathname()
+  const activeHref = active ?? pathname?.replace(/^\/preview/, '')
 
   const isAdmin = userRole === 'Admin'
   const showModItems = isBoardModerator || isAdmin
@@ -130,17 +151,26 @@ export function LandingHeader({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-text/70 hover:text-primary hover:bg-primary-light/50 transition-colors"
+                  aria-current={activeHref === item.href ? 'page' : undefined}
+                  className={cn(
+                    'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                    activeHref === item.href
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-text/70 hover:text-primary hover:bg-primary-light/50'
+                  )}
                 >
                   {item.label}
                 </Link>
               ))}
-              <Link
-                href="/wall"
-                className="btn btn-primary text-sm px-4 py-2 min-h-0 h-10 ml-1"
-              >
-                Live Demo
-              </Link>
+              {/* Redundant once you're already inside the demo. */}
+              {!DEMO_ROUTES.includes(activeHref ?? '') && (
+                <Link
+                  href="/wall"
+                  className="btn btn-primary text-sm px-4 py-2 min-h-0 h-10 ml-1"
+                >
+                  Live Demo
+                </Link>
+              )}
             </div>
           ) : (
             <>

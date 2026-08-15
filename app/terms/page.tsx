@@ -3,6 +3,8 @@ import { ArrowLeft } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { getPublicShowAds } from '@/lib/auth/session'
 import { AdRail } from '@/components/features/AdRail'
+import { LandingHeader } from '@/components/landing/LandingHeader'
+import { Footer } from '@/components/landing/Footer'
 import { PRO_PLANS } from '@/lib/pricing'
 
 export const metadata = { title: 'Terms & Conditions – MyShiftX' }
@@ -11,8 +13,10 @@ export default async function TermsPage() {
   const showAds = await getPublicShowAds(createServerClient())
 
   return (
-    <AdRail showAds={showAds} hasBottomNav={false}>
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
+      <LandingHeader displayName={null} />
+      <main className="flex-1">
+        <AdRail showAds={showAds} hasBottomNav={false}>
       <div className="max-w-3xl mx-auto px-4 py-12">
         <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-text/60 hover:text-text mb-8 min-h-0 min-w-0">
           <ArrowLeft className="w-4 h-4" /> Back
@@ -466,7 +470,9 @@ export default async function TermsPage() {
           </p>
         </div>
       </div>
+        </AdRail>
+      </main>
+      <Footer />
     </div>
-    </AdRail>
   )
 }

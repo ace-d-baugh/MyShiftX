@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { ShowcaseNav } from '@/components/showcase/ShowcaseNav'
 import { ShowcaseBanner } from '@/components/showcase/ShowcaseBanner'
 import { ShowcaseCalendar } from '@/components/showcase/ShowcaseCalendar'
 import { Prose } from '@/components/ui/Prose'
@@ -19,7 +18,6 @@ export default function PreviewCalendarPage() {
 
   return (
     <>
-      <ShowcaseNav active="/calendar" />
       {/* No AdRail here by design — a month grid is a navigation surface, so
        * it is off the ad-enabled list in AdRail.tsx. */}
       <div className="max-w-5xl mx-auto px-4 py-8">

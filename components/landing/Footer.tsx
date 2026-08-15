@@ -16,6 +16,7 @@ const ADS_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID)
 // FAQ stay in both modes; they're permanent content, not part of the demo.
 const LINKS = [
   { href: '/about', label: 'About' },
+  { href: '/for', label: 'Industries' },
   { href: '/blog', label: 'Blog' },
   { href: '/faq', label: 'FAQ' },
   { href: '/contact', label: 'Contact' },

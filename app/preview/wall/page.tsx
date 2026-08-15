@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { AdRail } from '@/components/features/AdRail'
-import { ShowcaseNav } from '@/components/showcase/ShowcaseNav'
 import { ShowcaseBanner } from '@/components/showcase/ShowcaseBanner'
 import { ShowcaseShiftCard } from '@/components/showcase/ShowcaseShiftCard'
 import { ShowcaseRequestCard } from '@/components/showcase/ShowcaseRequestCard'
@@ -24,7 +23,6 @@ export default function PreviewWallPage() {
 
   return (
     <>
-      <ShowcaseNav active="/wall" />
       <AdRail showAds hasBottomNav={false}>
         <div className="max-w-6xl mx-auto px-4 py-8">
 
