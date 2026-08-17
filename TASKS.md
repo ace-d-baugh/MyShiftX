@@ -1220,12 +1220,12 @@ Type-check, lint, and full build all clean. Could not exercise this live in-brow
 
 ---
 
-### Phase 6 — Help page (#9, #10) 🤖
+### 🟡 Phase 6 — Help page (#9, #10) — #9 COMPLETE 2026-08-18, #10 blocked on Phase 7
 
-- [ ] **#9 — Legend section.** Shift-type color chips (built from the actual badge CSS classes, not approximated — this matters because some themes override those classes for contrast), icon rows for Bundled/I Can Help/Comments/Message, party badges *(skip the party-badge row entirely if you didn't want #4/#8)*.
-- [ ] **#10 — Tour launch cards.** One card per tour chapter, needs #11 to exist first.
+- [x] **#9 — Legend section.** New "Legend" section in `HelpClient.tsx`, right before FAQ (matching WDW's placement): shift-type color chips using the actual `badge-trade`/`badge-giveaway` CSS classes (not approximated colors — several themes override those exact class names for contrast), an icon row for Bundled/I Can Help/Comments/Message, and a Board roles row (Crown/Award/UserRound matching `BOARD_ROLE_LABEL`). Party-badges row skipped entirely, as planned — MyShiftX never took #4/#8 (Disney park special-event badges).
+- [ ] **#10 — Tour launch cards.** Still blocked on #11 (Phase 7, the guided Product Tour) — WDW's version of this section requires `TOUR_CHAPTER_ORDER`/`TOUR_CHAPTERS`/`TOUR_ICONS`/`<ProductTour>`, none of which exist yet. Confirmed by reading WDW's actual file rather than assuming from the task list — this section sits immediately above Legend in WDW's source and is entirely tour-dependent. Will land as part of Phase 7 instead of here.
 
-Sequenced last-but-one because the Legend should describe whatever's actually live by this point (Type/Days filters, "I Can Help", etc.) — writing it earlier risks describing features that don't exist yet.
+Type-check, lint, and full build all clean. Could not exercise this live in-browser — same missing-test-credentials limitation as earlier phases.
 
 ---
 

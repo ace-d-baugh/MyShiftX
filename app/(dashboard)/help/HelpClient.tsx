@@ -5,12 +5,13 @@ import Link from 'next/link'
 import {
   HelpCircle, ChevronDown, Send, X, CheckCircle,
   LayoutGrid, UserPlus, MessageSquare, Layers,
-  HeartHandshake as Handshake,
+  HeartHandshake as Handshake, Crown, Award, UserRound,
   Bell, Monitor, Laptop, Smartphone, CalendarDays, Camera,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { sendSupportMessage } from '@/app/actions/help'
+import { BOARD_ROLE_LABEL } from '@/lib/roles'
 
 interface HelpClientProps {
   userEmail: string
@@ -231,6 +232,85 @@ export function HelpClient({ userEmail, importEnabled }: HelpClientProps) {
           ))}
         </div>
       </div>
+
+      {/* ── Legend ──────────────────────────────────────────────────────────── */}
+      <section className="mb-10 scroll-mt-20" id="legend">
+        <h2 className="font-accent text-xl font-bold text-text mb-1">Legend</h2>
+        <p className="text-sm text-text/60 mb-4">
+          Quick reference for the colors, icons, and badges used across the Wall and Calendar.
+        </p>
+
+        <div className="border border-border rounded-xl px-5 py-4 space-y-5">
+          {/* Colors */}
+          <div>
+            <p className="text-xs font-semibold text-text/50 uppercase tracking-wide mb-2.5">Shift colors</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                // Trade/Giveaway reuse the exact classes the real badges use
+                // (not just bg-info/bg-success) — several themes, Cyberpunk
+                // included, override .badge-trade/.badge-giveaway with a
+                // darker text color for contrast against a bright background,
+                // and that override only fires on these literal class names.
+                { swatch: 'badge-trade',    label: 'T',   desc: 'Trade' },
+                { swatch: 'badge-giveaway', label: 'G',   desc: 'Giveaway' },
+                { swatch: 'bg-primary/20 text-primary', label: 'G/T', desc: 'Give or Trade' },
+                { swatch: 'bg-accent/20 text-text',     label: 'R',   desc: 'Request' },
+              ].map(c => (
+                <div key={c.label} className="flex items-center gap-2 min-w-0">
+                  <span className={cn(
+                    'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold',
+                    c.swatch
+                  )}>
+                    {c.label}
+                  </span>
+                  <span className="text-sm text-text/70 truncate">{c.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Icons */}
+          <div className="pt-4 border-t border-border">
+            <p className="text-xs font-semibold text-text/50 uppercase tracking-wide mb-2.5">Icons</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { Icon: Layers,    desc: 'Bundled shifts' },
+                { Icon: Handshake, desc: 'I Can Help' },
+                { Icon: MessageSquare, desc: 'Comments' },
+                { Icon: Send,      desc: 'Message' },
+              ].map(({ Icon, desc }) => (
+                <div key={desc} className="flex items-center gap-2 min-w-0">
+                  <span className="shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Icon className="w-3.5 h-3.5 text-primary" />
+                  </span>
+                  <span className="text-sm text-text/70 truncate">{desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Board roles */}
+          <div className="pt-4 border-t border-border">
+            <p className="text-xs font-semibold text-text/50 uppercase tracking-wide mb-2.5">
+              Board roles <span className="normal-case font-normal">(My Boards member list)</span>
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                { Icon: Crown,     className: 'text-warning', label: BOARD_ROLE_LABEL.Leader },
+                { Icon: Award,     className: 'text-info',    label: BOARD_ROLE_LABEL.Mod },
+                { Icon: UserRound, className: 'text-primary', label: BOARD_ROLE_LABEL.User },
+              ].map(({ Icon, className, label }) => (
+                <div key={label} className="flex items-center gap-2 min-w-0">
+                  <span className="shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Icon className={cn('w-3.5 h-3.5', className)} />
+                  </span>
+                  <span className="text-sm text-text/70 truncate">{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ── FAQ ─────────────────────────────────────────────────────────────── */}
       <section className="mb-10">
