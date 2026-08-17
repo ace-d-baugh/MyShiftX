@@ -785,8 +785,11 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Board multi-select dropdown */}
+              <div className={cn('grid grid-cols-1 gap-3', boards.length > 1 && 'sm:grid-cols-2')}>
+                {/* Board multi-select dropdown — only worth showing once there's
+                    something to filter between; a single-board user's posts are
+                    already scoped to that one board. */}
+                {boards.length > 1 && (
                 <div ref={boardDropdownRef} className="relative">
                   <label className="block text-xs font-medium text-text/60 mb-1">Board</label>
                   <button
@@ -845,6 +848,7 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                     </div>
                   )}
                 </div>
+                )}
 
                 {/* Date — react-datepicker so it's a real calendar popup on
                     every browser, matching the post/edit forms (the native
