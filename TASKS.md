@@ -1163,10 +1163,8 @@ Two schema changes, both currently bundled with WDW's admin overhaul but separab
 
 - [ ] **#15 — `first_name` / `last_name` columns.** Adds the two columns to `users`, backfills existing rows by splitting `display_name` on its last whitespace token (guarded so re-running won't clobber manual corrections), updates `handle_new_user()` and `get_users_admin()` to populate/return them.
   - **Known trap, already hit once on WDW:** MyShiftX's `boards` and `users` tables use column-level SELECT grants, not table-wide (that's the S8 fix from last time). A new column has **no grant at all** until explicitly added — and selecting it fails the *whole query* with "permission denied for table X", not just that column, which is a confusing error to debug blind. WDW's own migration comment notes they missed this on the first pass. I'll grant it correctly from the start.
-- [ ] **#13 — Full "First Last" display names**, ⚠️ *you flagged this optional; picking it means committing to full last names being visible to any board member, not just close coworkers. MyShiftX is a broader public product than WDW's ~255 known coworkers — different privacy tradeoff. Confirm you still want this before I touch the regex/trigger.*
+- [ ] **#13 — Full "First Last" display names.** ✅ **Confirmed 2026-08-17** — useful for business purposes.
 - [ ] **#14 — Display-name copy update.** Trivial, rides with #13.
-
-**👤 You confirm:** are you still good with #13 given the privacy note above? If not, I'll do #15 alone and skip #13/#14 — they're independent.
 
 ---
 
@@ -1238,9 +1236,7 @@ Sequenced last-but-one because the Legend should describe whatever's actually li
 
 - [ ] **#19 — Remove weekly digest entirely**: cron route, unsubscribe route, email template, profile toggle, `notify_weekly_digest` column.
 
-⚠️ *You picked this, but it's worth a second look: MyShiftX's weekly digest is live today, and WDW's reason for dropping it was Resend send-cap risk at WDW's volume — not a bug. Removing a live feature is harder to reverse than not building it.*
-
-**👤 You confirm:** is MyShiftX also approaching a Resend send-cap concern, or is this purely "match WDW's decision"? Either answer is fine — I just want the removal to be a deliberate choice, not a copy-paste default. Sequenced last so it doesn't block anything else regardless of your answer.
+✅ **Confirmed 2026-08-17** — not a send-cap concern, you just never liked the feature. Deliberate removal, not a copy-paste default.
 
 ---
 
@@ -1255,13 +1251,28 @@ Sequenced last-but-one because the Legend should describe whatever's actually li
 7. **Phase 7** (tour) — last, so it can reference the finished Wall/Calendar
 8. **Phase 8** (digest removal) — whenever, independent of everything above
 
-### 📋 What I need from you before starting
+### 📋 Status
 
-- ✅ **Phase 1: confirm #13** (full last names) given the privacy note, or tell me to drop it and keep #15 alone
-- ✅ **Phase 8: confirm #19** — deliberate match of WDW's decision, or skip and keep the digest
-- Everything else has no open question — I'll start on Phase 1 (or Phase 2, if you want to skip the name-format decision for now and come back to it) once you give the go-ahead.
+**Both open questions resolved 2026-08-17 — all 17 items are go, no blockers remaining.**
 
-**None of the above blocks starting on Phase 2 (Wall filters)** if you'd rather begin with visible progress while you think over the two flagged items.
+### ✅ Phase 1 — COMPLETE 2026-08-18
+
+**⚠️ Found and fixed a real problem before this phase could even start:** the database already had `first_name`/`last_name` columns and a partially-updated signup trigger — leftover from earlier groundwork that never got finished or committed to git. Two consequences of that unfinished state, both fixed here:
+
+1. **The `@disney.com` signup block had been silently dropped** from the live trigger somewhere in that unfinished work. Restored — `@disney.com` addresses are blocked again.
+2. **The database had no read permission on the new columns at all** (the exact "new column needs its own grant" trap this app has hit before) — any query touching `first_name`, `last_name`, or `boards.status` would have failed outright the moment code tried to use them. Fixed.
+
+Also caught before it became real damage: my first backfill attempt derived `first_name`/`last_name` by splitting `display_name`, but every existing user's `display_name` was still in the OLD "First L." format — so the split produced garbage last names (just the initial + a period, e.g. `last_name = "B."`). Caught by a dry-run `SELECT` before committing to it, corrected by pulling real names from `auth.users` metadata instead (same source WDW's own manual backfill script used) — **16 of 17 users now have their real full name**, verified row-by-row. The 17th genuinely has no recoverable name anywhere (no OAuth metadata at all) and was deliberately left untouched rather than overwritten with a guess.
+
+**👤 One thing for you to know, not fix:** three accounts won't pass the new full-name format validation until their owner next edits their profile name — your two personal test accounts (`Matt "Ace" Baugh` / `Matt "Ace" Baugh`, quote characters aren't in the allowed set) and `lucas.hayes@myshiftx.com` (no recoverable name, still shows "Lucas H."). This is expected — the app doesn't retroactively reject existing data, it just won't accept a *save* that doesn't match the new format. I didn't touch anyone's account name without asking; fix at your convenience or leave as-is.
+
+- [x] #15 — columns, grants, backfill (corrected), `get_users_admin()` widened
+- [x] #13 — full "First Last" format live in the trigger, regex, OAuth callback
+- [x] #14 — copy updated: profile placeholder/helper/error text, register preview, admin edit-user placeholder
+
+Migrations: `20260818000000_finish_first_last_and_board_status.sql`, `20260818001000_backfill_names_from_auth_metadata.sql`. `lib/database.types.ts` updated to match (new `BoardStatus` type, `first_name`/`last_name` on the users table, widened `get_users_admin` return shape). Type-check, lint, and full build all clean.
+
+**Not done as part of Phase 1** (correctly deferred to Phase 5, which owns `boards.status`): no application code reads or writes `boards.status` yet — the column and its grant exist and are ready for Phase 5 to build on.
 
 ---
 

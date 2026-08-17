@@ -3,6 +3,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type GlobalRole  = 'Guest' | 'User' | 'Admin'
 export type Membership  = 'Basic' | 'Pro' | 'Trial'
 export type BoardRole   = 'User' | 'Mod' | 'Leader'
+export type BoardStatus = 'active' | 'paused' | 'deleted'
 export type FlagStatus      = 'pending' | 'resolved' | 'dismissed'
 export type FlagTargetType  = 'post' | 'user' | 'comment' | 'board'
 export type PreferredTime   = 'morning' | 'afternoon' | 'evening' | 'late'
@@ -21,6 +22,8 @@ export interface Database {
         Row: {
           id: string
           display_name: string | null
+          first_name: string | null
+          last_name: string | null
           email: string
           email_verified: boolean
           phone_number: string | null
@@ -47,6 +50,8 @@ export interface Database {
         Insert: {
           id?: string
           display_name?: string | null
+          first_name?: string | null
+          last_name?: string | null
           email: string
           email_verified?: boolean
           phone_number?: string | null
@@ -73,6 +78,8 @@ export interface Database {
         Update: {
           id?: string
           display_name?: string
+          first_name?: string | null
+          last_name?: string | null
           email?: string
           email_verified?: boolean
           phone_number?: string | null
@@ -107,6 +114,7 @@ export interface Database {
           invite_code_enabled: boolean
           created_by: string | null
           is_active: boolean
+          status: BoardStatus
           created_at: string
           updated_at: string
         }
@@ -118,6 +126,7 @@ export interface Database {
           invite_code_enabled?: boolean
           created_by?: string | null
           is_active?: boolean
+          status?: BoardStatus
           created_at?: string
           updated_at?: string
         }
@@ -129,6 +138,7 @@ export interface Database {
           invite_code_enabled?: boolean
           created_by?: string | null
           is_active?: boolean
+          status?: BoardStatus
           created_at?: string
           updated_at?: string
         }
@@ -842,7 +852,8 @@ export interface Database {
       get_users_admin: {
         Args: Record<string, never>
         Returns: {
-          id: string; display_name: string | null; role: GlobalRole; is_active: boolean
+          id: string; display_name: string | null; first_name: string | null; last_name: string | null
+          role: GlobalRole; is_active: boolean
           created_at: string; membership: Membership; billing_cycle: BillingCycle | null
         }[]
       }

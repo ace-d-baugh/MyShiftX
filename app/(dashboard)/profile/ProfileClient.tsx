@@ -122,7 +122,7 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
     setSaveSuccess(false)
 
     if (!displayNameRegex.test(displayName)) {
-      setNameError('Format: "FirstName [MiddleName] LastInitial." — e.g., "Thomas M." or "Mary Ann M."')
+      setNameError('Format: "FirstName [MiddleName] LastName" — e.g., "Thomas Morrow" or "Mary Ann Morrow"')
       return
     }
 
@@ -261,7 +261,7 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
 
       {isNewOAuthUser && (
         <div className="p-3 rounded-md bg-info/10 border border-info/20 text-info text-sm">
-          Welcome! Set a display name below before posting or joining boards.
+          Welcome! Set your display name &mdash; your full first and last name &mdash; below before posting or joining boards.
         </div>
       )}
 
@@ -302,9 +302,9 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
               className={`input placeholder:text-text/50 ${nameError ? 'border-warning' : ''}`}
               value={displayName}
               onChange={e => { setDisplayName(e.target.value); setNameError(null) }}
-              placeholder="Thomas M."
+              placeholder="Thomas Morrow"
             />
-            <p className="mt-1 text-xs text-text/40">FirstName [MiddleName] LastInitial. &mdash; e.g., &ldquo;Thomas M.&rdquo; or &ldquo;Mary Ann M.&rdquo;</p>
+            <p className="mt-1 text-xs text-text/40">Your full first and last name &mdash; this is what board members see. e.g., &ldquo;Thomas Morrow&rdquo; or &ldquo;Mary Ann Morrow&rdquo;</p>
             {nameError && <p className="mt-1 text-xs text-warning">{nameError}</p>}
           </div>
 
