@@ -1139,6 +1139,132 @@ The rule now permits only what the app really does: a pending plain-member join 
 
 ---
 
+## 🔀 WDWShiftX → MyShiftX Port #2 — Wall, Calendar, Help, Admin, Tour (2026-07-28 → 2026-08-17)
+
+**Source doc:** `WDWShiftX/PORTABLE_FEATURES_2.md` — the full survey of 19 candidate items, with portability notes. **You picked 17 of the 19** (everything except the two MNSSHP/HHN/MVMCP Disney-park badge items, which I'd also recommended skipping).
+
+**This is a bigger lift than the September security-fix pass.** That was ~16 focused, independent fixes. This is 17 items across 6 areas, several of which depend on each other, plus one 2,700-line admin overhaul that touches the same files that broke last time because of the Stripe/ads/self-serve-boards fork divergence. Read the whole section before we start — the sequencing and the conflict warnings matter more here than last time.
+
+**How to read this:** 🤖 = I do it. 👤 = only you can decide or do. Items are grouped into **phases** — later phases depend on earlier ones actually being done, not just picked.
+
+---
+
+### ⚠️ Before I touch anything: the fork-divergence risk is back
+
+WDWShiftX removed Stripe billing, ads, and self-serve board creation months ago. MyShiftX still has all three. Every prior port that touched `AdminClient.tsx`, `BoardsClient.tsx`, or `boards.ts` needed manual conflict resolution to avoid deleting MyShiftX's billing/ads code by accident — I caught it every time, but it's real work, not a formality.
+
+**Item 17 (admin panel overhaul) is the highest-risk item on this list** — it rewrites `AdminClient.tsx` (943 lines changed) and `BoardsClient.tsx` (677 lines changed), the exact two files where this keeps happening. I'll do the same careful diff-and-preserve process as before, but budget for it: this is not a quick cherry-pick.
+
+---
+
+### Phase 1 — Database groundwork 🤖
+
+Two schema changes, both currently bundled with WDW's admin overhaul but separable, plus the display-name format change. Doing these first means every later phase has the columns/functions it needs.
+
+- [ ] **#15 — `first_name` / `last_name` columns.** Adds the two columns to `users`, backfills existing rows by splitting `display_name` on its last whitespace token (guarded so re-running won't clobber manual corrections), updates `handle_new_user()` and `get_users_admin()` to populate/return them.
+  - **Known trap, already hit once on WDW:** MyShiftX's `boards` and `users` tables use column-level SELECT grants, not table-wide (that's the S8 fix from last time). A new column has **no grant at all** until explicitly added — and selecting it fails the *whole query* with "permission denied for table X", not just that column, which is a confusing error to debug blind. WDW's own migration comment notes they missed this on the first pass. I'll grant it correctly from the start.
+- [ ] **#13 — Full "First Last" display names**, ⚠️ *you flagged this optional; picking it means committing to full last names being visible to any board member, not just close coworkers. MyShiftX is a broader public product than WDW's ~255 known coworkers — different privacy tradeoff. Confirm you still want this before I touch the regex/trigger.*
+- [ ] **#14 — Display-name copy update.** Trivial, rides with #13.
+
+**👤 You confirm:** are you still good with #13 given the privacy note above? If not, I'll do #15 alone and skip #13/#14 — they're independent.
+
+---
+
+### Phase 2 — Wall filters (#1, #2, #3) 🤖
+
+Bundled because #3 (layout) only makes sense once #1 (Type) and #2 (Days) exist as controls to arrange.
+
+- [ ] **#1 — Type filter**: Trade/Giveaway star-checkboxes on Offers tab, both-on by default, always applied.
+- [ ] **#2 — Days filter**: seven day pills, all-on by default, reorders to match the user's week-start preference.
+- [ ] **#3 — Filter panel layout**: Board full-width first row, My Posts/Trade/Giveaway + Days sharing a row, Date + Search sharing a row, labels dropped for placeholder text + aria-labels, Clear Filters on the always-visible header.
+
+No database change. Touches only `WallClient.tsx` — MyShiftX's version has diverged less than the admin files, but I'll diff before applying rather than assume.
+
+---
+
+### Phase 3 — Wall/card polish (#5, #6, #7) 🤖
+
+- [ ] **#5 — "I Can Help" rename**: copy-only, touches the claim pill, Help page, push/email text, Trade Record empty state.
+- [ ] **#6 — Requests match Offers' action-row layout**: leadingAction → Comments → Message ordering, restyled interest pill.
+- [ ] **#7 — Calendar color-coding + dot split**: shift titles colored to match Wall trade/giveaway language, month-grid dots split offers-left/requests-right.
+
+Small and low-risk. Can land independently of everything else, but sequenced here because the Help Legend (#9) shows this styling and should describe what's actually live.
+
+---
+
+### Phase 4 — Notifications (#12) 🤖
+
+- [ ] **#12 — Push on comment posted.** New `notifyComment` server action: pushes the post owner + everyone else who's commented (minus the commenter), push-only (no email, protects the Resend quota), caller must already have a comment on the post before triggering it.
+
+Written on WDW *after* the S1 audit fix, so it's already auth-checked and reads content server-side rather than trusting the caller — should port cleanly with no security follow-up needed, unlike some of the original notification code.
+
+---
+
+### Phase 5 — Admin panel (#16, #17, #18) 🤖 — the big one
+
+- [ ] **#16 — Board-less user detection.** Small, no schema change, reuses an existing query. Low risk, do this one first in the phase to warm up on `AdminClient.tsx` before the big item.
+- [ ] **#17 — Admin panel overhaul + board soft-delete.** Final-state port (not the intermediate commits) of:
+  - `boards.status` (active/paused/deleted) — soft delete everywhere Delete is triggered (Overlord, `/boards`, profile). `is_active` stays authoritative for member-facing visibility so nothing that reads it needs to change.
+  - Sticky letter-sectioned Overlord tabs with an A–Z jump bar past 25 results, collapsible-but-sticky Filters, Inactive-user filter.
+  - Users tab: icon-based role display (fixes "Admin" showing instead of "Overlord"), board count doubling as accordion toggle, ⋮ menu on mobile.
+  - Boards tab: header mirrors the real `/boards/[slug]` header (Invite/Rename/Delete), Pause/Resume in a ⋮ menu.
+  - `/boards` + `/boards/[slug]`: sticky headers, member rows as a grid (fixes cross-section column misalignment), role icons with a legend key.
+  - Shared `CountPill` component unifying count styling.
+  - **This is where I expect the Stripe/ads/self-serve-board conflicts to show up.** Budget this as its own work session, not a quick add-on.
+- [ ] **#18 — Admin: assign user to board.** New "User Boards" section on the admin Edit User form — add a user to a board directly, full member-management parity with `/boards/[slug]`. Correctly routes through the service client since the S16 fix (last sync) intentionally locked down self-service joins to pending-only.
+
+**👤 You may want to be around for #17's rollout** — it's the largest visual change in this list and worth eyeballing on a preview deploy before it reaches real users, same as I'd recommend for any big admin-surface rewrite.
+
+---
+
+### Phase 6 — Help page (#9, #10) 🤖
+
+- [ ] **#9 — Legend section.** Shift-type color chips (built from the actual badge CSS classes, not approximated — this matters because some themes override those classes for contrast), icon rows for Bundled/I Can Help/Comments/Message, party badges *(skip the party-badge row entirely if you didn't want #4/#8)*.
+- [ ] **#10 — Tour launch cards.** One card per tour chapter, needs #11 to exist first.
+
+Sequenced last-but-one because the Legend should describe whatever's actually live by this point (Type/Days filters, "I Can Help", etc.) — writing it earlier risks describing features that don't exist yet.
+
+---
+
+### Phase 7 — Guided Product Tour (#11) 🤖 — second-biggest lift
+
+- [ ] **#11 — Four-chapter guided tour** (Wall, posting a shift, Calendar, Messages), built on `driver.js` (new dependency), themed from CSS custom properties so it follows every MyShiftX theme automatically. In-memory-only demo data (3 fake shifts, matching calendar entries, 2 fake conversations) merged into real lists for the tour's duration only — never touches the database, vanishes however the tour ends.
+
+**Sequenced last among the feature work on purpose**: the tour's steps describe and interact with specific controls — the Wall filters (#1–3), the "I Can Help" pill (#5), Calendar coloring (#7). Porting the tour before those exist means writing steps that reference UI that isn't there yet, then rewriting them anyway once the rest lands. ~950 lines across 5 new files plus edits to Wall/Calendar/Messages/Help/Navbar/layout.
+
+---
+
+### Phase 8 — Weekly digest removal (#19) 🤖, ⚠️ optional
+
+- [ ] **#19 — Remove weekly digest entirely**: cron route, unsubscribe route, email template, profile toggle, `notify_weekly_digest` column.
+
+⚠️ *You picked this, but it's worth a second look: MyShiftX's weekly digest is live today, and WDW's reason for dropping it was Resend send-cap risk at WDW's volume — not a bug. Removing a live feature is harder to reverse than not building it.*
+
+**👤 You confirm:** is MyShiftX also approaching a Resend send-cap concern, or is this purely "match WDW's decision"? Either answer is fine — I just want the removal to be a deliberate choice, not a copy-paste default. Sequenced last so it doesn't block anything else regardless of your answer.
+
+---
+
+### 📋 Suggested order
+
+1. **Phase 1** (database) — nothing else can safely start until #15's grants exist, if you're taking #16–18
+2. **Phase 2** (Wall filters) — self-contained, good place to start actual feature work
+3. **Phase 3** (Wall/card polish) — quick wins, low risk
+4. **Phase 4** (comment push) — self-contained
+5. **Phase 5** (admin overhaul) — do this in its own focused session; highest conflict risk
+6. **Phase 6** (Help) — after 2, 3, and 5 so the Legend matches reality
+7. **Phase 7** (tour) — last, so it can reference the finished Wall/Calendar
+8. **Phase 8** (digest removal) — whenever, independent of everything above
+
+### 📋 What I need from you before starting
+
+- ✅ **Phase 1: confirm #13** (full last names) given the privacy note, or tell me to drop it and keep #15 alone
+- ✅ **Phase 8: confirm #19** — deliberate match of WDW's decision, or skip and keep the digest
+- Everything else has no open question — I'll start on Phase 1 (or Phase 2, if you want to skip the name-format decision for now and come back to it) once you give the go-ahead.
+
+**None of the above blocks starting on Phase 2 (Wall filters)** if you'd rather begin with visible progress while you think over the two flagged items.
+
+---
+
 ## Ongoing / Maintenance
 
 | Task | Who | Notes |
