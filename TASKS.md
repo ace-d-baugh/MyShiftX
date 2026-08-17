@@ -1190,11 +1190,13 @@ Type-check, lint, and full build all clean. Could not exercise this live in-brow
 
 ---
 
-### Phase 4 — Notifications (#12) 🤖
+### ✅ Phase 4 — Notifications (#12) — COMPLETE 2026-08-18
 
-- [ ] **#12 — Push on comment posted.** New `notifyComment` server action: pushes the post owner + everyone else who's commented (minus the commenter), push-only (no email, protects the Resend quota), caller must already have a comment on the post before triggering it.
+- [x] **#12 — Push on comment posted.** Ported `notifyComment` into `app/actions/notifications.ts` (right after `notifyInterest`) unchanged from WDW: pushes the post owner + everyone else who's commented (minus the commenter), push-only (no email, protects the Resend quota), caller must already have a comment on the post before triggering it (anti-abuse — this is a public server action). Wired into `CommentSection.tsx`'s `handleSubmit`: an interest-marking comment still calls `notifyInterest` only; a plain comment now also fires `notifyComment`, fire-and-forget, same pattern as the existing interest notification.
 
-Written on WDW *after* the S1 audit fix, so it's already auth-checked and reads content server-side rather than trusting the caller — should port cleanly with no security follow-up needed, unlike some of the original notification code.
+Was written on WDW *after* the S1 audit fix, so it's already auth-checked and reads content server-side rather than trusting the caller — ported with no security follow-up needed, unlike some of the original notification code.
+
+Type-check, lint, and full build all clean. Could not exercise this live in-browser — same missing-test-credentials limitation as earlier phases, though this project does have a `.claude/skills/verify` skill that documents how to create a disposable confirmed test account for exactly this; it's restricted to explicit user invocation (`/verify`) and can't be run by me automatically.
 
 ---
 

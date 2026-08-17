@@ -14,7 +14,7 @@ import { FlagModal } from '@/components/features/FlagModal'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { CommentPostType } from '@/lib/database.types'
-import { notifyInterest } from '@/app/actions/notifications'
+import { notifyInterest, notifyComment } from '@/app/actions/notifications'
 import { startConversation } from '@/app/actions/messages'
 
 const QUICK_INTEREST_BODY = "I'm interested!"
@@ -261,10 +261,15 @@ export function CommentSection({
       setIsInterested(false)
       setReplyToName(null)
       await fetchComments()
-      // Fire-and-forget — notify the post owner if this comment marked interest
+      // Fire-and-forget notifications. An interest-marking comment pings just
+      // the owner ("is interested"); a plain comment pushes the owner and
+      // everyone else in the thread. Either way, never blocks the UI.
       if (wasInterested) {
         notifyInterest({ postId, postType })
           .catch(err => console.error('[interest] notify failed:', err))
+      } else {
+        notifyComment({ postId, postType })
+          .catch(err => console.error('[comment] notify failed:', err))
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to post comment.')
