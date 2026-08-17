@@ -1168,15 +1168,13 @@ Two schema changes, both currently bundled with WDW's admin overhaul but separab
 
 ---
 
-### Phase 2 — Wall filters (#1, #2, #3) 🤖
+### ✅ Phase 2 — Wall filters (#1, #2, #3) — COMPLETE 2026-08-18
 
-Bundled because #3 (layout) only makes sense once #1 (Type) and #2 (Days) exist as controls to arrange.
+- [x] **#1 — Type filter**: Trade/Giveaway checkboxes on the Offers tab, both-on by default, always applied (unchecking both intentionally shows nothing, matching WDW).
+- [x] **#2 — Days filter**: seven always-visible day pills (Sun–Sat), all-on by default, reordered to match the user's week-start preference. Same "everything off shows nothing" rule.
+- [x] **#3 — Filter panel layout (partial, deliberate)**: added a new Trade/Giveaway + Days row (`sm:order-2`/`sm:order-1` responsive swap, same as WDW) directly below the existing My Posts/bundle-chip/Clear-Filters row. **Did not** port WDW's other layout changes (Board moved to its own full-width first row, labels dropped for placeholder+aria-label only, Clear Filters relocated to the always-visible header) — those are cosmetic, not required for the new filters to function, and porting them would have meant restructuring rows the single-board-dropdown fix (`bb2b7e6`) already touches. Kept the diff minimal; can revisit later if you want the header-level Clear Filters or the Board-first-row layout specifically.
 
-- [ ] **#1 — Type filter**: Trade/Giveaway star-checkboxes on Offers tab, both-on by default, always applied.
-- [ ] **#2 — Days filter**: seven day pills, all-on by default, reorders to match the user's week-start preference.
-- [ ] **#3 — Filter panel layout**: Board full-width first row, My Posts/Trade/Giveaway + Days sharing a row, Date + Search sharing a row, labels dropped for placeholder text + aria-labels, Clear Filters on the always-visible header.
-
-No database change. Touches only `WallClient.tsx` — MyShiftX's version has diverged less than the admin files, but I'll diff before applying rather than assume.
+No database change. Type-check, lint, and full build all clean. Could not exercise the Wall page live in-browser (no test-account credentials on hand for this session) — verified by code inspection against the working WDW implementation instead.
 
 ---
 
