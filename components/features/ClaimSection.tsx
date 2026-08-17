@@ -7,6 +7,7 @@ import { claimShift, claimBundle, respondToClaim, withdrawClaim } from '@/app/ac
 import { messageAboutShift } from '@/app/actions/messages'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
+import { CountPill } from '@/components/ui/CountPill'
 import { cn } from '@/lib/utils'
 import type { ClaimStatus } from '@/lib/database.types'
 
@@ -57,7 +58,8 @@ export function InterestedPill({ count, open, onToggle }: InterestedPillProps) {
       )}
     >
       <Handshake className="w-3.5 h-3.5" />
-      ({count}) <span className="hidden sm:inline">Interested</span>
+      <CountPill count={count} tone={none ? 'default' : 'solid'} />
+      <span className="hidden sm:inline">Interested</span>
       {!none && <ChevronDown className={cn('w-3 h-3 transition-transform', open && 'rotate-180')} />}
     </button>
   )
@@ -245,7 +247,8 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
         )}
       >
         {bundleId ? <Layers className="w-3.5 h-3.5" /> : <Handshake className="w-3.5 h-3.5" />}
-        <span className="hidden sm:inline">I Can Help</span> ({claimCount})
+        <span className="hidden sm:inline">I Can Help</span>
+        <CountPill count={claimCount} tone={pending ? 'solid' : 'default'} />
       </button>
       {pending && (
         <p className="text-[11px] text-text/50 w-full mt-1">

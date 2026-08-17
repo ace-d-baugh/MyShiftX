@@ -3,10 +3,12 @@
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
-import { getActionSession } from '@/lib/auth/session'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getActionSession, requireAdminAction } from '@/lib/auth/session'
 import { notifyBoardApproved } from '@/app/actions/notifications'
 import { slugify } from '@/lib/slug'
 import { createBoardSchema } from '@/lib/validations/boards'
+import type { BoardRole } from '@/lib/database.types'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -271,14 +273,24 @@ export async function leaveBoard(boardId: string): Promise<{ error?: string }> {
 
 // ── Delete a board (Leader only) ──────────────────────────────────────────────
 
+// Soft delete: the board and everything on it disappear from every member
+// immediately (is_active gates all member-facing reads), but the row survives
+// as status='deleted' rather than being cascaded away — recoverable by
+// restoring it directly in the database, not from any UI. Shared by the
+// Overlord panel, a board Leader's own /boards page, and the profile page's
+// My Boards section, so "Delete" means the same thing everywhere it appears.
 export async function deleteBoard(boardId: string): Promise<{ error?: string }> {
   try {
     const { supabase } = await getActionSession()
-    // RLS enforces leader-only; CASCADE handles user_boards, shifts, requests
-    const { error } = await supabase.from('boards').delete().eq('id', boardId)
+    // RLS enforces leader-only
+    const { error } = await supabase
+      .from('boards')
+      .update({ status: 'deleted', is_active: false })
+      .eq('id', boardId)
     if (error) return { error: error.message }
     revalidatePath('/profile')
     revalidatePath('/wall')
+    revalidatePath('/admin')
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
@@ -503,5 +515,101 @@ export async function removeUserFromBoard(
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
+  }
+}
+
+// ── Overlord: assign a user to a board (global Admin only) ────────────────────
+
+/**
+ * Add another user to a board as an approved member with a chosen board role.
+ * The RLS INSERT policy (S16) only permits self-service pending joins, so this
+ * must run on the service-role client behind an app-level Admin guard. Distinct
+ * from confirmJoinBoard (a user's own pending request) — this is the overlord
+ * placing someone directly.
+ */
+export async function adminAddUserToBoard(
+  targetUserId: string,
+  boardId: string,
+  role: BoardRole
+): Promise<{ error?: string; userBoardId?: string }> {
+  try {
+    if (!['User', 'Mod', 'Leader'].includes(role)) return { error: 'Invalid role.' }
+    const { userId: adminId } = await requireAdminAction()
+
+    const db = createAdminClient()
+    const { data, error } = await db
+      .from('user_boards')
+      .insert({
+        user_id: targetUserId,
+        board_id: boardId,
+        role,
+        is_approved: true,
+        approved_by_user_id: adminId,
+        approved_at: new Date().toISOString(),
+        is_hidden: false,
+      })
+      .select('id')
+      .single()
+
+    if (error) {
+      if (error.code === '23505') return { error: 'That user is already a member of this board.' }
+      return { error: error.message }
+    }
+
+    revalidatePath(`/admin/users/${targetUserId}`)
+    return { userBoardId: data.id as string }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Not authorized.' }
+  }
+}
+
+/**
+ * Overlord version of transferBoardOwnership: promote the target to the board's
+ * Leader and step every *visible* human Leader down to Mod. Unlike the member
+ * flow, this does not touch the caller — the overlord isn't handing off their
+ * own crown — and it leaves hidden admin memberships alone. Runs on the service
+ * client so the multi-row role swap is atomic and RLS-independent.
+ */
+export async function adminTransferBoardOwnership(
+  boardId: string,
+  newLeaderUserId: string
+): Promise<{ error?: string }> {
+  try {
+    await requireAdminAction()
+    const db = createAdminClient()
+
+    // The new leader must already be a visible, approved member of the board.
+    const { data: target } = await db
+      .from('user_boards')
+      .select('id')
+      .eq('board_id', boardId)
+      .eq('user_id', newLeaderUserId)
+      .eq('is_approved', true)
+      .eq('is_hidden', false)
+      .maybeSingle()
+
+    if (!target) return { error: 'That user must be a member of the board before they can lead it.' }
+
+    // Step down the current visible Leader(s) — not hidden admin rows, not the
+    // incoming leader — so the board ends with exactly one human Admin.
+    const { error: demoteErr } = await db
+      .from('user_boards')
+      .update({ role: 'Mod' })
+      .eq('board_id', boardId)
+      .eq('role', 'Leader')
+      .eq('is_hidden', false)
+      .neq('user_id', newLeaderUserId)
+    if (demoteErr) return { error: demoteErr.message }
+
+    const { error: promoteErr } = await db
+      .from('user_boards')
+      .update({ role: 'Leader' })
+      .eq('id', target.id as string)
+    if (promoteErr) return { error: promoteErr.message }
+
+    revalidatePath(`/admin/users/${newLeaderUserId}`)
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Not authorized.' }
   }
 }

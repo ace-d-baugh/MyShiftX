@@ -1200,18 +1200,21 @@ Type-check, lint, and full build all clean. Could not exercise this live in-brow
 
 ---
 
-### Phase 5 — Admin panel (#16, #17, #18) 🤖 — the big one
+### 🟡 Phase 5 — Admin panel (#16, #17, #18) — Overlord panel COMPLETE 2026-08-18, `/boards` visual overhaul deferred
 
-- [ ] **#16 — Board-less user detection.** Small, no schema change, reuses an existing query. Low risk, do this one first in the phase to warm up on `AdminClient.tsx` before the big item.
-- [ ] **#17 — Admin panel overhaul + board soft-delete.** Final-state port (not the intermediate commits) of:
-  - `boards.status` (active/paused/deleted) — soft delete everywhere Delete is triggered (Overlord, `/boards`, profile). `is_active` stays authoritative for member-facing visibility so nothing that reads it needs to change.
-  - Sticky letter-sectioned Overlord tabs with an A–Z jump bar past 25 results, collapsible-but-sticky Filters, Inactive-user filter.
-  - Users tab: icon-based role display (fixes "Admin" showing instead of "Overlord"), board count doubling as accordion toggle, ⋮ menu on mobile.
-  - Boards tab: header mirrors the real `/boards/[slug]` header (Invite/Rename/Delete), Pause/Resume in a ⋮ menu.
-  - `/boards` + `/boards/[slug]`: sticky headers, member rows as a grid (fixes cross-section column misalignment), role icons with a legend key.
-  - Shared `CountPill` component unifying count styling.
-  - **This is where I expect the Stripe/ads/self-serve-board conflicts to show up.** Budget this as its own work session, not a quick add-on.
-- [ ] **#18 — Admin: assign user to board.** New "User Boards" section on the admin Edit User form — add a user to a board directly, full member-management parity with `/boards/[slug]`. Correctly routes through the service client since the S16 fix (last sync) intentionally locked down self-service joins to pending-only.
+- [x] **#16 — Board-less user detection.** Folded into the Users tab rewrite below (`board_count` per user, the "Boardless" filter + count, and the warning-dot on the Users tab icon). No schema change — reuses the existing `user_boards` query, tallied per-user as well as per-board now.
+- [x] **#17 — Admin panel overhaul + board soft-delete (Overlord panel only — see deferred item below).** Final-state port of:
+  - `boards.status` (active/paused/deleted) — `deleteBoard` (`app/actions/boards.ts`) now soft-deletes (`status='deleted', is_active=false`) instead of hard-deleting; `setBoardActive` (`app/actions/admin.ts`) keeps `status`/`is_active` in tandem for Pause/Resume. Verified this doesn't break `BoardsClient.tsx`'s existing delete handling — it just filters the board out of local state either way, hard or soft delete, so no client-side follow-up was needed there.
+  - Sticky letter-sectioned Overlord tabs (Boards + Users) with an A–Z jump bar past 25 results, collapsible-but-sticky Filters, Inactive-user filter. New shared `components/features/AlphaJump.tsx` (letter grouping/sorting, jump bar, sticky filter helpers) and `components/ui/CountPill.tsx`.
+  - Users tab: icon-based site-role display (Crown/UserRound/Ghost), board count doubling as the boards-accordion toggle, F L / L, F name-format toggle using the real `first_name`/`last_name` columns from Phase 1, ⋮ menu on mobile.
+  - Boards tab: header now carries the same Invite/Rename/Delete controls as the real `/boards/[slug]` header, status icon (Active/Paused/Deleted), Pause/Resume in a ⋮ menu.
+  - `CountPill` also applied retroactively to the Phase 3 claim/comment pills (`ClaimSection.tsx`, `CommentSection.tsx`) for the count-styling consistency this component exists for.
+  - **Fork-divergence handling:** kept the *entire* Charts tab (Stripe membership/revenue breakdown — `MembershipIcon`, `MEMBERSHIP_OPTIONS`, `getMembershipKey`, `billing_cycle`) untouched and unexported-shape-compatible with `AdminCharts.tsx`, which imports from `AdminClient.tsx` directly. WDW has no equivalent (no Stripe), so this tab and its exports don't exist in WDW's version at all — merged by hand rather than copied. `createBoard` (self-serve board creation) also left completely untouched — WDW disables it entirely, MyShiftX's stays as its normal user-facing flow.
+- [x] **#18 — Admin: assign user to board.** New `UserBoardsSection.tsx` on the admin Edit User form (add to board, change role, remove, transfer ownership, message) — ported as-is, no MyShiftX-specific changes needed. Two new server actions in `app/actions/boards.ts`: `adminAddUserToBoard`, `adminTransferBoardOwnership`, both service-role + `requireAdminAction`-gated. Wired through `users/[id]/page.tsx` (memberships + available-boards queries) and `UserEditClient.tsx`.
+
+**🟡 Deliberately deferred — its own follow-up session:** the matching visual overhaul for `/boards` and `/boards/[slug]` (`BoardsClient.tsx`) — sticky per-board headers, member rows as a grid, role icons with a legend key, per-board search/sort/alpha-jump. This is a ~700-line near-total rewrite of that file, comparable in size to the Overlord panel rewrite itself, and touches member-facing pages rather than the admin surface — a distinct deliverable that didn't need to block shipping the Overlord panel overhaul. The underlying soft-delete behavior change is already live and doesn't depend on this UI catching up (confirmed above). Board-status icons/Pause-Resume/Delete are only visible via Overlord for now; a Leader managing their own board still sees the pre-overhaul `/boards` UI.
+
+Type-check, lint, and full build all clean. Could not exercise this live in-browser — same missing-test-credentials limitation as earlier phases. This phase carried the most risk of any so far (Stripe/ads/self-serve-board fork divergence); the divergence points were all confirmed and handled deliberately rather than accidentally overwritten — see the fork-divergence note above.
 
 **👤 You may want to be around for #17's rollout** — it's the largest visual change in this list and worth eyeballing on a preview deploy before it reaches real users, same as I'd recommend for any big admin-surface rewrite.
 
