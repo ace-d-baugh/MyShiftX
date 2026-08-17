@@ -101,16 +101,41 @@ function hasAnyDots(data?: DayData): boolean {
   return !!data && (data.hasBoth || data.hasTradeOnly || data.hasGiveawayOnly || data.hasRequest)
 }
 
+/**
+ * Title colour for a shift, matching the Wall's cards: purple when the owner
+ * will trade *or* give it away, blue for trade only, green for giveaway only.
+ * A shift that isn't on the Wall has no type, so it stays the theme's ordinary
+ * text colour — same as its left bar.
+ */
+function shiftTypeColor(s: { is_trade: boolean; is_giveaway: boolean }): string {
+  if (s.is_trade && s.is_giveaway) return 'text-primary'
+  if (s.is_trade) return 'text-info'
+  if (s.is_giveaway) return 'text-success'
+  return 'text-text'
+}
+
 // ── Activity dots — shared between Grid and List ────────────────────────────
 // Big tappable circles: the three wall dots (offers) overlap like an avatar
 // stack (giveaway in front, trade behind it, both at the back), the request
 // dot sits alone on the other side since it opens the Requests tab instead.
+//
+// `spread` pushes the two groups to opposite ends of a full-width row — offers
+// left, requests hard right — which is what the month grid wants inside a day
+// cell. A day with only one kind still lands on its own side: the offers group
+// is always rendered, so an offers-only day leaves it at flex-start and a
+// requests-only day has an empty box holding the left slot. The list view
+// leaves it off and keeps both groups together at the end of the row.
 
-function ActivityDots({ data, dateStr, router }: { data?: DayData; dateStr: string; router: ReturnType<typeof useRouter> }) {
+function ActivityDots({ data, dateStr, router, spread = false }: {
+  data?: DayData
+  dateStr: string
+  router: ReturnType<typeof useRouter>
+  spread?: boolean
+}) {
   if (!hasAnyDots(data)) return null
   const d = data!
   return (
-    <div className="flex items-center shrink-0">
+    <div className={cn('flex items-center', spread ? 'w-full justify-between gap-1' : 'shrink-0')}>
       <div className="flex items-center">
         {d.hasBoth && (
           <button
@@ -144,7 +169,9 @@ function ActivityDots({ data, dateStr, router }: { data?: DayData; dateStr: stri
         <button
           onClick={e => { e.stopPropagation(); router.push(`/wall?tab=requests&date=${dateStr}`) }}
           title="Shift request on this day"
-          className="ml-1 relative z-30 min-h-0 min-w-0"
+          /* justify-between already separates the groups when spread, so the
+             nudge would only push it off the cell's right edge. */
+          className={cn('relative z-30 min-h-0 min-w-0', !spread && 'ml-1')}
         >
           <span className="block w-2.5 h-2.5 min-[505px]:w-4 min-[505px]:h-4 sm:w-5 sm:h-5 rounded-full bg-accent hover:opacity-70 transition-opacity" />
         </button>
@@ -468,7 +495,7 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                                 {s.bundle_id && (
                                   <Layers className="w-2.5 h-2.5 shrink-0 text-primary" aria-label="Part of a bundle" />
                                 )}
-                                <span className="font-medium text-text truncate">{s.shift_title}</span>
+                                <span className={cn('font-medium truncate', shiftTypeColor(s))}>{s.shift_title}</span>
                               </div>
                               <div className="text-text/50 tabular-nums">
                                 {fmtTime(s.start_time, settings?.timeFormat ?? '12h')}–{fmtTime(s.end_time, settings?.timeFormat ?? '12h')}
@@ -480,7 +507,7 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
 
                       {hasAnyDots(data) && (
                         <div className="mt-auto pt-1" onClick={e => e.stopPropagation()}>
-                          <ActivityDots data={data} dateStr={dateStr} router={router} />
+                          <ActivityDots data={data} dateStr={dateStr} router={router} spread />
                         </div>
                       )}
                     </div>
@@ -556,7 +583,7 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                               className="flex items-center gap-1 min-w-0 text-left hover:underline min-h-0"
                             >
                               {s.bundle_id && <Layers className="w-3 h-3 shrink-0 text-primary" aria-label="Part of a bundle" />}
-                              <span className="text-sm font-medium text-text truncate">{s.shift_title}</span>
+                              <span className={cn('text-sm font-medium truncate', shiftTypeColor(s))}>{s.shift_title}</span>
                             </button>
                             <button
                               onClick={e => {

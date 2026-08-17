@@ -36,7 +36,7 @@ const FAQS: { q: string; a: string; importOnly?: boolean }[] = [
   },
   {
     q: 'How do I ask for a shift someone posted?',
-    a: "Tap \"I'll take this\" on any shift card. This doesn't hand the shift over — it sends the owner a request and notifies them by email and push right away, and the post stays right where it is on the Wall. The pill shows how many people have asked (its count) and turns solid once you've sent yours; tap it again to withdraw before the owner responds. The owner reviews everyone who asked — including each person's trade history — and chooses who to accept. See Claiming a Shift below for what happens next.",
+    a: "Tap \"I Can Help\" on any shift card. This doesn't hand the shift over — it sends the owner a request and notifies them by email and push right away, and the post stays right where it is on the Wall. The pill shows how many people have asked (its count) and turns solid once you've sent yours; tap it again to withdraw before the owner responds. The owner reviews everyone who asked — including each person's trade history — and chooses who to accept. See Claiming a Shift below for what happens next.",
   },
   {
     q: 'How do I contact someone about a shift?',
@@ -214,7 +214,7 @@ export function HelpClient({ userEmail, importEnabled }: HelpClientProps) {
           {[
             { icon: UserPlus, step: '1', title: 'Get Invited', desc: 'Ask a board manager for an invite link or invite code to join your first board.' },
             { icon: LayoutGrid, step: '2', title: 'Browse the Wall', desc: 'See shift offers and requests from everyone on your boards, filtered by date or board.' },
-            { icon: Handshake, step: '3', title: 'Post or Claim', desc: 'Post your own shifts, or tap "I’ll take this" on someone else’s — the owner reviews requests and picks who to accept.' },
+            { icon: Handshake, step: '3', title: 'Post or Claim', desc: 'Post your own shifts, or tap "I Can Help" on someone else’s — the owner reviews requests and picks who to accept.' },
           ].map(({ icon: Icon, step, title, desc }) => (
             <div key={step} className="flex gap-3">
               <div className="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
@@ -264,7 +264,7 @@ export function HelpClient({ userEmail, importEnabled }: HelpClientProps) {
           <h2 className="font-accent text-xl font-bold text-text">Claiming a Shift</h2>
         </div>
         <p className="text-sm text-text/60 mb-4">
-          Tapping <strong>&ldquo;I&rsquo;ll take this&rdquo;</strong> raises your hand — it never removes the post or
+          Tapping <strong>&ldquo;I Can Help&rdquo;</strong> raises your hand — it never removes the post or
           hands the shift over automatically. That matters because more than one person can ask for the
           same shift (some workplaces have seniority or union rules the owner has to honor), so the owner
           always gets to choose.
@@ -296,7 +296,7 @@ export function HelpClient({ userEmail, importEnabled }: HelpClientProps) {
             <li><strong>Creating one:</strong> when posting or editing a shift, check &ldquo;Bundle with other shifts?&rdquo; Add shifts three ways — pick from your own upcoming schedule, add a brand-new one inline (it defaults to the next day, so a multi-day run fills in fast), or join one of your other existing bundles on the same board.</li>
             <li><strong>No double-booking:</strong> a shift you add through the bundle section can&rsquo;t overlap anything else already on your schedule — you&rsquo;ll get an error naming the exact conflict if it does.</li>
             <li><strong>Spotting one:</strong> a small stacked-layers icon appears before a bundled shift&rsquo;s title on the Wall and on your Calendar. Tap it to filter the Wall down to just that bundle&rsquo;s shifts; use Clear Filters to go back to everything.</li>
-            <li><strong>Claiming one:</strong> &ldquo;I&rsquo;ll take this&rdquo; becomes &ldquo;I&rsquo;ll take all&rdquo; — tapping it lists every shift in the set and confirms you understand it&rsquo;s all-or-nothing before sending the request. Accepting archives every shift in the bundle at once.</li>
+            <li><strong>Claiming one:</strong> tap <strong>&ldquo;I Can Help&rdquo;</strong> on a bundled shift and it lists every shift in the set, confirming you understand it&rsquo;s all-or-nothing before sending the request. Accepting archives every shift in the bundle at once.</li>
             <li><strong>Breaking one up:</strong> editing a bundled shift shows its current partners so you can untick one to drop it from the set. Removing or deleting any single shift in a bundle warns you first, then breaks up the whole bundle — the rest stay on the Wall as ordinary single shifts, nothing else is deleted.</li>
           </ul>
         </div>

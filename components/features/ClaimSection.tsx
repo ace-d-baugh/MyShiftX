@@ -73,7 +73,7 @@ interface ClaimSectionProps {
 }
 
 /**
- * Owner-only accordion listing everyone who tapped "I'll take this", newest
+ * Owner-only accordion listing everyone who tapped "I Can Help", newest
  * information first: name, reliability record, then Accept and Message.
  * Accepting archives the post as covered, auto-declines the rest, and opens a
  * chat with the shift details already posted; Message opens that same chat
@@ -184,7 +184,7 @@ interface ClaimPillProps {
 }
 
 /**
- * Non-owner "I'll take this" control — lives inline in the card's action
+ * Non-owner "I Can Help" control — lives inline in the card's action
  * row (where the old Interested pill used to sit). A toggle: border-only
  * when you haven't claimed, filled once you have. Clicking the filled state
  * withdraws the claim. A declined claim shows as a plain muted label.
@@ -235,8 +235,8 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
         onClick={handleClick}
         disabled={busy}
         title={pending
-          ? 'Claim sent — tap to withdraw'
-          : bundleId ? "I'll take this bundle" : "I'll take this"}
+          ? 'Sent — tap to withdraw'
+          : bundleId ? 'I can help with this bundle' : 'I can help with this'}
         className={cn(
           'badge inline-flex items-center gap-1 transition-colors shrink-0 disabled:opacity-60',
           pending
@@ -245,9 +245,7 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
         )}
       >
         {bundleId ? <Layers className="w-3.5 h-3.5" /> : <Handshake className="w-3.5 h-3.5" />}
-        <span className="hidden sm:inline">
-          {bundleId ? "I'll take all" : "I'll take this"}
-        </span> ({claimCount})
+        <span className="hidden sm:inline">I Can Help</span> ({claimCount})
       </button>
       {pending && (
         <p className="text-[11px] text-text/50 w-full mt-1">

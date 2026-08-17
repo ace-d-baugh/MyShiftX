@@ -1178,13 +1178,15 @@ No database change. Type-check, lint, and full build all clean. Could not exerci
 
 ---
 
-### Phase 3 — Wall/card polish (#5, #6, #7) 🤖
+### ✅ Phase 3 — Wall/card polish (#5, #6, #7) — COMPLETE 2026-08-18
 
-- [ ] **#5 — "I Can Help" rename**: copy-only, touches the claim pill, Help page, push/email text, Trade Record empty state.
-- [ ] **#6 — Requests match Offers' action-row layout**: leadingAction → Comments → Message ordering, restyled interest pill.
-- [ ] **#7 — Calendar color-coding + dot split**: shift titles colored to match Wall trade/giveaway language, month-grid dots split offers-left/requests-right.
+- [x] **#5 — "I Can Help" rename**: copy-only. Renamed everywhere it appeared: `ClaimSection.tsx` (shift claim pill, title tooltips, doc comments), `CommentSection.tsx` (requests' equivalent pill + prop doc comments), `RequestCard.tsx` (⋮ menu item, icon changed Star → Handshake to match), `notifications.ts` (push body text for a claim), `email-template.tsx` (claim email body), `TradeRecordSection.tsx` (empty-state copy), `HelpClient.tsx` (4 spots: quickstart step, FAQ answer, "Claiming a Shift" intro, bundle-claiming bullet). Left untouched: internal code comments in `claims.ts` and `WallClient.tsx` that WDW itself never renamed (matched upstream, not a regression), and blog posts (out of scope per your original instruction to exclude blog content from this port).
+- [x] **#6 — Requests match Offers' action-row layout**: reordered `CommentSection.tsx`'s action row to leadingAction → Interest pill → Comments → Message (was Comments → Interest pill before). Restyled the Interest pill from the gold/Star "mark interest" look to the same outline-until-acted-on/solid-once-sent visual language as `ClaimPill` — Handshake icon, primary color, tooltip text, label "I Can Help" for non-owners / "Interested" for the owner's accordion toggle. Kept the `(count)` inline format rather than introducing WDW's `CountPill` component — that's explicitly scoped to Phase 5 ("Shared CountPill component unifying count styling"), so building it early here would jump ahead of that phase for no functional reason.
+- [x] **#7 — Calendar color-coding + dot split**: added `shiftTypeColor()` to `CalendarClient.tsx` (purple = trade+giveaway, blue = trade only, green = giveaway only, matching the Wall's card language) and applied it to the shift title in both Grid and List views. Added a `spread` prop to `ActivityDots` — the month grid now passes it so offer dots sit left and the request dot sits hard right in the day cell; List view's three call sites are unchanged (no `spread`), matching WDW.
 
-Small and low-risk. Can land independently of everything else, but sequenced here because the Help Legend (#9) shows this styling and should describe what's actually live.
+Excluded (later-phase scope): Product Tour hooks/`data-tour` attributes, special-event badges, Party Legend modal, `notifyComment` (Phase 4), `CountPill` (Phase 5).
+
+Type-check, lint, and full build all clean. Could not exercise this live in-browser (same missing-test-credentials limitation as Phases 1–2) — verified by code inspection against WDW's working implementation.
 
 ---
 
