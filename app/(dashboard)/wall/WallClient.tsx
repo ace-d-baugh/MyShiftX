@@ -22,6 +22,15 @@ import { cn } from '@/lib/utils'
 
 const ET = 'America/New_York'
 
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const DAY_ABBR  = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+// Fixed Sun→Sat order for the day pills, independent of the user's week-start
+// setting (which still governs the calendar popups elsewhere on the page).
+const ALL_DAYS: readonly number[] = [0, 1, 2, 3, 4, 5, 6]
+// date-fns 'i' → 1=Mon..7=Sun; %7 maps to 0=Sun..6=Sat (JS getDay / settings.weekStart)
+const shiftWeekday = (iso: string) => Number(formatInTimeZone(parseISO(iso), ET, 'i')) % 7
+const requestWeekday = (dateStr: string) => Number(formatInTimeZone(`${dateStr}T12:00:00Z`, ET, 'i')) % 7
+
 interface Board { id: string; name: string }
 
 // Shared between the full wall load and the single-row realtime upsert
@@ -140,6 +149,14 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
   const [boardFilters, setBoardFilters] = useState<Set<string>>(new Set())
   const [boardDropdownOpen, setBoardDropdownOpen] = useState(false)
   const boardDropdownRef = useRef<HTMLDivElement>(null)
+  // Type filter (offers only): independent trade/giveaway toggles over the raw
+  // flags — a Give/Trade post (both flags) matches either one. Both on by
+  // default; unchecking both intentionally shows nothing.
+  const [typeFilters, setTypeFilters] = useState<{ trade: boolean; giveaway: boolean }>({ trade: true, giveaway: true })
+  // Days filter: weekday indices (0=Sun..6=Sat) shown as pills. All on by
+  // default; unchecking every day intentionally shows nothing (same rule as
+  // the Type filter above).
+  const [dayFilters, setDayFilters] = useState<Set<number>>(() => new Set(ALL_DAYS))
   const [myPostsOnly, setMyPostsOnly] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [deactivateError, setDeactivateError] = useState<string | null>(null)
@@ -530,6 +547,15 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
     })
   }
 
+  const toggleDay = (day: number) => {
+    setDayFilters(prev => {
+      const next = new Set(prev)
+      if (next.has(day)) next.delete(day)
+      else next.add(day)
+      return next
+    })
+  }
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (boardDropdownRef.current && !boardDropdownRef.current.contains(e.target as Node)) {
@@ -539,6 +565,13 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
     if (boardDropdownOpen) document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [boardDropdownOpen])
+
+  // Day-pill order follows the user's week-start preference, same as the
+  // calendar and the date picker below.
+  const orderedDayIndices = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => (settings.weekStart + i) % 7),
+    [settings.weekStart]
+  )
 
   const refresh = () => {
     if (tab === 'offers') loadShifts()
@@ -550,6 +583,12 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
     if (bundleFilter)       list = list.filter(s => s.bundle_id === bundleFilter)
     if (myPostsOnly)        list = list.filter(s => s.user_id === userId)
     if (boardFilters.size)  list = list.filter(s => s.board_id != null && boardFilters.has(s.board_id))
+    // Always applied: with both types off, this yields nothing (by design).
+    list = list.filter(s =>
+      (typeFilters.trade && s.is_trade) || (typeFilters.giveaway && s.is_giveaway)
+    )
+    // Always applied: with every day off, this yields nothing (by design).
+    list = list.filter(s => dayFilters.has(shiftWeekday(s.start_time)))
     if (dateFilter)         list = list.filter(s => formatInTimeZone(parseISO(s.start_time), ET, 'yyyy-MM-dd') === dateFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -561,12 +600,13 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
       )
     }
     return list
-  }, [shifts, search, dateFilter, boardFilters, myPostsOnly, bundleFilter, userId])
+  }, [shifts, search, dateFilter, boardFilters, typeFilters, dayFilters, myPostsOnly, bundleFilter, userId])
 
   const filteredRequests = useMemo(() => {
     let list = requests
     if (myPostsOnly)        list = list.filter(r => r.user_id === userId)
     if (boardFilters.size)  list = list.filter(r => r.board_id != null && boardFilters.has(r.board_id))
+    list = list.filter(r => dayFilters.has(requestWeekday(r.requested_date)))
     if (dateFilter)         list = list.filter(r => r.requested_date === dateFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -577,7 +617,7 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
       )
     }
     return list
-  }, [requests, search, dateFilter, boardFilters, myPostsOnly, userId])
+  }, [requests, search, dateFilter, boardFilters, dayFilters, myPostsOnly, userId])
 
   // Group shifts by their start date in ET
   const shiftDayGroups = useMemo(() => {
@@ -622,12 +662,15 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
   }, [])
 
   const hasActiveFilters = !!bundleFilter || myPostsOnly || boardFilters.size > 0 ||
+    !(typeFilters.trade && typeFilters.giveaway) || dayFilters.size < ALL_DAYS.length ||
     !!dateFilter || !!search.trim()
 
   const clearFilters = () => {
     setBundleFilter(null)
     setMyPostsOnly(false)
     setBoardFilters(new Set())
+    setTypeFilters({ trade: true, giveaway: true })
+    setDayFilters(new Set(ALL_DAYS))
     setDateFilter('')
     setSearch('')
   }
@@ -784,6 +827,56 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                   </button>
                 )}
               </div>
+
+              {/* Trade/Giveaway (offers only) share a row with the Days pills
+                  on wide screens; stacks on mobile. sm:order flips which
+                  column each sits in on wide screens (Days first, so it lands
+                  directly above the Date picker below it) without touching
+                  DOM order. */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {tab === 'offers' && (
+                  <div className="flex items-center justify-around gap-y-2 flex-wrap sm:order-2">
+                    <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                      <Checkbox
+                        checked={typeFilters.trade}
+                        onChange={e => setTypeFilters(t => ({ ...t, trade: e.target.checked }))}
+                      />
+                      <span className="text-sm font-bold text-info">Trade</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                      <Checkbox
+                        checked={typeFilters.giveaway}
+                        onChange={e => setTypeFilters(t => ({ ...t, giveaway: e.target.checked }))}
+                      />
+                      <span className="text-sm font-bold text-success">Giveaway</span>
+                    </label>
+                  </div>
+                )}
+
+                {/* Days — always-visible pills, ordered from the user's
+                    week-start preference. Colored (primary) when included,
+                    gray when clicked off. All colored by default. */}
+                <div className="flex flex-wrap justify-around gap-y-1.5 sm:order-1" role="group" aria-label="Filter by day of week">
+                  {orderedDayIndices.map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => toggleDay(d)}
+                      aria-pressed={dayFilters.has(d)}
+                      title={DAY_NAMES[d]}
+                      className={cn(
+                        'text-xs font-semibold px-2.5 py-1.5 rounded-full transition-colors min-h-0 min-w-0',
+                        dayFilters.has(d)
+                          ? 'bg-primary text-white hover:bg-primary/90'
+                          : 'bg-text/10 text-text/40 hover:bg-text/15'
+                      )}
+                    >
+                      {DAY_ABBR[d]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
 
               <div className={cn('grid grid-cols-1 gap-3', boards.length > 1 && 'sm:grid-cols-2')}>
                 {/* Board multi-select dropdown — only worth showing once there's
