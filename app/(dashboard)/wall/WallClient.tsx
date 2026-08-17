@@ -800,89 +800,10 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
 
           {filtersOpen && (
             <div className="mb-6 p-4 bg-primary-light/40 rounded-lg space-y-3">
-              {/* Scope row: my posts + the bundle chip, with a single reset */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <label className="flex items-center gap-2 cursor-pointer min-h-0">
-                  <Checkbox
-                    checked={myPostsOnly}
-                    onChange={e => setMyPostsOnly(e.target.checked)}
-                  />
-                  <span className="text-sm text-text whitespace-nowrap">My posts only</span>
-                </label>
-
-                {bundleFilter && (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/15 text-primary px-2 py-1 rounded-full">
-                    <Layers className="w-3 h-3" />
-                    Showing 1 bundle ({bundlesById.get(bundleFilter)?.length ?? 0})
-                  </span>
-                )}
-
-                {hasActiveFilters && (
-                  <button
-                    type="button"
-                    onClick={clearFilters}
-                    className="ml-auto inline-flex items-center gap-1 text-sm font-medium text-warning hover:text-warning/80 transition-colors min-h-0 min-w-0"
-                  >
-                    <X className="w-3.5 h-3.5" /> Clear Filters
-                  </button>
-                )}
-              </div>
-
-              {/* Trade/Giveaway (offers only) share a row with the Days pills
-                  on wide screens; stacks on mobile. sm:order flips which
-                  column each sits in on wide screens (Days first, so it lands
-                  directly above the Date picker below it) without touching
-                  DOM order. */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {tab === 'offers' && (
-                  <div className="flex items-center justify-around gap-y-2 flex-wrap sm:order-2">
-                    <label className="flex items-center gap-2 cursor-pointer min-h-0">
-                      <Checkbox
-                        checked={typeFilters.trade}
-                        onChange={e => setTypeFilters(t => ({ ...t, trade: e.target.checked }))}
-                      />
-                      <span className="text-sm font-bold text-info">Trade</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer min-h-0">
-                      <Checkbox
-                        checked={typeFilters.giveaway}
-                        onChange={e => setTypeFilters(t => ({ ...t, giveaway: e.target.checked }))}
-                      />
-                      <span className="text-sm font-bold text-success">Giveaway</span>
-                    </label>
-                  </div>
-                )}
-
-                {/* Days — always-visible pills, ordered from the user's
-                    week-start preference. Colored (primary) when included,
-                    gray when clicked off. All colored by default. */}
-                <div className="flex flex-wrap justify-around gap-y-1.5 sm:order-1" role="group" aria-label="Filter by day of week">
-                  {orderedDayIndices.map(d => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => toggleDay(d)}
-                      aria-pressed={dayFilters.has(d)}
-                      title={DAY_NAMES[d]}
-                      className={cn(
-                        'text-xs font-semibold px-2.5 py-1.5 rounded-full transition-colors min-h-0 min-w-0',
-                        dayFilters.has(d)
-                          ? 'bg-primary text-white hover:bg-primary/90'
-                          : 'bg-text/10 text-text/40 hover:bg-text/15'
-                      )}
-                    >
-                      {DAY_ABBR[d]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-
-              <div className={cn('grid grid-cols-1 gap-3', boards.length > 1 && 'sm:grid-cols-2')}>
-                {/* Board multi-select dropdown — only worth showing once there's
-                    something to filter between; a single-board user's posts are
-                    already scoped to that one board. */}
-                {boards.length > 1 && (
+              {/* Board — its own full-width row, first among the filters.
+                  Only meaningful once there's more than one board to
+                  actually filter between. */}
+              {boards.length > 1 && (
                 <div ref={boardDropdownRef} className="relative">
                   <label className="block text-xs font-medium text-text/60 mb-1">Board</label>
                   <button
@@ -941,8 +862,88 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                     </div>
                   )}
                 </div>
-                )}
+              )}
 
+              {/* My Posts + (offers only) Trade/Giveaway, one row */}
+              <div className="flex items-center justify-around gap-y-2 flex-wrap">
+                <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                  <Checkbox
+                    checked={myPostsOnly}
+                    onChange={e => setMyPostsOnly(e.target.checked)}
+                  />
+                  <span className="text-sm text-text whitespace-nowrap">My posts only</span>
+                </label>
+
+                {tab === 'offers' && (
+                  <>
+                    <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                      <Checkbox
+                        checked={typeFilters.trade}
+                        onChange={e => setTypeFilters(t => ({ ...t, trade: e.target.checked }))}
+                      />
+                      <span className="text-sm font-bold text-info">Trade</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                      <Checkbox
+                        checked={typeFilters.giveaway}
+                        onChange={e => setTypeFilters(t => ({ ...t, giveaway: e.target.checked }))}
+                      />
+                      <span className="text-sm font-bold text-success">Giveaway</span>
+                    </label>
+                  </>
+                )}
+              </div>
+
+              {/* Bundle chip + reset — with a single reset */}
+              {(bundleFilter || hasActiveFilters) && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  {bundleFilter && (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/15 text-primary px-2 py-1 rounded-full">
+                      <Layers className="w-3 h-3" />
+                      Showing 1 bundle ({bundlesById.get(bundleFilter)?.length ?? 0})
+                    </span>
+                  )}
+
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="ml-auto inline-flex items-center gap-1 text-sm font-medium text-warning hover:text-warning/80 transition-colors min-h-0 min-w-0"
+                    >
+                      <X className="w-3.5 h-3.5" /> Clear Filters
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Days — always-visible pills, ordered from the user's
+                  week-start preference. Colored (primary) when included,
+                  gray when clicked off. All colored by default. Its own
+                  full-width row so it lands directly above the Date
+                  picker below it on every screen size. */}
+              <div className="flex flex-wrap justify-around gap-y-1.5" role="group" aria-label="Filter by day of week">
+                {orderedDayIndices.map(d => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => toggleDay(d)}
+                    aria-pressed={dayFilters.has(d)}
+                    title={DAY_NAMES[d]}
+                    className={cn(
+                      'text-xs font-semibold px-2.5 py-1.5 rounded-full transition-colors min-h-0 min-w-0',
+                      dayFilters.has(d)
+                        ? 'bg-primary text-white hover:bg-primary/90'
+                        : 'bg-text/10 text-text/40 hover:bg-text/15'
+                    )}
+                  >
+                    {DAY_ABBR[d]}
+                  </button>
+                ))}
+              </div>
+
+              {/* Date + Search share a row on wide screens; Date stacks
+                  above Search on mobile. */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Date — react-datepicker so it's a real calendar popup on
                     every browser, matching the post/edit forms (the native
                     input[type=date] renders as a bare text field in some). */}
@@ -962,25 +963,25 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                   />
                 </div>
 
-              </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
-                <input
-                  className="input pl-9 pr-8 text-sm"
-                  placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
-                {search && (
-                  <button
-                    type="button"
-                    onClick={() => setSearch('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-text/40 hover:text-text min-h-0 min-w-0 p-0.5"
-                    aria-label="Clear search"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
+                  <input
+                    className="input pl-9 pr-8 text-sm"
+                    placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-text/40 hover:text-text min-h-0 min-w-0 p-0.5"
+                      aria-label="Clear search"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}
