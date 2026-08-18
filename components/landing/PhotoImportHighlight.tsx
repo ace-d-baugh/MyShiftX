@@ -37,7 +37,7 @@ export function PhotoImportHighlight({ industryName, scheduleApps }: PhotoImport
     : `Stop retyping the week's schedule. Photograph the posted schedule — paper on the break-room wall or ${appsPhrase} — and MyShiftX reads your shifts onto your calendar in seconds.`
 
   return (
-    <section className="py-20 px-4 bg-background">
+    <section className="py-12 md:py-20 px-4 bg-background">
       <div className="max-w-6xl mx-auto">
         <AnimateIn>
           <div className="card border border-primary/20 bg-gradient-to-br from-primary-light/60 via-card to-card p-8 md:p-12">

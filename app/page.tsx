@@ -269,7 +269,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── Features ── */}
-      <section className="py-20 px-4 bg-background">
+      <section className="py-12 md:py-20 px-4 bg-background">
         <div className="max-w-6xl mx-auto">
 
           <AnimateIn className="text-center mb-14">
@@ -285,7 +285,7 @@ export default async function HomePage() {
             {features.map((feature, i) => (
               <AnimateIn key={feature.title} delay={i * 90}>
                 <div
-                  className={`card border-l-4 ${feature.border} hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group h-full`}
+                  className={`card border-l-2 ${feature.border} hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group h-full`}
                 >
                   <div
                     className={`w-10 h-10 rounded-lg ${feature.iconBg} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}
@@ -349,7 +349,7 @@ export default async function HomePage() {
                   href={`/blog/${post.slug}`}
                   className="flex flex-col card h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
                 >
-                  <div className="flex flex-wrap gap-2 mb-2 text-[11px] text-text/40">
+                  <div className="flex flex-wrap gap-2 mb-2 text-[11px] text-text/70">
                     {post.tags.map(t => <span key={t}>{t}</span>)}
                   </div>
                   <h3 className="font-accent text-xl font-bold text-text mb-2 group-hover:text-primary transition-colors">
