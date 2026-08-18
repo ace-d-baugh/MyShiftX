@@ -6,7 +6,7 @@ import { parseISO, format } from 'date-fns'
 import { formatInTimeZone } from 'date-fns-tz'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown, X, Check, Layers, Calendar } from 'lucide-react'
+import { Plus, RefreshCw, Inbox, Search, SlidersHorizontal, ChevronDown, X, Check, Layers, CalendarDays, LayoutGrid } from 'lucide-react'
 import { getSettings } from '@/lib/settings'
 import { createClient } from '@/lib/supabase/client'
 import { deactivateShift, deactivateRequest } from '@/app/actions/posts'
@@ -103,13 +103,13 @@ const FilterDateInput = forwardRef<HTMLInputElement, {
   value?: string; onClick?: () => void; placeholder?: string; onClear?: () => void
 }>(({ value, onClick, placeholder, onClear }, ref) => (
   <div className="relative">
-    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 dark:text-primary pointer-events-none z-10" />
+    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 dark:text-primary pointer-events-none z-10" />
     <input
       ref={ref}
       readOnly
       value={value ?? ''}
       onClick={onClick}
-      placeholder={placeholder ?? 'Any date'}
+      placeholder={placeholder ?? 'Any Date'}
       className={`input text-sm h-9 pl-9 ${value ? 'pr-8' : ''} cursor-pointer`}
     />
     {value && onClear && (
@@ -151,6 +151,8 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
   const [boardFilters, setBoardFilters] = useState<Set<string>>(new Set())
   const [boardDropdownOpen, setBoardDropdownOpen] = useState(false)
   const boardDropdownRef = useRef<HTMLDivElement>(null)
+  // Controlled so a second click on the field closes the calendar (toggle).
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
   // Type filter (offers only): independent trade/giveaway toggles over the raw
   // flags — a Give/Trade post (both flags) matches either one. Both on by
   // default; unchecking both intentionally shows nothing.
@@ -802,22 +804,45 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
           panel and highlight the whole control as one region. */}
       {(currentPostCount > 1 || hasActiveFilters) && (
         <div data-tour="wall-filters-area">
-          <button
-            onClick={() => setFiltersOpen(o => !o)}
-            data-tour="wall-filters"
-            data-tour-open={String(filtersOpen)}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary mb-4 min-h-0 min-w-0"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Filters
-            {hasActiveFilters && (
-              <span className="w-1.5 h-1.5 rounded-full bg-primary" aria-label="filters active" />
-            )}
-            <ChevronDown className={cn('w-4 h-4 transition-transform', filtersOpen && 'rotate-180')} />
-          </button>
+          {/* Header row: the Filters toggle, with Clear Filters pinned to the
+              end so it appears/disappears without shifting the panel below. */}
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <button
+              onClick={() => setFiltersOpen(o => !o)}
+              data-tour="wall-filters"
+              data-tour-open={String(filtersOpen)}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary min-h-0 min-w-0"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              Filters
+              {hasActiveFilters && (
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" aria-label="filters active" />
+              )}
+              <ChevronDown className={cn('w-4 h-4 transition-transform', filtersOpen && 'rotate-180')} />
+            </button>
 
-          {filtersOpen && (
-            <div className="mb-6 p-4 bg-primary-light/40 rounded-lg space-y-3">
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex items-center gap-1 text-sm font-medium text-warning hover:text-warning/80 transition-colors min-h-0 min-w-0"
+              >
+                <X className="w-3.5 h-3.5" /> Clear Filters
+              </button>
+            )}
+          </div>
+
+          {/* Grid-rows 0fr/1fr collapse trick (same as DayGroup/LetterSection
+              elsewhere) so opening/closing Filters animates its height
+              instead of the panel just popping in and out. Always mounted —
+              only the wrapper's row height and the inner overflow-hidden
+              clip decide whether it's visible. */}
+          <div className={cn(
+            'grid transition-[grid-template-rows] duration-300 ease-spring',
+            filtersOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+          )}>
+          <div className="overflow-hidden">
+            <div className="mb-6 p-4 bg-primary-light rounded-lg space-y-3">
               {/* Board — its own full-width row, first among the filters.
                   Only meaningful once there's more than one board to
                   actually filter between. */}
@@ -827,14 +852,18 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                   <button
                     type="button"
                     onClick={() => setBoardDropdownOpen(o => !o)}
+                    aria-label="Filter by board"
                     className="input text-sm h-9 w-full flex items-center justify-between gap-2 cursor-pointer"
                   >
-                    <span className="truncate text-left">
-                      {boardFilters.size === 0
-                        ? 'All Boards'
-                        : boardFilters.size === 1
-                          ? (boards.find(b => boardFilters.has(b.id))?.name ?? '1 Board')
-                          : `${boardFilters.size} Boards`}
+                    <span className="flex items-center gap-2 min-w-0">
+                      <LayoutGrid className="w-4 h-4 shrink-0 text-text/40" />
+                      <span className="truncate text-left">
+                        {boardFilters.size === 0
+                          ? 'All Boards'
+                          : boardFilters.size === 1
+                            ? (boards.find(b => boardFilters.has(b.id))?.name ?? '1 Board')
+                            : `${boardFilters.size} Boards`}
+                      </span>
                     </span>
                     <ChevronDown className={cn('w-4 h-4 shrink-0 text-text/40 transition-transform', boardDropdownOpen && 'rotate-180')} />
                   </button>
@@ -912,25 +941,13 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                 )}
               </div>
 
-              {/* Bundle chip + reset — with a single reset */}
-              {(bundleFilter || hasActiveFilters) && (
+              {/* Bundle chip (Clear Filters now lives on the Filters header) */}
+              {bundleFilter && (
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                  {bundleFilter && (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/15 text-primary px-2 py-1 rounded-full">
-                      <Layers className="w-3 h-3" />
-                      Showing 1 bundle ({bundlesById.get(bundleFilter)?.length ?? 0})
-                    </span>
-                  )}
-
-                  {hasActiveFilters && (
-                    <button
-                      type="button"
-                      onClick={clearFilters}
-                      className="ml-auto inline-flex items-center gap-1 text-sm font-medium text-warning hover:text-warning/80 transition-colors min-h-0 min-w-0"
-                    >
-                      <X className="w-3.5 h-3.5" /> Clear Filters
-                    </button>
-                  )}
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/15 text-primary px-2 py-1 rounded-full">
+                    <Layers className="w-3 h-3" />
+                    Showing 1 bundle ({bundlesById.get(bundleFilter)?.length ?? 0})
+                  </span>
                 </div>
               )}
 
@@ -972,12 +989,16 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                 <div>
                   <label className="block text-xs font-medium text-text/60 mb-1">Date</label>
                   <DatePicker
+                    open={datePickerOpen}
+                    onInputClick={() => setDatePickerOpen(o => !o)}
+                    onClickOutside={() => setDatePickerOpen(false)}
+                    preventOpenOnFocus
                     selected={dateFilter ? parseISO(`${dateFilter}T12:00:00`) : null}
-                    onChange={(d: Date | null) => setDateFilter(d ? format(d, 'yyyy-MM-dd') : '')}
+                    onChange={(d: Date | null) => { setDateFilter(d ? format(d, 'yyyy-MM-dd') : ''); setDatePickerOpen(false) }}
                     dateFormat={settings.dateFormat === 'dmy' ? 'dd/MM/yyyy' : 'MM/dd/yyyy'}
                     calendarStartDay={settings.weekStart as 0 | 1 | 2 | 3 | 4 | 5 | 6}
                     minDate={new Date(new Date().setHours(0, 0, 0, 0))}
-                    placeholderText="Any date"
+                    placeholderText="Any Date"
                     isClearable
                     customInput={<FilterDateInput />}
                     popperPlacement="bottom-start"
@@ -1006,7 +1027,8 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                 </div>
               </div>
             </div>
-          )}
+          </div>
+          </div>
         </div>
       )}
 

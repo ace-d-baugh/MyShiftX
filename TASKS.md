@@ -1313,6 +1313,28 @@ Migrations: `20260818000000_finish_first_last_and_board_status.sql`, `2026081800
 
 ---
 
+### ✅ Final parity audit vs WDWShiftX — 2026-08-18
+
+File-by-file diff of every surface named in `PORTABLE_FEATURES_2.md`, plus a live database check. **Verified byte-identical to WDW** (modulo intentional branding renames): all five tour files, `ShiftCard.tsx`, `RequestCard.tsx`, `CommentSection.tsx`, `PostShiftForm.tsx`, `UserBoardsSection.tsx`, `lib/validations/auth.ts`, `notifyComment`, and all 33 `data-tour` selectors. Live DB re-confirmed: `first_name`/`last_name` + `boards.status` present with correct column grants, `@disney.com` block intact in `handle_new_user()`, `notify_weekly_digest` gone.
+
+**One real bug found and fixed:** `MessagesClient.tsx` gated the empty state on `conversations.length` instead of `displayConversations.length`. On an account with no real conversations the Messages tour chapter would have rendered "No conversations yet" and filtered away every `msg-*` step — defeating the entire point of the sample-conversation data. This is exactly the failure mode the demo rows exist to prevent, and it would only have shown up on a brand-new account, which is the one most likely to see the tour.
+
+**Item #3 (filter panel) gaps closed** — described in the document, never overridden by you:
+- Date field is now a controlled toggle (click to open, click again to close), matching WDW.
+- `CalendarDays` icon on the Date field and `LayoutGrid` icon on the Board dropdown (doc: "distinct icons per control"), plus an `aria-label` on the Board button.
+- Clear Filters moved to the always-visible Filters header row, so it no longer pushes panel content down when it appears.
+- Filter panel now animates open/closed via the grid-rows 0fr/1fr trick instead of popping, and uses solid `bg-primary-light` like WDW.
+- `"Any Date"` placeholder capitalization (named verbatim in the doc).
+
+**Deliberate divergences kept — not bugs:**
+- Your filter-panel row order and the Days/Date/Search 3-column grid (your explicit direction, supersedes WDW's 2-column `sm:order` arrangement).
+- Field labels retained rather than dropped for placeholder-only, per your later edit adding a "Days" label.
+- MyShiftX-only: `liveWall` gating, `UpgradeNudge`, the Basic-tier "new activity" banner, the Charts tab, self-serve `createBoard`, showcase-mode redirects, `AdRail`.
+- Party/special-event badges and `PartyLegendModal` correctly absent everywhere (#4/#8 skipped) — including WDW's `role="button"` day-header markup, which only exists to nest a badge button.
+- `ClaimSection` keeps MyShiftX's "Sent — waiting on the owner to accept" helper line under a pending claim. WDW dropped it; the doc doesn't mention it, and it's useful, so it stays.
+
+---
+
 ## Ongoing / Maintenance
 
 | Task | Who | Notes |

@@ -233,7 +233,7 @@ export function MessagesClient({ currentUserId, initialConversations }: Messages
 
       {deleteError && <p className="text-xs text-warning mb-2">{deleteError}</p>}
 
-      {conversations.length === 0 ? (
+      {displayConversations.length === 0 ? (
         <div className="card text-center py-10">
           <MessageSquare className="w-8 h-8 mx-auto text-text/20 mb-3" />
           <p className="text-sm font-medium text-text/70">No conversations yet</p>
