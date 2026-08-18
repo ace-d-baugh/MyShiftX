@@ -9,6 +9,8 @@ export const metadata = {
   title: 'Messages — Sorting Out a Trade Without the Group Chat',
   description:
     'How direct messages work on MyShiftX: every conversation attached to the shift it is about, so a trade gets settled in one thread instead of scattered across a group chat.',
+  // See app/preview/wall/page.tsx for why this points at /messages.
+  alternates: { canonical: '/messages' },
 }
 
 export const revalidate = 3600

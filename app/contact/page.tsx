@@ -6,7 +6,8 @@ import { AdRail } from '@/components/features/AdRail'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
 
-export const metadata = { title: 'Contact Us – MyShiftX' }
+// The root layout appends " – MyShiftX" via its title template.
+export const metadata = { title: 'Contact Us', alternates: { canonical: '/contact' } }
 
 export default async function ContactPage() {
   const showAds = await getPublicShowAds(createServerClient())
@@ -22,6 +23,20 @@ export default async function ContactPage() {
         </Link>
         <h1 className="font-accent text-3xl font-bold text-text mb-2">Contact Us</h1>
         <p className="text-text/50 text-sm mb-8">We&apos;d love to hear from you.</p>
+
+        <div className="space-y-3 text-sm text-text/70 leading-relaxed mb-8">
+          <p>
+            MyShiftX is built and run by a small team, so every message below reaches an actual
+            person rather than a support queue. Pick whichever address matches what you need — it
+            gets there faster than one general inbox sorting it out afterward.
+          </p>
+          <p>
+            Most questions we get are some version of &ldquo;how do I get my whole team using
+            this?&rdquo; or &ldquo;can it do X?&rdquo; Both are welcome. If you run a shift board
+            for retail, restaurants, warehouses, hospitality, or anywhere else that runs on a
+            posted schedule, we want to hear what is and is not working for you.
+          </p>
+        </div>
 
         <div className="space-y-4">
           <div className="card shadow-sm flex items-start gap-4">
@@ -67,6 +82,40 @@ export default async function ContactPage() {
               <Link href="/help" className="text-primary hover:underline font-medium">
                 Visit Help &amp; Support
               </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10 pt-8 border-t border-border">
+          <h2 className="font-accent font-bold text-text mb-4">Before You Write In</h2>
+          <div className="space-y-4 text-sm text-text/70 leading-relaxed">
+            <div>
+              <p className="font-medium text-text mb-1">How fast do you actually respond?</p>
+              <p>
+                Within 2 business days for most messages, usually sooner. Account-access issues
+                and anything affecting your ability to see or trade shifts get priority over
+                general feedback.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium text-text mb-1">
+                Can I request a feature or report a bug?
+              </p>
+              <p>
+                Yes — that is most of what General Support handles. Include what you were trying
+                to do and what happened instead; for a bug, the board and browser you were using
+                helps us reproduce it faster.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium text-text mb-1">
+                Do you offer phone support?
+              </p>
+              <p>
+                Not yet. Email keeps a written record of the request, which matters for
+                account-recovery and billing questions, so it is the one channel we staff
+                properly rather than splitting attention across several.
+              </p>
             </div>
           </div>
         </div>

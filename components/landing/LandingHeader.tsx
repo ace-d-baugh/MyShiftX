@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, LayoutGrid, CalendarDays, MessageSquare } from 'lucide-react'
+import { ChevronDown, LayoutGrid, CalendarDays, MessageSquare, Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ThemedLogo } from '@/components/ui/ThemedLogo'
@@ -60,6 +60,7 @@ export function LandingHeader({
 }: LandingHeaderProps) {
   const supabase = createClient()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const isLoggedIn = !!displayName
   // The demo is served by rewriting /wall → /preview/wall, so the path seen
   // here depends on whether it's the server or the client asking. Strip the
@@ -94,21 +95,13 @@ export function LandingHeader({
 
   return (
     <header className="sticky top-0 z-50 bg-background/90 backdrop-blur border-b border-border animate-slide-down">
-      <div className={cn(
-          'max-w-6xl mx-auto px-4 py-3',
-          isLoggedIn
-            ? 'flex items-center justify-between'
-            : 'flex flex-col sm:flex-row items-center gap-2 sm:justify-between'
-        )}>
+      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href={isLoggedIn ? '/wall' : '/'} className="flex flex-row items-center gap-0 align-baseline">
           {/* Full logo (icon + wordmark) at every breakpoint — smaller on mobile */}
           <ThemedLogo priority className="h-10 md:h-14 w-auto" />
         </Link>
 
-        <nav className={cn(
-            'flex items-center gap-3',
-            !isLoggedIn && 'w-full justify-center sm:w-auto sm:justify-end'
-          )}>
+        <nav className="flex items-center gap-3">
           {isLoggedIn ? (
             <div className="relative">
               <button
@@ -145,33 +138,48 @@ export function LandingHeader({
           ) : SHOWCASE_MODE ? (
             /* Showcase mode: a real topic-organised nav instead of auth CTAs.
              * AdSense asks for "an accessible, easy-to-use navigation bar
-             * organized by topic", and there is nothing to sign into anyway. */
-            <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1">
-              {PUBLIC_NAV.map(item => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={activeHref === item.href ? 'page' : undefined}
-                  className={cn(
-                    'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                    activeHref === item.href
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-text/70 hover:text-primary hover:bg-primary-light/50'
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              {/* Redundant once you're already inside the demo. */}
-              {!DEMO_ROUTES.includes(activeHref ?? '') && (
-                <Link
-                  href="/wall"
-                  className="btn btn-primary text-sm px-4 py-2 min-h-0 h-10 ml-1"
-                >
-                  Live Demo
-                </Link>
-              )}
-            </div>
+             * organized by topic", and there is nothing to sign into anyway.
+             * Eight items wrapped into pills on mobile, which is why this
+             * collapses into a hamburger below md — the wrapped version read
+             * as several uneven rows rather than a menu. */
+            <>
+              <div className="hidden md:flex items-center gap-1">
+                {PUBLIC_NAV.map(item => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={activeHref === item.href ? 'page' : undefined}
+                    className={cn(
+                      'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                      activeHref === item.href
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-text/70 hover:text-primary hover:bg-primary-light/50'
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                {/* Redundant once you're already inside the demo. */}
+                {!DEMO_ROUTES.includes(activeHref ?? '') && (
+                  <Link
+                    href="/wall"
+                    className="btn btn-primary text-sm px-4 py-2 min-h-0 h-10 ml-1"
+                  >
+                    Live Demo
+                  </Link>
+                )}
+              </div>
+
+              <button
+                onClick={() => setMobileNavOpen(o => !o)}
+                className="md:hidden p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
+                aria-label="Toggle menu"
+                aria-haspopup="menu"
+                aria-expanded={mobileNavOpen}
+              >
+                {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </>
           ) : (
             <>
               <Link href="/login" className="btn btn-outline text-sm px-4 py-2 min-h-0 h-10">
@@ -184,6 +192,52 @@ export function LandingHeader({
           )}
         </nav>
       </div>
+
+      {/* Mobile nav panel — showcase mode only; the other two states (logged
+          in, or the plain Log In/Get Started pair) are already one row. */}
+      {SHOWCASE_MODE && !isLoggedIn && mobileNavOpen && (
+        <div
+          className="md:hidden bg-background border-t border-border shadow-lg"
+          style={{ animation: 'navMenuOpen 0.38s ease-out both' }}
+        >
+          <nav className="px-4 py-2 flex flex-col">
+            {PUBLIC_NAV.map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={activeHref === item.href ? 'page' : undefined}
+                onClick={() => setMobileNavOpen(false)}
+                className={cn(
+                  'px-3 py-2.5 rounded-md text-sm font-medium transition-colors',
+                  activeHref === item.href
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-text/70 hover:text-primary hover:bg-primary-light/50'
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+            {!DEMO_ROUTES.includes(activeHref ?? '') && (
+              <Link
+                href="/wall"
+                onClick={() => setMobileNavOpen(false)}
+                className="btn btn-primary text-sm px-4 py-2 min-h-0 h-10 mt-2"
+              >
+                Live Demo
+              </Link>
+            )}
+          </nav>
+        </div>
+      )}
+
+      {/* Backdrop — closes the mobile panel when tapping outside it. */}
+      {SHOWCASE_MODE && !isLoggedIn && mobileNavOpen && (
+        <div
+          className="fixed inset-0 z-[49] md:hidden"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </header>
   )
 }

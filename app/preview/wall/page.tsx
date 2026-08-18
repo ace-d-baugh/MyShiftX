@@ -12,6 +12,10 @@ export const metadata = {
   title: 'The Wall — See How Shift Trading Works',
   description:
     'A walkthrough of the MyShiftX Wall: how shift trades, giveaways, and coverage requests are posted, filtered, and claimed by coworkers on a private workplace board.',
+  // Middleware rewrites the real /wall to this route; the canonical points
+  // back at /wall (not /preview/wall, which robots.txt disallows) so a
+  // crawler doesn't see two different URLs for the same content.
+  alternates: { canonical: '/wall' },
 }
 
 // Sample data, but the dates are computed relative to render time — hourly is
