@@ -60,7 +60,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'An evergreen guide for new workers facing peak pressure, unfamiliar trade norms, and the first time the schedule stops being theoretical.',
     publishedAt: '2026-08-14',
-    updatedAt: '2026-08-14',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Starting out', 'Scheduling'],
     readingMinutes: 6,
@@ -72,10 +72,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       '24/7 operations, seasonal peaks, multi-property work, guest-facing roles, and event-driven demand.',
     publishedAt: '2026-08-14',
-    updatedAt: '2026-08-14',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Industry', 'Hospitality & Attractions'],
-    readingMinutes: 6,
+    readingMinutes: 7,
     Body: HotelsThemeParksBody,
   },
   {
@@ -84,10 +84,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Split shifts, late closes, weekend demand, floor coverage, and the speed at which last-minute changes move.',
     publishedAt: '2026-08-14',
-    updatedAt: '2026-08-14',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Industry', 'Restaurants'],
-    readingMinutes: 6,
+    readingMinutes: 7,
     Body: RestaurantsQsrBody,
   },
   {
@@ -96,7 +96,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'It always creates overtime problems. Only unreliable people trade. Managers hate it. The reality is more ordinary and more useful.',
     publishedAt: '2026-08-13',
-    updatedAt: '2026-08-13',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'At work'],
     readingMinutes: 6,
@@ -108,7 +108,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Corporate tools publish the schedule. Workers still need a structured way to offer, request, discuss, and confirm cover with each other.',
     publishedAt: '2026-08-13',
-    updatedAt: '2026-08-13',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Workplace tools', 'Boards'],
     readingMinutes: 6,
@@ -120,10 +120,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'The patterns that appear weeks after the extra money lands — and what to do before they become a resignation.',
     publishedAt: '2026-08-12',
-    updatedAt: '2026-08-12',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Overtime', 'Recovery'],
-    readingMinutes: 6,
+    readingMinutes: 7,
     Body: BurnoutSignalsBody,
   },
   {
@@ -132,7 +132,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'How to plan months ahead, post early, and share the load when everyone wants the same days off.',
     publishedAt: '2026-08-12',
-    updatedAt: '2026-08-12',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Scheduling', 'At work'],
     readingMinutes: 6,
@@ -144,10 +144,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Practical tactics for mixed schedules created by trading, not just for permanent night workers.',
     publishedAt: '2026-08-12',
-    updatedAt: '2026-08-12',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Night shift', 'Recovery'],
-    readingMinutes: 6,
+    readingMinutes: 7,
     Body: MixedShiftsSleepBody,
   },
   {
@@ -156,7 +156,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Anchor days, protected rest blocks, and routines that make an irregular schedule feel less like guesswork.',
     publishedAt: '2026-08-11',
-    updatedAt: '2026-08-11',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Scheduling', 'Recovery'],
     readingMinutes: 6,
@@ -168,7 +168,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'When to involve a supervisor, how to document cleanly, and how to keep the focus on the shift rather than the person.',
     publishedAt: '2026-08-11',
-    updatedAt: '2026-08-11',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Working with people'],
     readingMinutes: 6,
@@ -180,7 +180,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Trust, privacy, verification, and workplace size. The trade-offs that decide whether a board stays tight or grows.',
     publishedAt: '2026-08-11',
-    updatedAt: '2026-08-11',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Boards', 'Workplace tools'],
     readingMinutes: 6,
@@ -192,7 +192,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'A short, low-pressure introduction that gets new people using the board correctly before they learn the hard way.',
     publishedAt: '2026-08-10',
-    updatedAt: '2026-08-10',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Boards', 'Workplace tools'],
     readingMinutes: 6,
@@ -204,7 +204,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'When a few names appear on every open shift, resentment builds on both sides. Practical ways to widen the pool without forcing anyone.',
     publishedAt: '2026-08-10',
-    updatedAt: '2026-08-10',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Boards', 'Working with people'],
     readingMinutes: 6,
@@ -216,7 +216,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Eligibility, confirmations, qualifications, last-minute posts, no-shows, and escalation. A practical template you can adapt.',
     publishedAt: '2026-08-10',
-    updatedAt: '2026-08-10',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Boards', 'Workplace tools'],
     readingMinutes: 6,
@@ -228,7 +228,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'How to present a shift board to management as a low-risk tool that reduces last-minute scrambles rather than as an unofficial parallel system.',
     publishedAt: '2026-08-09',
-    updatedAt: '2026-08-09',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Boards', 'Workplace tools'],
     readingMinutes: 6,
@@ -240,7 +240,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'The lines where mistakes actually live, and how to raise a query that gets fixed instead of ignored.',
     publishedAt: '2026-08-09',
-    updatedAt: '2026-08-09',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Pay', 'Getting organized'],
     readingMinutes: 6,
@@ -252,7 +252,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'A simple personal system for people who work more than one property or department so the numbers stay visible before the payslip arrives.',
     publishedAt: '2026-08-09',
-    updatedAt: '2026-08-09',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Pay', 'Getting organized'],
     readingMinutes: 6,
@@ -264,10 +264,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Notify the right person, follow the process, post coverage, confirm the handoff, keep a record. The sequence that keeps your record clean.',
     publishedAt: '2026-08-08',
-    updatedAt: '2026-08-08',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Working with people'],
-    readingMinutes: 6,
+    readingMinutes: 7,
     Body: CannotMakeShiftBody,
   },
   {
@@ -276,10 +276,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Polite, firm language that protects your boundaries and still leaves the relationship intact.',
     publishedAt: '2026-08-08',
-    updatedAt: '2026-08-08',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Working with people'],
-    readingMinutes: 5,
+    readingMinutes: 7,
     Body: SayNoCleanlyBody,
   },
   {
@@ -288,7 +288,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Ready-to-adapt messages that stay clear and professional without sounding desperate or vague.',
     publishedAt: '2026-08-08',
-    updatedAt: '2026-08-08',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Working with people'],
     readingMinutes: 6,
@@ -300,7 +300,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Snap the schedule, review the extracted shifts, and keep one calendar that actually wins. The small checks that stop a wrong import becoming a missed shift.',
     publishedAt: '2026-08-07',
-    updatedAt: '2026-08-07',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Scheduling', 'Getting organized'],
     readingMinutes: 6,
@@ -312,7 +312,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Filters exist for a reason. How to see only the shifts you can actually take when you work across sites, departments, or skill sets.',
     publishedAt: '2026-08-07',
-    updatedAt: '2026-08-07',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Workplace tools'],
     readingMinutes: 6,
@@ -324,7 +324,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Overtime thresholds, minimum rest, commute limits, and the days you protect. A short personal policy that stops you deciding the same questions under pressure every week.',
     publishedAt: '2026-08-07',
-    updatedAt: '2026-08-07',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Getting organized'],
     readingMinutes: 6,
@@ -336,7 +336,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Premiums, travel, lost rest, childcare, meals. Two shifts of the same length can cost very different amounts. How to see the real number before you agree.',
     publishedAt: '2026-08-06',
-    updatedAt: '2026-08-06',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Pay', 'Getting organized'],
     readingMinutes: 7,
@@ -348,7 +348,7 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'A lightweight way to track who has covered whom without turning every shift into a transaction or a score-settling exercise.',
     publishedAt: '2026-08-06',
-    updatedAt: '2026-08-06',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Working with people'],
     readingMinutes: 6,
@@ -360,10 +360,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Six questions that take thirty seconds. The difference between a trade you are glad you took and one you regret for a month.',
     publishedAt: '2026-08-06',
-    updatedAt: '2026-08-06',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Getting organized'],
-    readingMinutes: 7,
+    readingMinutes: 6,
     Body: ShiftTradeChecklistBody,
   },
   {
@@ -372,10 +372,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'The shift is still yours, the person who agreed has gone quiet, and the clock is running. A practical order of operations that protects your record and your reputation.',
     publishedAt: '2026-08-05',
-    updatedAt: '2026-08-05',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Working with people'],
-    readingMinutes: 7,
+    readingMinutes: 8,
     Body: TradeFallsThroughBody,
   },
   {
@@ -384,10 +384,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Seven details, roughly forty seconds. The difference between a post that gets answered and one that sits there until you end up working it yourself.',
     publishedAt: '2026-08-05',
-    updatedAt: '2026-08-05',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Getting organized'],
-    readingMinutes: 7,
+    readingMinutes: 8,
     Body: PostForCoverageBody,
   },
   {
@@ -396,10 +396,10 @@ export const BLOG_POSTS: BlogPost[] = [
     description:
       'Three different posts that all look the same from the outside. The details that tell people which one they’re actually answering.',
     publishedAt: '2026-08-05',
-    updatedAt: '2026-08-05',
+    updatedAt: '2026-08-18',
     author: AUTHOR,
     tags: ['Shift trading', 'Getting organized'],
-    readingMinutes: 7,
+    readingMinutes: 9,
     Body: SwapVsGiveawayBody,
   },
   {
