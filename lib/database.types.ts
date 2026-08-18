@@ -29,7 +29,6 @@ export interface Database {
           phone_number: string | null
           notify_via_email: boolean
           notify_via_sms: boolean
-          notify_weekly_digest: boolean
           onboarding_dismissed_at: string | null
           role: GlobalRole
           membership: Membership
@@ -57,7 +56,6 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          notify_weekly_digest?: boolean
           onboarding_dismissed_at?: string | null
           role?: GlobalRole
           membership?: Membership
@@ -85,7 +83,6 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
-          notify_weekly_digest?: boolean
           onboarding_dismissed_at?: string | null
           role?: GlobalRole
           membership?: Membership

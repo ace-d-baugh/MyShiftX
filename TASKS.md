@@ -1245,11 +1245,19 @@ Type-check, lint, and full production build all clean (build succeeds with the n
 
 ---
 
-### Phase 8 — Weekly digest removal (#19) 🤖, ⚠️ optional
+### ✅ Phase 8 — Weekly digest removal (#19) — COMPLETE 2026-08-18
 
-- [ ] **#19 — Remove weekly digest entirely**: cron route, unsubscribe route, email template, profile toggle, `notify_weekly_digest` column.
+- [x] **#19 — Remove weekly digest entirely.** Modeled directly on WDW's own removal commit (`61ab27c`), which left a clean trail — same file list, same shape:
+  - Deleted `app/api/cron/weekly-digest/route.ts`, `app/api/digest/unsubscribe/route.ts`, `lib/digest.ts`.
+  - Removed the `vercel.json` cron entry (Sunday 22:00 UTC).
+  - Removed the `weeklyDigestHtml` email template from `components/email-template.tsx`.
+  - Removed the Weekly Digest toggle from `ProfileClient.tsx` (UI, `notifyDigest` state, save payload field, `UserProfile` interface field) and the corresponding column from `profile/page.tsx`'s `select()`.
+  - Removed `notify_weekly_digest` from all three shapes (`Row`/`Insert`/`Update`) in `lib/database.types.ts`.
+  - New migration `20260818002000_drop_notify_weekly_digest.sql` — `ALTER TABLE public.users DROP COLUMN IF EXISTS notify_weekly_digest`, applied directly to the live database and verified gone via `information_schema.columns`. The column's SELECT grant (from the original `grant_select_onboarding_columns` migration) goes with it automatically — Postgres drops column-level grants when the column itself is dropped, no separate `REVOKE` needed.
 
-✅ **Confirmed 2026-08-17** — not a send-cap concern, you just never liked the feature. Deliberate removal, not a copy-paste default.
+✅ **Confirmed 2026-08-17** — not a send-cap concern, deliberate removal because the feature was never wanted, not a copy-paste default.
+
+Final sweep confirmed no remaining references outside the immutable migration history (kept, same as WDW — old migrations aren't rewritten, only the new drop migration is added on top). Type-check, lint, and a clean full rebuild (cleared `.next`/`.next-build` first, since stale generated route types from the deleted API routes briefly surfaced as phantom type errors) all pass.
 
 ---
 
