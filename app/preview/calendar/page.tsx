@@ -9,6 +9,8 @@ export const metadata = {
   title: 'The Calendar — Your Whole Schedule in One Place',
   description:
     'How the MyShiftX calendar works: your own shifts, the ones you have traded away, and the coverage your coworkers are looking for, all on one month view.',
+  // See app/preview/wall/page.tsx for why this points at /calendar.
+  alternates: { canonical: '/calendar' },
 }
 
 export const revalidate = 3600
