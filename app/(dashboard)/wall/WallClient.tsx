@@ -934,34 +934,38 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                 </div>
               )}
 
-              {/* Days — always-visible pills, ordered from the user's
-                  week-start preference. Colored (primary) when included,
-                  gray when clicked off. All colored by default. Its own
-                  full-width row so it lands directly above the Date
-                  picker below it on every screen size. */}
-              <div className="flex flex-wrap justify-around gap-y-1.5" role="group" aria-label="Filter by day of week">
-                {orderedDayIndices.map(d => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => toggleDay(d)}
-                    aria-pressed={dayFilters.has(d)}
-                    title={DAY_NAMES[d]}
-                    className={cn(
-                      'text-xs font-semibold px-2.5 py-1.5 rounded-full transition-colors min-h-0 min-w-0',
-                      dayFilters.has(d)
-                        ? 'bg-primary text-white hover:bg-primary/90'
-                        : 'bg-text/10 text-text/40 hover:bg-text/15'
-                    )}
-                  >
-                    {DAY_ABBR[d]}
-                  </button>
-                ))}
-              </div>
+              {/* Days + Date + Search share one row on large screens, Days
+                  first so it stays the leftmost (and therefore topmost once
+                  the grid collapses to one column) of the three — Board, My
+                  Posts row, [bundle chip], Days, Date, Search top to bottom
+                  on every screen size. */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Days — always-visible pills, ordered from the user's
+                    week-start preference. Colored (primary) when included,
+                    gray when clicked off. All colored by default. */}
+                <div>
+                  <label className="block text-xs font-medium text-text/60 mb-1">Days</label>
+                  <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by day of week">
+                    {orderedDayIndices.map(d => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => toggleDay(d)}
+                        aria-pressed={dayFilters.has(d)}
+                        title={DAY_NAMES[d]}
+                        className={cn(
+                          'text-xs font-semibold px-2.5 py-1.5 rounded-full transition-colors min-h-0 min-w-0',
+                          dayFilters.has(d)
+                            ? 'bg-primary text-white hover:bg-primary/90'
+                            : 'bg-text/10 text-text/40 hover:bg-text/15'
+                        )}
+                      >
+                        {DAY_ABBR[d]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-              {/* Date + Search share a row on wide screens; Date stacks
-                  above Search on mobile. */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Date — react-datepicker so it's a real calendar popup on
                     every browser, matching the post/edit forms (the native
                     input[type=date] renders as a bare text field in some). */}
