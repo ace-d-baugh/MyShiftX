@@ -1200,7 +1200,7 @@ Type-check, lint, and full build all clean. Could not exercise this live in-brow
 
 ---
 
-### 🟡 Phase 5 — Admin panel (#16, #17, #18) — Overlord panel COMPLETE 2026-08-18, `/boards` visual overhaul deferred
+### ✅ Phase 5 — Admin panel (#16, #17, #18) — COMPLETE 2026-08-18 (`/boards` overhaul landed 2026-08-18, see below)
 
 - [x] **#16 — Board-less user detection.** Folded into the Users tab rewrite below (`board_count` per user, the "Boardless" filter + count, and the warning-dot on the Users tab icon). No schema change — reuses the existing `user_boards` query, tallied per-user as well as per-board now.
 - [x] **#17 — Admin panel overhaul + board soft-delete (Overlord panel only — see deferred item below).** Final-state port of:
@@ -1212,11 +1212,27 @@ Type-check, lint, and full build all clean. Could not exercise this live in-brow
   - **Fork-divergence handling:** kept the *entire* Charts tab (Stripe membership/revenue breakdown — `MembershipIcon`, `MEMBERSHIP_OPTIONS`, `getMembershipKey`, `billing_cycle`) untouched and unexported-shape-compatible with `AdminCharts.tsx`, which imports from `AdminClient.tsx` directly. WDW has no equivalent (no Stripe), so this tab and its exports don't exist in WDW's version at all — merged by hand rather than copied. `createBoard` (self-serve board creation) also left completely untouched — WDW disables it entirely, MyShiftX's stays as its normal user-facing flow.
 - [x] **#18 — Admin: assign user to board.** New `UserBoardsSection.tsx` on the admin Edit User form (add to board, change role, remove, transfer ownership, message) — ported as-is, no MyShiftX-specific changes needed. Two new server actions in `app/actions/boards.ts`: `adminAddUserToBoard`, `adminTransferBoardOwnership`, both service-role + `requireAdminAction`-gated. Wired through `users/[id]/page.tsx` (memberships + available-boards queries) and `UserEditClient.tsx`.
 
-**🟡 Deliberately deferred — its own follow-up session:** the matching visual overhaul for `/boards` and `/boards/[slug]` (`BoardsClient.tsx`) — sticky per-board headers, member rows as a grid, role icons with a legend key, per-board search/sort/alpha-jump. This is a ~700-line near-total rewrite of that file, comparable in size to the Overlord panel rewrite itself, and touches member-facing pages rather than the admin surface — a distinct deliverable that didn't need to block shipping the Overlord panel overhaul. The underlying soft-delete behavior change is already live and doesn't depend on this UI catching up (confirmed above). Board-status icons/Pause-Resume/Delete are only visible via Overlord for now; a Leader managing their own board still sees the pre-overhaul `/boards` UI.
+**✅ `/boards` + `/boards/[slug]` visual overhaul — landed 2026-08-18, as its own follow-up (see below).**
 
 Type-check, lint, and full build all clean. Could not exercise this live in-browser — same missing-test-credentials limitation as earlier phases. This phase carried the most risk of any so far (Stripe/ads/self-serve-board fork divergence); the divergence points were all confirmed and handled deliberately rather than accidentally overwritten — see the fork-divergence note above.
 
 **👤 You may want to be around for #17's rollout** — it's the largest visual change in this list and worth eyeballing on a preview deploy before it reaches real users, same as I'd recommend for any big admin-surface rewrite.
+
+### ✅ Follow-up — `/boards` + `/boards/[slug]` visual overhaul — COMPLETE 2026-08-18
+
+The piece of #17 deferred out of the main Phase 5 commit. `BoardsClient.tsx` (shared by the full "My Boards" list at `/boards` and the single-board view at `/boards/[slug]`) rewritten to match the Overlord panel's design language:
+
+- Sticky per-board headers while scrolling that board's members, so it's always clear which board is on screen — same sticky-tiers technique as the Overlord panel, adapted with a `solo`/`withPageSearch` offset pair since `/boards/[slug]` never renders the page-level board-list search row that `/boards` does.
+- Member rows rewritten from a `<table>` to an explicit CSS grid — fixes a real (if minor) bug where the "approved by" column landed at a different x-position in each letter-section under the old table-per-section layout, since each section's column widths were driven independently by its own content.
+- Role icons (Crown/Award/UserRound) replacing the old text `Badge` in each member row, with a legend key under the page heading — same icon set and colors as the Overlord panel's `roleIcon`.
+- Per-board member search/sort, and a page-level board search/sort once there's more than one board — both using the already-ported `AlphaJump.tsx` (`SortToggleButton`, `JumpPanelToggle`, `LetterSection`, `VerticalJumpBar`).
+- Board header now carries the same Invite/Rename/Delete controls as the Overlord panel's Boards tab, folded into a ⋮ menu on mobile.
+- **One real behavior fix, not just visual:** `canRename` changed from `isAdmin`-only to `isAdmin || board.myRole === 'Leader'`, matching what the `updateBoardName` server action already permits (it's Leader-scoped via RLS, called through the plain user session). MyShiftX's old UI was stricter than the server it called — Leaders could never actually reach the rename control despite the backend allowing it. `canDelete` stays `isAdmin`-only, unchanged, matching both apps.
+- New `backHref="/boards"` prop, passed from `app/boards/[slug]/page.tsx` — turns the "My Boards" heading into a link back to the full list when viewing a single board, which that page previously had no way back from.
+
+This file turned out to have **no Stripe/ads/showcase-mode logic in it at all** — it's pure board/member management, so it ported almost verbatim from WDW rather than needing the careful hand-merge `AdminClient.tsx` required. The surrounding `app/boards/[slug]/page.tsx` keeps its `AdRail`/`getShowAds`/`SHOWCASE_MODE` wrapper untouched; only the `backHref` prop was added to the `<BoardsClient>` call inside it. `types.ts` and `utils.ts` needed no changes at all.
+
+Type-check, lint, and full build all clean (`/boards` and `/boards/[slug]` both compile and are present in the route list). Could not exercise this live in-browser — same missing-test-credentials limitation as every other phase this session.
 
 ---
 

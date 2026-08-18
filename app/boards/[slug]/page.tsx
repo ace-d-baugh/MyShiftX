@@ -164,6 +164,7 @@ export default async function BoardSlugPage({ params, searchParams }: Props) {
             managedBoards={managedBoards}
             currentUserId={user.id}
             isAdmin={isAdmin}
+            backHref="/boards"
           />
         </AdRail>
       </main>
