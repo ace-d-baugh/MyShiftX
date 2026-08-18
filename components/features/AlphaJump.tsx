@@ -111,17 +111,25 @@ export function LetterSection({
 // own children and doesn't affect whether the element sticks, so the
 // transition and the clipping both have to live on this one node.
 export function VerticalJumpBar({
-  letters, groups, onJump, open = true, stickyTopClass = 'top-[168px]', maxHeightClass = 'max-h-[calc(100vh-200px)]',
+  letters, groups, onJump, direction = 'asc', open = true, stickyTopClass = 'top-[168px]', maxHeightClass = 'max-h-[calc(100vh-200px)]',
 }: {
   letters: string[]
   groups: Map<string, unknown[]>
   onJump: (letter: string) => void
+  /** Sort direction the results are currently in. `letters` is always passed
+   *  in a fixed ascending order (A-Z, or # A-Z) — reversing it here for
+   *  'desc' is what makes the bar's top-to-bottom order match the list
+   *  instead of staying pinned to A-Z regardless of which way it's sorted.
+   *  A plain Array#reverse of a leading '#' bucket lands it last, which is
+   *  exactly the "Z...A, # last" convention compareStrings documents above. */
+  direction?: 'asc' | 'desc'
   /** Show/hide via the panel toggle — defaults open for callers that don't
    *  offer a toggle at all. */
   open?: boolean
   stickyTopClass?: string
   maxHeightClass?: string
 }) {
+  const displayLetters = direction === 'desc' ? [...letters].reverse() : letters
   return (
     <div
       aria-hidden={!open}
@@ -131,7 +139,7 @@ export function VerticalJumpBar({
         stickyTopClass, maxHeightClass
       )}
     >
-      {letters.map(letter => {
+      {displayLetters.map(letter => {
         const has = groups.has(letter)
         return (
           <button

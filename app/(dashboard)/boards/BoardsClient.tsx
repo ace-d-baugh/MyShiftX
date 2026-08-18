@@ -586,6 +586,7 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin, b
                   letters={AZ_LETTERS}
                   groups={memberGroups}
                   onJump={l => jumpToLetter(memberScope, l)}
+                  direction={sort}
                   open={jumpOpen}
                   stickyTopClass={MEMBER_RESULTS_TOP[tier]}
                   maxHeightClass={MEMBER_RESULTS_MAX_HEIGHT[tier]}
@@ -750,6 +751,7 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin, b
                 letters={AZ_LETTERS}
                 groups={boardListGroups}
                 onJump={l => jumpToLetter('boardlist', l)}
+                direction={boardListSort}
                 open={boardListJumpOpen}
                 stickyTopClass="top-[100px] md:top-[150px]"
                 maxHeightClass="max-h-[calc(100vh-120px)] md:max-h-[calc(100vh-170px)]"
