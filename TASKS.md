@@ -1,14 +1,16 @@
 # MyShiftX — Task Board
 
-## Where things stand — `2026-08-05`
+## Where things stand — `2026-08-18`
 
 **The product is built and Stripe is closed.** Auth, boards, the Wall, messaging, claims, bundles, photo import, push, calendar sync, Stripe (live checkout verified on production `2026-08-05`), feature gating, ads, and the full security audit are all shipped and live. What's left is not "finish the app" — it's **get the front door open**.
+
+**AdSense rejected the site a second time on `2026-08-18`, citing Low Value Content** (doorway pages + links to missing pages). That citation is now fixed — see Task 25 for the full list — and the site is ready to resubmit.
 
 **Blocking everything commercial:**
 
 | # | What | Who | Note |
 |---|---|---|---|
-| **25** | AdSense re-review — showcase mode is live, needs Search Console check + resubmit | 👤 You | Registration is **404 while showcase mode is on**. Nobody can sign up until it's reverted |
+| **25** | Request AdSense re-review — the Low Value Content citation is fixed and verified live | 👤 You | Registration is **404 while showcase mode is on**. Nobody can sign up until it's reverted |
 | **25** | Open the site for real signups (unset `NEXT_PUBLIC_SHOWCASE_MODE`) | 👤 You | See the deadlock note below — this, not Stripe, is now the actual bottleneck |
 
 > **⚠️ The launch deadlock.** As of `2026-08-05` nobody is using MyShiftX, because launch is being held until ads work. That is circular: ad revenue is pageviews × RPM, and pageviews are currently zero, so AdSense approval on every page in the site would still earn exactly $0. Stripe is now proven and a handful of $4.99 subscribers would out-earn the ads by an order of magnitude. The recommended order is **launch first, monetise second**: open signups → grow real traffic and blog content → get AdSense approved on the public surface → add a crawler login and enable the Wall ad slot once there is traffic worth serving.
@@ -885,7 +887,7 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 - ✅ Registration and account-recovery routes 404; `/login` still works but is linked nowhere; every private route sends signed-out visitors to `/` rather than `/login`, so no crawlable path dead-ends at an auth wall
 - ✅ **Nothing writes:** `assertWritesEnabled()` guards `getActionSession()` (the chokepoint for 51 of 53 server actions), plus survey, help, and both cron jobs; middleware 503s any non-GET to `/api/*`
 - ✅ Every demo page carries a permanent "Interactive demo — sample data" banner. This is deliberate and non-negotiable: Google's Publisher Policies **Misrepresentation** clause forbids presenting fabricated activity as a genuine community
-- ✅ **Permanent additions that survive the revert:** a blog (`app/blog` — six posts at launch, thirteen as of `2026-08-05`), a public `/faq`, and an expanded `/about`. *This is the part that actually clears Google's content bar* — the demo surface is thin content on its own. The demo pages are now intended to stay public **permanently** rather than being reverted: AdSense's [UGC forum-app rules](https://support.google.com/adsense/answer/9640027) want "equivalent web content for each page that sends ad requests", and a public `/preview/wall` is exactly that for the gated Wall
+- ✅ **Permanent additions that survive the revert:** a blog (`app/blog` — six posts at launch, forty-two as of `2026-08-18`, see below), a public `/faq`, and an expanded `/about`. *This is the part that actually clears Google's content bar* — the demo surface is thin content on its own. The demo pages are now intended to stay public **permanently** rather than being reverted: AdSense's [UGC forum-app rules](https://support.google.com/adsense/answer/9640027) want "equivalent web content for each page that sends ad requests", and a public `/preview/wall` is exactly that for the gated Wall
 - ✅ Verified on production after deploy: `/wall` `/calendar` `/messages` `/blog` `/faq` all 200; `/register` `/forgot-password` `/survey` 404; `/profile` 307 → `/`; `/preview/wall` 307 → `/wall`; `POST /api/push/subscribe` 503; `robots.txt` disallows `/preview/`; sitemap has 23 URLs with no `/login` or `/register`
 - ✅ README disclaimer updated for showcase mode (`6429fd1`)
 
@@ -896,17 +898,31 @@ Gemini reads the photo with a hand-tuned parsing prompt that isolates the target
 - ✅ Every new post links only to routes that are public in **both** modes (`/about`, `/wall`, `/calendar`) — `/boards` was deliberately avoided because it is dashboard-only and would recreate the "links leading to missing pages" citation from `10e4483`
 - ✅ Verified: `tsc --noEmit` clean, `next lint` clean
 
+**⚠️ Second rejection, `2026-08-18`: AdSense rejected the site again, this time citing Low Value Content** (linking Google's doorway-page and thin-content guidance). Two concrete causes, both now fixed:
+
+**🤖 Claude handled (`2026-08-18`) — Low Value Content citation:**
+- ✅ **Doorway pages fixed.** The six `/for/[slug]` industry landing pages (retail, restaurants, warehouses, hotels, theme parks, event venues) shared one template with only the nouns swapped — the exact shape Google's spam classifier flags. Consolidated into a single `/for` "Industries We Support" page with anchored sections and a jump nav; no per-industry content was lost. Old `/for/:slug` URLs 308-redirect to `/for` so nothing indexed 404s
+- ✅ **Dead `/register` links fixed everywhere.** Showcase mode 404s `/register` by design, but four CTAs still pointed at it — `PhotoImportHighlight`, the login page's "Register here", the `/boards/[slug]` invite redirect, and the OAuth-blocked callback. All four now follow the `SHOWCASE_MODE` gate the homepage already used. Verified: no public page or blog post links into `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, or `/survey`
+- ✅ **Terms pricing corrected.** Section 8 hardcoded `$5.99 / $31.99 / $53.99` (and omitted the quarterly plan) while checkout charges `$4.99 / $13.99 / $26.99 / $47.99` — a materially inaccurate legal document, separate from the AdSense citation but fixed alongside it. Now renders from `PRO_PLANS`, the same source `/upgrade` uses, so it can't drift again
+- ✅ **Nav and footer made consistent across all 13 public pages.** The site had three different chromes: `/about`, `/contact`, `/privacy`, `/terms`, `/data-deletion` had *no* header or footer at all (just a "Back" link); `/wall`, `/calendar`, `/messages` had their own 4-link `ShowcaseNav`; everything else had the full 8-link `LandingHeader`. `ShowcaseNav` is deleted — `LandingHeader` now derives the active-section highlight from `usePathname()` (stripping the `/preview` rewrite prefix so it doesn't flip on hydration) and renders identically everywhere
+- ✅ **29 thin blog posts rewritten.** A batch of 22–25 posts added `2026-08-05`–`08-14` ran 220–590 words, a third to a sixth the length of the site's strong posts, and several restated topics those originals already covered. Replaced with drafts running 960–1,430 words each; one draft (`Group-Chats-and-Facebook-Groups`) was deliberately excluded because it duplicated the existing `group-chats-fail-shift-workers` post. Blog is now **42 posts**, sitemap **51 URLs**. `readingMinutes` recomputed from actual word count at the site's own ~163 wpm; `updatedAt` bumped for the freshness signal
+- ✅ **Mobile hamburger nav.** `LandingHeader`'s 8-item public nav just wrapped into uneven pill rows below `md`. Now collapses into a hamburger button that opens a full vertical panel; desktop unchanged
+- ✅ **Canonical tags added** to `/wall`, `/calendar`, `/messages` — these are rewrites of `/preview/*`, which `robots.txt` disallows, so a crawler had no explicit signal for which URL is authoritative
+- ✅ **`/contact` expanded** from ~140 to ~400 words (was the thinnest page on the site) — two framing paragraphs plus a "Before You Write In" section (response time, bug reports, why no phone support)
+- ✅ Verified throughout: `tsc --noEmit` clean, full production build clean (95 static pages), spot-checked rendering and console in-browser at desktop and mobile widths
+
 **👤 You handle — next steps, in order:**
-- [ ] **Search Console → URL Inspection** on `/`, `/wall`, `/blog` — confirm Google fetches a real page, not a redirect
-- [ ] **Request the AdSense re-review** once URL Inspection looks clean
+- [ ] **Search Console → URL Inspection** on `/`, `/wall`, `/for`, `/blog` — confirm Google fetches a real page, not a redirect
+- [ ] **Request the AdSense re-review** — the Low Value Content citation is fixed and verified live on production
 - [ ] After approval: **unset `NEXT_PUBLIC_SHOWCASE_MODE` in Vercel and redeploy.** No code change. Both directions were verified locally on `2026-07-27`
 - [ ] After approval: configure the **AdSense crawler login** (AdSense → Crawler access + Search Console verification) so the gated Wall serves targeted ads instead of remnant fill
 
 **Notes for whoever picks this up:**
-- If a **second** rejection comes, the next lever is **more written content, not more demo surface**
+- If a **third** rejection comes, the next lever is **more written content, not more demo surface** — the blog is now 42 posts at real length, so that lever is mostly pulled already
 - Do **not** un-hide the placeholder testimonials in `app/page.tsx` (they sit behind `className="hidden"`) — fabricated reviews are a direct Misrepresentation hit
 - Registration being 404 in showcase mode means **no one can sign up while this is on**. That's the deliberate trade: the site can't grow and get approved at the same time. Weigh that if approval drags on — and see the launch-deadlock note at the top of this file, because "wait for ads before launching" is currently costing more than it earns
 - **Ad networks other than AdSense were evaluated on `2026-08-05` and none of them fit.** Ezoic now requires 250k monthly users, Raptive 25k pageviews plus long-form content on the *majority* of pages, Mediavine's main network $5k/yr in ad revenue. Only Newor Media (no minimum) is a realistic fallback if AdSense rejects again, and Mediavine Journey (1,000 sessions/mo) is the milestone worth aiming at if the blog keeps growing. **PropellerAds is a hard no** — its demand is popunder/push, which would wreck a product whose pitch is being more trustworthy than a Facebook group. AdMob is not an option either: PWAs aren't a supported Google Mobile Ads SDK platform, and the same publisher policies would bar the calendar/messages screens anyway
+- A duplicate ` – MyShiftX – MyShiftX` title tag was found and fixed on `/for` and `/contact` while touching those files (the root layout already appends the suffix, so pages shouldn't include it themselves). The same bug exists on `/about`, `/privacy`, `/terms`, `/data-deletion`, and several dashboard pages — cosmetic (browser tab / search snippet only), left alone as out of scope for this pass
 
 ---
 
