@@ -7,6 +7,7 @@ import { SessionTimeout } from '@/components/features/SessionTimeout'
 import { PreferencesSyncer } from '@/components/features/PreferencesSyncer'
 import { AdRail } from '@/components/features/AdRail'
 import { MessageToast } from '@/components/features/MessageToast'
+import { ProductTour } from '@/components/features/ProductTour'
 import type { GlobalRole } from '@/lib/database.types'
 
 type UserProfileRow = { id: string; display_name: string | null; role: GlobalRole; is_active: boolean } | null
@@ -79,6 +80,9 @@ export default async function DashboardLayout({
       <SessionTimeout />
       <PreferencesSyncer />
       <MessageToast currentUserId={user.id} />
+      {/* Mounted at layout level so the Wall → Post a Shift hand-off survives
+          the client-side navigation between the two chapters. */}
+      <ProductTour />
       <Navbar
         userRole={userRole}
         displayName={displayName}

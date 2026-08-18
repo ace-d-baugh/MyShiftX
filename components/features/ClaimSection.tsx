@@ -8,6 +8,7 @@ import { messageAboutShift } from '@/app/actions/messages'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { CountPill } from '@/components/ui/CountPill'
+import { isSampleId } from '@/lib/tour/sample-data'
 import { cn } from '@/lib/utils'
 import type { ClaimStatus } from '@/lib/database.types'
 
@@ -196,6 +197,12 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
   const [error, setError] = useState<string | null>(null)
   const [confirmBundle, setConfirmBundle] = useState(false)
 
+  // A tour demo shift has no row to claim, so its pill runs on local state
+  // instead: the walkthrough toggles it to show what "sent" looks like, count
+  // and all, and it resets when the demo card unmounts with the tour.
+  const isSample = isSampleId(shiftId)
+  const [demoClaimed, setDemoClaimed] = useState(false)
+
   const run = async (fn: () => Promise<{ error?: string }>) => {
     setBusy(true)
     setError(null)
@@ -214,12 +221,14 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
     )
   }
 
-  const pending = myClaim?.status === 'pending'
+  const pending = isSample ? demoClaimed : myClaim?.status === 'pending'
+  const shownCount = claimCount + (isSample && demoClaimed ? 1 : 0)
   const siblings = bundleSiblings ?? []
 
   // Bundled shifts go through a confirmation first — taking one means taking
   // all of them, which isn't obvious from a single card.
   const handleClick = () => {
+    if (isSample) { setDemoClaimed(c => !c); return }
     if (pending) return run(() => withdrawClaim(myClaim!.id))
     if (bundleId) { setConfirmBundle(true); return }
     return run(() => claimShift(shiftId))
@@ -239,6 +248,8 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
         title={pending
           ? 'Sent — tap to withdraw'
           : bundleId ? 'I can help with this bundle' : 'I can help with this'}
+        data-tour="claim-pill"
+        data-tour-claimed={String(pending)}
         className={cn(
           'badge inline-flex items-center gap-1 transition-colors shrink-0 disabled:opacity-60',
           pending
@@ -248,7 +259,7 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
       >
         {bundleId ? <Layers className="w-3.5 h-3.5" /> : <Handshake className="w-3.5 h-3.5" />}
         <span className="hidden sm:inline">I Can Help</span>
-        <CountPill count={claimCount} tone={pending ? 'solid' : 'default'} />
+        <CountPill count={shownCount} tone={pending ? 'solid' : 'default'} />
       </button>
       {pending && (
         <p className="text-[11px] text-text/50 w-full mt-1">

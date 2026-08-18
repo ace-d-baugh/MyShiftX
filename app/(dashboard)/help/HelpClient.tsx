@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
-  HelpCircle, ChevronDown, Send, X, CheckCircle,
+  HelpCircle, ChevronDown, Send, X, CheckCircle, ArrowRight, Plus, Compass,
   LayoutGrid, UserPlus, MessageSquare, Layers,
   HeartHandshake as Handshake, Crown, Award, UserRound,
   Bell, Monitor, Laptop, Smartphone, CalendarDays, Camera,
@@ -12,10 +13,21 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { sendSupportMessage } from '@/app/actions/help'
 import { BOARD_ROLE_LABEL } from '@/lib/roles'
+import { setPendingChapter, type TourChapter } from '@/lib/tour/tour-state'
+import { TOUR_CHAPTERS, TOUR_CHAPTER_ORDER } from '@/lib/tour/tour-steps'
 
 interface HelpClientProps {
   userEmail: string
   importEnabled: boolean
+}
+
+/** Icon per walkthrough — kept here rather than in the tour data, which has no
+ *  business knowing what it looks like. Mirrors each surface's nav icon. */
+const TOUR_ICONS: Record<TourChapter, typeof LayoutGrid> = {
+  wall: LayoutGrid,
+  'post-shift': Plus,
+  calendar: CalendarDays,
+  messages: MessageSquare,
 }
 
 const FAQS: { q: string; a: string; importOnly?: boolean }[] = [
@@ -162,6 +174,7 @@ const CALENDAR_GUIDES = [
 ]
 
 export function HelpClient({ userEmail, importEnabled }: HelpClientProps) {
+  const router = useRouter()
   const faqs = FAQS.filter(f => importEnabled || !f.importOnly)
   const [openIdx, setOpenIdx] = useState<number | null>(null)
   const [openGuide, setOpenGuide] = useState<number | null>(null)
@@ -232,6 +245,51 @@ export function HelpClient({ userEmail, importEnabled }: HelpClientProps) {
           ))}
         </div>
       </div>
+
+      {/* ── Guided walkthroughs ─────────────────────────────────────────────── */}
+      <section className="mb-10">
+        <div className="flex items-center gap-2 mb-1">
+          <Compass className="w-5 h-5 text-primary shrink-0" />
+          <h2 className="font-accent text-xl font-bold text-text">Guided Walkthroughs</h2>
+        </div>
+        <p className="text-sm text-text/60 mb-4">
+          Take the whole tour from the top, or jump straight to the part you need. Each one runs
+          in the real app on sample shifts that disappear when you&apos;re done.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {TOUR_CHAPTER_ORDER.map((id, i) => {
+            const { label, blurb, path } = TOUR_CHAPTERS[id]
+            const Icon = TOUR_ICONS[id]
+            return (
+              <button
+                key={id}
+                type="button"
+                /* Every chapter runs on its own page, so queue it and navigate —
+                   <ProductTour> in the dashboard layout starts it on arrival. */
+                onClick={() => { setPendingChapter(id); router.push(path) }}
+                className="card group text-left flex items-start gap-3 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Icon className="w-4 h-4 text-primary" />
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="font-accent font-bold text-text">{label}</span>
+                    {i === 0 && (
+                      <span className="text-[10px] font-semibold uppercase tracking-wide bg-primary/15 text-primary px-1.5 py-0.5 rounded-full leading-none">
+                        Start here
+                      </span>
+                    )}
+                  </span>
+                  <span className="block text-xs text-text/60 leading-relaxed mt-1">{blurb}</span>
+                </span>
+                <ArrowRight className="w-4 h-4 text-text/25 shrink-0 mt-1 transition-colors group-hover:text-primary" />
+              </button>
+            )
+          })}
+        </div>
+      </section>
 
       {/* ── Legend ──────────────────────────────────────────────────────────── */}
       <section className="mb-10 scroll-mt-20" id="legend">

@@ -13,6 +13,7 @@ import { Modal } from '@/components/ui/Modal'
 import { CountPill } from '@/components/ui/CountPill'
 import { FlagModal } from '@/components/features/FlagModal'
 import { createClient } from '@/lib/supabase/client'
+import { isSampleId, sampleComments } from '@/lib/tour/sample-data'
 import { cn } from '@/lib/utils'
 import type { CommentPostType } from '@/lib/database.types'
 import { notifyInterest, notifyComment } from '@/app/actions/notifications'
@@ -96,6 +97,13 @@ export function CommentSection({
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null)
 
   const fetchComments = useCallback(async (): Promise<CommentData[]> => {
+    // Tour demo posts exist only in memory — there is nothing to query for,
+    // and asking would just return an empty thread.
+    if (isSampleId(postId)) {
+      const canned = sampleComments(postId)
+      setComments(canned)
+      return canned
+    }
     setLoading(true)
     setError(null)
     try {
@@ -168,6 +176,7 @@ export function CommentSection({
       toggleInterestedList()
       return
     }
+    if (isSampleId(postId)) return
     if (!currentUserId || posting) return
     setPosting(true)
     setError(null)
@@ -213,6 +222,7 @@ export function CommentSection({
   // Errors (e.g. no longer sharing a board) show in the card's error area.
   const [messaging, setMessaging] = useState(false)
   const handleMessage = async () => {
+    if (isSampleId(postId)) return
     if (!ownerUserId || !currentUserId || messaging) return
     setMessaging(true)
     setError(null)
@@ -244,6 +254,8 @@ export function CommentSection({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // Nothing on a tour demo post is writable — it has no row to attach to.
+    if (isSampleId(postId)) return
     if (!currentUserId || !body.trim()) return
     setPosting(true)
     setError(null)
@@ -327,7 +339,7 @@ export function CommentSection({
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 pt-3 mt-3 border-t border-border">
-        <div className="flex items-center gap-2">
+        <div data-tour="card-actions" className="flex items-center gap-2">
           {leadingAction}
           {/* Requests have no separate claim system, so this doubles as their
               "I Can Help" control (leading position, mirroring ClaimPill) and
@@ -362,6 +374,8 @@ export function CommentSection({
           <button
             type="button"
             onClick={toggleComments}
+            data-tour="card-comments"
+            data-tour-open={String(commentsOpen)}
             className="badge bg-text/10 text-text/70 hover:bg-primary-light cursor-pointer inline-flex items-center gap-1 transition-colors shrink-0"
           >
             <MessageSquare className="w-3.5 h-3.5" />
@@ -413,6 +427,10 @@ export function CommentSection({
         </div>
       )}
 
+      {/* Mounted even while closed: driver.js resolves a step's target before
+          running that step's hooks, so the tour can only expand this section if
+          it is already in the DOM. Renders nothing until it is opened. */}
+      <div data-tour="card-comments-panel">
       {commentsOpen && (
         <div className="mt-3 space-y-3">
           {currentUserId && (
@@ -566,6 +584,7 @@ export function CommentSection({
           )}
         </div>
       )}
+      </div>
 
       <FlagModal
         open={flagCommentId !== null}

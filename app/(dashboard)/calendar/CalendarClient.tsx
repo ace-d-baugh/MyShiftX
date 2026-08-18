@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import {
@@ -19,6 +19,9 @@ import { bundleBreakupWarning } from '@/lib/bundles'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import {
+  isSampleId, sampleBoardRequests, sampleBoardShifts, sampleCalendarShifts, useSampleMode,
+} from '@/lib/tour/sample-data'
 
 const ET = 'America/New_York'
 
@@ -135,7 +138,10 @@ function ActivityDots({ data, dateStr, router, spread = false }: {
   if (!hasAnyDots(data)) return null
   const d = data!
   return (
-    <div className={cn('flex items-center', spread ? 'w-full justify-between gap-1' : 'shrink-0')}>
+    <div
+      data-tour="cal-dots"
+      className={cn('flex items-center', spread ? 'w-full justify-between gap-1' : 'shrink-0')}
+    >
       <div className="flex items-center">
         {d.hasBoth && (
           <button
@@ -184,10 +190,33 @@ type ViewMode = 'grid' | 'list'
 
 // ── Calendar client ───────────────────────────────────────────────────────────
 
-export function CalendarClient({ userId, displayName, importEnabled, today, myShifts, boardShifts, boardRequests, boards, isPro }: CalendarClientProps) {
+export function CalendarClient({
+  userId, displayName, importEnabled, today,
+  myShifts: myShiftsProp,
+  boardShifts: boardShiftsProp,
+  boardRequests: boardRequestsProp,
+  boards, isPro,
+}: CalendarClientProps) {
   const router = useRouter()
   const [settings, setSettings] = useState<UserSettings | null>(null)
   const [importOpen, setImportOpen] = useState(false)
+
+  // While the tour runs, the same three demo shifts the Wall shows are folded
+  // onto the calendar (plus one open request, so the Request dot has a day to
+  // sit on). Memory only — they disappear when the tour ends.
+  const sampleMode = useSampleMode()
+  const myShifts = useMemo(
+    () => (sampleMode ? [...sampleCalendarShifts(), ...myShiftsProp] : myShiftsProp),
+    [sampleMode, myShiftsProp]
+  )
+  const boardShifts = useMemo(
+    () => (sampleMode ? [...sampleBoardShifts(), ...boardShiftsProp] : boardShiftsProp),
+    [sampleMode, boardShiftsProp]
+  )
+  const boardRequests = useMemo(
+    () => (sampleMode ? [...sampleBoardRequests(), ...boardRequestsProp] : boardRequestsProp),
+    [sampleMode, boardRequestsProp]
+  )
 
   const [view, setView] = useState<ViewMode>('grid')
   useEffect(() => {
@@ -320,6 +349,7 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
           {importEnabled && (
             <button
               onClick={() => setImportOpen(true)}
+              data-tour="cal-import"
               className="btn btn-outline gap-1.5 text-sm px-4 py-2 min-h-0 h-10"
             >
               <Camera className="w-4 h-4" />
@@ -332,6 +362,7 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
               doesn't exist for them). */}
           <Link
             href={isPro ? '/profile#calendar-sync' : '/upgrade'}
+            data-tour="cal-sync"
             className="btn btn-outline gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline"
           >
             <RefreshCw className="w-4 h-4" />
@@ -339,7 +370,7 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
             <span className="hidden min-[505px]:inline sm:hidden">Sync</span>
             {!isPro && <Crown className="w-3.5 h-3.5 text-secondary-accent" fill="#ffea80" strokeWidth={0} aria-label="Pro feature" />}
           </Link>
-          <Link href="/wall/new-shift?from=calendar" className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
+          <Link href="/wall/new-shift?from=calendar" data-tour="cal-add" className="btn btn-primary gap-1.5 text-sm px-4 py-2 min-h-0 h-10 no-underline">
             <Plus className="w-4 h-4" />
             <span className="hidden min-[505px]:inline">
               <span className="hidden sm:inline">Add </span>Shift
@@ -379,13 +410,13 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
 
       {/* Dot legend + view toggle */}
       <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
-        <div className="flex items-center gap-5 flex-wrap text-xs text-text/60">
+        <div data-tour="cal-legend" className="flex items-center gap-5 flex-wrap text-xs text-text/60">
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" />Trade + Giveaway</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-info inline-block" />Trade</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-success inline-block" />Giveaway</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-accent inline-block" />Request</span>
         </div>
-        <div className="flex items-center gap-1 rounded-lg border border-border p-0.5 shrink-0">
+        <div data-tour="cal-view" className="flex items-center gap-1 rounded-lg border border-border p-0.5 shrink-0">
           <button
             onClick={() => changeView('grid')}
             aria-label="Grid view" title="Grid view"
@@ -441,6 +472,11 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                     <div
                       key={dateStr}
                       onClick={() => { if (!isPast) goCreate(dateStr) }}
+                      /* Scopes the tour's calendar steps to a day it supplied,
+                         so they don't land on a real shift from last week. */
+                      data-tour-sample={
+                        (data?.myShifts ?? []).some(s => isSampleId(s.id)) ? 'true' : undefined
+                      }
                       className={cn(
                         'relative bg-card p-1.5 min-h-[90px] flex flex-col',
                         isPast && 'opacity-50',
@@ -483,6 +519,7 @@ export function CalendarClient({ userId, displayName, importEnabled, today, mySh
                             <button
                               key={s.id}
                               onClick={e => { e.stopPropagation(); router.push(`/wall/edit-shift/${s.id}?from=calendar`) }}
+                              data-tour="cal-shift"
                               className={cn(
                                 'w-full text-left rounded px-1 py-0.5 text-[10px] leading-tight transition-colors border-l-2',
                                 s.is_trade && s.is_giveaway ? 'border-l-primary bg-primary/5 hover:bg-primary/10' :

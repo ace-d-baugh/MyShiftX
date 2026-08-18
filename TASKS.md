@@ -1229,11 +1229,19 @@ Type-check, lint, and full build all clean. Could not exercise this live in-brow
 
 ---
 
-### Phase 7 — Guided Product Tour (#11) 🤖 — second-biggest lift
+### ✅ Phase 7 — Guided Product Tour (#11) — COMPLETE 2026-08-18
 
-- [ ] **#11 — Four-chapter guided tour** (Wall, posting a shift, Calendar, Messages), built on `driver.js` (new dependency), themed from CSS custom properties so it follows every MyShiftX theme automatically. In-memory-only demo data (3 fake shifts, matching calendar entries, 2 fake conversations) merged into real lists for the tour's duration only — never touches the database, vanishes however the tour ends.
+- [x] **#11 — Four-chapter guided tour** (Wall, posting a shift, Calendar, Messages), built on `driver.js` (new dependency, `^1.8.0`, saved to `package.json`), themed from CSS custom properties so it follows every MyShiftX theme automatically. In-memory-only demo data (3 fake shifts, matching calendar entries, 2 fake conversations) merged into real lists for the tour's duration only — never touches the database, vanishes however the tour ends.
 
-**Sequenced last among the feature work on purpose**: the tour's steps describe and interact with specific controls — the Wall filters (#1–3), the "I Can Help" pill (#5), Calendar coloring (#7). Porting the tour before those exist means writing steps that reference UI that isn't there yet, then rewriting them anyway once the rest lands. ~950 lines across 5 new files plus edits to Wall/Calendar/Messages/Help/Navbar/layout.
+Five new files, ported near-verbatim from WDW with only naming/branding changes (storage key `myshiftx-tour-v1`, event name `myshiftx:tour`, popover class `.myshiftx-tour`, "WDWShiftX" → "MyShiftX" in one line of tour copy): `lib/tour/sample-data.ts`, `lib/tour/tour-state.ts`, `lib/tour/tour-steps.ts`, `components/features/ProductTour.tsx`, `components/features/product-tour.css`. `<ProductTour />` mounted once in `app/(dashboard)/layout.tsx`.
+
+Then wired `data-tour="…"` attributes and sample-data merges into every surface the tour points at — the exact set Phases 2/3/6 deliberately left out while their own scope was still landing: `WallClient.tsx` (tabs, days, filters, post button, displayShifts sample merge), `ShiftCard.tsx` (card root + sample marker, menu, details toggle, badges), `ClaimSection.tsx` (claim pill + local demo-claim state for the sample shift, since it has no real row to claim), `CommentSection.tsx` (actions row, comments toggle + always-mounted panel wrapper, sample-post guards on every write path), `CalendarClient.tsx` (legend, view toggle, import/sync buttons, day-cell sample marker, shift block, sample shift/board-shift/board-request merges), `PostShiftForm.tsx` (every step target on the form), `MessagesClient.tsx` (start button, list, row + sample marker, unread badge, delete guard, sample conversation merge), `Navbar.tsx` (`nav-calendar` on both desktop and mobile nav). Verified after wiring: every one of the 33 `data-tour="…"` selectors referenced in `tour-steps.ts` resolves to exactly one file in the app (cross-checked with a grep sweep, not just by eye).
+
+Also landed #10 (Tour launch cards) here since it was blocked on this phase — added the "Guided Walkthroughs" section to the Help page between Getting Started and Legend, one card per chapter linking through `setPendingChapter` + navigation (the same hand-off mechanism the tour itself uses between chapters).
+
+**Consistently excluded, matching earlier phases' scope decisions**: special-event/party badges and `PartyLegendModal` (never wanted, #4/#8) — the WDW day-header markup that exists solely to nest a party-badge button was *not* ported; MyShiftX's day headers stay plain `<button>`s. `createBoard` (self-serve board creation, Stripe/ads) were not touched by any of this — the tour has no interaction with either.
+
+Type-check, lint, and full production build all clean (build succeeds with the new `driver.js` dependency and all new client bundles). Could not exercise this live in-browser — same missing-test-credentials limitation as earlier phases; this one in particular would benefit from an actual click-through (auto-start on first Wall visit, the Wall→post-shift→calendar→messages hand-off chain, dark/light popover theming) whenever `/verify` is run.
 
 ---
 
