@@ -145,6 +145,50 @@ export default function Body() {
         15-20 or 20-30 mmHg range while accommodating real body shapes.
       </p>
 
+      <ProductCard
+        name="Comrad Compression Socks"
+        badge="Best Everyday Premium Option"
+        href="https://amzn.to/3Smy3qq"
+        images={['/products/compression-socks/comrad/1.jpg', '/products/compression-socks/comrad/2.jpg', '/products/compression-socks/comrad/3.jpg', '/products/compression-socks/comrad/4.jpg', '/products/compression-socks/comrad/5.jpg', '/products/compression-socks/comrad/6.jpg']}
+        pros={['Soft, breathable fabric', 'Wide range of colors and patterns', 'Consistent graduated compression']}
+        cons={['Pricier per pair than multi-packs', 'Sizing runs specific — check the chart']}
+        bestFor="Workers who want compression that doesn't look 'medical' and don't mind paying more for one trusted brand."
+      />
+      <p>
+        Comrad built its reputation on making compression wear that looks and feels like a normal
+        premium sock rather than something clinical. The fabric is soft and breathable, the
+        graduated compression (available in both 15-20 and 20-30 mmHg) is consistent pair to pair,
+        and the color and pattern range is wider than most medical-style brands offer.
+      </p>
+      <p>
+        They cost more than a multi-pack, but for people who want a sock they&rsquo;d happily wear
+        outside of work too, Comrad is a frequent recommendation. Sizing is specific to the brand,
+        so check the chart rather than guessing from your usual shoe size.
+      </p>
+
+      <ProductCard
+        name="Copper-Infused or Performance Multi-Pack Alternatives"
+        badge="Best Budget Performance Multi-Pack"
+        href="https://amzn.to/3U2fk40"
+        images={['/products/compression-socks/copper-infused/1.jpg', '/products/compression-socks/copper-infused/2.jpg', '/products/compression-socks/copper-infused/3.jpg', '/products/compression-socks/copper-infused/4.jpg', '/products/compression-socks/copper-infused/5.jpg', '/products/compression-socks/copper-infused/6.jpg', '/products/compression-socks/copper-infused/7.jpg']}
+        pros={['Multi-pack value', 'Odor-resistant copper infusion', 'Athletic-style fit works well under closed shoes']}
+        cons={['Copper odor-control claims are more marketing than proven', 'Compression consistency varies by manufacturer']}
+        bestFor="Budget shoppers who want an athletic-style compression sock with added odor control, bought in bulk."
+      />
+      <p>
+        Copper-infused compression socks lean on an athletic, performance-sock look rather than the
+        medical style of most compression brands, and they&rsquo;re usually sold in multi-packs at
+        a lower per-pair price. The copper thread is marketed for antimicrobial and odor-control
+        properties &mdash; the clinical evidence for that is thin, but the socks themselves still
+        deliver ordinary graduated compression underneath the marketing.
+      </p>
+      <p>
+        Quality varies more by manufacturer than with established brands, so it&rsquo;s worth
+        checking recent reviews for the specific multi-pack rather than assuming all copper-infused
+        options perform the same. For shift workers who go through socks fast and want a bulk
+        option that still fits comfortably under sneakers, this category fills that gap.
+      </p>
+
       <h2>Quick Buying Notes</h2>
       <ul>
         <li>Measure your calf if possible and check the brand&rsquo;s size chart &mdash; don&rsquo;t guess.</li>

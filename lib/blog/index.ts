@@ -363,7 +363,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: 'best-portable-chargers-for-shift-workers',
-    title: 'Top 4 Portable Chargers & Power Banks for All-Day Shifts',
+    title: 'Top 6 Portable Chargers & Power Banks for All-Day Shifts',
     description:
       'Capacity, fast charging, and pocket-friendly sizing for keeping a phone alive through a full shift and the ride home.',
     publishedAt: '2026-05-26',
@@ -615,7 +615,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: 'top-7-compression-socks-for-long-shifts',
-    title: 'Top 5 Compression Socks That Actually Survive Long Shifts',
+    title: 'Top 7 Compression Socks That Actually Survive Long Shifts',
     description:
       'Graduated compression options for swollen ankles and heavy legs after 10-12 hours standing on hard floors.',
     publishedAt: '2026-03-13',
@@ -651,7 +651,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: 'top-5-alarm-clocks-for-rotating-schedules',
-    title: 'Top 4 Alarm Clocks & Wake-Up Lights for Rotating Schedules',
+    title: 'Top 5 Alarm Clocks & Wake-Up Lights for Rotating Schedules',
     description:
       'Sunrise lights, bed shakers, and loud backups for waking up reliably on a schedule that never sits still.',
     publishedAt: '2026-03-03',
@@ -687,7 +687,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: 'best-sleep-masks-for-daytime-sleep',
-    title: 'Top 4 Sleep Masks for Daytime Sleep After Late Shifts',
+    title: 'Top 5 Sleep Masks for Daytime Sleep After Late Shifts',
     description:
       'Contoured designs, cooling materials, and budget alternatives that close the light gaps blackout curtains alone can miss.',
     publishedAt: '2026-02-20',

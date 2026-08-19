@@ -111,6 +111,29 @@ export default function Body() {
         Battery backup is useful for power outages or if the unit is unplugged accidentally.
       </p>
 
+      <ProductCard
+        name="Phone and Watch Charging Stand"
+        badge="Best Bedside Charging Station"
+        href="https://amzn.to/4cz1xrV"
+        images={['/products/alarm-clocks/charging/1.jpg', '/products/alarm-clocks/charging/2.jpg', '/products/alarm-clocks/charging/3.jpg', '/products/alarm-clocks/charging/4.jpg', '/products/alarm-clocks/charging/5.jpg', '/products/alarm-clocks/charging/6.jpg', '/products/alarm-clocks/charging/7.jpg']}
+        pros={['Keeps phone and watch charged and visible as backup alarms', 'Tidy bedside setup', 'Some models include a night-light or clock display']}
+        cons={['Another device to set up', "Not itself an alarm — just supporting infrastructure"]}
+        bestFor="Anyone who relies on a phone or smartwatch as a backup alarm and wants both charged and ready without hunting for cables at odd hours."
+      />
+      <p>
+        A dedicated bedside charging stand isn&rsquo;t an alarm clock on its own, but it earns its
+        place in this list because so many shift workers still use their phone (or a smartwatch) as
+        the real backup alarm. A stand that charges both overnight, or during a short daytime sleep
+        window, means neither device is sitting dead or half-charged when the primary alarm goes
+        off.
+      </p>
+      <p>
+        Look for one with a stable base, cables long enough to reach your usual outlet, and enough
+        angle adjustment that you can actually glance at the time without fumbling in the dark. A
+        few models add a soft night-light, which is useful for the walk to the bathroom without
+        turning on a bright overhead light and undoing your wind-down.
+      </p>
+
       <h2>Practical Tips for Rotating Schedules</h2>
       <ul>
         <li>Set the alarm for the time you actually need to be up, not the time you hope to get up. Build in buffer for the fog of short-turnaround sleep.</li>

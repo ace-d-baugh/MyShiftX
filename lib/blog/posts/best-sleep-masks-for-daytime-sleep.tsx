@@ -115,6 +115,29 @@ export default function Body() {
         that a simple mask plus a separate speaker or fan doesn&rsquo;t solve.
       </p>
 
+      <ProductCard
+        name="Weighted or Deep-Pressure Sleep Masks"
+        badge="Best for Anxious or Restless Sleepers"
+        href="https://amzn.to/4wNl0N2"
+        images={['/products/sleep-masks/weighted/1.jpg', '/products/sleep-masks/weighted/2.jpg', '/products/sleep-masks/weighted/3.jpg', '/products/sleep-masks/weighted/4.jpg', '/products/sleep-masks/weighted/5.jpg', '/products/sleep-masks/weighted/6.jpg', '/products/sleep-masks/weighted/7.jpg']}
+        pros={['Gentle pressure can help you relax and fall asleep faster', 'Blocks light as a side effect of the design', 'Some people find the weighted feel calming']}
+        cons={['Not for everyone — can feel too warm or restrictive', 'Heavier than a standard mask, so less ideal in a hot room']}
+        bestFor="Restless sleepers or anyone who likes the calming feel of gentle weight in addition to light blocking."
+      />
+      <p>
+        Weighted sleep masks use small glass or plastic beads sewn into the fabric to apply gentle,
+        even pressure across the eyes and temples &mdash; the same idea behind weighted blankets,
+        scaled down to the face. For some people that pressure is genuinely calming and helps them
+        settle into sleep faster, which matters when you&rsquo;re trying to fall asleep on a schedule
+        your body doesn&rsquo;t agree with.
+      </p>
+      <p>
+        They block light effectively as a byproduct of full coverage, but that isn&rsquo;t really the
+        selling point &mdash; the weight is. This is a more individual preference than the other
+        options here: some shift workers swear by it, others find the extra warmth and pressure
+        counterproductive, especially in a bedroom that already runs hot during the day.
+      </p>
+
       <h2>Practical Tips</h2>
       <ul>
         <li>Put the mask on after you&rsquo;re already in bed and the room is as dark as possible so you can adjust the fit.</li>
