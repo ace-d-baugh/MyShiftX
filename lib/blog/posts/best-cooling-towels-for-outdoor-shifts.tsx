@@ -34,7 +34,8 @@ export default function Body() {
       <ProductCard
         name="Instant Cooling Towels (Multi-Packs)"
         badge="Best Simple Core Solution"
-        href="https://amzn.to/4cqdZKw"
+        href="https://amzn.to/4g4XOEN"
+        images={['/products/cooling-towels/cooling-towel/1.jpg', '/products/cooling-towels/cooling-towel/2.jpg', '/products/cooling-towels/cooling-towel/3.jpg', '/products/cooling-towels/cooling-towel/4.jpg', '/products/cooling-towels/cooling-towel/5.jpg', '/products/cooling-towels/cooling-towel/6.jpg', '/products/cooling-towels/cooling-towel/7.jpg']}
         pros={['Inexpensive', 'Lightweight', 'Noticeable cooling when activated', 'Easy to carry multiple']}
         cons={['Effect fades as they dry', 'Need access to water to re-activate', 'Quality varies by brand']}
         bestFor="Almost any outdoor role as a first, low-cost heat management tool."
@@ -54,7 +55,8 @@ export default function Body() {
       <ProductCard
         name="Small Clip-On or Handheld Fans"
         badge="Best Active Airflow"
-        href="https://amzn.to/4g4XOEN"
+        href="https://amzn.to/4zr5ZTh"
+        images={['/products/cooling-towels/handheld-fan/1.jpg', '/products/cooling-towels/handheld-fan/2.jpg', '/products/cooling-towels/handheld-fan/3.jpg', '/products/cooling-towels/handheld-fan/4.jpg', '/products/cooling-towels/handheld-fan/5.jpg', '/products/cooling-towels/handheld-fan/6.jpg', '/products/cooling-towels/handheld-fan/7.jpg']}
         pros={['Active airflow', 'Useful in humid conditions', 'Many clip-on options keep hands free']}
         cons={['Battery management required', 'Can be noisy', 'Bulkier than a towel']}
         bestFor="Stationary or low-movement outdoor posts, or as a break-time tool."
@@ -73,7 +75,8 @@ export default function Body() {
       <ProductCard
         name="Neck Fans"
         badge="Best Hands-Free Continuous Cooling"
-        href="https://amzn.to/4y95oVc"
+        href="https://amzn.to/4zxB1cv"
+        images={['/products/cooling-towels/neck-fan/1.jpg', '/products/cooling-towels/neck-fan/2.jpg', '/products/cooling-towels/neck-fan/3.jpg', '/products/cooling-towels/neck-fan/4.jpg', '/products/cooling-towels/neck-fan/5.jpg', '/products/cooling-towels/neck-fan/6.jpg']}
         pros={['Hands-free', 'Continuous airflow', 'Increasingly common and refined designs']}
         cons={['Battery life limits usefulness on very long shifts', 'Some feel bulky or unbalanced']}
         bestFor="Roles where you need ongoing cooling without holding a device."
@@ -93,7 +96,8 @@ export default function Body() {
       <ProductCard
         name="Optional Cooling Vests or Bandana Styles"
         badge="Extra Coverage"
-        href="https://amzn.to/4zxB1cv"
+        href="https://amzn.to/4x86i3R"
+        images={['/products/cooling-towels/cooling-bandana/1.jpg', '/products/cooling-towels/cooling-bandana/2.jpg', '/products/cooling-towels/cooling-bandana/3.jpg', '/products/cooling-towels/cooling-bandana/4.jpg', '/products/cooling-towels/cooling-bandana/5.jpg', '/products/cooling-towels/cooling-bandana/6.jpg', '/products/cooling-towels/cooling-bandana/7.jpg']}
         pros={['Broader or longer-lasting cooling in some designs']}
         cons={['Higher cost', 'Often require pre-cooling', 'Can be bulkier under uniforms']}
         bestFor="Extreme heat roles or as an upgrade when simpler tools fall short."

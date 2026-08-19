@@ -34,7 +34,8 @@ export default function Body() {
       <ProductCard
         name="Heavy-Duty Badge Reels"
         badge="Best Everyday Essentials Access"
-        href="https://amzn.to/3UpPKpA"
+        href="https://amzn.to/4xjs6JS"
+        images={['/products/pocket-organizers/badge-reel/1.jpg', '/products/pocket-organizers/badge-reel/2.jpg', '/products/pocket-organizers/badge-reel/3.jpg', '/products/pocket-organizers/badge-reel/4.jpg', '/products/pocket-organizers/badge-reel/5.jpg', '/products/pocket-organizers/badge-reel/6.jpg']}
         pros={['Instant access', 'Keeps items secure', 'Works with most uniforms', 'Inexpensive relative to the time saved']}
         cons={['Cord can tangle if overloaded', 'Cheap versions fail fast']}
         bestFor="Anyone who needs badge + keys or a couple of small tools constantly available."
@@ -54,7 +55,8 @@ export default function Body() {
       <ProductCard
         name="Nurse/Utility Multi-Tool Pens (Light + Marker + Scissors)"
         badge="Best Multi-Function Tool"
-        href="https://amzn.to/4xjs6JS"
+        href="https://amzn.to/3U5BxOD"
+        images={['/products/pocket-organizers/multi-tool-pen/1.jpg', '/products/pocket-organizers/multi-tool-pen/2.jpg', '/products/pocket-organizers/multi-tool-pen/3.jpg', '/products/pocket-organizers/multi-tool-pen/4.jpg', '/products/pocket-organizers/multi-tool-pen/5.jpg', '/products/pocket-organizers/multi-tool-pen/6.jpg']}
         pros={['Multiple functions in one slim tool', 'Reduces pocket clutter', 'Convenient']}
         cons={['Individual features may not be as good as dedicated tools', 'Some feel cheap']}
         bestFor="Roles that need frequent writing plus occasional light or marking."
@@ -74,7 +76,8 @@ export default function Body() {
       <ProductCard
         name="Small Clip-On Organizers"
         badge="Best for Multiple Small Items"
-        href="https://amzn.to/3U5BxOD"
+        href="https://amzn.to/4xGqfii"
+        images={['/products/pocket-organizers/clip-on/1.jpg', '/products/pocket-organizers/clip-on/2.jpg', '/products/pocket-organizers/clip-on/3.jpg', '/products/pocket-organizers/clip-on/4.jpg', '/products/pocket-organizers/clip-on/5.jpg']}
         pros={['More organized storage than a single reel', 'Keeps multiple items together', 'Still relatively compact']}
         cons={['Adds some bulk', 'Quality varies widely']}
         bestFor="Roles that require several small tools or items throughout the shift."
@@ -93,7 +96,8 @@ export default function Body() {
       <ProductCard
         name="Retractable Key/Badge Holders"
         badge="Best Secure Key Management"
-        href="https://amzn.to/4xGqfii"
+        href="https://amzn.to/45C8CEf"
+        images={['/products/pocket-organizers/retractable/1.jpg', '/products/pocket-organizers/retractable/2.jpg', '/products/pocket-organizers/retractable/3.jpg', '/products/pocket-organizers/retractable/4.jpg', '/products/pocket-organizers/retractable/5.jpg', '/products/pocket-organizers/retractable/6.jpg']}
         pros={['Stronger for keys and heavier items', 'Keeps keys accessible but secure']}
         cons={['Can be bulkier', 'Cord length and strength vary']}
         bestFor="Staff who handle keys or access cards frequently."
@@ -112,7 +116,8 @@ export default function Body() {
       <ProductCard
         name="Optional Stethoscope-Style or Radio Holders"
         badge="Best for Specific Gear"
-        href="https://amzn.to/45C8CEf"
+        href="https://amzn.to/4cqdZKw"
+        images={['/products/pocket-organizers/stethoscope-style/1.jpg', '/products/pocket-organizers/stethoscope-style/2.jpg', '/products/pocket-organizers/stethoscope-style/3.jpg', '/products/pocket-organizers/stethoscope-style/4.jpg', '/products/pocket-organizers/stethoscope-style/5.jpg', '/products/pocket-organizers/stethoscope-style/6.jpg', '/products/pocket-organizers/stethoscope-style/7.jpg']}
         pros={['Purpose-built security for specific items', 'Frees up pockets']}
         cons={['Only useful if you carry that exact gear', 'Can be over-specific']}
         bestFor="Roles that regularly use radios or similar equipment."

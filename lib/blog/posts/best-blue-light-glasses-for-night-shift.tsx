@@ -36,7 +36,8 @@ export default function Body() {
       <ProductCard
         name="Swanwick or Similar Amber Glasses"
         badge="Best Targeted Evening Protection"
-        href="https://amzn.to/4wFtgym"
+        href="https://amzn.to/4qxIeoQ"
+        images={['/products/blue-light-blockers/swanwick/1.jpg', '/products/blue-light-blockers/swanwick/2.jpg', '/products/blue-light-blockers/swanwick/3.jpg', '/products/blue-light-blockers/swanwick/4.jpg', '/products/blue-light-blockers/swanwick/5.jpg', '/products/blue-light-blockers/swanwick/6.jpg', '/products/blue-light-blockers/swanwick/7.jpg']}
         pros={['Stronger blue-light filtering for evening use', 'Purpose-built for sleep support', 'Multiple frame styles']}
         cons={['Amber tint changes color perception', 'Not ideal for tasks that require perfect color accuracy']}
         bestFor="Post-shift wind-down and evening screen use when stronger filtering is the priority."
@@ -57,7 +58,8 @@ export default function Body() {
       <ProductCard
         name="Uvex Skyper (Budget Research-Backed Option)"
         badge="Best Value Proven Performer"
-        href="https://amzn.to/4qxIeoQ"
+        href="https://amzn.to/3SiqroH"
+        images={['/products/blue-light-blockers/uvex-skyper/1.jpg', '/products/blue-light-blockers/uvex-skyper/2.jpg']}
         pros={['Inexpensive', 'Strong filtering', 'Wraparound coverage', 'Widely available']}
         cons={['Industrial look', 'Orange tint is obvious', 'May not feel as refined as premium frames']}
         bestFor="Trying stronger blue-light filtering on a budget or for home use after shifts."
@@ -77,7 +79,8 @@ export default function Body() {
       <ProductCard
         name="Stylish Everyday Blue-Light Glasses"
         badge="Best for All-Day or Subtle Wear"
-        href="https://amzn.to/3SiqroH"
+        href="https://amzn.to/4cNAucm"
+        images={['/products/blue-light-blockers/stylish/1.jpg', '/products/blue-light-blockers/stylish/2.jpg', '/products/blue-light-blockers/stylish/3.jpg', '/products/blue-light-blockers/stylish/4.jpg', '/products/blue-light-blockers/stylish/5.jpg', '/products/blue-light-blockers/stylish/6.jpg']}
         pros={['More natural appearance', 'Comfortable for longer wear', 'Suitable for mixed day/evening use']}
         cons={['Lower filtering percentage than dedicated amber lenses']}
         bestFor="People who want subtle protection they can wear more places without drawing attention."
@@ -98,7 +101,8 @@ export default function Body() {
       <ProductCard
         name="Clip-On Options"
         badge="Best for People Who Already Wear Glasses"
-        href="https://amzn.to/4cNAucm"
+        href="https://amzn.to/3UpPKpA"
+        images={['/products/blue-light-blockers/clip-on/1.jpg', '/products/blue-light-blockers/clip-on/2.jpg', '/products/blue-light-blockers/clip-on/3.jpg', '/products/blue-light-blockers/clip-on/4.jpg', '/products/blue-light-blockers/clip-on/5.jpg', '/products/blue-light-blockers/clip-on/6.jpg']}
         pros={['Works with existing glasses', 'Lower cost than a full second pair', 'Removable']}
         cons={['Can feel less secure or add bulk', 'Optical quality varies']}
         bestFor="Prescription glasses wearers who want a simple add-on solution."

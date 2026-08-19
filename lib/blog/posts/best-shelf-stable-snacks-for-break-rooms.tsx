@@ -35,7 +35,8 @@ export default function Body() {
       <ProductCard
         name="High-Protein Bars (RXBAR, KIND, and Similar)"
         badge="Best Portable Sustained Energy"
-        href="https://amzn.to/4g8phFy"
+        href="https://amzn.to/4qmhIys"
+        images={['/products/snacks/protein-bars/1.jpg', '/products/snacks/protein-bars/2.jpg', '/products/snacks/protein-bars/3.jpg', '/products/snacks/protein-bars/4.jpg', '/products/snacks/protein-bars/5.jpg']}
         pros={['Convenient', 'Higher protein', 'Long shelf life', 'Widely available flavors']}
         cons={['Some are still high in sugar or calories', 'Texture varies']}
         bestFor="Quick, filling options during short breaks."
@@ -55,7 +56,8 @@ export default function Body() {
       <ProductCard
         name="Nut & Seed Packs"
         badge="Best Simple Healthy Fat + Protein"
-        href="https://amzn.to/4qmhIys"
+        href="https://amzn.to/4xbCu6G"
+        images={['/products/snacks/nuts/1.jpg', '/products/snacks/nuts/2.jpg', '/products/snacks/nuts/3.jpg', '/products/snacks/nuts/4.jpg', '/products/snacks/nuts/5.jpg', '/products/snacks/nuts/6.jpg', '/products/snacks/nuts/7.jpg']}
         pros={['Minimal ingredients', 'Satisfying', 'No mess', 'Long shelf life']}
         cons={['Calorie-dense', 'Some people find them dry without water']}
         bestFor="Reliable, no-fuss energy that doesn't spike and crash."
@@ -74,7 +76,8 @@ export default function Body() {
       <ProductCard
         name="Jerky or Meat Sticks"
         badge="Best Savory High-Protein Option"
-        href="https://amzn.to/4xbCu6G"
+        href="https://amzn.to/3ScNaCP"
+        images={['/products/snacks/jerky/1.jpg', '/products/snacks/jerky/2.jpg', '/products/snacks/jerky/3.jpg', '/products/snacks/jerky/4.jpg', '/products/snacks/jerky/5.jpg', '/products/snacks/jerky/6.jpg']}
         pros={['High protein', 'Savory alternative', 'Portable', 'Filling']}
         cons={['Can be high in sodium', 'Quality varies widely', 'Some are tough to chew quickly']}
         bestFor="People who prefer savory snacks or need more protein density."
@@ -93,7 +96,8 @@ export default function Body() {
       <ProductCard
         name="Electrolyte Packets"
         badge="Best for Hydration Support"
-        href="https://amzn.to/3ScNaCP"
+        href="https://amzn.to/469GGYx"
+        images={['/products/snacks/electrolytes/1.jpg', '/products/snacks/electrolytes/2.jpg', '/products/snacks/electrolytes/3.jpg', '/products/snacks/electrolytes/4.jpg', '/products/snacks/electrolytes/5.jpg', '/products/snacks/electrolytes/6.jpg']}
         pros={['Supports hydration', 'Lightweight', 'Easy to store', 'Useful in heat']}
         cons={['Not a food snack', 'Taste varies', 'Some contain sugar or artificial ingredients']}
         bestFor="Outdoor park and event staff or anyone who sweats heavily during shifts."
@@ -112,7 +116,8 @@ export default function Body() {
       <ProductCard
         name="Dark Chocolate or Low-Sugar Options"
         badge="Best Controlled Treat"
-        href="https://amzn.to/4qoS9Nj"
+        href="https://amzn.to/45BBAnK"
+        images={['/products/snacks/dark-chocolate/1.jpg', '/products/snacks/dark-chocolate/2.jpg', '/products/snacks/dark-chocolate/3.jpg', '/products/snacks/dark-chocolate/4.jpg', '/products/snacks/dark-chocolate/5.jpg', '/products/snacks/dark-chocolate/6.jpg', '/products/snacks/dark-chocolate/7.jpg']}
         pros={['Satisfies sweet cravings', 'Portion control is easy', 'Dark chocolate has some redeeming qualities']}
         cons={['Still a treat, not a primary energy source', 'Easy to overdo if not portioned']}
         bestFor="Planned small rewards during long shifts."

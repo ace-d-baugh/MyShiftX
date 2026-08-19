@@ -14,8 +14,8 @@ export default function Body() {
         Pockets fill up fast. Bags get in the way or get left behind. For theme park, restaurant,
         theater, merchandise, and event floor staff, a good hands-free carrier keeps essentials
         accessible without occupying your hands or creating a tripping or catching hazard.
-        Crossbody bags, running-style belts, and clear stadium-approved options solve different
-        versions of the same problem.
+        Crossbody bags, running-style belts, fanny packs, and clear stadium-approved options solve
+        different versions of the same problem.
       </p>
       <p>
         The best choices for this work stay secure during movement, hold the specific items you
@@ -33,19 +33,20 @@ export default function Body() {
       </ul>
 
       <ProductCard
-        name="Slim Running-Style Belts / Fanny Packs"
+        name="Slim Running-Style Belts"
         badge="Best Minimal Hands-Free Option"
-        href="https://amzn.to/45BBAnK"
+        href="https://amzn.to/4x7lezb"
+        images={['/products/crossbody-bags/slim-belt/1.jpg', '/products/crossbody-bags/slim-belt/2.jpg', '/products/crossbody-bags/slim-belt/3.jpg', '/products/crossbody-bags/slim-belt/4.jpg', '/products/crossbody-bags/slim-belt/5.jpg', '/products/crossbody-bags/slim-belt/6.jpg']}
         pros={['Very low profile', 'Secure during movement', 'Hands completely free', 'Often water-resistant']}
         cons={['Limited capacity', 'Phone size can be tight in the smallest models']}
         bestFor="High-movement roles where minimalism and security matter most."
       />
       <p>
-        Modern slim running belts and low-profile fanny packs sit close to the body and hold a
-        phone, keys, cards, and sometimes a small water bottle or snack. They&rsquo;re popular for
-        floor work because they stay out of the way, don&rsquo;t swing like a shoulder bag, and
-        leave both hands free. Look for ones with secure zippers or closures and a fit that
-        doesn&rsquo;t ride up or dig in during long wear.
+        Modern slim running belts sit close to the body and hold a phone, keys, cards, and
+        sometimes a small water bottle or snack. They&rsquo;re popular for floor work because they
+        stay out of the way, don&rsquo;t swing like a shoulder bag, and leave both hands free. Look
+        for ones with secure zippers or closures and a fit that doesn&rsquo;t ride up or dig in
+        during long wear.
       </p>
       <p>
         These are ideal when you need the absolute minimum bulk and maximum freedom of movement.
@@ -54,7 +55,8 @@ export default function Body() {
       <ProductCard
         name="Crossbody Bags with Water Bottle Holders"
         badge="Best Everyday Capacity + Access"
-        href="https://amzn.to/4x7lezb"
+        href="https://amzn.to/3Urx20R"
+        images={['/products/crossbody-bags/water-bottle/1.jpg', '/products/crossbody-bags/water-bottle/2.jpg', '/products/crossbody-bags/water-bottle/3.jpg', '/products/crossbody-bags/water-bottle/4.jpg', '/products/crossbody-bags/water-bottle/5.jpg', '/products/crossbody-bags/water-bottle/6.jpg', '/products/crossbody-bags/water-bottle/7.jpg']}
         pros={['More capacity than a belt', 'Easy access', 'Hydration built in', 'Still relatively hands-free']}
         cons={['Can bounce if not fitted well', 'Bulkier than the slimmest options']}
         bestFor="Staff who need a bit more than the absolute minimum and want water with them."
@@ -74,7 +76,8 @@ export default function Body() {
       <ProductCard
         name="Clear Stadium-Approved Bags"
         badge="Best for Events & Parks with Security Rules"
-        href="https://amzn.to/3Urx20R"
+        href="https://amzn.to/3SlldZn"
+        images={['/products/crossbody-bags/clear-stadium/1.jpg', '/products/crossbody-bags/clear-stadium/2.jpg', '/products/crossbody-bags/clear-stadium/3.jpg', '/products/crossbody-bags/clear-stadium/4.jpg', '/products/crossbody-bags/clear-stadium/5.jpg', '/products/crossbody-bags/clear-stadium/6.jpg']}
         pros={['Meets common security policies', 'Contents visible (advantage or drawback)', 'Purpose-built sizes']}
         cons={['Privacy is limited', 'Materials can feel less premium', 'Not needed if your venue has no such rule']}
         bestFor="Parks, stadiums, and events with clear-bag policies."
@@ -92,9 +95,32 @@ export default function Body() {
       </p>
 
       <ProductCard
+        name="Fanny Pack or Crossbody"
+        badge="Best All-Around Middle Ground"
+        href="https://amzn.to/45BmZsE"
+        images={['/products/crossbody-bags/fanny-pack/1.jpg', '/products/crossbody-bags/fanny-pack/2.jpg', '/products/crossbody-bags/fanny-pack/3.jpg', '/products/crossbody-bags/fanny-pack/4.jpg', '/products/crossbody-bags/fanny-pack/5.jpg', '/products/crossbody-bags/fanny-pack/6.jpg', '/products/crossbody-bags/fanny-pack/7.jpg']}
+        pros={['More structure and pocket organization than a slim belt', 'Converts between waist and crossbody wear', 'Enough room for phone, keys, cards, and a small extra']}
+        cons={['Bulkier at the waist than a minimal running belt', 'Not as compliant as a purpose-built clear bag for venues that require one']}
+        bestFor="Staff who want more organization than a slim belt without stepping up to a full crossbody or sling."
+      />
+      <p>
+        A fanny pack sits in between the minimal running belt and the larger crossbody options.
+        Most modern versions convert between a waist pack and a crossbody by adjusting the strap,
+        which is useful if your preference changes depending on the role or the day. The added
+        structure usually means dedicated pockets for cards and small items instead of one open
+        pouch, so things stop sliding around together.
+      </p>
+      <p>
+        They land in a good spot for people who found a slim belt too limited but don&rsquo;t want
+        the bulk of a full crossbody or sling. Look for a wide, adjustable strap and a zipper (not
+        just a snap or magnetic closure) if you&rsquo;ll be bending, reaching, or moving quickly
+        during a shift.
+      </p>
+
+      <ProductCard
         name="Rugged Small Sling Bags"
         badge="Best Durable Compact Option"
-        href="https://amzn.to/3SlldZn"
+        href="https://amzn.to/4x9jqps"
         images={['/products/crossbody-bags/small-sling/1.jpg', '/products/crossbody-bags/small-sling/2.jpg', '/products/crossbody-bags/small-sling/3.jpg', '/products/crossbody-bags/small-sling/4.jpg', '/products/crossbody-bags/small-sling/5.jpg', '/products/crossbody-bags/small-sling/6.jpg', '/products/crossbody-bags/small-sling/7.jpg']}
         pros={['Durable', 'Better organization', 'Weather-resistant options', 'Secure crossbody carry']}
         cons={['Slightly more bulk', 'Style may or may not match uniform expectations']}
@@ -122,10 +148,10 @@ export default function Body() {
 
       <p>
         Hands-free carry is one of those upgrades that feels minor until you work a full shift
-        without constantly checking pockets or setting a bag down. A slim belt or well-fitted
-        crossbody keeps the essentials on you and your hands available for the actual work. Start
-        with the capacity and style that matches how much you truly need to carry, then refine
-        based on bounce, access, and durability after real shifts.
+        without constantly checking pockets or setting a bag down. A slim belt, a fanny pack, or a
+        well-fitted crossbody keeps the essentials on you and your hands available for the actual
+        work. Start with the capacity and style that matches how much you truly need to carry, then
+        refine based on bounce, access, and durability after real shifts.
       </p>
       <p>
         Once you find a carrier that stays put and holds exactly what you need, it tends to become

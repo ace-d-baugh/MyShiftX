@@ -35,7 +35,8 @@ export default function Body() {
       <ProductCard
         name="Anker PowerCore / High-Capacity Models"
         badge="Best Overall Reliability"
-        href="https://amzn.to/4zrKC4j"
+        href="https://amzn.to/4c0bHBD"
+        images={['/products/portable-chargers/anker/1.jpg', '/products/portable-chargers/anker/2.jpg', '/products/portable-chargers/anker/3.jpg', '/products/portable-chargers/anker/4.jpg', '/products/portable-chargers/anker/5.jpg', '/products/portable-chargers/anker/6.jpg', '/products/portable-chargers/anker/7.jpg']}
         pros={['Reliable capacity and performance', 'Good safety record', 'Wide range of sizes', 'Solid charging speeds']}
         cons={['Premium models cost more', 'Larger capacities add weight']}
         bestFor="Most people who want a dependable daily power bank that just works."
@@ -56,7 +57,8 @@ export default function Body() {
       <ProductCard
         name="Slim Pocket-Friendly Options"
         badge="Best for Minimal Carry"
-        href="https://amzn.to/4c0bHBD"
+        href="https://amzn.to/3RWZG9t"
+        images={['/products/portable-chargers/slim/1.jpg', '/products/portable-chargers/slim/2.jpg', '/products/portable-chargers/slim/3.jpg', '/products/portable-chargers/slim/4.jpg', '/products/portable-chargers/slim/5.jpg', '/products/portable-chargers/slim/6.jpg', '/products/portable-chargers/slim/7.jpg']}
         pros={['Easy to carry every day', 'Less noticeable weight', 'Often enough for one solid recharge']}
         cons={['Lower total capacity', 'May not support the fastest charging speeds']}
         bestFor="People who will only use a charger if it truly fits in a pocket without bulk."
@@ -75,7 +77,8 @@ export default function Body() {
       <ProductCard
         name="Fast-Charging USB-C Models"
         badge="Best for Quick Top-Ups"
-        href="https://amzn.to/3RWZG9t"
+        href="https://amzn.to/4ghYAND"
+        images={['/products/portable-chargers/fast-charging/1.jpg', '/products/portable-chargers/fast-charging/2.jpg', '/products/portable-chargers/fast-charging/3.jpg', '/products/portable-chargers/fast-charging/4.jpg', '/products/portable-chargers/fast-charging/5.jpg', '/products/portable-chargers/fast-charging/6.jpg', '/products/portable-chargers/fast-charging/7.jpg']}
         pros={['Faster recovery during short breaks', 'Future-proof for newer phones', 'Efficient']}
         cons={['Can cost more', 'Higher output models sometimes run warmer']}
         bestFor="Anyone with a modern phone who wants the most charge in the least time."
@@ -94,7 +97,8 @@ export default function Body() {
       <ProductCard
         name="Solar or Rugged Versions"
         badge="Optional for Outdoor Park & Event Roles"
-        href="https://amzn.to/4ghYAND"
+        href="https://amzn.to/4wFtgym"
+        images={['/products/portable-chargers/solar/1.jpg', '/products/portable-chargers/solar/2.jpg', '/products/portable-chargers/solar/3.jpg', '/products/portable-chargers/solar/4.jpg', '/products/portable-chargers/solar/5.jpg', '/products/portable-chargers/solar/6.jpg', '/products/portable-chargers/solar/7.jpg']}
         pros={['More durable', 'Some weather resistance', 'Solar as a backup']}
         cons={['Heavier', 'Solar is slow', 'Higher price for the rugged features']}
         bestFor="Outdoor park and event staff who need extra toughness."

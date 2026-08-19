@@ -40,6 +40,7 @@ export default function Body() {
         name="NICETOWN 100% Blackout Curtains"
         badge="Best Overall Value"
         href="https://amzn.to/4csO6d0"
+        images={['/products/blackout-curtains/nicetown/1.jpg', '/products/blackout-curtains/nicetown/2.jpg', '/products/blackout-curtains/nicetown/3.jpg', '/products/blackout-curtains/nicetown/4.jpg', '/products/blackout-curtains/nicetown/5.jpg', '/products/blackout-curtains/nicetown/6.jpg', '/products/blackout-curtains/nicetown/7.jpg']}
         pros={[
           'Strong light blocking for the price',
           'Good thermal benefit',
@@ -70,6 +71,7 @@ export default function Body() {
       <ProductCard
         name="Premium Thermal / Noise-Reducing Curtains"
         href="https://amzn.to/4xUm0zP"
+        images={['/products/blackout-curtains/thermal/1.jpg', '/products/blackout-curtains/thermal/2.jpg', '/products/blackout-curtains/thermal/3.jpg', '/products/blackout-curtains/thermal/4.jpg', '/products/blackout-curtains/thermal/5.jpg', '/products/blackout-curtains/thermal/6.jpg', '/products/blackout-curtains/thermal/7.jpg']}
         pros={['Better heat and noise control', 'Often denser light blocking']}
         cons={[
           'Higher price',
@@ -92,6 +94,7 @@ export default function Body() {
       <ProductCard
         name="Blackout Curtain Liners or Layered Solutions"
         href="https://amzn.to/3UFBdGm"
+        images={['/products/blackout-curtains/liners/1.jpg', '/products/blackout-curtains/liners/2.jpg', '/products/blackout-curtains/liners/3.jpg', '/products/blackout-curtains/liners/4.jpg', '/products/blackout-curtains/liners/5.jpg', '/products/blackout-curtains/liners/6.jpg', '/products/blackout-curtains/liners/7.jpg']}
         pros={['Flexible', 'Works with existing décor', 'Targets the last light leaks']}
         cons={['Extra step to install', 'Not as seamless as a single high-quality pair']}
         bestFor="Renters, people who want to keep decorative curtains, or those chasing absolute darkness."

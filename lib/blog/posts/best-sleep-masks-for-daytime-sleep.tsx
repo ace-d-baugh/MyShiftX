@@ -36,7 +36,8 @@ export default function Body() {
       <ProductCard
         name="Manta Original Sleep Mask"
         badge="Best Overall Contoured Design"
-        href="https://amzn.to/4x2WyYF"
+        href="https://amzn.to/4cQLLsv"
+        images={['/products/sleep-masks/manta-original/1.jpg', '/products/sleep-masks/manta-original/2.jpg', '/products/sleep-masks/manta-original/3.jpg', '/products/sleep-masks/manta-original/4.jpg', '/products/sleep-masks/manta-original/5.jpg', '/products/sleep-masks/manta-original/6.jpg']}
         pros={['Excellent light blocking', 'No pressure on eyes', 'Stays in place', 'Comfortable for long sleeps']}
         cons={['Higher price', 'Bulkier than simple masks']}
         bestFor="Anyone serious about daytime sleep quality who has been disappointed by basic masks."
@@ -58,7 +59,8 @@ export default function Body() {
       <ProductCard
         name="Manta Silk or Cool Versions"
         badge="Best for Temperature & Skin Comfort"
-        href="https://amzn.to/4cQLLsv"
+        href="https://amzn.to/4gp2N1X"
+        images={['/products/sleep-masks/manta-silk/1.jpg', '/products/sleep-masks/manta-silk/2.jpg', '/products/sleep-masks/manta-silk/3.jpg', '/products/sleep-masks/manta-silk/4.jpg', '/products/sleep-masks/manta-silk/5.jpg', '/products/sleep-masks/manta-silk/6.jpg', '/products/sleep-masks/manta-silk/7.jpg']}
         pros={['Soft or cooling materials', 'Same strong light blocking as the original', 'Good for sensitive skin or warm rooms']}
         cons={['Premium price', 'Still a more structured design']}
         bestFor="Hot sleepers, people with sensitive skin, or those who want a more luxurious feel."
@@ -78,7 +80,8 @@ export default function Body() {
       <ProductCard
         name="Budget Soft Foam or Silk Alternatives"
         badge="Best Everyday Value"
-        href="https://amzn.to/4gp2N1X"
+        href="https://amzn.to/3Shfa8k"
+        images={['/products/sleep-masks/budget/1.jpg', '/products/sleep-masks/budget/2.jpg', '/products/sleep-masks/budget/3.jpg', '/products/sleep-masks/budget/4.jpg', '/products/sleep-masks/budget/5.jpg', '/products/sleep-masks/budget/6.jpg', '/products/sleep-masks/budget/7.jpg']}
         pros={['Affordable', 'Lightweight', 'Easy to replace', 'Good enough for most light-blocking needs']}
         cons={['Can press on eyes or shift during sleep', 'Light leaks more common at the edges']}
         bestFor="Trying sleep masks for the first time or needing inexpensive backups."
@@ -98,7 +101,7 @@ export default function Body() {
       <ProductCard
         name="Bluetooth / Sleep-Sound Masks"
         badge="Optional Extra for Noisy Environments"
-        href="https://amzn.to/3Shfa8k"
+        href="https://amzn.to/3S3B3bc"
         pros={['Combines darkness and sound', 'Convenient for some noise environments']}
         cons={['Bulkier', 'Requires charging', 'Sound quality varies']}
         bestFor="People whose main remaining sleep disruptor is daytime noise."

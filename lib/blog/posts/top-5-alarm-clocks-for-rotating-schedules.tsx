@@ -35,7 +35,8 @@ export default function Body() {
       <ProductCard
         name="Hatch Restore"
         badge="Best All-in-One Sleep & Wake System"
-        href="https://amzn.to/4x86i3R"
+        href="https://amzn.to/3SJeyZc"
+        images={['/products/alarm-clocks/hatch-restore/1.jpg', '/products/alarm-clocks/hatch-restore/2.jpg', '/products/alarm-clocks/hatch-restore/3.jpg', '/products/alarm-clocks/hatch-restore/4.jpg', '/products/alarm-clocks/hatch-restore/5.jpg', '/products/alarm-clocks/hatch-restore/6.jpg', '/products/alarm-clocks/hatch-restore/7.jpg']}
         pros={['Gradual light wake-up', 'Sleep sounds', 'Customizable', 'Good for sensitive sleepers']}
         cons={['Higher price', 'Requires power and app setup']}
         bestFor="People who want a gentler, more complete sleep-and-wake system."
@@ -56,7 +57,8 @@ export default function Body() {
       <ProductCard
         name="Philips Wake-Up Light"
         badge="Best Dedicated Sunrise Alarm"
-        href="https://amzn.to/3SJeyZc"
+        href="https://amzn.to/3SJeHfc"
+        images={['/products/alarm-clocks/philips-light/1.jpg', '/products/alarm-clocks/philips-light/2.jpg', '/products/alarm-clocks/philips-light/3.jpg', '/products/alarm-clocks/philips-light/4.jpg', '/products/alarm-clocks/philips-light/5.jpg', '/products/alarm-clocks/philips-light/6.jpg', '/products/alarm-clocks/philips-light/7.jpg']}
         pros={['Effective gradual light', 'Relatively straightforward', 'Proven for many users']}
         cons={['Light alone may not wake the heaviest sleepers', 'Sound options vary by model']}
         bestFor="Daytime sleepers who respond well to light cues."
@@ -75,7 +77,8 @@ export default function Body() {
       <ProductCard
         name="Vibrating / Bed-Shaker Alarms"
         badge="Best for Heavy Sleepers or Shared Spaces"
-        href="https://amzn.to/3SJeHfc"
+        href="https://amzn.to/3Sl4RQt"
+        images={['/products/alarm-clocks/bed-shaker/1.jpg', '/products/alarm-clocks/bed-shaker/2.jpg', '/products/alarm-clocks/bed-shaker/3.jpg', '/products/alarm-clocks/bed-shaker/4.jpg', '/products/alarm-clocks/bed-shaker/5.jpg', '/products/alarm-clocks/bed-shaker/6.jpg']}
         pros={['Highly effective for heavy sleepers', 'Discrete in shared housing', "Doesn't rely on sound alone"]}
         cons={['Requires placement under the mattress or pillow', 'Some models feel industrial']}
         bestFor="Heavy sleepers, shared living situations, or anyone who sleeps through regular alarms."
@@ -95,7 +98,8 @@ export default function Body() {
       <ProductCard
         name="Loud Traditional Alarm as Backup"
         badge="Best Simple Reliability"
-        href="https://amzn.to/3Sl4RQt"
+        href="https://amzn.to/4igMA1k"
+        images={['/products/alarm-clocks/traditional/1.jpg', '/products/alarm-clocks/traditional/2.jpg', '/products/alarm-clocks/traditional/3.jpg', '/products/alarm-clocks/traditional/4.jpg', '/products/alarm-clocks/traditional/5.jpg', '/products/alarm-clocks/traditional/6.jpg']}
         pros={['Extremely reliable', 'No app or complex setup', 'Works offline']}
         cons={['Can be jarring', 'Limited features']}
         bestFor="Backup alarm or for people who prefer pure simplicity."
