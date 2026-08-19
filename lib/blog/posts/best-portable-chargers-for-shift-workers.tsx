@@ -111,6 +111,49 @@ export default function Body() {
         outdoor stretches or rough handling.
       </p>
 
+      <ProductCard
+        name="INIU or Similar High-Value Fast Chargers"
+        badge="Best High-Value Fast Charger"
+        href="https://amzn.to/3ScvJlP"
+        images={['/products/portable-chargers/iniu/1.jpg', '/products/portable-chargers/iniu/2.jpg', '/products/portable-chargers/iniu/3.jpg', '/products/portable-chargers/iniu/4.jpg', '/products/portable-chargers/iniu/5.jpg', '/products/portable-chargers/iniu/6.jpg', '/products/portable-chargers/iniu/7.jpg']}
+        pros={['Strong charging speed for the price', 'Compact and easy to carry', 'Consistently good reviews for reliability']}
+        cons={['Less brand recognition than Anker', 'Smaller accessory ecosystem']}
+        bestFor="Shift workers who want Anker-like performance without the premium price tag."
+      />
+      <p>
+        INIU and similar mid-tier brands have built a strong reputation among people who want fast
+        charging and a compact form factor without paying Anker&rsquo;s premium. Charging speeds are
+        often surprisingly competitive for the price, and the compact sizing makes them easy to keep
+        in a bag or locker without noticing the extra bulk.
+      </p>
+      <p>
+        The brand name carries less weight than Anker&rsquo;s, and the accessory ecosystem (cases,
+        matching cables, multi-packs) is smaller. For most shift workers that trade-off is worth it
+        &mdash; the core job, fast reliable charging, is there at a lower price.
+      </p>
+
+      <ProductCard
+        name="MagSafe / Magnetic Wireless Power Banks"
+        badge="Best Cable-Free Option for iPhone"
+        href="https://amzn.to/46aN9T6"
+        images={['/products/portable-chargers/magsafe/1.jpg', '/products/portable-chargers/magsafe/2.jpg', '/products/portable-chargers/magsafe/3.jpg', '/products/portable-chargers/magsafe/4.jpg', '/products/portable-chargers/magsafe/5.jpg', '/products/portable-chargers/magsafe/6.jpg', '/products/portable-chargers/magsafe/7.jpg']}
+        pros={['No cable needed', 'Snaps on and charges hands-free', 'Slim profile']}
+        cons={['Wireless charging is slower and less efficient than wired', 'Only works with MagSafe-compatible phones', 'Magnetic hold can slip loose in a pocket']}
+        bestFor="iPhone users who want a quick charging boost on a break without digging for a cord."
+      />
+      <p>
+        Magnetic wireless power banks snap directly onto the back of a MagSafe-compatible iPhone and
+        start charging with no cable involved. For a short break where digging out a cable and
+        finding the port isn&rsquo;t worth the hassle, snapping one on and continuing to use your
+        phone normally is genuinely convenient.
+      </p>
+      <p>
+        The trade-off is charging speed: wireless is slower than a wired connection, so this is
+        better as a top-up than a full recharge from empty. It also only works with MagSafe-compatible
+        phones, and the magnetic hold can work loose if the bank is jostled around in a pocket or
+        apron.
+      </p>
+
       <h2>Practical Buying and Use Tips</h2>
       <ul>
         <li>Check the real capacity (mAh) and look for reviews that mention actual phone recharges rather than just the number on the box.</li>
