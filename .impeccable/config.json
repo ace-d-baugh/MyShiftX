@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "border-l-4",
+        "files": [
+          "components/ui/Prose.tsx"
+        ],
+        "createdAt": "2026-08-19T16:52:05.501Z",
+        "reason": "blockquote left-rule, not a card accent border — standard quote-indicator convention (GitHub/Medium style), not the card side-tab AI-slop pattern the rule targets"
+      }
+    ]
+  }
+}
