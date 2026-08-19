@@ -40,6 +40,7 @@ export default function Body() {
         name="Hoka Bondi 9 / Bondi SR"
         badge="Best Overall Max Cushion"
         href="https://amzn.to/4gejU6A"
+        images={['/products/best-shoes/hoka/1.jpg', '/products/best-shoes/hoka/2.jpg', '/products/best-shoes/hoka/3.jpg', '/products/best-shoes/hoka/4.jpg', '/products/best-shoes/hoka/5.jpg', '/products/best-shoes/hoka/6.jpg']}
         pros={['Exceptional impact protection', 'Stable for its height', 'Wide sizes', 'Comfortable out of the box']}
         cons={['Chunky look', 'Can feel warm', 'Higher price']}
         bestFor="Theme park walking, long merchandise shifts, theater standing, or any role where cushioning is the top priority."
@@ -60,6 +61,7 @@ export default function Body() {
         name="Brooks Ghost"
         badge="Best Balanced Daily Trainer"
         href="https://amzn.to/4xUlvFX"
+        images={['/products/best-shoes/brooks/1.jpg', '/products/best-shoes/brooks/2.jpg', '/products/best-shoes/brooks/3.jpg', '/products/best-shoes/brooks/4.jpg', '/products/best-shoes/brooks/5.jpg', '/products/best-shoes/brooks/6.jpg']}
         pros={['Reliable cushioning and support', 'Good breathability', 'Versatile', 'Multiple widths']}
         cons={['Not the absolute softest', 'Standard versions lack specialized slip resistance']}
         bestFor="Theme park cast, theater staff who move between areas, merchandise floor walkers, and restaurant front-of-house."
@@ -79,6 +81,7 @@ export default function Body() {
         name="New Balance Fresh Foam 1080"
         badge="Best Plush Ride with Wide Options"
         href="https://amzn.to/4gDXcWK"
+        images={['/products/best-shoes/new-balance/1.jpg', '/products/best-shoes/new-balance/2.jpg', '/products/best-shoes/new-balance/3.jpg', '/products/best-shoes/new-balance/4.jpg', '/products/best-shoes/new-balance/5.jpg', '/products/best-shoes/new-balance/6.jpg', '/products/best-shoes/new-balance/7.jpg']}
         pros={['Plush yet stable', 'Excellent size and width range', 'Good for swelling feet']}
         cons={['Can run a bit warm', 'Premium price']}
         bestFor="Workers who need width options or longer walking distances in parks and large venues."
@@ -97,6 +100,7 @@ export default function Body() {
         name="Dansko Professional Clogs"
         badge="Best Traditional Work Clog"
         href="https://amzn.to/4x7Q375"
+        images={['/products/best-shoes/dansko/1.jpg', '/products/best-shoes/dansko/2.jpg', '/products/best-shoes/dansko/3.jpg', '/products/best-shoes/dansko/4.jpg', '/products/best-shoes/dansko/5.jpg', '/products/best-shoes/dansko/6.jpg', '/products/best-shoes/dansko/7.jpg']}
         pros={['Excellent arch support and posture benefits', 'Durable', 'Easy to clean']}
         cons={['Heavier than sneakers', "Clog feel isn't for everyone", 'Break-in required']}
         bestFor="Kitchen staff, back-of-house roles, or long standing shifts with less walking."
@@ -117,6 +121,7 @@ export default function Body() {
         name="Skechers Arch Fit or Work Styles"
         badge="Best Value with Built-In Support"
         href="https://amzn.to/3UFAVPM"
+        images={['/products/best-shoes/skechers/1.jpg', '/products/best-shoes/skechers/2.jpg', '/products/best-shoes/skechers/3.jpg', '/products/best-shoes/skechers/4.jpg', '/products/best-shoes/skechers/5.jpg', '/products/best-shoes/skechers/6.jpg', '/products/best-shoes/skechers/7.jpg']}
         pros={['Strong arch support for the price', 'Lightweight', 'Good availability of work versions']}
         cons={['Not as maximal in cushioning as the premium options']}
         bestFor="Budget-conscious workers across restaurants, parks, theaters, and retail."
@@ -137,6 +142,7 @@ export default function Body() {
         name="Crocs On-the-Clock"
         badge="Best Easy-Clean Slip-On for Kitchens"
         href="https://amzn.to/4zrU6N5"
+        images={['/products/best-shoes/crocs/1.jpg', '/products/best-shoes/crocs/2.jpg', '/products/best-shoes/crocs/3.jpg', '/products/best-shoes/crocs/4.jpg', '/products/best-shoes/crocs/5.jpg', '/products/best-shoes/crocs/6.jpg']}
         pros={['Excellent slip resistance', 'Easy to clean', 'Lightweight', 'True slip-on']}
         cons={['Less refined look', 'Cushioning good but not maximal']}
         bestFor="Kitchen staff, dishwashers, outdoor event crews in wet conditions."

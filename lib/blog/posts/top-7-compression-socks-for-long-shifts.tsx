@@ -42,6 +42,7 @@ export default function Body() {
         name="CHARMKING Multi-Packs (15-20 mmHg)"
         badge="Best Value for Daily Rotation"
         href="https://amzn.to/4zJ55SD"
+        images={['/products/compression-socks/charmking/1.jpg', '/products/compression-socks/charmking/2.jpg', '/products/compression-socks/charmking/3.jpg', '/products/compression-socks/charmking/4.jpg', '/products/compression-socks/charmking/5.jpg', '/products/compression-socks/charmking/6.jpg']}
         pros={['Excellent price-per-pair', 'Decent all-day comfort for mild compression', 'Lots of color options', 'Easy to rotate']}
         cons={['Not the firmest support', 'Some pairs can feel thinner than premium brands']}
         bestFor="Anyone who wants to try compression without spending a lot, or who needs multiple pairs for daily use."
@@ -64,6 +65,7 @@ export default function Body() {
         name="Physix Gear Sport (20-30 mmHg)"
         badge="Best Overall Firm Support"
         href="https://amzn.to/4gFRmEk"
+        images={['/products/compression-socks/physix/1.jpg', '/products/compression-socks/physix/2.jpg', '/products/compression-socks/physix/3.jpg', '/products/compression-socks/physix/4.jpg', '/products/compression-socks/physix/5.jpg', '/products/compression-socks/physix/6.jpg', '/products/compression-socks/physix/7.jpg']}
         pros={['Solid firm compression', 'Stays up well', 'Good durability', 'Widely available sizes']}
         cons={['Firmer feel takes a little getting used to', 'Single pairs cost more than multi-packs']}
         bestFor="Workers who want noticeable support and have already tried milder options."
@@ -84,6 +86,7 @@ export default function Body() {
         name="Sockwell Circulator (Merino)"
         badge="Best Premium Temperature-Regulating Option"
         href="https://amzn.to/3UFB3ie"
+        images={['/products/compression-socks/sockwell/1.jpg', '/products/compression-socks/sockwell/2.jpg', '/products/compression-socks/sockwell/3.jpg']}
         pros={['Excellent temperature and odor control', 'Durable', 'Stays in place', 'Comfortable for sensitive skin']}
         cons={['Higher price', 'Firmness can feel stiff to some']}
         bestFor="Outdoor event or park staff, or anyone who prioritizes natural fibers and all-day comfort."
@@ -104,6 +107,7 @@ export default function Body() {
         name="Bombas Compression"
         badge="Best Everyday Comfort Focus"
         href="https://amzn.to/4g6twkZ"
+        images={['/products/compression-socks/bombas/1.jpg', '/products/compression-socks/bombas/2.jpg', '/products/compression-socks/bombas/3.jpg', '/products/compression-socks/bombas/4.jpg', '/products/compression-socks/bombas/5.jpg', '/products/compression-socks/bombas/6.jpg']}
         pros={['Very comfortable for all-day wear', 'Thoughtful design details', 'Good for milder needs']}
         cons={['Milder compression may not be enough for heavy swelling', 'Higher price than basic multi-packs']}
         bestFor="People new to compression or those who want a sock that feels good from the first hour to the last."
@@ -124,6 +128,7 @@ export default function Body() {
         name="Wellow or Wide-Calf Options"
         badge="Best for Larger Calves"
         href="https://amzn.to/4getLt2"
+        images={['/products/compression-socks/wellow/1.jpg', '/products/compression-socks/wellow/2.jpg', '/products/compression-socks/wellow/3.jpg', '/products/compression-socks/wellow/4.jpg', '/products/compression-socks/wellow/5.jpg', '/products/compression-socks/wellow/6.jpg']}
         pros={['Proper fit for wider calves', 'Reduces the dig-in or slide-down problem']}
         cons={['Fewer color choices in some lines', 'Can cost more']}
         bestFor="Anyone who has struggled with regular compression socks being too tight at the top."
