@@ -227,6 +227,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'Night shift'],
     readingMinutes: 7,
+    images: ['/products/night-survival/blackout-curtains/1.jpg'],
     Body: ClosingShiftKitBody,
   },
   {
@@ -263,6 +264,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'At work'],
     readingMinutes: 6,
+    images: ['/products/snacks/protein-bars/1.jpg'],
     Body: SnacksBody,
   },
   {
@@ -299,6 +301,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'Night shift'],
     readingMinutes: 6,
+    images: ['/products/blue-light-blockers/swanwick/1.jpg'],
     Body: BlueLightGlassesBody,
   },
   {
@@ -335,6 +338,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'At work'],
     readingMinutes: 6,
+    images: ['/products/cooling-towels/cooling-towel/1.jpg'],
     Body: CoolingTowelsBody,
   },
   {
@@ -371,6 +375,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'At work'],
     readingMinutes: 6,
+    images: ['/products/portable-chargers/anker/1.jpg'],
     Body: PortableChargersBody,
   },
   {
@@ -407,6 +412,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'At work'],
     readingMinutes: 6,
+    images: ['/products/insulated-tumblers/stanley/1.jpg'],
     Body: InsulatedTumblersBody,
   },
   {
@@ -443,6 +449,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'At work'],
     readingMinutes: 6,
+    images: ['/products/pocket-organizers/badge-reel/1.jpg'],
     Body: PocketOrganizersBody,
   },
   {
@@ -479,6 +486,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'At work'],
     readingMinutes: 6,
+    images: ['/products/crossbody-bags/slim-belt/1.jpg'],
     Body: CrossbodyBagsBody,
   },
   {
@@ -515,6 +523,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'At work'],
     readingMinutes: 6,
+    images: ['/products/lunch-bags/packit/1.jpg'],
     Body: LunchBagsBody,
   },
   {
@@ -551,6 +560,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'Recovery'],
     readingMinutes: 8,
+    images: ['/products/best-shoes/hoka/1.jpg'],
     Body: BestShoesBody,
   },
   {
@@ -587,6 +597,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'Recovery'],
     readingMinutes: 6,
+    images: ['/products/insoles/superfeet/1.jpg'],
     Body: InsolesBody,
   },
   {
@@ -623,6 +634,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'Recovery'],
     readingMinutes: 7,
+    images: ['/products/compression-socks/charmking/1.jpg'],
     Body: CompressionSocksBody,
   },
   {
@@ -659,6 +671,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'Scheduling'],
     readingMinutes: 6,
+    images: ['/products/alarm-clocks/hatch-restore/1.jpg'],
     Body: AlarmClocksBody,
   },
   {
@@ -695,6 +708,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'Night shift'],
     readingMinutes: 6,
+    images: ['/products/sleep-masks/manta-original/1.jpg'],
     Body: SleepMasksBody,
   },
   {
@@ -731,6 +745,7 @@ export const BLOG_POSTS: BlogPost[] = [
     author: AUTHOR,
     tags: ['Gear', 'Night shift'],
     readingMinutes: 6,
+    images: ['/products/blackout-curtains/nicetown/1.jpg'],
     Body: BlackoutCurtainsBody,
   },
   {

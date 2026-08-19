@@ -11,5 +11,13 @@ export interface BlogPost {
   author: string
   tags: string[]
   readingMinutes: number
+  /**
+   * Local image paths (/products/... or /posts/...). First is used as the
+   * card thumbnail on /blog and the hero image on the post page; any
+   * further entries are available for inline use within the post body.
+   * Omit entirely for a text-only post — the card and hero both fall back
+   * gracefully with no image area.
+   */
+  images?: string[]
   Body: ComponentType
 }

@@ -106,6 +106,15 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               </div>
             </header>
 
+            {post.images?.[0] && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={post.images[0]}
+                alt=""
+                className="w-full max-h-[420px] object-cover rounded-lg border border-border mb-10"
+              />
+            )}
+
             <Prose>
               <Body />
             </Prose>
