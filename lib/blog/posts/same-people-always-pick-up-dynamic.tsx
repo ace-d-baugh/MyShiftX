@@ -95,7 +95,7 @@ export default function Body() {
       </p>
 
       <p>
-        Improve visibility, deliberately interrupt the automatic assignment of hard shifts to the same names, and make clean refusals normal. Those three moves usually widen participation without forcing anyone and without turning peer trading into a managed rota.
+        Improve visibility, deliberately interrupt the automatic assignment of hard shifts to the same names, and make clean refusals normal. Those three moves usually widen participation without forcing anyone and without turning peer trading into a managed schedule.
       </p>
 
       <p>

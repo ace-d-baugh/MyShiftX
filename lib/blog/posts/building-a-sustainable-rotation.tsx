@@ -2,7 +2,7 @@ export default function Body() {
   return (
     <>
       <p>
-        A rotating schedule that changes every week or two is manageable if you stop trying to memorise it and start treating it as a structure with a few fixed points.
+        A rotating schedule that changes every week or two is manageable if you stop trying to memorize it and start treating it as a structure with a few fixed points.
       </p>
 
       <p>
@@ -20,7 +20,7 @@ export default function Body() {
       </p>
 
       <p>
-        When a new rota drops, the first thing I do is locate the anchors. The rest of the week then makes more sense. Without them the whole thing feels like random noise.
+        When a new schedule drops, the first thing I do is locate the anchors. The rest of the week then makes more sense. Without them the whole thing feels like random noise.
       </p>
 
       <h2>Protect at Least One Rest Block</h2>
@@ -40,7 +40,7 @@ export default function Body() {
       <h2>Keep One Calendar That Wins</h2>
 
       <p>
-        Phone, paper, group chat, and a photo of the rota on the fridge is four sources of truth. Choose one and put every confirmed shift there. When the rota changes, update that calendar first. Everything else is secondary.
+        Phone, paper, group chat, and a photo of the schedule on the fridge is four sources of truth. Choose one and put every confirmed shift there. When the schedule changes, update that calendar first. Everything else is secondary.
       </p>
 
       <p>
@@ -68,7 +68,7 @@ export default function Body() {
       </ul>
 
       <p>
-        You will not make an irregular rota feel like a fixed office week. You can make it predictable enough that you stop losing track of your own life inside it. The small routines do most of the heavy lifting.
+        You will not make an irregular schedule feel like a fixed office week. You can make it predictable enough that you stop losing track of your own life inside it. The small routines do most of the heavy lifting.
       </p>
 
       <h2>Trading Adds Another Layer</h2>
@@ -112,7 +112,7 @@ export default function Body() {
       <h2>A Simple Weekly Check</h2>
 
       <p>
-        When the new rota lands (or when you finalise a trade):
+        When the new schedule lands (or when you finalize a trade):
       </p>
 
       <ol>

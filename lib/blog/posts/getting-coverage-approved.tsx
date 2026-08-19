@@ -127,7 +127,7 @@ export default function Body() {
       <p>
         For anything touching your legal rights — minimum rest, overtime entitlement, what can
         happen if a trade fails — talk to your union or an employment advisor in your jurisdiction.
-        Those rules vary far too much for anyone to summarise them usefully in a blog post,
+        Those rules vary far too much for anyone to summarize them usefully in a blog post,
         including us.
       </p>
     </>

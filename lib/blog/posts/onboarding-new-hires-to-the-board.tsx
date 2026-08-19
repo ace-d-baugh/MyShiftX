@@ -52,7 +52,7 @@ export default function Body() {
       <h2>Pair Them with One Experienced Person</h2>
 
       <p>
-        A single point of contact for “is this post normal?” questions is more useful than a long document. The experienced person does not need to be a manager — just someone who uses the board well and is willing to answer two or three questions in the first fortnight.
+        A single point of contact for “is this post normal?” questions is more useful than a long document. The experienced person does not need to be a manager — just someone who uses the board well and is willing to answer two or three questions in the first couple of weeks.
       </p>
 
       <p>

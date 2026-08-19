@@ -58,7 +58,7 @@ export default function Body() {
       </p>
 
       <p>
-        Do not apologise excessively. One “sorry I can’t help this time” is enough. Repeated apologies make the refusal feel larger than it is and can make the other person feel like they asked for something unreasonable.
+        Do not apologize excessively. One “sorry I can’t help this time” is enough. Repeated apologies make the refusal feel larger than it is and can make the other person feel like they asked for something unreasonable.
       </p>
 
       <p>

@@ -2,7 +2,7 @@ export default function Body() {
   return (
     <>
       <p>
-        The first busy season is when the abstract parts of shift work become concrete. The rota gets heavier, trading becomes more important, and the informal rules become visible because people start breaking them under pressure.
+        The first busy season is when the abstract parts of shift work become concrete. The schedule gets heavier, trading becomes more important, and the informal rules become visible because people start breaking them under pressure.
       </p>
 
       <p>

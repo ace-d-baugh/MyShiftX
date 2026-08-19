@@ -97,7 +97,7 @@ export default function Body() {
 
       <ul>
         <li><strong>Restaurants &amp; bars</strong> — managers often feel the pain of last-minute cover most acutely on weekends and holidays. Framing around fewer Friday-night scrambles lands well.</li>
-        <li><strong>Healthcare</strong> — qualification and staffing-ratio concerns are front of mind. Emphasise that the board can surface only qualified people and still route through official approval.</li>
+        <li><strong>Healthcare</strong> — qualification and staffing-ratio concerns are front of mind. Emphasize that the board can surface only qualified people and still route through official approval.</li>
         <li><strong>Warehouse / manufacturing</strong> — overtime rules and mandatory shifts create clear operational risks. A board that makes those constraints visible is easier to accept.</li>
         <li><strong>Retail</strong> — multi-location managers care about consistency. A single clear process across sites is more attractive than a collection of local group chats.</li>
       </ul>

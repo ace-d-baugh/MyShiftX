@@ -12,11 +12,11 @@ export default function Body() {
       <h2>Post Early — Months, Not Days</h2>
 
       <p>
-        If you know you need Christmas, New Year, or a major local event weekend off, put the request or the shift up as soon as the rota shape is visible. Early posts get better responses and fairer exchanges. Last-minute holiday posts are mostly answered by people who have already lost the negotiation.
+        If you know you need Christmas, New Year, or a major local event weekend off, put the request or the shift up as soon as the schedule shape is visible. Early posts get better responses and fairer exchanges. Last-minute holiday posts are mostly answered by people who have already lost the negotiation.
       </p>
 
       <p>
-        In most workplaces the outline of the holiday period is known weeks or months ahead. Waiting until the formal leave window opens, or until the detailed rota drops, simply compresses the available time and increases the pressure. Posting early does not guarantee you get what you want. It does give you a better chance and better terms.
+        In most workplaces the outline of the holiday period is known weeks or months ahead. Waiting until the formal leave window opens, or until the detailed schedule drops, simply compresses the available time and increases the pressure. Posting early does not guarantee you get what you want. It does give you a better chance and better terms.
       </p>
 
       <h2>Be Willing to Take a Less Popular Shift in Return</h2>

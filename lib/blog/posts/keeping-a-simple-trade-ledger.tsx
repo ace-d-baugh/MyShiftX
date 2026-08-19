@@ -95,7 +95,7 @@ export default function Body() {
       </p>
 
       <p>
-        I’ve adjusted who I offer good shifts to and who I prioritise when I need cover, based on nothing more than the pattern in my own notes. The relationship stays intact because the adjustment is quiet and proportional.
+        I’ve adjusted who I offer good shifts to and who I prioritize when I need cover, based on nothing more than the pattern in my own notes. The relationship stays intact because the adjustment is quiet and proportional.
       </p>
 
       <h2>When to Ignore the Ledger</h2>

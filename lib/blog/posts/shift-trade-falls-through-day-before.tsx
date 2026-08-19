@@ -75,7 +75,7 @@ export default function Body() {
         A screenshot of the original “yeah I’ll take it” message plus a timestamped note that you told the manager is usually enough. You will almost never need it. The few times you do, you will be glad it exists.
       </p>
 
-      <h2>Afterwards</h2>
+      <h2>Afterward</h2>
 
       <p>
         Once the immediate problem is solved — either you worked it, or someone else took it — there is a judgment call.
