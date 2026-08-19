@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -31,10 +33,14 @@ export default function Body() {
         <li>Easy to clean and durable enough for daily use.</li>
       </ul>
 
-      <h3>1. Manta Original Sleep Mask &mdash; Best Overall Contoured Design</h3>
-      <p>
-        <a href="https://amzn.to/4x2WyYF">Check current price and versions on Amazon</a>
-      </p>
+      <ProductCard
+        name="Manta Original Sleep Mask"
+        badge="Best Overall Contoured Design"
+        href="https://amzn.to/4x2WyYF"
+        pros={['Excellent light blocking', 'No pressure on eyes', 'Stays in place', 'Comfortable for long sleeps']}
+        cons={['Higher price', 'Bulkier than simple masks']}
+        bestFor="Anyone serious about daytime sleep quality who has been disappointed by basic masks."
+      />
       <p>
         The Manta Original is frequently recommended for people who need total darkness without
         the mask pressing on their eyes. The contoured cups create a small space so your eyelids
@@ -48,20 +54,15 @@ export default function Body() {
         effectiveness make it a favorite for people who have tried cheaper masks and still ended up
         with light leaks or pressure headaches.
       </p>
-      <p>
-        <strong>Pros:</strong> Excellent light blocking; no pressure on eyes; stays in place;
-        comfortable for long sleeps.
-        <br />
-        <strong>Cons:</strong> Higher price; bulkier than simple masks.
-        <br />
-        <strong>Best for:</strong> Anyone serious about daytime sleep quality who has been
-        disappointed by basic masks.
-      </p>
 
-      <h3>2. Manta Silk or Cool Versions &mdash; Best for Temperature and Skin Comfort</h3>
-      <p>
-        <a href="https://amzn.to/4cQLLsv">Check current silk and cool versions on Amazon</a>
-      </p>
+      <ProductCard
+        name="Manta Silk or Cool Versions"
+        badge="Best for Temperature & Skin Comfort"
+        href="https://amzn.to/4cQLLsv"
+        pros={['Soft or cooling materials', 'Same strong light blocking as the original', 'Good for sensitive skin or warm rooms']}
+        cons={['Premium price', 'Still a more structured design']}
+        bestFor="Hot sleepers, people with sensitive skin, or those who want a more luxurious feel."
+      />
       <p>
         If you run hot during daytime sleep or prefer a softer face feel, Manta&rsquo;s silk or
         cooling versions build on the same contoured design with different materials. Silk feels
@@ -73,20 +74,15 @@ export default function Body() {
         and texture preferences. They&rsquo;re especially useful for summer daytime sleeps or for
         people who find standard foam or polyester masks irritating after several hours.
       </p>
-      <p>
-        <strong>Pros:</strong> Soft or cooling materials; same strong light blocking as the
-        original; good for sensitive skin or warm rooms.
-        <br />
-        <strong>Cons:</strong> Premium price; still a more structured design.
-        <br />
-        <strong>Best for:</strong> Hot sleepers, people with sensitive skin, or those who want a
-        more luxurious feel.
-      </p>
 
-      <h3>3. Budget Soft Foam or Silk Alternatives &mdash; Best Everyday Value</h3>
-      <p>
-        <a href="https://amzn.to/4gp2N1X">Check current budget soft foam and silk options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Budget Soft Foam or Silk Alternatives"
+        badge="Best Everyday Value"
+        href="https://amzn.to/4gp2N1X"
+        pros={['Affordable', 'Lightweight', 'Easy to replace', 'Good enough for most light-blocking needs']}
+        cons={['Can press on eyes or shift during sleep', 'Light leaks more common at the edges']}
+        bestFor="Trying sleep masks for the first time or needing inexpensive backups."
+      />
       <p>
         Not everyone needs a premium contoured mask. Many soft foam or basic silk sleep masks do a
         solid job of blocking light at a much lower price. Look for ones with a contoured or molded
@@ -98,21 +94,15 @@ export default function Body() {
         long-wear comfort of the Manta-style options, but for many shift workers they provide
         enough improvement over sleeping without any mask to be worth trying.
       </p>
-      <p>
-        <strong>Pros:</strong> Affordable; lightweight; easy to replace; good enough for most
-        light-blocking needs.
-        <br />
-        <strong>Cons:</strong> Can press on eyes or shift during sleep; light leaks more common at
-        the edges.
-        <br />
-        <strong>Best for:</strong> Trying sleep masks for the first time or needing inexpensive
-        backups.
-      </p>
 
-      <h3>4. Bluetooth / Sleep-Sound Masks &mdash; Optional Extra for Noisy Environments</h3>
-      <p>
-        <a href="https://amzn.to/3Shfa8k">Check current Bluetooth and sleep-sound masks on Amazon</a>
-      </p>
+      <ProductCard
+        name="Bluetooth / Sleep-Sound Masks"
+        badge="Optional Extra for Noisy Environments"
+        href="https://amzn.to/3Shfa8k"
+        pros={['Combines darkness and sound', 'Convenient for some noise environments']}
+        cons={['Bulkier', 'Requires charging', 'Sound quality varies']}
+        bestFor="People whose main remaining sleep disruptor is daytime noise."
+      />
       <p>
         Some sleep masks integrate thin speakers or Bluetooth so you can play white noise, rain
         sounds, or podcasts without earbuds. For shift workers dealing with daytime household
@@ -123,13 +113,6 @@ export default function Body() {
         The trade-off is bulk and battery management. These are secondary options &mdash; priority
         should still be solid light blocking and comfort. Use them if noise is a consistent problem
         that a simple mask plus a separate speaker or fan doesn&rsquo;t solve.
-      </p>
-      <p>
-        <strong>Pros:</strong> Combines darkness and sound; convenient for some noise environments.
-        <br />
-        <strong>Cons:</strong> Bulkier; requires charging; sound quality varies.
-        <br />
-        <strong>Best for:</strong> People whose main remaining sleep disruptor is daytime noise.
       </p>
 
       <h2>Practical Tips</h2>

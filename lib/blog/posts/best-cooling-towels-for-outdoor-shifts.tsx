@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -29,10 +31,14 @@ export default function Body() {
         <li>For fans: battery life that lasts a meaningful portion of a shift and secure attachment options.</li>
       </ul>
 
-      <h3>1. Instant Cooling Towels (Multi-Packs) &mdash; Best Simple Core Solution</h3>
-      <p>
-        <a href="https://amzn.to/4cqdZKw">Check current multi-pack cooling towels on Amazon</a>
-      </p>
+      <ProductCard
+        name="Instant Cooling Towels (Multi-Packs)"
+        badge="Best Simple Core Solution"
+        href="https://amzn.to/4cqdZKw"
+        pros={['Inexpensive', 'Lightweight', 'Noticeable cooling when activated', 'Easy to carry multiple']}
+        cons={['Effect fades as they dry', 'Need access to water to re-activate', 'Quality varies by brand']}
+        bestFor="Almost any outdoor role as a first, low-cost heat management tool."
+      />
       <p>
         Instant cooling towels work by evaporative cooling. You wet them, wring them out, and snap
         or shake them to activate the cooling effect. Many are made from PVA or similar materials
@@ -44,21 +50,15 @@ export default function Body() {
         (or under a hat) can take the edge off high heat. Re-wetting at a water fountain or with a
         water bottle keeps them working through the day.
       </p>
-      <p>
-        <strong>Pros:</strong> Inexpensive; lightweight; noticeable cooling when activated; easy to
-        carry multiple.
-        <br />
-        <strong>Cons:</strong> Effect fades as they dry; need access to water to re-activate;
-        quality varies by brand.
-        <br />
-        <strong>Best for:</strong> Almost any outdoor role as a first, low-cost heat management
-        tool.
-      </p>
 
-      <h3>2. Small Clip-On or Handheld Fans &mdash; Best Active Airflow</h3>
-      <p>
-        <a href="https://amzn.to/4g4XOEN">Check current small clip-on and handheld fans on Amazon</a>
-      </p>
+      <ProductCard
+        name="Small Clip-On or Handheld Fans"
+        badge="Best Active Airflow"
+        href="https://amzn.to/4g4XOEN"
+        pros={['Active airflow', 'Useful in humid conditions', 'Many clip-on options keep hands free']}
+        cons={['Battery management required', 'Can be noisy', 'Bulkier than a towel']}
+        bestFor="Stationary or low-movement outdoor posts, or as a break-time tool."
+      />
       <p>
         When humidity is high or evaporative cooling is less effective, a small fan that moves air
         across your skin helps. Clip-on models that attach to a shirt, bag, or hat free your hands,
@@ -69,20 +69,15 @@ export default function Body() {
         These are especially helpful in still air or when you&rsquo;re stationary for long periods.
         Pairing a fan with a cooling towel often works better than either tool alone.
       </p>
-      <p>
-        <strong>Pros:</strong> Active airflow; useful in humid conditions; many clip-on options keep
-        hands free.
-        <br />
-        <strong>Cons:</strong> Battery management required; can be noisy; bulkier than a towel.
-        <br />
-        <strong>Best for:</strong> Stationary or low-movement outdoor posts, or as a break-time
-        tool.
-      </p>
 
-      <h3>3. Neck Fans &mdash; Best Hands-Free Continuous Cooling</h3>
-      <p>
-        <a href="https://amzn.to/4y95oVc">Check current neck fans on Amazon</a>
-      </p>
+      <ProductCard
+        name="Neck Fans"
+        badge="Best Hands-Free Continuous Cooling"
+        href="https://amzn.to/4y95oVc"
+        pros={['Hands-free', 'Continuous airflow', 'Increasingly common and refined designs']}
+        cons={['Battery life limits usefulness on very long shifts', 'Some feel bulky or unbalanced']}
+        bestFor="Roles where you need ongoing cooling without holding a device."
+      />
       <p>
         Neck fans sit around the neck and blow air upward toward the face and neck. They&rsquo;re
         popular for outdoor work because they provide continuous airflow without occupying your
@@ -94,20 +89,15 @@ export default function Body() {
         so high that the air itself feels oppressive. They&rsquo;re a step up in convenience from
         handheld fans for people who need ongoing airflow.
       </p>
-      <p>
-        <strong>Pros:</strong> Hands-free; continuous airflow; increasingly common and refined
-        designs.
-        <br />
-        <strong>Cons:</strong> Battery life limits usefulness on very long shifts; some feel bulky
-        or unbalanced.
-        <br />
-        <strong>Best for:</strong> Roles where you need ongoing cooling without holding a device.
-      </p>
 
-      <h3>4. Optional Cooling Vests or Bandana Styles &mdash; Extra Coverage</h3>
-      <p>
-        <a href="https://amzn.to/4zxB1cv">Check current cooling vests and bandana styles on Amazon</a>
-      </p>
+      <ProductCard
+        name="Optional Cooling Vests or Bandana Styles"
+        badge="Extra Coverage"
+        href="https://amzn.to/4zxB1cv"
+        pros={['Broader or longer-lasting cooling in some designs']}
+        cons={['Higher cost', 'Often require pre-cooling', 'Can be bulkier under uniforms']}
+        bestFor="Extreme heat roles or as an upgrade when simpler tools fall short."
+      />
       <p>
         For higher-heat environments or longer continuous exposure, some workers use cooling
         bandanas, neck wraps with phase-change materials, or lightweight cooling vests. These
@@ -117,15 +107,6 @@ export default function Body() {
       <p>
         These are more specialized and usually more expensive. They&rsquo;re worth considering if
         basic towels and fans aren&rsquo;t enough for the conditions you regularly face.
-      </p>
-      <p>
-        <strong>Pros:</strong> Broader or longer-lasting cooling in some designs.
-        <br />
-        <strong>Cons:</strong> Higher cost; often require pre-cooling; can be bulkier under
-        uniforms.
-        <br />
-        <strong>Best for:</strong> Extreme heat roles or as an upgrade when simpler tools fall
-        short.
       </p>
 
       <h2>Practical Tips for Outdoor Shifts</h2>

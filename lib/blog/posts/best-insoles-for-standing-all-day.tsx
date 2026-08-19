@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -29,10 +31,14 @@ export default function Body() {
         <li>Breathability so feet don&rsquo;t overheat inside already warm shoes.</li>
       </ul>
 
-      <h3>1. Superfeet High Arch or Green &mdash; Best Firm Supportive Option</h3>
-      <p>
-        <a href="https://amzn.to/4igMA1k">Check current Superfeet models on Amazon</a>
-      </p>
+      <ProductCard
+        name="Superfeet High Arch or Green"
+        badge="Best Firm Supportive Option"
+        href="https://amzn.to/4igMA1k"
+        pros={['Strong arch support', 'Durable structure', 'Widely recommended for standing work']}
+        cons={['Firm feel takes adjustment for some', 'Higher price than basic foam']}
+        bestFor="People who need real arch support and prefer a structured feel over soft cushioning."
+      />
       <p>
         Superfeet is one of the most recommended brands for people who stand or walk all day. The
         Green and high-arch versions provide firm, structured support that many users notice
@@ -43,20 +49,15 @@ export default function Body() {
         The firmness is intentional &mdash; softer foam can feel great at first but collapse under
         full body weight over long hours. Superfeet tend to hold their shape longer.
       </p>
-      <p>
-        <strong>Pros:</strong> Strong arch support; durable structure; widely recommended for
-        standing work.
-        <br />
-        <strong>Cons:</strong> Firm feel takes adjustment for some; higher price than basic foam.
-        <br />
-        <strong>Best for:</strong> People who need real arch support and prefer a structured feel
-        over soft cushioning.
-      </p>
 
-      <h3>2. PowerStep Pinnacle &mdash; Best Balanced Support &amp; Cushion</h3>
-      <p>
-        <a href="https://amzn.to/4qveZDa">Check current PowerStep models on Amazon</a>
-      </p>
+      <ProductCard
+        name="PowerStep Pinnacle"
+        badge="Best Balanced Support & Cushion"
+        href="https://amzn.to/4qveZDa"
+        pros={['Good balance of support and cushion', 'Effective for standing fatigue', 'Solid durability']}
+        cons={['May feel bulky in tighter shoes', 'Fit needs to be right']}
+        bestFor="General all-day standing relief when you want both support and some softness."
+      />
       <p>
         PowerStep Pinnacle insoles combine a supportive arch with more cushioning than the firmest
         Superfeet options. They&rsquo;re frequently recommended by podiatrists and people who stand
@@ -67,20 +68,15 @@ export default function Body() {
         Many users with mild to moderate arch issues or general standing fatigue report less
         end-of-day discomfort after switching. They&rsquo;re a strong middle-ground choice.
       </p>
-      <p>
-        <strong>Pros:</strong> Good balance of support and cushion; effective for standing fatigue;
-        solid durability.
-        <br />
-        <strong>Cons:</strong> May feel bulky in tighter shoes; fit needs to be right.
-        <br />
-        <strong>Best for:</strong> General all-day standing relief when you want both support and
-        some softness.
-      </p>
 
-      <h3>3. Walkhero or Dr. Scholl&rsquo;s Work Insoles &mdash; Best Accessible Everyday Options</h3>
-      <p>
-        <a href="https://amzn.to/4xbOWmS">Check current Walkhero and Dr. Scholl&rsquo;s work insoles on Amazon</a>
-      </p>
+      <ProductCard
+        name="Walkhero or Dr. Scholl's Work Insoles"
+        badge="Best Accessible Everyday Options"
+        href="https://amzn.to/4xbOWmS"
+        pros={['Affordable', 'Easy to find', 'Immediate cushioning improvement for many users']}
+        cons={['Support level is milder', 'May compress faster under heavy daily use']}
+        bestFor="Budget-friendly first upgrade or temporary relief while testing higher-end options."
+      />
       <p>
         For a lower-cost entry point, brands like Walkhero and Dr. Scholl&rsquo;s work-oriented
         insoles offer cushioning and basic arch support that many shift workers find helpful.
@@ -92,20 +88,15 @@ export default function Body() {
         they&rsquo;re a practical first upgrade if your current shoes have flattened out or never
         had much support to begin with.
       </p>
-      <p>
-        <strong>Pros:</strong> Affordable; easy to find; immediate cushioning improvement for many
-        users.
-        <br />
-        <strong>Cons:</strong> Support level is milder; may compress faster under heavy daily use.
-        <br />
-        <strong>Best for:</strong> Budget-friendly first upgrade or temporary relief while testing
-        higher-end options.
-      </p>
 
-      <h3>4. Customizable Trim-to-Fit Options &mdash; Best for Exact Fit</h3>
-      <p>
-        <a href="https://amzn.to/4bZPSlP">Check current trim-to-fit insoles on Amazon</a>
-      </p>
+      <ProductCard
+        name="Customizable Trim-to-Fit Options"
+        badge="Best for Exact Fit"
+        href="https://amzn.to/4bZPSlP"
+        pros={['Better custom fit', 'Works across different shoe brands']}
+        cons={['Requires careful trimming', 'Irreversible if cut too short']}
+        bestFor="Anyone whose shoes have an unusual last or who has had fit issues with previous insoles."
+      />
       <p>
         Many quality insoles come with trim lines so you can match them to your exact shoe size and
         shape. This matters more than it sounds &mdash; poorly fitting insoles can slide, bunch, or
@@ -115,14 +106,6 @@ export default function Body() {
       <p>
         Getting the length and width right is often the difference between insoles that help and
         insoles that get removed after a few days.
-      </p>
-      <p>
-        <strong>Pros:</strong> Better custom fit; works across different shoe brands.
-        <br />
-        <strong>Cons:</strong> Requires careful trimming; irreversible if cut too short.
-        <br />
-        <strong>Best for:</strong> Anyone whose shoes have an unusual last or who has had fit issues
-        with previous insoles.
       </p>
 
       <h2>Practical Tips</h2>

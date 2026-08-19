@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -29,10 +31,14 @@ export default function Body() {
         <li>Durability against drops and daily abuse.</li>
       </ul>
 
-      <h3>1. Stanley Quencher / Adventure Quencher &mdash; Best Popular High-Capacity Option</h3>
-      <p>
-        <a href="https://amzn.to/4wFQO6m">Check current sizes and colors on Amazon</a>
-      </p>
+      <ProductCard
+        name="Stanley Quencher / Adventure Quencher"
+        badge="Best Popular High-Capacity Option"
+        href="https://amzn.to/4wFQO6m"
+        pros={['Excellent capacity and insulation', 'Comfortable handle', 'Widely available colors and sizes']}
+        cons={['Can be bulky', 'Straw requires cleaning attention']}
+        bestFor="People who want one big drink to last most of the shift."
+      />
       <p>
         Stanley&rsquo;s Quencher line became a cultural phenomenon for a reason: it holds a lot of
         liquid, keeps it cold (or hot) for a long time, and comes in enough colors and sizes that
@@ -44,19 +50,15 @@ export default function Body() {
         often. The lid and straw system is generally reliable when closed properly. It&rsquo;s a
         solid all-around choice for both hot and cold drinks.
       </p>
-      <p>
-        <strong>Pros:</strong> Excellent capacity and insulation; comfortable handle; widely
-        available colors and sizes.
-        <br />
-        <strong>Cons:</strong> Can be bulky; straw requires cleaning attention.
-        <br />
-        <strong>Best for:</strong> People who want one big drink to last most of the shift.
-      </p>
 
-      <h3>2. Contigo Autoseal &mdash; Best Spill-Resistant Everyday Tumbler</h3>
-      <p>
-        <a href="https://amzn.to/4c0bzSF">Check current models on Amazon</a>
-      </p>
+      <ProductCard
+        name="Contigo Autoseal"
+        badge="Best Spill-Resistant Everyday Tumbler"
+        href="https://amzn.to/4c0bzSF"
+        pros={['Strong leak resistance', 'Reliable insulation', 'Easy one-handed use']}
+        cons={['Smaller capacity than some Quencher-style options']}
+        bestFor="Active roles where spills are a real risk."
+      />
       <p>
         Contigo&rsquo;s Autoseal lids are designed to stay closed until you press the button, which
         reduces the chance of leaks in bags or lockers. The insulation is solid for the size, and
@@ -67,18 +69,15 @@ export default function Body() {
         that won&rsquo;t spill if knocked over or tossed into a bag. They&rsquo;re a practical
         middle-ground option between basic bottles and oversized tumblers.
       </p>
-      <p>
-        <strong>Pros:</strong> Strong leak resistance; reliable insulation; easy one-handed use.
-        <br />
-        <strong>Cons:</strong> Smaller capacity than some Quencher-style options.
-        <br />
-        <strong>Best for:</strong> Active roles where spills are a real risk.
-      </p>
 
-      <h3>3. Hydro Flask &mdash; Best Durable Classic Insulated Bottle</h3>
-      <p>
-        <a href="https://amzn.to/4gDYH7k">Check current sizes and colors on Amazon</a>
-      </p>
+      <ProductCard
+        name="Hydro Flask"
+        badge="Best Durable Classic Insulated Bottle"
+        href="https://amzn.to/4gDYH7k"
+        pros={['Proven insulation', 'Tough exterior', 'Good size range']}
+        cons={['Premium price', 'Some lids require extra care to stay leak-proof']}
+        bestFor="Outdoor park and event staff or anyone who wants a bottle that lasts years."
+      />
       <p>
         Hydro Flask has a long reputation for temperature retention and tough powder-coated
         exteriors that hold up to daily wear. The classic wide-mouth bottles and newer tumbler
@@ -89,19 +88,15 @@ export default function Body() {
         The brand offers a range of sizes and lids (including straw and flex lids), so you can
         match the bottle to how you actually drink during a shift.
       </p>
-      <p>
-        <strong>Pros:</strong> Proven insulation; tough exterior; good size range.
-        <br />
-        <strong>Cons:</strong> Premium price; some lids require extra care to stay leak-proof.
-        <br />
-        <strong>Best for:</strong> Outdoor park and event staff or anyone who wants a bottle that
-        lasts years.
-      </p>
 
-      <h3>4. Yeti Rambler &mdash; Best Premium Rugged Option</h3>
-      <p>
-        <a href="https://amzn.to/3SCVkVb">Check current sizes and lids on Amazon</a>
-      </p>
+      <ProductCard
+        name="Yeti Rambler"
+        badge="Best Premium Rugged Option"
+        href="https://amzn.to/3SCVkVb"
+        pros={['Outstanding insulation and durability', 'Rugged construction']}
+        cons={['Higher price', 'Heavier than some alternatives']}
+        bestFor="Demanding outdoor or event roles where gear takes abuse."
+      />
       <p>
         Yeti Ramblers are built for rough use and excellent temperature control. The double-wall
         insulation keeps drinks at temperature for extended periods, and the construction feels
@@ -113,18 +108,15 @@ export default function Body() {
         performance and longevity worth it. They&rsquo;re a strong choice if you want something
         that will survive being dropped, left in hot vehicles, or used hard every day.
       </p>
-      <p>
-        <strong>Pros:</strong> Outstanding insulation and durability; rugged construction.
-        <br />
-        <strong>Cons:</strong> Higher price; heavier than some alternatives.
-        <br />
-        <strong>Best for:</strong> Demanding outdoor or event roles where gear takes abuse.
-      </p>
 
-      <h3>5. Simple High-Volume Budget Option &mdash; Best Affordable Workhorse</h3>
-      <p>
-        <a href="https://amzn.to/4qIXUpr">Check current high-volume budget options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Simple High-Volume Budget Option"
+        badge="Best Affordable Workhorse"
+        href="https://amzn.to/4qIXUpr"
+        pros={['Lower cost', 'Adequate performance for most shifts']}
+        cons={['Insulation and durability can be less consistent']}
+        bestFor="Budget-conscious workers or secondary bottles."
+      />
       <p>
         Not every shift requires a premium brand. Plenty of well-reviewed budget insulated tumblers
         and bottles deliver solid temperature retention and leak resistance at a lower price. Look
@@ -135,13 +127,6 @@ export default function Body() {
         These are ideal for trying the insulated-tumbler habit or for keeping a backup in the car
         or locker. Performance varies more than with the top brands, so check recent reviews for
         the specific model.
-      </p>
-      <p>
-        <strong>Pros:</strong> Lower cost; adequate performance for most shifts.
-        <br />
-        <strong>Cons:</strong> Insulation and durability can be less consistent.
-        <br />
-        <strong>Best for:</strong> Budget-conscious workers or secondary bottles.
       </p>
 
       <h2>Practical Tips</h2>

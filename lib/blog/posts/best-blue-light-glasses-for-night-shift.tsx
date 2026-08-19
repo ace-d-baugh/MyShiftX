@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -31,10 +33,14 @@ export default function Body() {
         <li>Options that look acceptable in public if you&rsquo;ll wear them while grabbing food or commuting.</li>
       </ul>
 
-      <h3>1. Swanwick or Similar Amber Glasses &mdash; Best Targeted Evening Protection</h3>
-      <p>
-        <a href="https://amzn.to/4wFtgym">Check current Swanwick and similar amber options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Swanwick or Similar Amber Glasses"
+        badge="Best Targeted Evening Protection"
+        href="https://amzn.to/4wFtgym"
+        pros={['Stronger blue-light filtering for evening use', 'Purpose-built for sleep support', 'Multiple frame styles']}
+        cons={['Amber tint changes color perception', 'Not ideal for tasks that require perfect color accuracy']}
+        bestFor="Post-shift wind-down and evening screen use when stronger filtering is the priority."
+      />
       <p>
         Swanwick and comparable amber-lens glasses are designed specifically for evening and night
         use. They filter a higher percentage of blue light than many clear &ldquo;computer&rdquo;
@@ -47,21 +53,15 @@ export default function Body() {
         everyday clear blue-light glasses provide. Fit and comfort vary by model, so check sizing
         and return policies.
       </p>
-      <p>
-        <strong>Pros:</strong> Stronger blue-light filtering for evening use; purpose-built for
-        sleep support; multiple frame styles.
-        <br />
-        <strong>Cons:</strong> Amber tint changes color perception; not ideal for tasks that require
-        perfect color accuracy.
-        <br />
-        <strong>Best for:</strong> Post-shift wind-down and evening screen use when stronger
-        filtering is the priority.
-      </p>
 
-      <h3>2. Uvex Skyper (Budget Research-Backed Option) &mdash; Best Value Proven Performer</h3>
-      <p>
-        <a href="https://amzn.to/4qxIeoQ">Check current Uvex Skyper options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Uvex Skyper (Budget Research-Backed Option)"
+        badge="Best Value Proven Performer"
+        href="https://amzn.to/4qxIeoQ"
+        pros={['Inexpensive', 'Strong filtering', 'Wraparound coverage', 'Widely available']}
+        cons={['Industrial look', 'Orange tint is obvious', 'May not feel as refined as premium frames']}
+        bestFor="Trying stronger blue-light filtering on a budget or for home use after shifts."
+      />
       <p>
         The Uvex Skyper is a frequently mentioned budget option that has appeared in research and
         practical recommendations for blue-light filtering. The orange lenses provide substantial
@@ -73,20 +73,15 @@ export default function Body() {
         For shift workers testing whether blue-light glasses make a difference, this is a low-cost
         way to try a more aggressive filter without spending much.
       </p>
-      <p>
-        <strong>Pros:</strong> Inexpensive; strong filtering; wraparound coverage; widely available.
-        <br />
-        <strong>Cons:</strong> Industrial look; orange tint is obvious; may not feel as refined as
-        premium frames.
-        <br />
-        <strong>Best for:</strong> Trying stronger blue-light filtering on a budget or for home use
-        after shifts.
-      </p>
 
-      <h3>3. Stylish Everyday Blue-Light Glasses &mdash; Best for All-Day or Subtle Wear</h3>
-      <p>
-        <a href="https://amzn.to/3SiqroH">Check current stylish blue-light glasses on Amazon</a>
-      </p>
+      <ProductCard
+        name="Stylish Everyday Blue-Light Glasses"
+        badge="Best for All-Day or Subtle Wear"
+        href="https://amzn.to/3SiqroH"
+        pros={['More natural appearance', 'Comfortable for longer wear', 'Suitable for mixed day/evening use']}
+        cons={['Lower filtering percentage than dedicated amber lenses']}
+        bestFor="People who want subtle protection they can wear more places without drawing attention."
+      />
       <p>
         If you want something you can wear more casually &mdash; during the end of a shift, on the
         commute, or while running errands &mdash; clear or lightly tinted blue-light glasses with
@@ -99,20 +94,15 @@ export default function Body() {
         middle ground if the strong amber look of pure evening glasses feels too much for public
         use.
       </p>
-      <p>
-        <strong>Pros:</strong> More natural appearance; comfortable for longer wear; suitable for
-        mixed day/evening use.
-        <br />
-        <strong>Cons:</strong> Lower filtering percentage than dedicated amber lenses.
-        <br />
-        <strong>Best for:</strong> People who want subtle protection they can wear more places
-        without drawing attention.
-      </p>
 
-      <h3>4. Clip-On Options &mdash; Best for People Who Already Wear Glasses</h3>
-      <p>
-        <a href="https://amzn.to/4cNAucm">Check current clip-on blue-light options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Clip-On Options"
+        badge="Best for People Who Already Wear Glasses"
+        href="https://amzn.to/4cNAucm"
+        pros={['Works with existing glasses', 'Lower cost than a full second pair', 'Removable']}
+        cons={['Can feel less secure or add bulk', 'Optical quality varies']}
+        bestFor="Prescription glasses wearers who want a simple add-on solution."
+      />
       <p>
         If you already wear prescription glasses, clip-on blue-light filters or amber overlays can
         add protection without requiring a second full pair. Quality varies &mdash; look for ones
@@ -122,14 +112,6 @@ export default function Body() {
         These are a practical solution for prescription wearers who don&rsquo;t want to invest in a
         second pair of custom lenses right away. They work best when the clip stays firmly in place
         during the commute and evening routine.
-      </p>
-      <p>
-        <strong>Pros:</strong> Works with existing glasses; lower cost than a full second pair;
-        removable.
-        <br />
-        <strong>Cons:</strong> Can feel less secure or add bulk; optical quality varies.
-        <br />
-        <strong>Best for:</strong> Prescription glasses wearers who want a simple add-on solution.
       </p>
 
       <h2>Practical Tips for Shift Workers</h2>

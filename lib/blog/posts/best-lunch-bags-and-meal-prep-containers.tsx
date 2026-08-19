@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -30,10 +32,14 @@ export default function Body() {
         <li>Freezable or ice-pack compatibility so you don&rsquo;t rely on a work fridge that may not exist or may be full.</li>
       </ul>
 
-      <h3>1. PackIt Freezable Lunch Bags &mdash; Best Built-In Cooling</h3>
-      <p>
-        <a href="https://amzn.to/4gp2lRj">Check current styles and sizes on Amazon</a>
-      </p>
+      <ProductCard
+        name="PackIt Freezable Lunch Bags"
+        badge="Best Built-In Cooling"
+        href="https://amzn.to/4gp2lRj"
+        pros={['No separate ice packs needed', 'Convenient for people who forget them', 'Folds flat', 'Keeps food cold for hours when properly frozen']}
+        cons={['Must remember to freeze it', 'Can be heavier when frozen', 'Capacity varies by model']}
+        bestFor="Workers without consistent fridge access or anyone who wants a simple freeze-and-go system."
+      />
       <p>
         PackIt&rsquo;s freezable bags have gel walls built into the fabric. You freeze the entire
         bag overnight, pack your food in the morning, and the walls themselves act as the ice pack.
@@ -45,21 +51,15 @@ export default function Body() {
         add a slim extra ice pack for very long days or hot environments. The bags fold flat when
         not in use, which helps with freezer space.
       </p>
-      <p>
-        <strong>Pros:</strong> No separate ice packs needed; convenient for people who forget them;
-        folds flat; keeps food cold for hours when properly frozen.
-        <br />
-        <strong>Cons:</strong> Must remember to freeze it; can be heavier when frozen; capacity
-        varies by model.
-        <br />
-        <strong>Best for:</strong> Workers without consistent fridge access or anyone who wants a
-        simple freeze-and-go system.
-      </p>
 
-      <h3>2. Bentgo Systems &mdash; Best Organized Meal Containers + Bag Options</h3>
-      <p>
-        <a href="https://amzn.to/4gj26qZ">Check current Bentgo bento and bag options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Bentgo Systems"
+        badge="Best Organized Meal Containers + Bag Options"
+        href="https://amzn.to/4gj26qZ"
+        pros={['Good organization and portion control', 'Solid insulation with ice packs', 'Practical pockets', 'Adult-friendly sizes available']}
+        cons={['Containers and bags are often sold separately', 'Insulation still benefits from an ice pack']}
+        bestFor="Meal-preppers who want food kept separate and a bag that fits the containers well."
+      />
       <p>
         Bentgo is known for compartmentalized bento-style containers that keep foods separate and
         reduce sogginess. Their insulated bags and lunch systems are designed to hold those
@@ -71,21 +71,15 @@ export default function Body() {
         carbs, veggies, and a treat &mdash; without everything mixing. The bags themselves are
         generally lightweight and have useful exterior pockets.
       </p>
-      <p>
-        <strong>Pros:</strong> Good organization and portion control; solid insulation with ice
-        packs; practical pockets; adult-friendly sizes available.
-        <br />
-        <strong>Cons:</strong> Containers and bags are often sold separately; insulation still
-        benefits from an ice pack.
-        <br />
-        <strong>Best for:</strong> Meal-preppers who want food kept separate and a bag that fits the
-        containers well.
-      </p>
 
-      <h3>3. Large Insulated Tote Bags &mdash; Best Capacity for Bigger Meals or Multiple Items</h3>
-      <p>
-        <a href="https://amzn.to/46fnoAZ">Check current large insulated totes on Amazon</a>
-      </p>
+      <ProductCard
+        name="Large Insulated Tote Bags"
+        badge="Best Capacity for Bigger Meals or Multiple Items"
+        href="https://amzn.to/46fnoAZ"
+        pros={['Higher capacity', 'Better for multi-meal days or larger containers', 'Often stronger insulation']}
+        cons={['Bulkier', 'Can be overkill for simple single-meal days']}
+        bestFor="Split shifts, long outdoor days, or anyone packing more than a basic sandwich and snack."
+      />
       <p>
         When one small lunch bag isn&rsquo;t enough &mdash; multiple meals for a double, extra
         snacks, a large water bottle, or food for a long outdoor shift &mdash; a larger insulated
@@ -98,20 +92,15 @@ export default function Body() {
         containers don&rsquo;t tip over inside. Some expand or have external pockets for non-food
         items.
       </p>
-      <p>
-        <strong>Pros:</strong> Higher capacity; better for multi-meal days or larger containers;
-        often stronger insulation.
-        <br />
-        <strong>Cons:</strong> Bulkier; can be overkill for simple single-meal days.
-        <br />
-        <strong>Best for:</strong> Split shifts, long outdoor days, or anyone packing more than a
-        basic sandwich and snack.
-      </p>
 
-      <h3>4. Leak-Proof Containers &mdash; The Foundation of Any System</h3>
-      <p>
-        <a href="https://amzn.to/3Uremyh">Check current leak-proof containers on Amazon</a>
-      </p>
+      <ProductCard
+        name="Leak-Proof Containers"
+        badge="The Foundation of Any System"
+        href="https://amzn.to/3Uremyh"
+        pros={['Prevents spills and cross-contamination', 'Reusable and cost-effective long-term', 'Many sizes and compartment styles']}
+        cons={['Glass is heavier', 'Cheap plastic lids can fail over time']}
+        bestFor="Everyone — this is the base layer under any bag system."
+      />
       <p>
         Even the best bag fails if the containers inside leak. Look for containers with reliable
         seals (silicone gaskets, locking lids, or proven snap systems), preferably BPA-free and
@@ -123,19 +112,15 @@ export default function Body() {
         chance of a mess in your bag or locker. Many shift workers keep two or three sets in
         rotation so one is always clean.
       </p>
-      <p>
-        <strong>Pros:</strong> Prevents spills and cross-contamination; reusable and cost-effective
-        long-term; many sizes and compartment styles.
-        <br />
-        <strong>Cons:</strong> Glass is heavier; cheap plastic lids can fail over time.
-        <br />
-        <strong>Best for:</strong> Everyone &mdash; this is the base layer under any bag system.
-      </p>
 
-      <h3>5. Long-Lasting Ice Packs &mdash; Backup Cold Source</h3>
-      <p>
-        <a href="https://amzn.to/3SJdIf0">Check current long-lasting ice packs on Amazon</a>
-      </p>
+      <ProductCard
+        name="Long-Lasting Ice Packs"
+        badge="Backup Cold Source"
+        href="https://amzn.to/3SJdIf0"
+        pros={['Extends cold time', 'Flexible options fit more bags', 'Reusable']}
+        cons={['Another item to freeze and track', 'Takes freezer space']}
+        bestFor="Long shifts, hot environments, or as a backup with any bag system."
+      />
       <p>
         Even freezable bags or good insulation benefit from high-quality ice packs on very long or
         hot days. Slim, flexible packs fit better around containers than bulky brick-style ones.
@@ -145,14 +130,6 @@ export default function Body() {
       <p>
         Keep a couple in the freezer so you always have a frozen one ready. For split shifts or
         outdoor work in summer, a reliable ice pack is cheap insurance against food safety issues.
-      </p>
-      <p>
-        <strong>Pros:</strong> Extends cold time; flexible options fit more bags; reusable.
-        <br />
-        <strong>Cons:</strong> Another item to freeze and track; takes freezer space.
-        <br />
-        <strong>Best for:</strong> Long shifts, hot environments, or as a backup with any bag
-        system.
       </p>
 
       <h2>Practical Tips for Shift Workers</h2>
