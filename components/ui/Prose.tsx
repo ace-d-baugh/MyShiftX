@@ -23,7 +23,7 @@ export function Prose({
         '[&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-5 [&>ul]:space-y-2',
         '[&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-5 [&>ol]:space-y-2',
         '[&_strong]:text-text [&_strong]:font-semibold',
-        '[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80',
+        '[&_a:not(.btn)]:text-primary [&_a:not(.btn)]:underline [&_a:not(.btn)]:underline-offset-2 hover:[&_a:not(.btn)]:text-primary/80',
         '[&>blockquote]:border-l-4 [&>blockquote]:border-primary/30 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-text/60 [&>blockquote]:my-6',
         className
       )}

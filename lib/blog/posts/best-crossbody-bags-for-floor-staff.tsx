@@ -95,6 +95,7 @@ export default function Body() {
         name="Rugged Small Sling Bags"
         badge="Best Durable Compact Option"
         href="https://amzn.to/3SlldZn"
+        images={['/products/crossbody-bags/small-sling/1.jpg', '/products/crossbody-bags/small-sling/2.jpg', '/products/crossbody-bags/small-sling/3.jpg', '/products/crossbody-bags/small-sling/4.jpg', '/products/crossbody-bags/small-sling/5.jpg', '/products/crossbody-bags/small-sling/6.jpg', '/products/crossbody-bags/small-sling/7.jpg']}
         pros={['Durable', 'Better organization', 'Weather-resistant options', 'Secure crossbody carry']}
         cons={['Slightly more bulk', 'Style may or may not match uniform expectations']}
         bestFor="Outdoor or higher-wear environments where a soft pack would wear out faster."
