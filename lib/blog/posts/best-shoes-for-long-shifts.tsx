@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -34,10 +36,14 @@ export default function Body() {
         <li><strong>Breathability or easy cleaning.</strong> Hot kitchens and humid parks mean sweaty feet.</li>
       </ul>
 
-      <h3>1. Hoka Bondi 9 / Bondi SR &mdash; Best Overall Max Cushion</h3>
-      <p>
-        <a href="https://amzn.to/4gejU6A">Check current price and colors on Amazon</a>
-      </p>
+      <ProductCard
+        name="Hoka Bondi 9 / Bondi SR"
+        badge="Best Overall Max Cushion"
+        href="https://amzn.to/4gejU6A"
+        pros={['Exceptional impact protection', 'Stable for its height', 'Wide sizes', 'Comfortable out of the box']}
+        cons={['Chunky look', 'Can feel warm', 'Higher price']}
+        bestFor="Theme park walking, long merchandise shifts, theater standing, or any role where cushioning is the top priority."
+      />
       <p>
         Hoka&rsquo;s Bondi has become the default for people who stand or walk all day. The Bondi 9
         delivers a massive stack of cushioning (around 40+ mm in the heel) with updated foam that
@@ -49,20 +55,15 @@ export default function Body() {
         surfaces, the Bondi SR adds a grippy outsole while keeping the same max-cushion ride. Many
         food-service workers call the SR their daily driver.
       </p>
-      <p>
-        <strong>Pros:</strong> Exceptional impact protection; stable for its height; wide sizes;
-        comfortable out of the box.
-        <br />
-        <strong>Cons:</strong> Chunky look; can feel warm; higher price.
-        <br />
-        <strong>Best for:</strong> Theme park walking, long merchandise shifts, theater standing, or
-        any role where cushioning is the top priority.
-      </p>
 
-      <h3>2. Brooks Ghost &mdash; Best Balanced Daily Trainer</h3>
-      <p>
-        <a href="https://amzn.to/4xUlvFX">Check current price and colors on Amazon</a>
-      </p>
+      <ProductCard
+        name="Brooks Ghost"
+        badge="Best Balanced Daily Trainer"
+        href="https://amzn.to/4xUlvFX"
+        pros={['Reliable cushioning and support', 'Good breathability', 'Versatile', 'Multiple widths']}
+        cons={['Not the absolute softest', 'Standard versions lack specialized slip resistance']}
+        bestFor="Theme park cast, theater staff who move between areas, merchandise floor walkers, and restaurant front-of-house."
+      />
       <p>
         The Brooks Ghost sits between soft and supportive. It doesn&rsquo;t have the extreme stack
         of a Bondi, but the cushioning is highly rated for all-day comfort. Many servers, retail
@@ -73,21 +74,15 @@ export default function Body() {
         The upper is usually breathable mesh, the fit runs true to size, and the outsole holds up
         to daily abuse. It&rsquo;s a frequent pick for people who walk a lot during their shift.
       </p>
-      <p>
-        <strong>Pros:</strong> Reliable cushioning and support; good breathability; versatile;
-        multiple widths.
-        <br />
-        <strong>Cons:</strong> Not the absolute softest; standard versions lack specialized slip
-        resistance.
-        <br />
-        <strong>Best for:</strong> Theme park cast, theater staff who move between areas,
-        merchandise floor walkers, and restaurant front-of-house.
-      </p>
 
-      <h3>3. New Balance Fresh Foam 1080 &mdash; Best Plush Ride with Wide Options</h3>
-      <p>
-        <a href="https://amzn.to/4gDXcWK">Check current price and colors on Amazon</a>
-      </p>
+      <ProductCard
+        name="New Balance Fresh Foam 1080"
+        badge="Best Plush Ride with Wide Options"
+        href="https://amzn.to/4gDXcWK"
+        pros={['Plush yet stable', 'Excellent size and width range', 'Good for swelling feet']}
+        cons={['Can run a bit warm', 'Premium price']}
+        bestFor="Workers who need width options or longer walking distances in parks and large venues."
+      />
       <p>
         New Balance&rsquo;s Fresh Foam 1080 is another favorite for all-day wear. The foam is soft
         and protective, the upper is accommodating, and New Balance offers excellent width options
@@ -97,20 +92,15 @@ export default function Body() {
         People who stand long stretches on hard floors often praise the 1080 for reducing fatigue.
         The rocker geometry helps with a smooth stride while still delivering serious cushioning.
       </p>
-      <p>
-        <strong>Pros:</strong> Plush yet stable; excellent size and width range; good for swelling
-        feet.
-        <br />
-        <strong>Cons:</strong> Can run a bit warm; premium price.
-        <br />
-        <strong>Best for:</strong> Workers who need width options or longer walking distances in
-        parks and large venues.
-      </p>
 
-      <h3>4. Dansko Professional Clogs &mdash; Best Traditional Work Clog</h3>
-      <p>
-        <a href="https://amzn.to/4x7Q375">Check current price and styles on Amazon</a>
-      </p>
+      <ProductCard
+        name="Dansko Professional Clogs"
+        badge="Best Traditional Work Clog"
+        href="https://amzn.to/4x7Q375"
+        pros={['Excellent arch support and posture benefits', 'Durable', 'Easy to clean']}
+        cons={['Heavier than sneakers', "Clog feel isn't for everyone", 'Break-in required']}
+        bestFor="Kitchen staff, back-of-house roles, or long standing shifts with less walking."
+      />
       <p>
         Dansko Professional clogs have been a staple in kitchens and restaurants for decades. The
         contoured footbed, rocker bottom, and rigid construction change how you stand and walk. The
@@ -122,20 +112,15 @@ export default function Body() {
         standing work. The slip-resistant outsole handles wet floors, and the closed design
         protects against spills.
       </p>
-      <p>
-        <strong>Pros:</strong> Excellent arch support and posture benefits; durable; easy to clean.
-        <br />
-        <strong>Cons:</strong> Heavier than sneakers; clog feel isn&rsquo;t for everyone; break-in
-        required.
-        <br />
-        <strong>Best for:</strong> Kitchen staff, back-of-house roles, or long standing shifts with
-        less walking.
-      </p>
 
-      <h3>5. Skechers Arch Fit or Work Styles &mdash; Best Value with Built-In Support</h3>
-      <p>
-        <a href="https://amzn.to/3UFAVPM">Check current price and styles on Amazon</a>
-      </p>
+      <ProductCard
+        name="Skechers Arch Fit or Work Styles"
+        badge="Best Value with Built-In Support"
+        href="https://amzn.to/3UFAVPM"
+        pros={['Strong arch support for the price', 'Lightweight', 'Good availability of work versions']}
+        cons={['Not as maximal in cushioning as the premium options']}
+        bestFor="Budget-conscious workers across restaurants, parks, theaters, and retail."
+      />
       <p>
         Skechers Arch Fit models (and work-oriented slip-resistant versions) punch above their
         price for many shift workers. The podiatrist-designed insole provides real arch support
@@ -147,20 +132,15 @@ export default function Body() {
         retail frequently mention less foot pain at the end of long shifts compared with generic
         sneakers.
       </p>
-      <p>
-        <strong>Pros:</strong> Strong arch support for the price; lightweight; good availability of
-        work versions.
-        <br />
-        <strong>Cons:</strong> Not as maximal in cushioning as the premium options.
-        <br />
-        <strong>Best for:</strong> Budget-conscious workers across restaurants, parks, theaters, and
-        retail.
-      </p>
 
-      <h3>6. Crocs On-the-Clock &mdash; Best Easy-Clean Slip-On for Kitchens</h3>
-      <p>
-        <a href="https://amzn.to/4zrU6N5">Check current price and colors on Amazon</a>
-      </p>
+      <ProductCard
+        name="Crocs On-the-Clock"
+        badge="Best Easy-Clean Slip-On for Kitchens"
+        href="https://amzn.to/4zrU6N5"
+        pros={['Excellent slip resistance', 'Easy to clean', 'Lightweight', 'True slip-on']}
+        cons={['Less refined look', 'Cushioning good but not maximal']}
+        bestFor="Kitchen staff, dishwashers, outdoor event crews in wet conditions."
+      />
       <p>
         For back-of-house, kitchen, or roles with constant spills, Crocs On-the-Clock remain
         popular. The LiteRide or dual-comfort footbed is surprisingly supportive, the closed design
@@ -171,14 +151,6 @@ export default function Body() {
         They won&rsquo;t match a Bondi&rsquo;s cushioning for pure standing on dry concrete, but
         for messy environments they&rsquo;re hard to beat. Many cooks keep a pair as their
         dedicated work shoe because they wipe or rinse clean and go right back on.
-      </p>
-      <p>
-        <strong>Pros:</strong> Excellent slip resistance; easy to clean; lightweight; true slip-on.
-        <br />
-        <strong>Cons:</strong> Less refined look; cushioning good but not maximal.
-        <br />
-        <strong>Best for:</strong> Kitchen staff, dishwashers, outdoor event crews in wet
-        conditions.
       </p>
 
       <h2>Practical Tips</h2>

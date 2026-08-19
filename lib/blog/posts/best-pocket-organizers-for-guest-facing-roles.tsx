@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -29,10 +31,14 @@ export default function Body() {
         <li>Compatibility with uniforms, aprons, belts, or lanyards already in use.</li>
       </ul>
 
-      <h3>1. Heavy-Duty Badge Reels &mdash; Best Everyday Essentials Access</h3>
-      <p>
-        <a href="https://amzn.to/3UpPKpA">Check current heavy-duty badge reels on Amazon</a>
-      </p>
+      <ProductCard
+        name="Heavy-Duty Badge Reels"
+        badge="Best Everyday Essentials Access"
+        href="https://amzn.to/3UpPKpA"
+        pros={['Instant access', 'Keeps items secure', 'Works with most uniforms', 'Inexpensive relative to the time saved']}
+        cons={['Cord can tangle if overloaded', 'Cheap versions fail fast']}
+        bestFor="Anyone who needs badge + keys or a couple of small tools constantly available."
+      />
       <p>
         A solid badge reel is the simplest upgrade for anyone who needs ID, keys, or a small tool
         instantly available. Look for metal or reinforced construction, a strong retractable cord,
@@ -44,20 +50,15 @@ export default function Body() {
         Cheap plastic reels break or lose tension quickly. Spending a little more on a heavy-duty
         version usually pays off in fewer replacements and less frustration mid-shift.
       </p>
-      <p>
-        <strong>Pros:</strong> Instant access; keeps items secure; works with most uniforms;
-        inexpensive relative to the time saved.
-        <br />
-        <strong>Cons:</strong> Cord can tangle if overloaded; cheap versions fail fast.
-        <br />
-        <strong>Best for:</strong> Anyone who needs badge + keys or a couple of small tools
-        constantly available.
-      </p>
 
-      <h3>2. Nurse/Utility Multi-Tool Pens (Light + Marker + Scissors) &mdash; Best Multi-Function Tool</h3>
-      <p>
-        <a href="https://amzn.to/4xjs6JS">Check current multi-tool pens on Amazon</a>
-      </p>
+      <ProductCard
+        name="Nurse/Utility Multi-Tool Pens (Light + Marker + Scissors)"
+        badge="Best Multi-Function Tool"
+        href="https://amzn.to/4xjs6JS"
+        pros={['Multiple functions in one slim tool', 'Reduces pocket clutter', 'Convenient']}
+        cons={['Individual features may not be as good as dedicated tools', 'Some feel cheap']}
+        bestFor="Roles that need frequent writing plus occasional light or marking."
+      />
       <p>
         Multi-tool pens that combine a writing tip, small light, marker, or even mini scissors are
         popular among healthcare and hospitality workers for a reason. One tool replaces several
@@ -69,21 +70,15 @@ export default function Body() {
         Look for ones with solid metal construction and a reliable clip. The writing quality
         varies, so check recent reviews if you write a lot during your shift.
       </p>
-      <p>
-        <strong>Pros:</strong> Multiple functions in one slim tool; reduces pocket clutter;
-        convenient.
-        <br />
-        <strong>Cons:</strong> Individual features may not be as good as dedicated tools; some feel
-        cheap.
-        <br />
-        <strong>Best for:</strong> Roles that need frequent writing plus occasional light or
-        marking.
-      </p>
 
-      <h3>3. Small Clip-On Organizers &mdash; Best for Multiple Small Items</h3>
-      <p>
-        <a href="https://amzn.to/3U5BxOD">Check current small clip-on organizers on Amazon</a>
-      </p>
+      <ProductCard
+        name="Small Clip-On Organizers"
+        badge="Best for Multiple Small Items"
+        href="https://amzn.to/3U5BxOD"
+        pros={['More organized storage than a single reel', 'Keeps multiple items together', 'Still relatively compact']}
+        cons={['Adds some bulk', 'Quality varies widely']}
+        bestFor="Roles that require several small tools or items throughout the shift."
+      />
       <p>
         When a single badge reel isn&rsquo;t enough, small clip-on organizers or mini pouches that
         attach to a belt, apron, or pocket edge give you dedicated spots for pens, cards, coins, or
@@ -94,20 +89,15 @@ export default function Body() {
         or moving quickly. Some are designed specifically for healthcare or service uniforms and
         hold up better under daily use.
       </p>
-      <p>
-        <strong>Pros:</strong> More organized storage than a single reel; keeps multiple items
-        together; still relatively compact.
-        <br />
-        <strong>Cons:</strong> Adds some bulk; quality varies widely.
-        <br />
-        <strong>Best for:</strong> Roles that require several small tools or items throughout the
-        shift.
-      </p>
 
-      <h3>4. Retractable Key/Badge Holders &mdash; Best Secure Key Management</h3>
-      <p>
-        <a href="https://amzn.to/4xGqfii">Check current retractable key and badge holders on Amazon</a>
-      </p>
+      <ProductCard
+        name="Retractable Key/Badge Holders"
+        badge="Best Secure Key Management"
+        href="https://amzn.to/4xGqfii"
+        pros={['Stronger for keys and heavier items', 'Keeps keys accessible but secure']}
+        cons={['Can be bulkier', 'Cord length and strength vary']}
+        bestFor="Staff who handle keys or access cards frequently."
+      />
       <p>
         Retractable holders designed specifically for keys or heavier items often have stronger
         cords and more robust clips than basic badge reels. They&rsquo;re useful when you need to
@@ -118,31 +108,20 @@ export default function Body() {
         Look for models rated for higher weight and with a locking or secure clip so the holder
         doesn&rsquo;t walk away during a busy shift.
       </p>
-      <p>
-        <strong>Pros:</strong> Stronger for keys and heavier items; keeps keys accessible but
-        secure.
-        <br />
-        <strong>Cons:</strong> Can be bulkier; cord length and strength vary.
-        <br />
-        <strong>Best for:</strong> Staff who handle keys or access cards frequently.
-      </p>
 
-      <h3>5. Optional Stethoscope-Style or Radio Holders &mdash; Best for Specific Gear</h3>
-      <p>
-        <a href="https://amzn.to/45C8CEf">Check current specialized holders on Amazon</a>
-      </p>
+      <ProductCard
+        name="Optional Stethoscope-Style or Radio Holders"
+        badge="Best for Specific Gear"
+        href="https://amzn.to/45C8CEf"
+        pros={['Purpose-built security for specific items', 'Frees up pockets']}
+        cons={['Only useful if you carry that exact gear', 'Can be over-specific']}
+        bestFor="Roles that regularly use radios or similar equipment."
+      />
       <p>
         Some roles require carrying a radio, small flashlight, or other specific tool.
         Stethoscope-style holders or dedicated clips adapted for radios and similar gear keep those
         items secure and hands-free. These are more specialized, so only worth it if your job
         actually requires that gear every shift.
-      </p>
-      <p>
-        <strong>Pros:</strong> Purpose-built security for specific items; frees up pockets.
-        <br />
-        <strong>Cons:</strong> Only useful if you carry that exact gear; can be over-specific.
-        <br />
-        <strong>Best for:</strong> Roles that regularly use radios or similar equipment.
       </p>
 
       <h2>Practical Tips</h2>

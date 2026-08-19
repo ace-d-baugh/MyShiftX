@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -36,10 +38,14 @@ export default function Body() {
         <li>Multi-packs make sense when you need clean pairs every day.</li>
       </ul>
 
-      <h3>1. CHARMKING Multi-Packs (15-20 mmHg) &mdash; Best Value for Daily Rotation</h3>
-      <p>
-        <a href="https://amzn.to/4zJ55SD">Check current price and packs on Amazon</a>
-      </p>
+      <ProductCard
+        name="CHARMKING Multi-Packs (15-20 mmHg)"
+        badge="Best Value for Daily Rotation"
+        href="https://amzn.to/4zJ55SD"
+        pros={['Excellent price-per-pair', 'Decent all-day comfort for mild compression', 'Lots of color options', 'Easy to rotate']}
+        cons={['Not the firmest support', 'Some pairs can feel thinner than premium brands']}
+        bestFor="Anyone who wants to try compression without spending a lot, or who needs multiple pairs for daily use."
+      />
       <p>
         CHARMKING multi-packs (often 3, 6, or 8 pairs) are one of the most popular budget options
         for a reason. They deliver graduated 15-20 mmHg compression at a price that lets you own
@@ -53,21 +59,15 @@ export default function Body() {
         something that doesn&rsquo;t scream &ldquo;medical sock&rdquo; under pants or with
         uniforms.
       </p>
-      <p>
-        <strong>Pros:</strong> Excellent price-per-pair; decent all-day comfort for mild
-        compression; lots of color options; easy to rotate.
-        <br />
-        <strong>Cons:</strong> Not the firmest support; some pairs can feel thinner than premium
-        brands.
-        <br />
-        <strong>Best for:</strong> Anyone who wants to try compression without spending a lot, or
-        who needs multiple pairs for daily use.
-      </p>
 
-      <h3>2. Physix Gear Sport (20-30 mmHg) &mdash; Best Overall Firm Support</h3>
-      <p>
-        <a href="https://amzn.to/4gFRmEk">Check current price and sizes on Amazon</a>
-      </p>
+      <ProductCard
+        name="Physix Gear Sport (20-30 mmHg)"
+        badge="Best Overall Firm Support"
+        href="https://amzn.to/4gFRmEk"
+        pros={['Solid firm compression', 'Stays up well', 'Good durability', 'Widely available sizes']}
+        cons={['Firmer feel takes a little getting used to', 'Single pairs cost more than multi-packs']}
+        bestFor="Workers who want noticeable support and have already tried milder options."
+      />
       <p>
         Physix Gear is one of the most frequently recommended mid-range options for nurses,
         servers, and other people on their feet all day. The 20-30 mmHg graduated compression is
@@ -79,21 +79,15 @@ export default function Body() {
         full shifts. Sizing goes up to larger calf options, which is useful for people who find
         standard compression socks too tight at the top.
       </p>
-      <p>
-        <strong>Pros:</strong> Solid firm compression; stays up well; good durability; widely
-        available sizes.
-        <br />
-        <strong>Cons:</strong> Firmer feel takes a little getting used to; single pairs cost more
-        than multi-packs.
-        <br />
-        <strong>Best for:</strong> Workers who want noticeable support and have already tried
-        milder options.
-      </p>
 
-      <h3>3. Sockwell Circulator (Merino) &mdash; Best Premium Temperature-Regulating Option</h3>
-      <p>
-        <a href="https://amzn.to/3UFB3ie">Check current price and styles on Amazon</a>
-      </p>
+      <ProductCard
+        name="Sockwell Circulator (Merino)"
+        badge="Best Premium Temperature-Regulating Option"
+        href="https://amzn.to/3UFB3ie"
+        pros={['Excellent temperature and odor control', 'Durable', 'Stays in place', 'Comfortable for sensitive skin']}
+        cons={['Higher price', 'Firmness can feel stiff to some']}
+        bestFor="Outdoor event or park staff, or anyone who prioritizes natural fibers and all-day comfort."
+      />
       <p>
         Sockwell&rsquo;s Circulator (and similar merino blends) stands out for temperature
         regulation. Merino wool helps keep feet cooler in heat and warmer in cold without the
@@ -105,20 +99,15 @@ export default function Body() {
         temperature-variable environments often prefer the comfort and odor control. They&rsquo;re
         a step up in materials and feel for those willing to invest in fewer, higher-quality pairs.
       </p>
-      <p>
-        <strong>Pros:</strong> Excellent temperature and odor control; durable; stays in place;
-        comfortable for sensitive skin.
-        <br />
-        <strong>Cons:</strong> Higher price; firmness can feel stiff to some.
-        <br />
-        <strong>Best for:</strong> Outdoor event or park staff, or anyone who prioritizes natural
-        fibers and all-day comfort.
-      </p>
 
-      <h3>4. Bombas Compression &mdash; Best Everyday Comfort Focus</h3>
-      <p>
-        <a href="https://amzn.to/4g6twkZ">Check current price and styles on Amazon</a>
-      </p>
+      <ProductCard
+        name="Bombas Compression"
+        badge="Best Everyday Comfort Focus"
+        href="https://amzn.to/4g6twkZ"
+        pros={['Very comfortable for all-day wear', 'Thoughtful design details', 'Good for milder needs']}
+        cons={['Milder compression may not be enough for heavy swelling', 'Higher price than basic multi-packs']}
+        bestFor="People new to compression or those who want a sock that feels good from the first hour to the last."
+      />
       <p>
         Bombas Everyday Compression socks (usually 15-20 mmHg) emphasize comfort details: seamless
         toes, cushioned soles, and a honeycomb arch support design. The compression is milder than
@@ -130,21 +119,15 @@ export default function Body() {
         the socks feel more like regular premium socks with added support. They&rsquo;re a strong
         choice if pure plush feel matters as much as compression strength.
       </p>
-      <p>
-        <strong>Pros:</strong> Very comfortable for all-day wear; thoughtful design details; good
-        for milder needs.
-        <br />
-        <strong>Cons:</strong> Milder compression may not be enough for heavy swelling; higher price
-        than basic multi-packs.
-        <br />
-        <strong>Best for:</strong> People new to compression or those who want a sock that feels
-        good from the first hour to the last.
-      </p>
 
-      <h3>5. Wellow or Wide-Calf Options &mdash; Best for Larger Calves</h3>
-      <p>
-        <a href="https://amzn.to/4getLt2">Check current price and wide-calf options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Wellow or Wide-Calf Options"
+        badge="Best for Larger Calves"
+        href="https://amzn.to/4getLt2"
+        pros={['Proper fit for wider calves', 'Reduces the dig-in or slide-down problem']}
+        cons={['Fewer color choices in some lines', 'Can cost more']}
+        bestFor="Anyone who has struggled with regular compression socks being too tight at the top."
+      />
       <p>
         Standard compression socks often fail people with wider calves &mdash; they either dig in
         at the top or slide down. Brands and styles that specifically offer wide-calf or extended
@@ -155,15 +138,6 @@ export default function Body() {
         For shift workers with larger lower legs, proper fit is the difference between socks that
         help and socks that create new pressure points. These options usually stay in the useful
         15-20 or 20-30 mmHg range while accommodating real body shapes.
-      </p>
-      <p>
-        <strong>Pros:</strong> Proper fit for wider calves; reduces the dig-in or slide-down
-        problem.
-        <br />
-        <strong>Cons:</strong> Fewer color choices in some lines; can cost more.
-        <br />
-        <strong>Best for:</strong> Anyone who has struggled with regular compression socks being
-        too tight at the top.
       </p>
 
       <h2>Quick Buying Notes</h2>

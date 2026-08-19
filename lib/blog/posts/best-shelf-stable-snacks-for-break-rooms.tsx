@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -30,10 +32,14 @@ export default function Body() {
         <li>Options that don&rsquo;t create a mess or strong odors in shared spaces.</li>
       </ul>
 
-      <h3>1. High-Protein Bars (RXBAR, KIND, and Similar) &mdash; Best Portable Sustained Energy</h3>
-      <p>
-        <a href="https://amzn.to/4g8phFy">Check current protein and energy bars on Amazon</a>
-      </p>
+      <ProductCard
+        name="High-Protein Bars (RXBAR, KIND, and Similar)"
+        badge="Best Portable Sustained Energy"
+        href="https://amzn.to/4g8phFy"
+        pros={['Convenient', 'Higher protein', 'Long shelf life', 'Widely available flavors']}
+        cons={['Some are still high in sugar or calories', 'Texture varies']}
+        bestFor="Quick, filling options during short breaks."
+      />
       <p>
         Protein bars with recognizable ingredients (nuts, egg whites, dates, etc.) tend to keep
         people fuller longer than candy bars. RXBAR, certain KIND varieties, and similar options
@@ -45,19 +51,15 @@ export default function Body() {
         in your locker or bag so you&rsquo;re not dependent on whatever the break room has that
         day.
       </p>
-      <p>
-        <strong>Pros:</strong> Convenient; higher protein; long shelf life; widely available
-        flavors.
-        <br />
-        <strong>Cons:</strong> Some are still high in sugar or calories; texture varies.
-        <br />
-        <strong>Best for:</strong> Quick, filling options during short breaks.
-      </p>
 
-      <h3>2. Nut &amp; Seed Packs &mdash; Best Simple Healthy Fat + Protein</h3>
-      <p>
-        <a href="https://amzn.to/4qmhIys">Check current nut and seed packs on Amazon</a>
-      </p>
+      <ProductCard
+        name="Nut & Seed Packs"
+        badge="Best Simple Healthy Fat + Protein"
+        href="https://amzn.to/4qmhIys"
+        pros={['Minimal ingredients', 'Satisfying', 'No mess', 'Long shelf life']}
+        cons={['Calorie-dense', 'Some people find them dry without water']}
+        bestFor="Reliable, no-fuss energy that doesn't spike and crash."
+      />
       <p>
         Single-serve almond, mixed nut, or seed packs are about as simple and reliable as snacks
         get. They provide protein, healthy fats, and sustained energy without preparation. Many
@@ -68,18 +70,15 @@ export default function Body() {
         on hot outdoor shifts where dehydration is already a risk. They&rsquo;re also useful for
         pairing with a piece of fruit if you have access to any.
       </p>
-      <p>
-        <strong>Pros:</strong> Minimal ingredients; satisfying; no mess; long shelf life.
-        <br />
-        <strong>Cons:</strong> Calorie-dense; some people find them dry without water.
-        <br />
-        <strong>Best for:</strong> Reliable, no-fuss energy that doesn&rsquo;t spike and crash.
-      </p>
 
-      <h3>3. Jerky or Meat Sticks &mdash; Best Savory High-Protein Option</h3>
-      <p>
-        <a href="https://amzn.to/4xbCu6G">Check current jerky and meat stick options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Jerky or Meat Sticks"
+        badge="Best Savory High-Protein Option"
+        href="https://amzn.to/4xbCu6G"
+        pros={['High protein', 'Savory alternative', 'Portable', 'Filling']}
+        cons={['Can be high in sodium', 'Quality varies widely', 'Some are tough to chew quickly']}
+        bestFor="People who prefer savory snacks or need more protein density."
+      />
       <p>
         When you want something savory and higher in protein, quality jerky or meat sticks work
         well. They don&rsquo;t require refrigeration once packaged, pack easily, and provide a more
@@ -90,19 +89,15 @@ export default function Body() {
         These are especially useful on longer shifts when a sweet bar starts to feel repetitive.
         Keep them sealed until you need them to preserve texture and flavor.
       </p>
-      <p>
-        <strong>Pros:</strong> High protein; savory alternative; portable; filling.
-        <br />
-        <strong>Cons:</strong> Can be high in sodium; quality varies widely; some are tough to chew
-        quickly.
-        <br />
-        <strong>Best for:</strong> People who prefer savory snacks or need more protein density.
-      </p>
 
-      <h3>4. Electrolyte Packets &mdash; Best for Hydration Support</h3>
-      <p>
-        <a href="https://amzn.to/3ScNaCP">Check current electrolyte packets on Amazon</a>
-      </p>
+      <ProductCard
+        name="Electrolyte Packets"
+        badge="Best for Hydration Support"
+        href="https://amzn.to/3ScNaCP"
+        pros={['Supports hydration', 'Lightweight', 'Easy to store', 'Useful in heat']}
+        cons={['Not a food snack', 'Taste varies', 'Some contain sugar or artificial ingredients']}
+        bestFor="Outdoor park and event staff or anyone who sweats heavily during shifts."
+      />
       <p>
         On hot outdoor shifts or any day where you&rsquo;re sweating more than usual, plain water
         sometimes isn&rsquo;t enough. Single-serve electrolyte packets that mix into a water bottle
@@ -113,20 +108,15 @@ export default function Body() {
         Choose lower-sugar or sugar-free versions if you mainly need the electrolytes rather than
         extra calories. These are a practical addition rather than a standalone snack.
       </p>
-      <p>
-        <strong>Pros:</strong> Supports hydration; lightweight; easy to store; useful in heat.
-        <br />
-        <strong>Cons:</strong> Not a food snack; taste varies; some contain sugar or artificial
-        ingredients.
-        <br />
-        <strong>Best for:</strong> Outdoor park and event staff or anyone who sweats heavily during
-        shifts.
-      </p>
 
-      <h3>5. Dark Chocolate or Low-Sugar Options &mdash; Best Controlled Treat</h3>
-      <p>
-        <a href="https://amzn.to/4qoS9Nj">Check current dark chocolate and low-sugar options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Dark Chocolate or Low-Sugar Options"
+        badge="Best Controlled Treat"
+        href="https://amzn.to/4qoS9Nj"
+        pros={['Satisfies sweet cravings', 'Portion control is easy', 'Dark chocolate has some redeeming qualities']}
+        cons={['Still a treat, not a primary energy source', 'Easy to overdo if not portioned']}
+        bestFor="Planned small rewards during long shifts."
+      />
       <p>
         Completely eliminating enjoyable food from long shifts is unrealistic for most people.
         Small portions of higher-cocoa dark chocolate or lower-sugar treats can satisfy a craving
@@ -136,15 +126,6 @@ export default function Body() {
       <p>
         This category is about controlled enjoyment rather than primary fuel. Having a planned
         small treat is often better than impulsive vending-machine decisions when energy is low.
-      </p>
-      <p>
-        <strong>Pros:</strong> Satisfies sweet cravings; portion control is easy; dark chocolate has
-        some redeeming qualities.
-        <br />
-        <strong>Cons:</strong> Still a treat, not a primary energy source; easy to overdo if not
-        portioned.
-        <br />
-        <strong>Best for:</strong> Planned small rewards during long shifts.
       </p>
 
       <h2>Practical Tips</h2>

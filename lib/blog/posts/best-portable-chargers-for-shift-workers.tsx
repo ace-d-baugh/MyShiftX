@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -30,10 +32,14 @@ export default function Body() {
         <li>Enough ports or the right cable type for your phone and any other devices.</li>
       </ul>
 
-      <h3>1. Anker PowerCore / High-Capacity Models &mdash; Best Overall Reliability</h3>
-      <p>
-        <a href="https://amzn.to/4zrKC4j">Check current Anker high-capacity models on Amazon</a>
-      </p>
+      <ProductCard
+        name="Anker PowerCore / High-Capacity Models"
+        badge="Best Overall Reliability"
+        href="https://amzn.to/4zrKC4j"
+        pros={['Reliable capacity and performance', 'Good safety record', 'Wide range of sizes', 'Solid charging speeds']}
+        cons={['Premium models cost more', 'Larger capacities add weight']}
+        bestFor="Most people who want a dependable daily power bank that just works."
+      />
       <p>
         Anker is one of the most consistently recommended brands for power banks because the
         capacity ratings tend to be honest, the build quality holds up, and charging speeds are
@@ -46,20 +52,15 @@ export default function Body() {
         widely available, come in different sizes, and have a strong track record for not failing
         after a few months of use.
       </p>
-      <p>
-        <strong>Pros:</strong> Reliable capacity and performance; good safety record; wide range of
-        sizes; solid charging speeds.
-        <br />
-        <strong>Cons:</strong> Premium models cost more; larger capacities add weight.
-        <br />
-        <strong>Best for:</strong> Most people who want a dependable daily power bank that just
-        works.
-      </p>
 
-      <h3>2. Slim Pocket-Friendly Options &mdash; Best for Minimal Carry</h3>
-      <p>
-        <a href="https://amzn.to/4c0bHBD">Check current slim pocket-friendly power banks on Amazon</a>
-      </p>
+      <ProductCard
+        name="Slim Pocket-Friendly Options"
+        badge="Best for Minimal Carry"
+        href="https://amzn.to/4c0bHBD"
+        pros={['Easy to carry every day', 'Less noticeable weight', 'Often enough for one solid recharge']}
+        cons={['Lower total capacity', 'May not support the fastest charging speeds']}
+        bestFor="People who will only use a charger if it truly fits in a pocket without bulk."
+      />
       <p>
         If you hate carrying extra bulk, slim power banks that fit in a back pocket or small apron
         pouch are more likely to actually come with you every day. These usually offer lower total
@@ -70,20 +71,15 @@ export default function Body() {
         Look for models that support at least moderate fast charging and have a flat profile. Some
         include built-in cables to reduce the number of separate items you need to remember.
       </p>
-      <p>
-        <strong>Pros:</strong> Easy to carry every day; less noticeable weight; often enough for one
-        solid recharge.
-        <br />
-        <strong>Cons:</strong> Lower total capacity; may not support the fastest charging speeds.
-        <br />
-        <strong>Best for:</strong> People who will only use a charger if it truly fits in a pocket
-        without bulk.
-      </p>
 
-      <h3>3. Fast-Charging USB-C Models &mdash; Best for Quick Top-Ups</h3>
-      <p>
-        <a href="https://amzn.to/3RWZG9t">Check current fast-charging USB-C models on Amazon</a>
-      </p>
+      <ProductCard
+        name="Fast-Charging USB-C Models"
+        badge="Best for Quick Top-Ups"
+        href="https://amzn.to/3RWZG9t"
+        pros={['Faster recovery during short breaks', 'Future-proof for newer phones', 'Efficient']}
+        cons={['Can cost more', 'Higher output models sometimes run warmer']}
+        bestFor="Anyone with a modern phone who wants the most charge in the least time."
+      />
       <p>
         Modern phones charge much faster with USB-C Power Delivery (PD) or equivalent. A power bank
         that supports higher wattage output can give you a meaningful charge during a short break
@@ -94,20 +90,15 @@ export default function Body() {
         These models are especially useful if your phone supports 20W+ charging. Pair them with a
         good USB-C cable for best results.
       </p>
-      <p>
-        <strong>Pros:</strong> Faster recovery during short breaks; future-proof for newer phones;
-        efficient.
-        <br />
-        <strong>Cons:</strong> Can cost more; higher output models sometimes run warmer.
-        <br />
-        <strong>Best for:</strong> Anyone with a modern phone who wants the most charge in the least
-        time.
-      </p>
 
-      <h3>4. Solar or Rugged Versions &mdash; Optional for Outdoor Park &amp; Event Roles</h3>
-      <p>
-        <a href="https://amzn.to/4ghYAND">Check current solar and rugged options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Solar or Rugged Versions"
+        badge="Optional for Outdoor Park & Event Roles"
+        href="https://amzn.to/4ghYAND"
+        pros={['More durable', 'Some weather resistance', 'Solar as a backup']}
+        cons={['Heavier', 'Solar is slow', 'Higher price for the rugged features']}
+        bestFor="Outdoor park and event staff who need extra toughness."
+      />
       <p>
         For outdoor theme park, festival, or event work where you may be away from outlets all day
         and exposed to weather, rugged or solar-assisted power banks add durability and a backup
@@ -118,13 +109,6 @@ export default function Body() {
         These are secondary options for most people &mdash; standard high-capacity banks still
         handle the majority of shift needs. Consider them if your role regularly involves long
         outdoor stretches or rough handling.
-      </p>
-      <p>
-        <strong>Pros:</strong> More durable; some weather resistance; solar as a backup.
-        <br />
-        <strong>Cons:</strong> Heavier; solar is slow; higher price for the rugged features.
-        <br />
-        <strong>Best for:</strong> Outdoor park and event staff who need extra toughness.
       </p>
 
       <h2>Practical Buying and Use Tips</h2>

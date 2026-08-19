@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -34,10 +36,22 @@ export default function Body() {
         <li>Price that lets you cover every bedroom window you need without stretching the budget.</li>
       </ul>
 
-      <h3>1. NICETOWN 100% Blackout Curtains &mdash; Best Overall Value</h3>
-      <p>
-        <a href="https://amzn.to/4csO6d0">Check current sizes and colors on Amazon</a>
-      </p>
+      <ProductCard
+        name="NICETOWN 100% Blackout Curtains"
+        badge="Best Overall Value"
+        href="https://amzn.to/4csO6d0"
+        pros={[
+          'Strong light blocking for the price',
+          'Good thermal benefit',
+          'Massive size/color selection',
+          'Easy to install',
+        ]}
+        cons={[
+          'Edge light can still leak without careful rod placement or side sealing',
+          'Lighter colors are less effective',
+        ]}
+        bestFor="Most night-shift and closing-crew workers who need reliable daytime darkness without spending a fortune."
+      />
       <p>
         NICETOWN is the most frequently recommended blackout curtain brand for shift workers and
         light-sensitive sleepers. Their triple-weave fabric (sometimes called Plylux or similar)
@@ -52,21 +66,17 @@ export default function Body() {
         reducing drafts in winter. They come in a huge range of sizes and colors, and most styles
         are machine washable.
       </p>
-      <p>
-        <strong>Pros:</strong> Strong light blocking for the price; good thermal benefit; massive
-        size/color selection; easy to install.
-        <br />
-        <strong>Cons:</strong> Edge light can still leak without careful rod placement or side
-        sealing; lighter colors are less effective.
-        <br />
-        <strong>Best for:</strong> Most night-shift and closing-crew workers who need reliable
-        daytime darkness without spending a fortune.
-      </p>
 
-      <h3>2. Premium Thermal / Noise-Reducing Options</h3>
-      <p>
-        <a href="https://amzn.to/4xUm0zP">Check current premium thermal options on Amazon</a>
-      </p>
+      <ProductCard
+        name="Premium Thermal / Noise-Reducing Curtains"
+        href="https://amzn.to/4xUm0zP"
+        pros={['Better heat and noise control', 'Often denser light blocking']}
+        cons={[
+          'Higher price',
+          'Heavier fabric can be harder to hang on lightweight rods',
+        ]}
+        bestFor="Hot climates, west-facing windows, or bedrooms near noisy streets."
+      />
       <p>
         If your bedroom gets very hot in the afternoon or you deal with street noise as well as
         light, look for heavier thermal or multi-layer blackout curtains. These often add a foam or
@@ -78,20 +88,14 @@ export default function Body() {
         strong afternoon sun or thin walls. Look for models specifically marketed for energy
         efficiency or noise reduction, and still choose darker colors for maximum darkness.
       </p>
-      <p>
-        <strong>Pros:</strong> Better heat and noise control; often denser light blocking.
-        <br />
-        <strong>Cons:</strong> Higher price; heavier fabric can be harder to hang on lightweight
-        rods.
-        <br />
-        <strong>Best for:</strong> Hot climates, west-facing windows, or bedrooms near noisy
-        streets.
-      </p>
 
-      <h3>3. Blackout Curtain Liners or Layered Solutions</h3>
-      <p>
-        <a href="https://amzn.to/3UFBdGm">Check current blackout liners and blinds on Amazon</a>
-      </p>
+      <ProductCard
+        name="Blackout Curtain Liners or Layered Solutions"
+        href="https://amzn.to/3UFBdGm"
+        pros={['Flexible', 'Works with existing décor', 'Targets the last light leaks']}
+        cons={['Extra step to install', 'Not as seamless as a single high-quality pair']}
+        bestFor="Renters, people who want to keep decorative curtains, or those chasing absolute darkness."
+      />
       <p>
         If you already like your existing curtains or live in a rental where you can&rsquo;t (or
         don&rsquo;t want to) replace everything, blackout liners or clip-on blackout panels can
@@ -102,15 +106,6 @@ export default function Body() {
         These solutions are less elegant than a full dedicated pair but can close the remaining
         light gaps that prevent true darkness. For serious daytime sleepers, combining a good
         blackout curtain with side sealing or a secondary layer often produces the best results.
-      </p>
-      <p>
-        <strong>Pros:</strong> Flexible; works with existing d&eacute;cor; targets the last light
-        leaks.
-        <br />
-        <strong>Cons:</strong> Extra step to install; not as seamless as a single high-quality pair.
-        <br />
-        <strong>Best for:</strong> Renters, people who want to keep decorative curtains, or those
-        chasing absolute darkness.
       </p>
 
       <h2>Installation Tips That Matter</h2>

@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -30,10 +32,14 @@ export default function Body() {
         <li>Simple interface so you&rsquo;re not fighting the device when half-asleep.</li>
       </ul>
 
-      <h3>1. Hatch Restore &mdash; Best All-in-One Sleep &amp; Wake System</h3>
-      <p>
-        <a href="https://amzn.to/4x86i3R">Check current Hatch Restore models on Amazon</a>
-      </p>
+      <ProductCard
+        name="Hatch Restore"
+        badge="Best All-in-One Sleep & Wake System"
+        href="https://amzn.to/4x86i3R"
+        pros={['Gradual light wake-up', 'Sleep sounds', 'Customizable', 'Good for sensitive sleepers']}
+        cons={['Higher price', 'Requires power and app setup']}
+        bestFor="People who want a gentler, more complete sleep-and-wake system."
+      />
       <p>
         The Hatch Restore combines a sunrise alarm, sound machine, and bedside lamp in one device.
         The gradual light ramp mimics natural sunrise, which many people find gentler and more
@@ -46,19 +52,15 @@ export default function Body() {
         It&rsquo;s a premium option, but for people who struggle with abrupt alarms or need better
         wind-down and wake-up support, it often becomes a daily tool.
       </p>
-      <p>
-        <strong>Pros:</strong> Gradual light wake-up; sleep sounds; customizable; good for
-        sensitive sleepers.
-        <br />
-        <strong>Cons:</strong> Higher price; requires power and app setup.
-        <br />
-        <strong>Best for:</strong> People who want a gentler, more complete sleep-and-wake system.
-      </p>
 
-      <h3>2. Philips Wake-Up Light &mdash; Best Dedicated Sunrise Alarm</h3>
-      <p>
-        <a href="https://amzn.to/3SJeyZc">Check current Philips Wake-Up Light models on Amazon</a>
-      </p>
+      <ProductCard
+        name="Philips Wake-Up Light"
+        badge="Best Dedicated Sunrise Alarm"
+        href="https://amzn.to/3SJeyZc"
+        pros={['Effective gradual light', 'Relatively straightforward', 'Proven for many users']}
+        cons={['Light alone may not wake the heaviest sleepers', 'Sound options vary by model']}
+        bestFor="Daytime sleepers who respond well to light cues."
+      />
       <p>
         Philips wake-up lights focus on the gradual light approach. The light intensity increases
         over a set period before the optional sound alarm kicks in. This is particularly helpful
@@ -69,20 +71,15 @@ export default function Body() {
         Many models include nature sounds or radio as backup. They&rsquo;re simpler than full smart
         systems and have a long track record among people who prefer light-based waking.
       </p>
-      <p>
-        <strong>Pros:</strong> Effective gradual light; relatively straightforward; proven for many
-        users.
-        <br />
-        <strong>Cons:</strong> Light alone may not wake the heaviest sleepers; sound options vary by
-        model.
-        <br />
-        <strong>Best for:</strong> Daytime sleepers who respond well to light cues.
-      </p>
 
-      <h3>3. Vibrating / Bed-Shaker Alarms &mdash; Best for Heavy Sleepers or Shared Spaces</h3>
-      <p>
-        <a href="https://amzn.to/3SJeHfc">Check current vibrating and bed-shaker alarms on Amazon</a>
-      </p>
+      <ProductCard
+        name="Vibrating / Bed-Shaker Alarms"
+        badge="Best for Heavy Sleepers or Shared Spaces"
+        href="https://amzn.to/3SJeHfc"
+        pros={['Highly effective for heavy sleepers', 'Discrete in shared housing', "Doesn't rely on sound alone"]}
+        cons={['Requires placement under the mattress or pillow', 'Some models feel industrial']}
+        bestFor="Heavy sleepers, shared living situations, or anyone who sleeps through regular alarms."
+      />
       <p>
         When sound isn&rsquo;t enough &mdash; or when you share a space and don&rsquo;t want to
         blast an alarm &mdash; vibrating alarms that shake the bed or a pillow can be more
@@ -94,21 +91,15 @@ export default function Body() {
         For shift workers, a bed-shaker provides a physical cue that is hard to ignore and
         doesn&rsquo;t rely on volume that might disturb others.
       </p>
-      <p>
-        <strong>Pros:</strong> Highly effective for heavy sleepers; discrete in shared housing;
-        doesn&rsquo;t rely on sound alone.
-        <br />
-        <strong>Cons:</strong> Requires placement under the mattress or pillow; some models feel
-        industrial.
-        <br />
-        <strong>Best for:</strong> Heavy sleepers, shared living situations, or anyone who sleeps
-        through regular alarms.
-      </p>
 
-      <h3>4. Loud Traditional Alarm as Backup &mdash; Best Simple Reliability</h3>
-      <p>
-        <a href="https://amzn.to/3Sl4RQt">Check current loud traditional alarms on Amazon</a>
-      </p>
+      <ProductCard
+        name="Loud Traditional Alarm as Backup"
+        badge="Best Simple Reliability"
+        href="https://amzn.to/3Sl4RQt"
+        pros={['Extremely reliable', 'No app or complex setup', 'Works offline']}
+        cons={['Can be jarring', 'Limited features']}
+        bestFor="Backup alarm or for people who prefer pure simplicity."
+      />
       <p>
         Sometimes the simplest solution is still the best backup. A loud, battery-powered or
         plug-in alarm clock with a strong buzzer or bell gives you a failsafe that doesn&rsquo;t
@@ -118,13 +109,6 @@ export default function Body() {
       <p>
         Look for models with easy-to-set dual alarms and a volume that can cut through deep sleep.
         Battery backup is useful for power outages or if the unit is unplugged accidentally.
-      </p>
-      <p>
-        <strong>Pros:</strong> Extremely reliable; no app or complex setup; works offline.
-        <br />
-        <strong>Cons:</strong> Can be jarring; limited features.
-        <br />
-        <strong>Best for:</strong> Backup alarm or for people who prefer pure simplicity.
       </p>
 
       <h2>Practical Tips for Rotating Schedules</h2>

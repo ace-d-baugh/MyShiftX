@@ -1,3 +1,5 @@
+import { ProductCard } from '@/components/blog/ProductCard'
+
 export default function Body() {
   return (
     <>
@@ -30,10 +32,14 @@ export default function Body() {
         <li>For certain venues: clear or see-through designs that meet security rules.</li>
       </ul>
 
-      <h3>1. Slim Running-Style Belts / Fanny Packs &mdash; Best Minimal Hands-Free Option</h3>
-      <p>
-        <a href="https://amzn.to/45BBAnK">Check current slim belts and fanny packs on Amazon</a>
-      </p>
+      <ProductCard
+        name="Slim Running-Style Belts / Fanny Packs"
+        badge="Best Minimal Hands-Free Option"
+        href="https://amzn.to/45BBAnK"
+        pros={['Very low profile', 'Secure during movement', 'Hands completely free', 'Often water-resistant']}
+        cons={['Limited capacity', 'Phone size can be tight in the smallest models']}
+        bestFor="High-movement roles where minimalism and security matter most."
+      />
       <p>
         Modern slim running belts and low-profile fanny packs sit close to the body and hold a
         phone, keys, cards, and sometimes a small water bottle or snack. They&rsquo;re popular for
@@ -44,19 +50,15 @@ export default function Body() {
       <p>
         These are ideal when you need the absolute minimum bulk and maximum freedom of movement.
       </p>
-      <p>
-        <strong>Pros:</strong> Very low profile; secure during movement; hands completely free;
-        often water-resistant.
-        <br />
-        <strong>Cons:</strong> Limited capacity; phone size can be tight in the smallest models.
-        <br />
-        <strong>Best for:</strong> High-movement roles where minimalism and security matter most.
-      </p>
 
-      <h3>2. Crossbody Bags with Water Bottle Holders &mdash; Best Everyday Capacity + Access</h3>
-      <p>
-        <a href="https://amzn.to/4x7lezb">Check current crossbody bags with bottle holders on Amazon</a>
-      </p>
+      <ProductCard
+        name="Crossbody Bags with Water Bottle Holders"
+        badge="Best Everyday Capacity + Access"
+        href="https://amzn.to/4x7lezb"
+        pros={['More capacity than a belt', 'Easy access', 'Hydration built in', 'Still relatively hands-free']}
+        cons={['Can bounce if not fitted well', 'Bulkier than the slimmest options']}
+        bestFor="Staff who need a bit more than the absolute minimum and want water with them."
+      />
       <p>
         A compact crossbody with a dedicated water bottle pocket (or enough room for a bottle plus
         essentials) covers more daily needs than a pure running belt. You can carry phone, keys,
@@ -68,20 +70,15 @@ export default function Body() {
         Choose sizes that stay close to the body rather than large messenger-style bags that swing.
         Water bottle compatibility is a practical bonus for long outdoor or floor shifts.
       </p>
-      <p>
-        <strong>Pros:</strong> More capacity than a belt; easy access; hydration built in; still
-        relatively hands-free.
-        <br />
-        <strong>Cons:</strong> Can bounce if not fitted well; bulkier than the slimmest options.
-        <br />
-        <strong>Best for:</strong> Staff who need a bit more than the absolute minimum and want
-        water with them.
-      </p>
 
-      <h3>3. Clear Stadium-Approved Bags &mdash; Best for Events &amp; Parks with Security Rules</h3>
-      <p>
-        <a href="https://amzn.to/3Urx20R">Check current clear stadium-approved bags on Amazon</a>
-      </p>
+      <ProductCard
+        name="Clear Stadium-Approved Bags"
+        badge="Best for Events & Parks with Security Rules"
+        href="https://amzn.to/3Urx20R"
+        pros={['Meets common security policies', 'Contents visible (advantage or drawback)', 'Purpose-built sizes']}
+        cons={['Privacy is limited', 'Materials can feel less premium', 'Not needed if your venue has no such rule']}
+        bestFor="Parks, stadiums, and events with clear-bag policies."
+      />
       <p>
         Many parks, stadiums, theaters, and event venues require clear bags for security. A
         well-designed clear crossbody or tote that meets size guidelines lets you carry essentials
@@ -93,20 +90,15 @@ export default function Body() {
         These are environment-specific. If your workplace requires them, a durable clear option is
         better than repeatedly borrowing or using flimsy disposables.
       </p>
-      <p>
-        <strong>Pros:</strong> Meets common security policies; contents visible (which can be an
-        advantage or drawback); purpose-built sizes.
-        <br />
-        <strong>Cons:</strong> Privacy is limited; materials can feel less premium; not needed if
-        your venue has no such rule.
-        <br />
-        <strong>Best for:</strong> Parks, stadiums, and events with clear-bag policies.
-      </p>
 
-      <h3>4. Rugged Small Sling Bags &mdash; Best Durable Compact Option</h3>
-      <p>
-        <a href="https://amzn.to/3SlldZn">Check current rugged small sling bags on Amazon</a>
-      </p>
+      <ProductCard
+        name="Rugged Small Sling Bags"
+        badge="Best Durable Compact Option"
+        href="https://amzn.to/3SlldZn"
+        pros={['Durable', 'Better organization', 'Weather-resistant options', 'Secure crossbody carry']}
+        cons={['Slightly more bulk', 'Style may or may not match uniform expectations']}
+        bestFor="Outdoor or higher-wear environments where a soft pack would wear out faster."
+      />
       <p>
         Small sling bags that sit across the body offer a middle ground: more structure and weather
         resistance than a soft fanny pack, still compact enough for floor work. Rugged materials
@@ -116,15 +108,6 @@ export default function Body() {
       <p>
         These work well when you want something a step more substantial than a running belt but
         still far smaller than a regular backpack or tote.
-      </p>
-      <p>
-        <strong>Pros:</strong> Durable; better organization; weather-resistant options; secure
-        crossbody carry.
-        <br />
-        <strong>Cons:</strong> Slightly more bulk; style may or may not match uniform expectations.
-        <br />
-        <strong>Best for:</strong> Outdoor or higher-wear environments where a soft pack would wear
-        out faster.
       </p>
 
       <h2>Practical Tips</h2>
