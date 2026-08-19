@@ -35,6 +35,7 @@ export default function Body() {
         name="Stanley Quencher / Adventure Quencher"
         badge="Best Popular High-Capacity Option"
         href="https://amzn.to/4wFQO6m"
+        images={['/products/insulated-tumblers/stanley/1.jpg', '/products/insulated-tumblers/stanley/2.jpg', '/products/insulated-tumblers/stanley/3.jpg', '/products/insulated-tumblers/stanley/4.jpg', '/products/insulated-tumblers/stanley/5.jpg', '/products/insulated-tumblers/stanley/6.jpg', '/products/insulated-tumblers/stanley/7.jpg']}
         pros={['Excellent capacity and insulation', 'Comfortable handle', 'Widely available colors and sizes']}
         cons={['Can be bulky', 'Straw requires cleaning attention']}
         bestFor="People who want one big drink to last most of the shift."
@@ -55,6 +56,7 @@ export default function Body() {
         name="Contigo Autoseal"
         badge="Best Spill-Resistant Everyday Tumbler"
         href="https://amzn.to/4c0bzSF"
+        images={['/products/insulated-tumblers/contigo/1.jpg', '/products/insulated-tumblers/contigo/2.jpg', '/products/insulated-tumblers/contigo/3.jpg', '/products/insulated-tumblers/contigo/4.jpg', '/products/insulated-tumblers/contigo/5.jpg', '/products/insulated-tumblers/contigo/6.jpg', '/products/insulated-tumblers/contigo/7.jpg']}
         pros={['Strong leak resistance', 'Reliable insulation', 'Easy one-handed use']}
         cons={['Smaller capacity than some Quencher-style options']}
         bestFor="Active roles where spills are a real risk."
@@ -73,7 +75,8 @@ export default function Body() {
       <ProductCard
         name="Hydro Flask"
         badge="Best Durable Classic Insulated Bottle"
-        href="https://amzn.to/4gDYH7k"
+        href="https://amzn.to/3SCVkVb"
+        images={['/products/insulated-tumblers/hydro-flask/1.jpg', '/products/insulated-tumblers/hydro-flask/2.jpg', '/products/insulated-tumblers/hydro-flask/3.jpg', '/products/insulated-tumblers/hydro-flask/4.jpg']}
         pros={['Proven insulation', 'Tough exterior', 'Good size range']}
         cons={['Premium price', 'Some lids require extra care to stay leak-proof']}
         bestFor="Outdoor park and event staff or anyone who wants a bottle that lasts years."
@@ -92,7 +95,8 @@ export default function Body() {
       <ProductCard
         name="Yeti Rambler"
         badge="Best Premium Rugged Option"
-        href="https://amzn.to/3SCVkVb"
+        href="https://amzn.to/4qIXUpr"
+        images={['/products/insulated-tumblers/yeti/1.jpg', '/products/insulated-tumblers/yeti/2.jpg', '/products/insulated-tumblers/yeti/3.jpg', '/products/insulated-tumblers/yeti/4.jpg', '/products/insulated-tumblers/yeti/5.jpg', '/products/insulated-tumblers/yeti/6.jpg', '/products/insulated-tumblers/yeti/7.jpg']}
         pros={['Outstanding insulation and durability', 'Rugged construction']}
         cons={['Higher price', 'Heavier than some alternatives']}
         bestFor="Demanding outdoor or event roles where gear takes abuse."
@@ -112,7 +116,8 @@ export default function Body() {
       <ProductCard
         name="Simple High-Volume Budget Option"
         badge="Best Affordable Workhorse"
-        href="https://amzn.to/4qIXUpr"
+        href="https://amzn.to/4zrKC4j"
+        images={['/products/insulated-tumblers/budget/1.jpg', '/products/insulated-tumblers/budget/2.jpg', '/products/insulated-tumblers/budget/3.jpg', '/products/insulated-tumblers/budget/4.jpg', '/products/insulated-tumblers/budget/5.jpg', '/products/insulated-tumblers/budget/6.jpg', '/products/insulated-tumblers/budget/7.jpg']}
         pros={['Lower cost', 'Adequate performance for most shifts']}
         cons={['Insulation and durability can be less consistent']}
         bestFor="Budget-conscious workers or secondary bottles."

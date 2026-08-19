@@ -35,7 +35,8 @@ export default function Body() {
       <ProductCard
         name="PackIt Freezable Lunch Bags"
         badge="Best Built-In Cooling"
-        href="https://amzn.to/4gp2lRj"
+        href="https://amzn.to/4gj26qZ"
+        images={['/products/lunch-bags/packit/1.jpg', '/products/lunch-bags/packit/2.jpg', '/products/lunch-bags/packit/3.jpg', '/products/lunch-bags/packit/4.jpg', '/products/lunch-bags/packit/5.jpg', '/products/lunch-bags/packit/6.jpg', '/products/lunch-bags/packit/7.jpg']}
         pros={['No separate ice packs needed', 'Convenient for people who forget them', 'Folds flat', 'Keeps food cold for hours when properly frozen']}
         cons={['Must remember to freeze it', 'Can be heavier when frozen', 'Capacity varies by model']}
         bestFor="Workers without consistent fridge access or anyone who wants a simple freeze-and-go system."
@@ -55,7 +56,8 @@ export default function Body() {
       <ProductCard
         name="Bentgo Systems"
         badge="Best Organized Meal Containers + Bag Options"
-        href="https://amzn.to/4gj26qZ"
+        href="https://amzn.to/46fnoAZ"
+        images={['/products/lunch-bags/bentgo/1.jpg', '/products/lunch-bags/bentgo/2.jpg', '/products/lunch-bags/bentgo/3.jpg', '/products/lunch-bags/bentgo/4.jpg', '/products/lunch-bags/bentgo/5.jpg', '/products/lunch-bags/bentgo/6.jpg', '/products/lunch-bags/bentgo/7.jpg']}
         pros={['Good organization and portion control', 'Solid insulation with ice packs', 'Practical pockets', 'Adult-friendly sizes available']}
         cons={['Containers and bags are often sold separately', 'Insulation still benefits from an ice pack']}
         bestFor="Meal-preppers who want food kept separate and a bag that fits the containers well."
@@ -75,7 +77,8 @@ export default function Body() {
       <ProductCard
         name="Large Insulated Tote Bags"
         badge="Best Capacity for Bigger Meals or Multiple Items"
-        href="https://amzn.to/46fnoAZ"
+        href="https://amzn.to/3Uremyh"
+        images={['/products/lunch-bags/insulated/1.jpg', '/products/lunch-bags/insulated/2.jpg', '/products/lunch-bags/insulated/3.jpg', '/products/lunch-bags/insulated/4.jpg', '/products/lunch-bags/insulated/5.jpg', '/products/lunch-bags/insulated/6.jpg', '/products/lunch-bags/insulated/7.jpg']}
         pros={['Higher capacity', 'Better for multi-meal days or larger containers', 'Often stronger insulation']}
         cons={['Bulkier', 'Can be overkill for simple single-meal days']}
         bestFor="Split shifts, long outdoor days, or anyone packing more than a basic sandwich and snack."
@@ -96,7 +99,8 @@ export default function Body() {
       <ProductCard
         name="Leak-Proof Containers"
         badge="The Foundation of Any System"
-        href="https://amzn.to/3Uremyh"
+        href="https://amzn.to/3SJdIf0"
+        images={['/products/lunch-bags/leak-proof/1.jpg', '/products/lunch-bags/leak-proof/2.jpg', '/products/lunch-bags/leak-proof/3.jpg', '/products/lunch-bags/leak-proof/4.jpg', '/products/lunch-bags/leak-proof/5.jpg', '/products/lunch-bags/leak-proof/6.jpg', '/products/lunch-bags/leak-proof/7.jpg']}
         pros={['Prevents spills and cross-contamination', 'Reusable and cost-effective long-term', 'Many sizes and compartment styles']}
         cons={['Glass is heavier', 'Cheap plastic lids can fail over time']}
         bestFor="Everyone — this is the base layer under any bag system."
@@ -116,7 +120,8 @@ export default function Body() {
       <ProductCard
         name="Long-Lasting Ice Packs"
         badge="Backup Cold Source"
-        href="https://amzn.to/3SJdIf0"
+        href="https://amzn.to/4x2WyYF"
+        images={['/products/lunch-bags/ice-packs/1.jpg', '/products/lunch-bags/ice-packs/2.jpg', '/products/lunch-bags/ice-packs/3.jpg', '/products/lunch-bags/ice-packs/4.jpg', '/products/lunch-bags/ice-packs/5.jpg', '/products/lunch-bags/ice-packs/6.jpg', '/products/lunch-bags/ice-packs/7.jpg']}
         pros={['Extends cold time', 'Flexible options fit more bags', 'Reusable']}
         cons={['Another item to freeze and track', 'Takes freezer space']}
         bestFor="Long shifts, hot environments, or as a backup with any bag system."

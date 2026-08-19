@@ -34,7 +34,8 @@ export default function Body() {
       <ProductCard
         name="Superfeet High Arch or Green"
         badge="Best Firm Supportive Option"
-        href="https://amzn.to/4igMA1k"
+        href="https://amzn.to/4qveZDa"
+        images={['/products/insoles/superfeet/1.jpg', '/products/insoles/superfeet/2.jpg', '/products/insoles/superfeet/3.jpg', '/products/insoles/superfeet/4.jpg', '/products/insoles/superfeet/5.jpg', '/products/insoles/superfeet/6.jpg', '/products/insoles/superfeet/7.jpg']}
         pros={['Strong arch support', 'Durable structure', 'Widely recommended for standing work']}
         cons={['Firm feel takes adjustment for some', 'Higher price than basic foam']}
         bestFor="People who need real arch support and prefer a structured feel over soft cushioning."
@@ -53,7 +54,8 @@ export default function Body() {
       <ProductCard
         name="PowerStep Pinnacle"
         badge="Best Balanced Support & Cushion"
-        href="https://amzn.to/4qveZDa"
+        href="https://amzn.to/4xbOWmS"
+        images={['/products/insoles/powerstep/1.jpg', '/products/insoles/powerstep/2.jpg', '/products/insoles/powerstep/3.jpg', '/products/insoles/powerstep/4.jpg', '/products/insoles/powerstep/5.jpg']}
         pros={['Good balance of support and cushion', 'Effective for standing fatigue', 'Solid durability']}
         cons={['May feel bulky in tighter shoes', 'Fit needs to be right']}
         bestFor="General all-day standing relief when you want both support and some softness."
@@ -72,7 +74,8 @@ export default function Body() {
       <ProductCard
         name="Walkhero or Dr. Scholl's Work Insoles"
         badge="Best Accessible Everyday Options"
-        href="https://amzn.to/4xbOWmS"
+        href="https://amzn.to/4g8phFy"
+        images={['/products/insoles/walkhero/1.jpg', '/products/insoles/walkhero/2.jpg', '/products/insoles/walkhero/3.jpg', '/products/insoles/walkhero/4.jpg', '/products/insoles/walkhero/5.jpg', '/products/insoles/walkhero/6.jpg']}
         pros={['Affordable', 'Easy to find', 'Immediate cushioning improvement for many users']}
         cons={['Support level is milder', 'May compress faster under heavy daily use']}
         bestFor="Budget-friendly first upgrade or temporary relief while testing higher-end options."
@@ -93,6 +96,7 @@ export default function Body() {
         name="Customizable Trim-to-Fit Options"
         badge="Best for Exact Fit"
         href="https://amzn.to/4bZPSlP"
+        images={['/products/insoles/trim-to-fit/1.jpg', '/products/insoles/trim-to-fit/2.jpg', '/products/insoles/trim-to-fit/3.jpg', '/products/insoles/trim-to-fit/4.jpg', '/products/insoles/trim-to-fit/5.jpg', '/products/insoles/trim-to-fit/6.jpg', '/products/insoles/trim-to-fit/7.jpg']}
         pros={['Better custom fit', 'Works across different shoe brands']}
         cons={['Requires careful trimming', 'Irreversible if cut too short']}
         bestFor="Anyone whose shoes have an unusual last or who has had fit issues with previous insoles."
