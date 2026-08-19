@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, ImageOff, Star, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+const AUTOPLAY_MS = 4500
 
 export interface ProductCardProps {
   /** Product name, e.g. "NICETOWN 100% Blackout Curtains" */
@@ -37,18 +39,39 @@ export function ProductCard({
   ctaLabel = 'Check Current Price on Amazon',
 }: ProductCardProps) {
   const [index, setIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
   const hasImages = images.length > 0
   const hasMultiple = images.length > 1
+  // Bumped on any manual nav so the autoplay interval restarts its countdown
+  // from that point rather than jumping again a moment later.
+  const [resetTick, setResetTick] = useState(0)
+  const imagesLength = images.length
 
+  useEffect(() => {
+    if (!hasMultiple || paused) return
+    const id = setInterval(() => {
+      setIndex(i => (i === imagesLength - 1 ? 0 : i + 1))
+    }, AUTOPLAY_MS)
+    return () => clearInterval(id)
+  }, [hasMultiple, paused, imagesLength, resetTick])
+
+  function goTo(i: number) {
+    setIndex(i)
+    setResetTick(t => t + 1)
+  }
   function prev() {
-    setIndex(i => (i === 0 ? images.length - 1 : i - 1))
+    goTo(index === 0 ? images.length - 1 : index - 1)
   }
   function next() {
-    setIndex(i => (i === images.length - 1 ? 0 : i + 1))
+    goTo(index === images.length - 1 ? 0 : index + 1)
   }
 
   return (
-    <div className="not-prose card overflow-hidden p-0 my-8">
+    <div
+      className="not-prose card overflow-hidden p-0 my-8"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
       <div className="relative aspect-[4/3] sm:aspect-[16/9] bg-secondary/30">
         {hasImages ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -93,7 +116,7 @@ export function ProductCard({
                 <button
                   key={i}
                   type="button"
-                  onClick={() => setIndex(i)}
+                  onClick={() => goTo(i)}
                   aria-label={`Show photo ${i + 1}`}
                   className={cn(
                     'h-1.5 w-1.5 rounded-full transition-colors',

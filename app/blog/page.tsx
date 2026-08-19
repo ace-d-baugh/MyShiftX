@@ -37,28 +37,38 @@ export default function BlogIndexPage() {
             {/* Lead post */}
             <Link
               href={`/blog/${lead.slug}`}
-              className="block card border-l-4 border-l-primary mb-10 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
+              className="block card overflow-hidden p-0 border-l-4 border-l-primary mb-10 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
             >
-              <div className="flex flex-wrap items-center gap-2 mb-3 text-xs">
-                <span className="badge bg-primary/15 text-primary">Latest</span>
-                {lead.tags.map(t => (
-                  <span key={t} className="text-text/40">{t}</span>
-                ))}
-              </div>
-              <h2 className="font-accent text-2xl md:text-3xl font-bold text-text mb-3 group-hover:text-primary transition-colors">
-                {lead.title}
-              </h2>
-              <p className="text-text/65 leading-relaxed mb-4">{lead.description}</p>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text/45">
-                <time dateTime={lead.publishedAt}>{formatPostDate(lead.publishedAt)}</time>
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  {lead.readingMinutes} min read
-                </span>
-                <span className="flex items-center gap-1 text-primary font-medium ml-auto">
-                  Read
-                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                </span>
+              {lead.images?.[0] && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={lead.images[0]}
+                  alt=""
+                  className="h-48 md:h-64 w-full object-cover"
+                />
+              )}
+              <div className="p-6">
+                <div className="flex flex-wrap items-center gap-2 mb-3 text-xs">
+                  <span className="badge bg-primary/15 text-primary">Latest</span>
+                  {lead.tags.map(t => (
+                    <span key={t} className="text-text/40">{t}</span>
+                  ))}
+                </div>
+                <h2 className="font-accent text-2xl md:text-3xl font-bold text-text mb-3 group-hover:text-primary transition-colors">
+                  {lead.title}
+                </h2>
+                <p className="text-text/65 leading-relaxed mb-4">{lead.description}</p>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text/45">
+                  <time dateTime={lead.publishedAt}>{formatPostDate(lead.publishedAt)}</time>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {lead.readingMinutes} min read
+                  </span>
+                  <span className="flex items-center gap-1 text-primary font-medium ml-auto">
+                    Read
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </div>
               </div>
             </Link>
 
@@ -68,21 +78,31 @@ export default function BlogIndexPage() {
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
-                  className="flex flex-col card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
+                  className="flex flex-col card overflow-hidden p-0 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
                 >
-                  <div className="flex flex-wrap gap-2 mb-2 text-[11px] text-text/40">
-                    {post.tags.map(t => <span key={t}>{t}</span>)}
-                  </div>
-                  <h2 className="font-accent text-xl font-bold text-text mb-2 group-hover:text-primary transition-colors">
-                    {post.title}
-                  </h2>
-                  <p className="text-sm text-text/60 leading-relaxed flex-1">{post.description}</p>
-                  <div className="flex items-center gap-3 text-xs text-text/45 mt-4 pt-3 border-t border-border">
-                    <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      {post.readingMinutes} min
-                    </span>
+                  {post.images?.[0] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={post.images[0]}
+                      alt=""
+                      className="h-40 w-full object-cover"
+                    />
+                  )}
+                  <div className="flex flex-col flex-1 p-5">
+                    <div className="flex flex-wrap gap-2 mb-2 text-[11px] text-text/40">
+                      {post.tags.map(t => <span key={t}>{t}</span>)}
+                    </div>
+                    <h2 className="font-accent text-xl font-bold text-text mb-2 group-hover:text-primary transition-colors">
+                      {post.title}
+                    </h2>
+                    <p className="text-sm text-text/60 leading-relaxed flex-1">{post.description}</p>
+                    <div className="flex items-center gap-3 text-xs text-text/45 mt-4 pt-3 border-t border-border">
+                      <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        {post.readingMinutes} min
+                      </span>
+                    </div>
                   </div>
                 </Link>
               ))}
