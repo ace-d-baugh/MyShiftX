@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, ImageOff, Star, ExternalLink } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ImageOff, Star, ExternalLink, Expand } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ImageLightbox } from './ImageLightbox'
 
 const AUTOPLAY_MS = 4500
 
@@ -40,6 +41,7 @@ export function ProductCard({
 }: ProductCardProps) {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
   const hasImages = images.length > 0
   const hasMultiple = images.length > 1
   // Bumped on any manual nav so the autoplay interval restarts its countdown
@@ -48,12 +50,12 @@ export function ProductCard({
   const imagesLength = images.length
 
   useEffect(() => {
-    if (!hasMultiple || paused) return
+    if (!hasMultiple || paused || lightboxOpen) return
     const id = setInterval(() => {
       setIndex(i => (i === imagesLength - 1 ? 0 : i + 1))
     }, AUTOPLAY_MS)
     return () => clearInterval(id)
-  }, [hasMultiple, paused, imagesLength, resetTick])
+  }, [hasMultiple, paused, lightboxOpen, imagesLength, resetTick])
 
   function goTo(i: number) {
     setIndex(i)
@@ -74,12 +76,22 @@ export function ProductCard({
     >
       <div className="relative aspect-[4/3] sm:aspect-[16/9] bg-secondary/30">
         {hasImages ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={images[index]}
-            alt={name}
-            className="h-full w-full object-cover"
-          />
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            aria-label={`View full-size photo of ${name}`}
+            className="group/img relative block h-full w-full cursor-zoom-in"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={images[index]}
+              alt={name}
+              className="h-full w-full object-cover"
+            />
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover/img:bg-black/20 group-hover/img:opacity-100">
+              <Expand className="w-6 h-6 text-white drop-shadow" />
+            </span>
+          </button>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-text/30">
             <ImageOff className="w-8 h-8" />
@@ -178,6 +190,17 @@ export function ProductCard({
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>
+
+      {hasImages && (
+        <ImageLightbox
+          images={images}
+          index={index}
+          onIndexChange={goTo}
+          alt={name}
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </div>
   )
 }
