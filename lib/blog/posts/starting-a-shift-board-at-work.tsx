@@ -121,7 +121,7 @@ export default function Body() {
       <ul>
         <li>
           <strong>Approve joiners individually.</strong> Somebody with the code should still be
-          checked against &ldquo;do I recognise this person as working here&rdquo;. It takes ten
+          checked against &ldquo;do I recognize this person as working here&rdquo;. It takes ten
           seconds and it is the whole security model.
         </li>
         <li>

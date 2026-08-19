@@ -2,7 +2,7 @@ export default function Body() {
   return (
     <>
       <p>
-        Modern scheduling software is good at building rotas, enforcing rules, and giving managers a dashboard. It is usually less good at the peer-to-peer problem: one worker needs a shift covered, another is willing and qualified, and both need a clean way to find each other and record the agreement.
+        Modern scheduling software is good at building schedules, enforcing rules, and giving managers a dashboard. It is usually less good at the peer-to-peer problem: one worker needs a shift covered, another is willing and qualified, and both need a clean way to find each other and record the agreement.
       </p>
 
       <p>
@@ -30,7 +30,7 @@ export default function Body() {
       </p>
 
       <p>
-        I’ve seen the same pattern in restaurants, hospitals, warehouses, and retail. The official system publishes the rota. The real cover work happens somewhere else — usually a group chat that is also used for memes, shift gossip, and last-minute “who’s on tonight?” questions. Important posts disappear. Soft yeses go unconfirmed. The official system never sees the agreement until someone remembers to file the paperwork.
+        I’ve seen the same pattern in restaurants, hospitals, warehouses, and retail. The official system publishes the schedule. The real cover work happens somewhere else — usually a group chat that is also used for memes, shift gossip, and last-minute “who’s on tonight?” questions. Important posts disappear. Soft yeses go unconfirmed. The official system never sees the agreement until someone remembers to file the paperwork.
       </p>
 
       <p>
@@ -76,7 +76,7 @@ export default function Body() {
       </p>
 
       <ol>
-        <li>The official scheduling system for the published rota, hours tracking, and final approval.</li>
+        <li>The official scheduling system for the published schedule, hours tracking, and final approval.</li>
         <li>A dedicated board (or equivalent structured tool) for offering, requesting, and confirming cover.</li>
         <li>Clear rules about when a trade is considered locked and who files the paperwork.</li>
       </ol>
@@ -111,7 +111,7 @@ export default function Body() {
       </p>
 
       <p>
-        The practical test is simple: when someone needs a shift covered, do they open the official tool or do they open a chat? If the answer is still the chat, the software stack is not finished yet. Closing that gap is what turns a published rota into a system people can actually use to keep the floor staffed without constant last-minute stress.
+        The practical test is simple: when someone needs a shift covered, do they open the official tool or do they open a chat? If the answer is still the chat, the software stack is not finished yet. Closing that gap is what turns a published schedule into a system people can actually use to keep the floor staffed without constant last-minute stress.
       </p>
     </>
   )

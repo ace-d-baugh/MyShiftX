@@ -69,7 +69,7 @@ export default function Body() {
       <h2>Review Them Every Couple of Months</h2>
 
       <p>
-        Your tolerance changes. A limit that worked in a quiet season may be too tight — or too loose — when the rota gets heavier. A short review every eight to ten weeks keeps the rules matched to your actual life rather than to an earlier version of it.
+        Your tolerance changes. A limit that worked in a quiet season may be too tight — or too loose — when the schedule gets heavier. A short review every eight to ten weeks keeps the rules matched to your actual life rather than to an earlier version of it.
       </p>
 
       <p>

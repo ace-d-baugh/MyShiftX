@@ -2,7 +2,7 @@ export default function Body() {
   return (
     <>
       <p>
-        Re-typing a week of shifts from a paper rota or a screenshot is slow and easy to get wrong. Photographing the schedule and letting the system pull the times into your calendar is faster — provided you treat the result as a draft, not as gospel.
+        Re-typing a week of shifts from a paper schedule or a screenshot is slow and easy to get wrong. Photographing the schedule and letting the system pull the times into your calendar is faster — provided you treat the result as a draft, not as gospel.
       </p>
 
       <p>
@@ -28,7 +28,7 @@ export default function Body() {
       <ul>
         <li>Is this actually your row? On a full-team schedule the system can mis-identify lines that look similar.</li>
         <li>Are the dates correct? A shifted week or a misread day number is the most common error.</li>
-        <li>Are the start and end times right? Handwritten rotas and low-contrast screenshots produce the most mistakes here.</li>
+        <li>Are the start and end times right? Handwritten schedules and low-contrast screenshots produce the most mistakes here.</li>
         <li>Do any of the imported shifts overlap with something already on your calendar? The system should flag this; still look.</li>
         <li>Is the role or station correct if it appears? A wrong role can cause problems later if the shift is offered or swapped.</li>
       </ul>
@@ -40,7 +40,7 @@ export default function Body() {
       <h2>When the Photo Is Hard to Read</h2>
 
       <p>
-        Bad lighting, crumpled paper, or a screenshot with low resolution will produce more errors. If the extract looks messy, fix the source rather than correcting every field by hand: take the photo again square-on, in better light, or crop more tightly to your section of the rota.
+        Bad lighting, crumpled paper, or a screenshot with low resolution will produce more errors. If the extract looks messy, fix the source rather than correcting every field by hand: take the photo again square-on, in better light, or crop more tightly to your section of the schedule.
       </p>
 
       <p>
@@ -57,10 +57,10 @@ export default function Body() {
         I’ve watched people miss shifts because the photo import went into one calendar while they were still looking at another. One source of truth removes that class of error.
       </p>
 
-      <h2>After a Rota Change</h2>
+      <h2>After a Schedule Change</h2>
 
       <p>
-        Published rotas get amended. When your workplace issues a revision, re-import or manually update the affected days rather than assuming the old extract is still current. A calendar that is three days out of date is more dangerous than no calendar at all, because you will trust it.
+        Published schedules get amended. When your workplace issues a revision, re-import or manually update the affected days rather than assuming the old extract is still current. A calendar that is three days out of date is more dangerous than no calendar at all, because you will trust it.
       </p>
 
       <p>
@@ -73,7 +73,7 @@ export default function Body() {
         <li>Review every import before confirming.</li>
         <li>Re-take the photo if the extract looks messy.</li>
         <li>Keep only one authoritative calendar.</li>
-        <li>Re-import or update when the official rota changes.</li>
+        <li>Re-import or update when the official schedule changes.</li>
         <li>Spot-check a couple of shifts against the original paper or screenshot after import.</li>
       </ul>
 
@@ -125,7 +125,7 @@ export default function Body() {
       </p>
 
       <p>
-        Treat the extracted shifts as a draft. Check the row, the dates, the times, any overlaps, and the role if it appears. Keep one calendar that wins. Re-import when the official rota changes. Do those things and the feature becomes one of the highest-leverage time-savers available to people on rotating schedules.
+        Treat the extracted shifts as a draft. Check the row, the dates, the times, any overlaps, and the role if it appears. Keep one calendar that wins. Re-import when the official schedule changes. Do those things and the feature becomes one of the highest-leverage time-savers available to people on rotating schedules.
       </p>
 
       <p>
@@ -133,7 +133,7 @@ export default function Body() {
       </p>
 
       <p>
-        The photo-to-calendar feature on MyShiftX is built for exactly this workflow: photograph the rota or screenshot the official app, review the extracted shifts, and confirm them onto your calendar. Free accounts get four imports a month — enough for most people to stay current. Pro removes the monthly limit and adds calendar export so the same shifts can sync into Google Calendar or Apple Calendar without re-typing.
+        The photo-to-calendar feature on MyShiftX is built for exactly this workflow: photograph the schedule or screenshot the official app, review the extracted shifts, and confirm them onto your calendar. Free accounts get four imports a month — enough for most people to stay current. Pro removes the monthly limit and adds calendar export so the same shifts can sync into Google Calendar or Apple Calendar without re-typing.
       </p>
     </>
   )

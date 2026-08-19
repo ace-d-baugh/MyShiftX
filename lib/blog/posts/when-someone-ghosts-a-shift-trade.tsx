@@ -128,7 +128,7 @@ export default function Body() {
         </li>
       </ol>
 
-      <h2>Afterwards</h2>
+      <h2>Afterward</h2>
       <p>
         Once the immediate problem is solved, there is a judgement call about what to do with the
         information. A few principles that hold up:

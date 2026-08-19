@@ -86,7 +86,7 @@ export default function Body() {
       <h2>Adapting the Template</h2>
 
       <p>
-        Different workplaces will emphasise different rules. Healthcare may put more weight on qualification and unit eligibility. Restaurants may emphasise station sign-offs and confirmation speed. Multi-site operations may stress location filters and verification. The core structure remains the same; the emphasis shifts to match the real risks.
+        Different workplaces will emphasize different rules. Healthcare may put more weight on qualification and unit eligibility. Restaurants may emphasize station sign-offs and confirmation speed. Multi-site operations may stress location filters and verification. The core structure remains the same; the emphasis shifts to match the real risks.
       </p>
 
       <p>

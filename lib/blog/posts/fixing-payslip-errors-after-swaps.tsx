@@ -2,7 +2,7 @@ export default function Body() {
   return (
     <>
       <p>
-        A salary is largely self-checking. A rota with premiums, swaps, overtime thresholds, and multiple sites is not. Errors cluster in predictable places. Knowing where to look turns a vague feeling that something is wrong into a specific, fixable claim.
+        A salary is largely self-checking. A schedule with premiums, swaps, overtime thresholds, and multiple sites is not. Errors cluster in predictable places. Knowing where to look turns a vague feeling that something is wrong into a specific, fixable claim.
       </p>
 
       <p>

@@ -23,7 +23,7 @@ export default function Body() {
       <p>
         You cannot check a payslip against nothing. The single highest-value habit here is having
         an independent record of what you actually worked, made at the time rather than
-        reconstructed afterwards.
+        reconstructed afterward.
       </p>
       <p>
         It does not need to be elaborate. For each shift: the date, start and finish, the position,
@@ -86,7 +86,7 @@ export default function Body() {
       <p>
         <strong>The pickup logged as coverage.</strong> On some systems an extra shift recorded as
         covering somebody else is treated differently from an extra shift recorded as additional
-        hours, and only one of them counts towards an overtime threshold.
+        hours, and only one of them counts toward an overtime threshold.
       </p>
       <p>
         <strong>The shift attributed to the wrong person entirely.</strong> Rarer, but it happens

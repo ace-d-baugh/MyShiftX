@@ -12,7 +12,7 @@ export default function Body() {
       <h2>Multi-Property and Multi-Zone Reality</h2>
 
       <p>
-        A shift at a different hotel, land, or venue can look identical on the rota and still require local knowledge, different transport, or a different team culture. Filters by property and role are not optional extras; they are how you stop people claiming shifts they cannot usefully work.
+        A shift at a different hotel, land, or venue can look identical on the schedule and still require local knowledge, different transport, or a different team culture. Filters by property and role are not optional extras; they are how you stop people claiming shifts they cannot usefully work.
       </p>
 
       <p>
@@ -104,7 +104,7 @@ export default function Body() {
       <h2>Bottom Line</h2>
 
       <p>
-        These workplaces already run on complicated rotas. A board that respects that complexity — rather than flattening everything into “who’s free?” — is the one that lasts past the first busy season.
+        These workplaces already run on complicated schedules. A board that respects that complexity — rather than flattening everything into “who’s free?” — is the one that lasts past the first busy season.
       </p>
 
       <p>

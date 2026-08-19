@@ -63,7 +63,7 @@ export default function Body() {
         <li>Set a short-term maximum (for example, no extra shifts for the next two weeks).</li>
         <li>Protect at least one full rest block with no exceptions.</li>
         <li>Review the personal rules and temporarily tighten them.</li>
-        <li>If the money pressure is real, prioritise higher-premium shifts over volume.</li>
+        <li>If the money pressure is real, prioritize higher-premium shifts over volume.</li>
         <li>Tell one trusted person you are dialling back so the social expectation adjusts.</li>
       </ul>
 

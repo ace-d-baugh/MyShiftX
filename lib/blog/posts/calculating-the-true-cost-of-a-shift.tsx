@@ -6,7 +6,7 @@ export default function Body() {
       </p>
 
       <p>
-        Two shifts of identical length can differ by a full day’s effective pay once you add the things the rota does not show. People who trade a lot learn this the hard way. The rest learn it the first time they take a “good” shift and feel poorer afterwards.
+        Two shifts of identical length can differ by a full day’s effective pay once you add the things the schedule does not show. People who trade a lot learn this the hard way. The rest learn it the first time they take a “good” shift and feel poorer afterward.
       </p>
 
       <p>
@@ -30,7 +30,7 @@ export default function Body() {
       <h2>Travel Time and Cost</h2>
 
       <p>
-        A shift at a different property is longer than the hours on the rota. Forty minutes each way is an extra hour and twenty minutes of your day, unpaid. Parking charges, surge pricing, or a taxi when the last bus has gone all come out of the same pay packet.
+        A shift at a different property is longer than the hours on the schedule. Forty minutes each way is an extra hour and twenty minutes of your day, unpaid. Parking charges, surge pricing, or a taxi when the last bus has gone all come out of the same pay packet.
       </p>
 
       <p>
@@ -48,7 +48,7 @@ export default function Body() {
       </p>
 
       <p>
-        If you have caring responsibilities, a second job, or study, the cost of a disrupted rest day is higher still. The rota does not see that cost. You will feel it.
+        If you have caring responsibilities, a second job, or study, the cost of a disrupted rest day is higher still. The schedule does not see that cost. You will feel it.
       </p>
 
       <p>
@@ -80,7 +80,7 @@ export default function Body() {
       </ol>
 
       <p>
-        You do not need a spreadsheet. A thirty-second version of the list is enough to catch the shifts that look good on the board and feel bad afterwards.
+        You do not need a spreadsheet. A thirty-second version of the list is enough to catch the shifts that look good on the board and feel bad afterward.
       </p>
 
       <p>
