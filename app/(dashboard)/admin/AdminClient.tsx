@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/Input'
 import { slugify } from '@/lib/slug'
 import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/ui/Badge'
+import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { BOARD_ROLE_LABEL, GLOBAL_ROLE_LABEL } from '@/lib/roles'
@@ -53,6 +54,7 @@ export interface UserRow {
    *  handful of pre-migration rows may not have been backfilled. */
   first_name: string | null
   last_name: string | null
+  avatar_url: string | null
   role: string
   is_active: boolean
   created_at: string
@@ -699,6 +701,10 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId, pos
                 Admins show the admin icon here instead, same override as the
                 Charts tab and the legend key. */}
             <MembershipIcon user={u} />
+
+            {/* Identity, after the two meaning-icons above — those say role
+                and billing tier, this says who the person actually is. */}
+            <Avatar avatarUrl={u.avatar_url} displayName={formattedName || u.display_name} size={20} />
 
             <p className={cn('font-medium truncate', u.is_active ? 'text-text' : 'text-text/40 line-through')}>
               {formattedName || <span className="italic text-text/40">No display name</span>}

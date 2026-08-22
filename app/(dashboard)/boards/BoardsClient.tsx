@@ -10,6 +10,7 @@ import {
   LogOut, UserMinus, Flag, UserCog, UserPlus, AlertTriangle,
 } from 'lucide-react'
 import { BOARD_ROLE_LABEL } from '@/lib/roles'
+import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { FlagModal } from '@/components/features/FlagModal'
@@ -355,6 +356,7 @@ export function BoardsClient({ managedBoards: initial, currentUserId, isAdmin, b
               </span>
             )
           })()}
+          <Avatar avatarUrl={member.avatarUrl} displayName={member.displayName} size={20} />
           <span className="font-medium text-text truncate">
             {member.displayName ?? <span className="italic text-text/40">No name</span>}
           </span>
