@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import {
   HelpCircle, ChevronDown, Send, X, CheckCircle, ArrowRight, Plus, Compass,
   LayoutGrid, UserPlus, MessageSquare, Layers,
-  HeartHandshake as Handshake, Crown, Award, UserRound,
+  HeartHandshake as Handshake, Crown, Award, UserRound, Share2,
   Bell, Monitor, Laptop, Smartphone, CalendarDays, Camera,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -336,6 +336,7 @@ export function HelpClient({ userEmail, importEnabled }: HelpClientProps) {
                 { Icon: Handshake, desc: 'I Can Help' },
                 { Icon: MessageSquare, desc: 'Comments' },
                 { Icon: Send,      desc: 'Message' },
+                { Icon: Share2,    desc: 'Share (your own posts)' },
               ].map(({ Icon, desc }) => (
                 <div key={desc} className="flex items-center gap-2 min-w-0">
                   <span className="shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">

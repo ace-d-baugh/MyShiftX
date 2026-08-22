@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -10,7 +10,7 @@ import { getSettings } from '@/lib/settings'
 import { slugify } from '@/lib/slug'
 import {
   Clock, LayoutGrid, User, Flag, Pencil, Trash2, EyeOff,
-  MoreVertical, MessageSquare, Send, ChevronDown, Layers,
+  MoreVertical, MessageSquare, Send, ChevronDown, Layers, Share2,
 } from 'lucide-react'
 import { unpostShift, dissolveBundle } from '@/app/actions/posts'
 import { bundleBreakupWarning } from '@/lib/bundles'
@@ -19,6 +19,8 @@ import { FlagModal } from '@/components/features/FlagModal'
 import { CommentSection } from '@/components/features/CommentSection'
 import { ClaimSection, ClaimPill, InterestedPill, type MyClaim, type PendingClaim } from '@/components/features/ClaimSection'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { ShareHandler } from '@/components/features/ShareHandler'
+import { buildShiftShareData, wallPostShareUrl } from '@/lib/share/buildWallPostShare'
 import { isSampleId } from '@/lib/tour/sample-data'
 import { cn } from '@/lib/utils'
 
@@ -83,12 +85,18 @@ export function ShiftCard({
   useEffect(() => setMounted(true), [])
   const [openCommentsTick, setOpenCommentsTick] = useState(0)
   const [messageTick, setMessageTick] = useState(0)
+  const [shareTick, setShareTick] = useState(0)
   const [claimsOpen, setClaimsOpen] = useState(false)
 
   const isOwner = currentUserId && shift.user_id === currentUserId
   const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>('12h')
   const [tz, setTz] = useState('America/New_York')
   useEffect(() => { const s = getSettings(); setTimeFormat(s.timeFormat); setTz(s.timezone) }, [])
+
+  const shareData = useMemo(
+    () => buildShiftShareData(shift, tz, timeFormat),
+    [shift, tz, timeFormat]
+  )
 
   // Close menu on any scroll
   const menuOpen = !!menuPos
@@ -292,6 +300,7 @@ export function ShiftCard({
           ownerUserId={shift.user_id}
           openCommentsTick={openCommentsTick}
           messageTick={messageTick}
+          onShare={() => setShareTick(t => t + 1)}
           showInterest={false}
           leadingAction={
             isOwner ? (
@@ -377,6 +386,9 @@ export function ShiftCard({
             {isOwner && (
               <>
                 <div className="my-1 border-t border-border" />
+                <button className={menuItemCls} onClick={() => { setShareTick(t => t + 1); setMenuPos(null) }}>
+                  <Share2 className="w-3.5 h-3.5 shrink-0" /> Share
+                </button>
                 <button className={menuItemCls} onClick={() => { router.push(`/wall/edit-shift/${shift.id}`); setMenuPos(null) }}>
                   <Pencil className="w-3.5 h-3.5 shrink-0" /> Edit
                 </button>
@@ -420,6 +432,10 @@ export function ShiftCard({
         onConfirm={handleDelete}
         onCancel={() => setConfirmRemove(false)}
       />
+
+      {/* Off-screen capture node only needs to exist for the owner — Share
+          isn't offered to anyone else, so there's nothing to render it for. */}
+      {isOwner && <ShareHandler data={shareData} url={wallPostShareUrl(shift.id)} tick={shareTick} />}
     </>
   )
 }
