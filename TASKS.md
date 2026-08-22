@@ -1351,6 +1351,33 @@ File-by-file diff of every surface named in `PORTABLE_FEATURES_2.md`, plus a liv
 
 ---
 
+## 🔀 WDWShiftX → MyShiftX Port #3 — Wall sharing + Profile pictures (2026-08-20 → 2026-08-21)
+
+Items 20–26 of `PORTABLE_FEATURES_2.md`. Commit `9d30910` (re-add join-a-board via invite code) deliberately excluded — MyShiftX's board-join flow already works that way.
+
+### ✅ Sequenced prep — #21, #22, #23 — COMPLETE 2026-08-22
+Request-form Board field moved above Title (matching PostShiftForm); poster name grown `text-xs → text-lg` with a `w-3 → w-4` icon on both cards; mobile name moved to its own row below date/time, taking the accordion chevron with it; mobile date/time row now flush; CommentSection divider margin halved. Done *before* avatars on purpose, per the doc — a 12px generic icon reads fine, a real photo needs room. The sm+ chevron keeps the `data-tour` instrumentation; the mobile one is deliberately uninstrumented since both drive the same toggle and only one is ever visible.
+
+### ✅ #20 Wall post sharing — COMPLETE 2026-08-22
+Owner-only Share inline (in the Message pill's spot, empty on your own post) and in the ⋮ menu, on both card types. Off-screen branded card → `html-to-image` → `navigator.share()` with image + text + `/wall?post=<id>`, degrading to text+link, then to a copy/download modal. Deep link switches tab, clears filters, expands the day-group, scrolls to and ring-highlights the card; silent no-op if the post isn't visible to that viewer.
+
+**Re-derived, not copied** (the doc's explicit warning): the image reads accent and badge colors live off the DOM at capture time. Verified first that MyShiftX's `--color-primary/-info/-success/-accent/-text` and all five `Badge.tsx` class strings match what the capture code reads — they do, so the image tracks whichever of the 8 themes the poster has active. `?post=` was threaded *alongside* the existing `getMembership`/`isProTier`/`liveWall` plumbing, not in place of it. New dep: `html-to-image`.
+
+### ✅ #24, #25, #26 Profile pictures — COMPLETE 2026-08-22
+**Storage** built fresh against MyShiftX's own project (first bucket here): `avatars`, public-read so members see each other's photo in-card and in the lightbox, writes scoped to `(storage.foldername(name))[1] = auth.uid()::text`. `users.avatar_url` + its column-level grant land in the **same** migration — this table uses per-column grants, so a column without one fails the whole query for every reader. Migration written strictly additive (`ON CONFLICT DO NOTHING`, `ADD COLUMN IF NOT EXISTS`, and `DROP POLICY IF EXISTS` only on policies it creates); post-apply check confirmed `public.users` kept its original 26 columns and 2 policies.
+
+**Rollout**: Wall cards (desktop + mobile), Profile, Comments (rows + interested list), Messages (picker, list, chat header, toast), Boards, Overlord Users tab. On Boards and Overlord the avatar sits *between* the role icon and the name — those icons mean role/billing tier, not identity.
+
+**⚠️ The SECURITY DEFINER grant gotcha was real here, not hypothetical.** All three RPCs (`get_conversations`, `get_messageable_users`, `get_users_admin`) carried explicit non-default ACLs — `authenticated` + `service_role`, **not** `PUBLIC`/`anon` — set by `20260719151000_function_execute_lockdown.sql`. Postgres can't `CREATE OR REPLACE` a `RETURNS TABLE` shape, and `DROP` resets EXECUTE to `PUBLIC`, so recreating them without reissuing would have silently re-exposed `get_users_admin()` (which returns a row for *every* user) to anonymous callers. Both migrations reissue that exact `REVOKE`/`GRANT` pair. Verified after applying: `anon` EXECUTE false on all three, plus six other locked-down RPCs spot-checked unchanged. `get_users_admin()` was re-derived from MyShiftX's live definition — this fork returns `membership`/`billing_cycle` that WDW's does not.
+
+**#26 contrast re-measured against MyShiftX's own light theme**, as the doc insists — and it reproduces exactly. Against `bg-primary-light`, every tint token fails WCAG AA 4.5:1: `success` **1.26:1**, `info` 1.36:1, `warning` 1.54:1, `accent` 1.71:1, `primary` 2.28:1. The fallback letter now always uses `--color-text`, measured **11.45:1** on the same background. (WDW reported 1.26:1 → 11.54:1; independently measured here, not assumed.) `tintClassName` still colors the generic icon fallback, just never the letter.
+
+New dep: `react-easy-crop`. Degrades cleanly as required — `Avatar`'s `avatarUrl` is optional and nullable and all 13 call sites pass a nullable value, so an un-extended query renders the fallback rather than crashing.
+
+Type-check, lint, and full build clean throughout. Not exercised live in-browser — same missing-test-credentials limitation as the earlier ports; the share capture, the crop/upload round-trip, and the lightbox are the parts most worth a `/verify` pass.
+
+---
+
 ## Ongoing / Maintenance
 
 | Task | Who | Notes |
