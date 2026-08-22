@@ -29,6 +29,7 @@ export interface Database {
           phone_number: string | null
           notify_via_email: boolean
           notify_via_sms: boolean
+          avatar_url: string | null
           onboarding_dismissed_at: string | null
           role: GlobalRole
           membership: Membership
@@ -56,6 +57,7 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
+          avatar_url?: string | null
           onboarding_dismissed_at?: string | null
           role?: GlobalRole
           membership?: Membership
@@ -83,6 +85,7 @@ export interface Database {
           phone_number?: string | null
           notify_via_email?: boolean
           notify_via_sms?: boolean
+          avatar_url?: string | null
           onboarding_dismissed_at?: string | null
           role?: GlobalRole
           membership?: Membership
