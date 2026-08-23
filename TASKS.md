@@ -1376,6 +1376,15 @@ New dep: `react-easy-crop`. Degrades cleanly as required — `Avatar`'s `avatarU
 
 Type-check, lint, and full build clean throughout. Not exercised live in-browser — same missing-test-credentials limitation as the earlier ports; the share capture, the crop/upload round-trip, and the lightbox are the parts most worth a `/verify` pass.
 
+### Port #4: Overlord panel Clear Filters + inactive-user count fixes (2026-08-23)
+
+Two small fixes from WDWShiftX's `PORTABLE_FEATURES_2.md` items 27–28, no schema/RPC changes:
+
+- **Clear Filters (item 27):** Added a Clear Filters link to both the Boards and Users tabs' sticky filter header row in `AdminClient.tsx`, matching the Wall's existing convention exactly (`text-warning`, small `X` icon, only visible when a filter on that tab is active). `boardsHasActiveFilters`/`clearBoardFilters` cover `boardSearch`/`boardStatusFilter`; `usersHasActiveFilters`/`clearUserFilters` cover `userSearch`/`filterRole`/`zeroBoardsOnly`.
+- **Inactive-user count leaks (item 28):** MyShiftX's `filteredUsers` already excluded inactive users correctly (the WDW bug wasn't present there), but two derived counts weren't: `zeroBoardsCount` counted inactive users toward the Boardless pill, and the Users tab's header badge used the raw `users.length` instead of an active-only count. Fixed `zeroBoardsCount` to filter `u.is_active`, and added `activeUserCount` for the tab badge.
+
+Type-check and lint clean. Not exercised live in-browser — no admin test credentials available in this environment; verify Clear Filters appears/works on both tabs and that deactivating a user drops it from the default count/Boardless pill before considering this done.
+
 ---
 
 ## Ongoing / Maintenance
