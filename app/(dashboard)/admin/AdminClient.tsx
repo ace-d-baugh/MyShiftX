@@ -217,7 +217,14 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId, pos
   const [userSort, setUserSort] = useState<'asc' | 'desc'>('asc')
   const [nameFormat, setNameFormat] = useState<NameFormat>('first-last')
   const [membershipFilters, setMembershipFilters] = useState<Set<MembershipFilterKey>>(new Set())
+  // Fixed + portalled (see membershipDropdownPos below) rather than the
+  // absolute-inside-relative pattern the Wall's own Board dropdown uses --
+  // this one lives inside the Filters panel's grid-rows collapse-to-animate
+  // wrapper, whose overflow-hidden (required for the height transition) was
+  // clipping the popover at the panel's bottom edge before it could open
+  // past it, same trap the row ⋮ menus below work around.
   const [membershipDropdownOpen, setMembershipDropdownOpen] = useState(false)
+  const [membershipDropdownPos, setMembershipDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null)
   const membershipDropdownRef = useRef<HTMLDivElement>(null)
 
   // Boards tab filters
@@ -377,14 +384,18 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId, pos
     return () => document.removeEventListener('scroll', close, { capture: true })
   }, [rowMenu])
 
+  // Portalled to document.body (see membershipDropdownPos above), so a
+  // fixed inset-0 click-catcher inside the portal itself handles outside
+  // clicks (below, alongside the row menus) instead of a ref-containment
+  // check here -- the popover's DOM nodes no longer live inside
+  // membershipDropdownRef's subtree, so contains() would misfire on every
+  // click inside the popover, not just outside it. Same "can't track the
+  // button on scroll" trap as the row menus, so it closes on scroll too.
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (membershipDropdownRef.current && !membershipDropdownRef.current.contains(e.target as Node)) {
-        setMembershipDropdownOpen(false)
-      }
-    }
-    if (membershipDropdownOpen) document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    if (!membershipDropdownOpen) return
+    const close = () => setMembershipDropdownOpen(false)
+    document.addEventListener('scroll', close, { passive: true, capture: true })
+    return () => document.removeEventListener('scroll', close, { capture: true })
   }, [membershipDropdownOpen])
 
   const toggleMembershipFilter = (key: MembershipFilterKey) => {
@@ -481,11 +492,12 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId, pos
     setBoardStatusFilter('')
   }
 
-  const usersHasActiveFilters = !!userSearch.trim() || !!filterRole || zeroBoardsOnly
+  const usersHasActiveFilters = !!userSearch.trim() || !!filterRole || zeroBoardsOnly || membershipFilters.size > 0
   const clearUserFilters = () => {
     setUserSearch('')
     setFilterRole('')
     setZeroBoardsOnly(false)
+    setMembershipFilters(new Set())
   }
 
   const sortedBoards = useMemo(
@@ -1136,11 +1148,22 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId, pos
                       <option value="Inactive">Inactive</option>
                     </select>
 
-                    {/* Membership multi-select dropdown — MyShiftX-specific */}
+                    {/* Membership multi-select dropdown — MyShiftX-specific.
+                        Trigger only; the popover itself is portalled (see
+                        membershipDropdownPos) so the Filters panel's
+                        collapse-animation overflow-hidden can't clip it. */}
                     <div ref={membershipDropdownRef} className="relative">
                       <button
                         type="button"
-                        onClick={() => setMembershipDropdownOpen(o => !o)}
+                        onClick={() => {
+                          if (membershipDropdownOpen) {
+                            setMembershipDropdownOpen(false)
+                            return
+                          }
+                          const r = membershipDropdownRef.current?.getBoundingClientRect()
+                          if (r) setMembershipDropdownPos({ top: r.bottom + 4, left: r.left, width: r.width })
+                          setMembershipDropdownOpen(true)
+                        }}
                         className="input text-sm h-9 w-full flex items-center justify-between gap-2 cursor-pointer"
                       >
                         <span className="truncate text-left">
@@ -1152,47 +1175,6 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId, pos
                         </span>
                         <ChevronDown className={cn('w-4 h-4 shrink-0 text-text/40 transition-transform', membershipDropdownOpen && 'rotate-180')} />
                       </button>
-
-                      {membershipDropdownOpen && (
-                        <div className="absolute z-50 top-full left-0 mt-1 w-full min-w-[200px] bg-card border border-border rounded-lg shadow-lg py-1">
-                          <button
-                            type="button"
-                            onClick={() => setMembershipFilters(new Set())}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-primary-light/40 transition-colors min-h-0 min-w-0"
-                          >
-                            <span className={cn('w-4 h-4 rounded border shrink-0 flex items-center justify-center', membershipFilters.size === 0 ? 'bg-primary border-primary' : 'border-border bg-background')}>
-                              {membershipFilters.size === 0 && <Check className="w-2.5 h-2.5 text-white" />}
-                            </span>
-                            <span className="font-medium">All Memberships</span>
-                          </button>
-
-                          {membershipFilters.size > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => setMembershipFilters(new Set())}
-                              className="w-full flex items-center px-3 py-1 text-xs text-primary hover:text-primary/70 transition-colors min-h-0 min-w-0"
-                            >
-                              Clear selection
-                            </button>
-                          )}
-
-                          <div className="h-px bg-border mx-2 my-1" />
-
-                          {MEMBERSHIP_OPTIONS.map(o => (
-                            <button
-                              key={o.key}
-                              type="button"
-                              onClick={() => toggleMembershipFilter(o.key)}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-primary-light/40 transition-colors min-h-0 min-w-0"
-                            >
-                              <span className={cn('w-4 h-4 rounded border shrink-0 flex items-center justify-center', membershipFilters.has(o.key) ? 'bg-primary border-primary' : 'border-border bg-background')}>
-                                {membershipFilters.has(o.key) && <Check className="w-2.5 h-2.5 text-white" />}
-                              </span>
-                              <span className="truncate">{o.label}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -1390,6 +1372,59 @@ export function AdminClient({ boards: initBoards, users: initUsers, adminId, pos
             </>
           )}
         </Modal>
+      )}
+
+      {/* ── Membership filter popover — fixed + portalled, same reason as
+          the row menus below: its trigger sits inside the Filters panel's
+          grid-rows collapse-animation wrapper, whose overflow-hidden clips
+          anything absolutely positioned past the panel's own bottom edge. */}
+      {mounted && membershipDropdownOpen && membershipDropdownPos && createPortal(
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setMembershipDropdownOpen(false)} />
+          <div
+            role="menu"
+            style={{ position: 'fixed', top: membershipDropdownPos.top, left: membershipDropdownPos.left, width: membershipDropdownPos.width }}
+            className="min-w-[200px] bg-card border border-border rounded-lg shadow-xl z-50 py-1"
+          >
+            <button
+              type="button"
+              onClick={() => setMembershipFilters(new Set())}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-primary-light/40 transition-colors min-h-0 min-w-0"
+            >
+              <span className={cn('w-4 h-4 rounded border shrink-0 flex items-center justify-center', membershipFilters.size === 0 ? 'bg-primary border-primary' : 'border-border bg-background')}>
+                {membershipFilters.size === 0 && <Check className="w-2.5 h-2.5 text-white" />}
+              </span>
+              <span className="font-medium">All Memberships</span>
+            </button>
+
+            {membershipFilters.size > 0 && (
+              <button
+                type="button"
+                onClick={() => setMembershipFilters(new Set())}
+                className="w-full flex items-center px-3 py-1 text-xs text-primary hover:text-primary/70 transition-colors min-h-0 min-w-0"
+              >
+                Clear selection
+              </button>
+            )}
+
+            <div className="h-px bg-border mx-2 my-1" />
+
+            {MEMBERSHIP_OPTIONS.map(o => (
+              <button
+                key={o.key}
+                type="button"
+                onClick={() => toggleMembershipFilter(o.key)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-primary-light/40 transition-colors min-h-0 min-w-0"
+              >
+                <span className={cn('w-4 h-4 rounded border shrink-0 flex items-center justify-center', membershipFilters.has(o.key) ? 'bg-primary border-primary' : 'border-border bg-background')}>
+                  {membershipFilters.has(o.key) && <Check className="w-2.5 h-2.5 text-white" />}
+                </span>
+                <span className="truncate">{o.label}</span>
+              </button>
+            ))}
+          </div>
+        </>,
+        document.body
       )}
 
       {/* ── Row ⋮ menus — fixed + portalled so a card can't clip them ────── */}
