@@ -5,21 +5,21 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually carry through a full shift.
+          Disclosure: this post contains affiliate links. MyShiftX may earn a small commission on
+          purchases made through them, at no cost to you.
         </em>
       </p>
       <p>
-        Coffee that goes lukewarm by the second break, water that turns warm and unappealing, or a
-        drink that spills in a locker or on the floor &mdash; these are small frustrations that add
-        up on long shifts. Theme park, restaurant, theater, and event staff need drinkware that
-        keeps beverages at the right temperature for hours, survives being tossed in a bag or left
-        in a hot break room, and doesn&rsquo;t leak.
+        There&rsquo;s a small, specific misery to reaching for coffee at hour four and finding it
+        lukewarm, or grabbing your water bottle at hour nine and finding it warm enough to be
+        unappetizing. Neither ruins a shift on its own. Both are the kind of tiny recurring
+        annoyance that a genuinely good tumbler removes permanently, for a one-time cost that&rsquo;s
+        usually less than a week of vending-machine drinks.
       </p>
       <p>
-        Insulated tumblers and bottles solve that problem when they&rsquo;re built well. Here&rsquo;s
-        a practical look at options that hold up for the kind of days we work.
+        Not every insulated bottle actually holds temperature the way the marketing claims. Here&rsquo;s
+        what actually performs for a full shift, based on what park, restaurant, theater, and event
+        staff keep buying and keep using.
       </p>
 
       <h2>What Matters for Shift Work</h2>
@@ -132,6 +132,32 @@ export default function Body() {
         These are ideal for trying the insulated-tumbler habit or for keeping a backup in the car
         or locker. Performance varies more than with the top brands, so check recent reviews for
         the specific model.
+      </p>
+
+      <h2>How Much Water a Long Shift Actually Costs You</h2>
+      <p>
+        Standing or moving for eight to twelve hours, especially outdoors or near heat sources like
+        a kitchen line, pushes fluid loss well past a normal office day. A common rule of thumb is
+        roughly half an ounce to an ounce of water per pound of body weight per day under normal
+        conditions, and that number climbs on hot or physically demanding shifts. For a 160-pound
+        worker, that&rsquo;s in the neighborhood of 80&ndash;160 ounces &mdash; call it two to four
+        refills of a 40-ounce tumbler across a full shift, more in summer heat.
+      </p>
+      <p>
+        This is part of why capacity matters more than it seems on a product page. A bottle that
+        only holds 20 ounces means multiple trips to a water fountain during an already-busy shift,
+        and most people simply skip the refill rather than leave a station or a section repeatedly.
+        A bigger bottle you fill once at the start of a shift gets used; a smaller one you&rsquo;re
+        supposed to refill three times usually doesn&rsquo;t.
+      </p>
+      <p>
+        A simple gut-check for whether you&rsquo;re drinking enough: pale yellow urine generally
+        means you&rsquo;re adequately hydrated, while dark yellow is a sign to catch up. It&rsquo;s
+        not a precise measurement, but it&rsquo;s a free one, and it&rsquo;s more useful mid-shift
+        than trying to mentally track ounces while you&rsquo;re also doing the actual job. Thirst
+        itself is a lagging indicator &mdash; by the time you notice it, you&rsquo;re already
+        somewhat behind, which is another reason a large-capacity bottle you sip from steadily beats
+        one you only reach for once you&rsquo;re already parched.
       </p>
 
       <h2>Practical Tips</h2>

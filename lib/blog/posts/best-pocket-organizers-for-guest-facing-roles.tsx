@@ -5,17 +5,16 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually use on the floor.
+          Disclosure: some links in this post are affiliate links. MyShiftX may earn a small
+          commission if you make a purchase, at no cost to you.
         </em>
       </p>
       <p>
-        Theme park cast, restaurant servers, theater ushers, merchandise associates, and event
-        staff all share a common problem: too many small essential items and not enough reliable
-        places to put them. Keys, badges, pens, markers, radios, small tools, cash, cards, and
-        phones need to be accessible without requiring a full bag or constant digging through
-        pockets.
+        Watch anyone working a guest-facing shift for ten minutes and you&rsquo;ll see the same
+        small ritual repeat: pat a pocket, check another, dig for a badge or a pen, apologize to
+        whoever&rsquo;s waiting. None of it takes long, but it happens dozens of times a shift, and
+        it&rsquo;s the kind of visible fumbling that makes a confident employee look scattered for
+        no real reason.
       </p>
       <p>
         Good pocket organizers, badge reels, and clip-on accessories keep the most-used items
@@ -129,6 +128,31 @@ export default function Body() {
         actually requires that gear every shift.
       </p>
 
+      <h2>Building a Kit That Doesn&rsquo;t Look Cluttered</h2>
+      <p>
+        There&rsquo;s a real tension in guest-facing roles between having everything you need and
+        looking put-together. A badge reel with six things clipped to it reads as disorganized even
+        if it&rsquo;s technically efficient. The fix isn&rsquo;t fewer tools &mdash; it&rsquo;s
+        distributing them: one reel for the items you touch constantly (badge, maybe keys), a
+        separate slim clip or pocket for backup items you need rarely, and nothing dangling that
+        catches on a cart, a door, or a guest&rsquo;s stroller.
+      </p>
+      <p>
+        Color matters more than people expect here too. A black or uniform-matched reel disappears
+        visually; a bright novelty one draws attention to itself in exactly the roles where the
+        point is to look competent and unobtrusive. If your workplace has any kind of appearance
+        guideline, it&rsquo;s worth checking before you clip on anything with a logo or a loud
+        color.
+      </p>
+      <p>
+        Positioning matters as much as the gear itself. A reel clipped at hip height is faster to
+        reach than one buried at the bottom of an apron pocket, and a badge that hangs at belt level
+        rather than chest level is less likely to swing forward and smack a counter or a cart every
+        time you lean over. A few minutes adjusting where things actually sit, rather than just
+        buying the recommended item and clipping it wherever there&rsquo;s room, is often the
+        difference between a setup you forget about and one you keep fiddling with all shift.
+      </p>
+
       <h2>Practical Tips</h2>
       <ul>
         <li>Start with one solid badge reel and one multi-tool pen &mdash; these solve the most common access problems for the least money and bulk.</li>
@@ -149,7 +173,8 @@ export default function Body() {
         These small organizational tools are easy to overlook until you work a full shift without
         them and notice how often you are searching for a pen, keys, or badge. A single solid badge
         reel and one multi-function tool often eliminate the majority of the daily access friction
-        for guest-facing roles.
+        for guest-facing roles, and both are cheap enough to replace without a second thought once
+        they eventually wear out.
       </p>
     </>
   )

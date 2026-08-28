@@ -5,22 +5,23 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually wear on the floor.
+          A quick note: this post uses affiliate links, and a purchase through one may earn
+          MyShiftX a small commission at no extra cost to you.
         </em>
       </p>
       <p>
-        Pockets fill up fast. Bags get in the way or get left behind. For theme park, restaurant,
-        theater, merchandise, and event floor staff, a good hands-free carrier keeps essentials
-        accessible without occupying your hands or creating a tripping or catching hazard.
-        Crossbody bags, running-style belts, fanny packs, and clear stadium-approved options solve
-        different versions of the same problem.
+        There is a specific kind of shift-long annoyance that comes from having nowhere to put your
+        phone. Pockets get full, or your uniform doesn&rsquo;t have real ones. A tote gets left in
+        the break room and forgotten. A shoulder bag swings into a guest, a tray, or a cart every
+        time you turn. None of this is a big problem on any single shift, but multiplied across a
+        forty-hour week it&rsquo;s a genuine source of friction that a five-dollar accessory
+        largely solves.
       </p>
       <p>
-        The best choices for this work stay secure during movement, hold the specific items you
-        need (phone, keys, cards, small tools, water), and don&rsquo;t look or feel out of place
-        with the uniform or environment.
+        This roundup covers the hands-free carry options that actually hold up on a floor &mdash;
+        theme park paths, restaurant sections, theater aisles, retail sales floors &mdash; rather
+        than the ones that look good in a product photo and fall apart or flop around after a week
+        of real use.
       </p>
 
       <h2>What Matters on the Floor</h2>
@@ -135,6 +136,22 @@ export default function Body() {
       <p>
         These work well when you want something a step more substantial than a running belt but
         still far smaller than a regular backpack or tote.
+      </p>
+
+      <h2>Check Your Uniform Policy Before You Buy</h2>
+      <p>
+        Guest-facing roles often have dress-code language that covers accessories, even when nobody
+        mentions it during onboarding. Some workplaces restrict bag color to match the uniform,
+        require anything worn on the floor to be a specific size or style, or ban visible branding
+        that isn&rsquo;t the company&rsquo;s own. Clear-bag policies at parks and stadiums are the
+        most obvious version of this, but plenty of restaurants and retail floors have quieter rules
+        about what can and can&rsquo;t be worn while working a section.
+      </p>
+      <p>
+        It&rsquo;s a five-minute conversation with a supervisor that saves you from buying something
+        you can&rsquo;t actually wear on shift. If your workplace has no rule at all, that&rsquo;s
+        useful to confirm too &mdash; it means the crossbody or fanny pack you liked in the photos is
+        genuinely fair game, not just unenforced.
       </p>
 
       <h2>Practical Tips</h2>

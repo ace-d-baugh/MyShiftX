@@ -5,17 +5,17 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually use for irregular sleep schedules.
+          A note before we start: this post contains affiliate links, and a purchase through one
+          may earn MyShiftX a small commission at no extra cost to you.
         </em>
       </p>
       <p>
-        Rotating schedules, early park opens, late closes, and split shifts make consistent sleep
-        hard enough. Waking up for the next shift can be even harder &mdash; especially when
-        you&rsquo;re trying to sleep during the day or after a short turnaround. Phone alarms work,
-        but many shift workers find dedicated alarm clocks or wake-up lights more reliable and less
-        jarring.
+        Sleeping through an alarm is a different kind of risk when your shift starts at 5 a.m. after
+        four hours of sleep than when it&rsquo;s a regular 9-to-5. Rotating schedules, early park
+        opens, late closes, and split shifts already make consistent sleep hard. Waking up reliably
+        on top of that &mdash; especially from daytime sleep, when your body is actively fighting to
+        stay asleep &mdash; is its own problem, and a phone alarm on silent or a dead battery is a
+        real way to miss a shift entirely.
       </p>
       <p>
         The best tools for this kind of schedule either wake you gradually with light, use
@@ -136,6 +136,23 @@ export default function Body() {
         angle adjustment that you can actually glance at the time without fumbling in the dark. A
         few models add a soft night-light, which is useful for the walk to the bathroom without
         turning on a bright overhead light and undoing your wind-down.
+      </p>
+
+      <h2>The Two-Alarm Rule</h2>
+      <p>
+        Anyone who has actually missed a shift to a dead phone or a silenced alarm tends to adopt
+        the same rule afterward: never rely on exactly one alarm for anything that matters. The
+        specific tools differ, but the logic is always the same &mdash; two systems that fail
+        independently. A phone alarm and a battery-powered backup clock cover different failure
+        modes: the phone dies or gets left on silent from the last time you turned it off during a
+        movie, while a $10 battery alarm doesn&rsquo;t care about either of those things.
+      </p>
+      <p>
+        The same logic applies to light-based systems. A wake-up light is genuinely gentler and
+        better for daytime sleep, but light alone won&rsquo;t reliably wake every heavy sleeper,
+        especially early in the adjustment period. Pairing a light-based primary alarm with a loud
+        or vibrating backup, set a few minutes later, catches the mornings the gentle option
+        isn&rsquo;t enough without giving up its benefits on the mornings it is.
       </p>
 
       <h2>Practical Tips for Rotating Schedules</h2>

@@ -5,21 +5,21 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually use on hot outdoor shifts.
+          Heads up: this post includes affiliate links. MyShiftX may earn a small commission if you
+          buy through one, at no cost to you.
         </em>
       </p>
       <p>
-        Summer peaks at theme parks, outdoor events, and festival grounds turn long shifts into
-        heat management problems. Standing in direct sun, walking between posts, or working near
-        heat-generating equipment can leave you overheated, drained, and less effective for guests.
-        Cooling towels and small portable fans are simple, relatively cheap tools that help manage
-        body temperature when air conditioning isn&rsquo;t an option.
+        Standing on asphalt in direct sun for eight hours does something that standing in an
+        air-conditioned building never will. Heat load builds slowly and quietly &mdash; you don&rsquo;t
+        notice the first hour, you feel a little sluggish by the third, and by the sixth you&rsquo;re
+        making small decision-quality mistakes without realizing it. Outdoor event and park staff
+        deal with this every peak-season shift, and the fix isn&rsquo;t heroics. It&rsquo;s a handful
+        of cheap tools used consistently before you feel bad, not after.
       </p>
       <p>
-        The most useful options activate quickly, stay effective for a reasonable time, and are
-        easy to carry and re-wet during a shift.
+        This guide covers the gear that actually earns a spot in a bag or locker for hot outdoor
+        shifts &mdash; not the novelty items, the ones that get reached for every single day.
       </p>
 
       <h2>What Matters in Hot Outdoor Conditions</h2>
@@ -44,7 +44,8 @@ export default function Body() {
         Instant cooling towels work by evaporative cooling. You wet them, wring them out, and snap
         or shake them to activate the cooling effect. Many are made from PVA or similar materials
         that hold water and feel significantly cooler than ambient temperature against the skin.
-        They&rsquo;re cheap enough to buy in multi-packs so you can rotate or keep spares.
+        They&rsquo;re cheap enough to buy in multi-packs so you can rotate or keep spares in
+        different bags, a locker, and the car.
       </p>
       <p>
         For park and event staff, a cooling towel around the neck or over the head during breaks
@@ -111,6 +112,32 @@ export default function Body() {
       <p>
         These are more specialized and usually more expensive. They&rsquo;re worth considering if
         basic towels and fans aren&rsquo;t enough for the conditions you regularly face.
+      </p>
+
+      <h2>Recognizing Heat Stress Before It Becomes a Problem</h2>
+      <p>
+        Cooling gear is a comfort tool right up until it isn&rsquo;t enough, and the line between
+        &ldquo;uncomfortably hot&rdquo; and an actual heat-related illness is easy to miss when
+        you&rsquo;re busy with guests or a line. The early signs worth knowing: heavy sweating that
+        suddenly stops, cool or clammy skin despite the heat, dizziness or a headache that doesn&rsquo;t
+        go away with water, and irritability or confusion that a coworker notices before you do. Any
+        of those is a signal to get to shade, tell a supervisor, and cool down actively &mdash; not
+        push through to the end of the section.
+      </p>
+      <p>
+        None of the products above are a substitute for the basics your workplace should already
+        have covered: scheduled breaks in shade or air conditioning, water access, and a real
+        process for reporting when someone doesn&rsquo;t look right. Cooling towels and fans buy
+        you margin on a hot day. They don&rsquo;t replace paying attention to how you and the people
+        next to you are actually doing.
+      </p>
+      <p>
+        New hires and anyone unaccustomed to a specific outdoor role are worth watching more
+        closely for the first week or two of a heat season, since heat tolerance is partly a matter
+        of gradual acclimation that a returning seasonal worker has already built up and a new one
+        hasn&rsquo;t. A buddy system &mdash; simply agreeing to check on each other every hour or so
+        during a heat advisory &mdash; costs nothing and catches problems earlier than waiting for
+        someone to visibly struggle.
       </p>
 
       <h2>Practical Tips for Outdoor Shifts</h2>

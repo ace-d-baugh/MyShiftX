@@ -5,17 +5,16 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually use for daytime sleep.
+          Disclosure: this post contains affiliate links. If you buy through one, MyShiftX may earn
+          a small commission at no extra cost to you.
         </em>
       </p>
       <p>
-        Even with blackout curtains, some light still finds a way in &mdash; around the edges of
-        the fabric, under the door, or from phone screens and hallway lights. For night-shift
-        workers, closing crews, and anyone trying to sleep after late events or park shifts, a good
-        sleep mask closes that final gap and creates the complete darkness your brain needs for
-        better rest.
+        Blackout curtains handle most of the light in a room, but &ldquo;most&rdquo; still leaves a
+        gap &mdash; a thin line around the frame, a hallway light under the door, the glow of a
+        phone charging on the nightstand. For someone trying to sleep at 10 a.m. after a closing
+        shift or an overnight event, that remaining sliver of light is often the difference between
+        deep sleep and a restless few hours that don&rsquo;t actually recover you.
       </p>
       <p>
         The best sleep masks for shift workers stay comfortable for long daytime sleeps, block
@@ -139,6 +138,23 @@ export default function Body() {
         selling point &mdash; the weight is. This is a more individual preference than the other
         options here: some shift workers swear by it, others find the extra warmth and pressure
         counterproductive, especially in a bedroom that already runs hot during the day.
+      </p>
+
+      <h2>A Mask Won&rsquo;t Fix a Bad Sleep Setup on Its Own</h2>
+      <p>
+        A sleep mask solves one specific problem &mdash; light &mdash; and it&rsquo;s easy to expect
+        it to fix daytime sleep by itself. It won&rsquo;t. Temperature matters just as much: a room
+        in the high 70s or warmer actively fights sleep regardless of how dark it is, so a fan or a
+        lower thermostat setting during the day is worth as much attention as the mask itself.
+        Phone use in the twenty minutes before trying to sleep undoes some of what the mask is
+        doing, since a bright screen right before bed works against the darkness you just created.
+      </p>
+      <p>
+        The combination that actually works for most night and closing-shift workers is boring but
+        effective: blackout curtains for the bulk of the light, a mask for what leaks through, a
+        cool room, and a short no-screens buffer before lying down. Any one of those alone helps a
+        little. Together they&rsquo;re usually the difference between four broken hours and a full,
+        genuinely restorative sleep.
       </p>
 
       <h2>Practical Tips</h2>

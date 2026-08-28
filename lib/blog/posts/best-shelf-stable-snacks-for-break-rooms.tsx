@@ -5,17 +5,17 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually keep in a locker or bag.
+          Disclosure: this post contains affiliate links. MyShiftX may earn a small commission on
+          purchases made through them, at no extra cost to you.
         </em>
       </p>
       <p>
-        Long shifts create energy crashes. When the only options in the break room are
-        vending-machine candy or nothing at all, it&rsquo;s easy to grab whatever is fastest and
-        then feel worse an hour later. Having a small stash of shelf-stable, relatively healthy
-        snacks that actually hold up in a locker or bag makes a real difference in how the second
-        half of a shift feels.
+        There&rsquo;s a specific slump that hits somewhere around hour five or six of a long shift,
+        and it usually gets blamed on being tired when it&rsquo;s really about blood sugar. The
+        vending machine offers a fast fix &mdash; a candy bar, a soda &mdash; that spikes energy for
+        twenty minutes and then drops you lower than where you started. A small stash of better
+        options in a locker or bag breaks that cycle for less money than the vending machine
+        charges anyway.
       </p>
       <p>
         The best options for theme park, restaurant, theater, and event staff are ones that
@@ -133,6 +133,32 @@ export default function Body() {
         small treat is often better than impulsive vending-machine decisions when energy is low.
       </p>
 
+      <h2>Timing Snacks to Your Actual Shift</h2>
+      <p>
+        What you eat matters less than most people think; when you eat it matters more. A protein
+        or fat-forward snack about halfway through a long shift &mdash; before the crash starts
+        rather than after it hits &mdash; keeps blood sugar steadier than waiting until you already
+        feel foggy and reaching for the fastest sugar available. If your shift has a predictable
+        slow patch (the mid-afternoon lull at a park, the gap between lunch and dinner rush at a
+        restaurant), that&rsquo;s the natural spot to eat something with protein, not the moment you
+        already feel drained.
+      </p>
+      <p>
+        A second useful habit: eat something before an unusually demanding stretch, not during it.
+        If you know a peak rush, a big event load-in, or a double is coming, a snack twenty to thirty
+        minutes ahead does more than trying to eat on the fly once you&rsquo;re already in the middle
+        of it.
+      </p>
+      <p>
+        It also helps to notice the difference between actual hunger and the specific fatigue that
+        long shifts produce, since they feel similar and get treated the same way by a lot of
+        people. If a snack twenty minutes ago didn&rsquo;t change how you feel, the problem is more
+        likely dehydration, being on your feet too long without a break, or simple accumulated
+        tiredness &mdash; and reaching for a second snack won&rsquo;t fix any of those. Water, a
+        few minutes off your feet, or just recognizing you&rsquo;re near the end of what the shift
+        should reasonably ask of you is sometimes the more honest answer than more food.
+      </p>
+
       <h2>Practical Tips</h2>
       <ul>
         <li>Rotate a small stock so nothing sits in a hot locker for months.</li>
@@ -147,7 +173,8 @@ export default function Body() {
         and reduces the chance of energy crashes that make the last hours of a shift harder. Focus
         on options with some protein or healthy fat, keep portions practical for short breaks, and
         treat electrolytes as part of the system on hot days. Small, consistent upgrades here
-        compound over weeks of long shifts.
+        compound over weeks of long shifts, and a stocked locker is one less thing to plan for on
+        the mornings when there simply wasn&rsquo;t time to make anything before leaving the house.
       </p>
     </>
   )

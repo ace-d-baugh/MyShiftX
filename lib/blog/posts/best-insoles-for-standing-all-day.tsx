@@ -5,17 +5,16 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually put in our work shoes.
+          Disclosure: links in this post may be affiliate links. MyShiftX may earn a small
+          commission on qualifying purchases, at no additional cost to you.
         </em>
       </p>
       <p>
-        Even good shoes eventually need help. Hard floors &mdash; concrete park pathways,
-        restaurant tile, theater stages, merchandise floors &mdash; transmit impact straight into
-        your feet, knees, and back over a 10&ndash;12 hour shift. Quality insoles can add
-        cushioning, arch support, and shock absorption to shoes you already own, extending their
-        useful life and reducing end-of-day fatigue.
+        A shoe&rsquo;s factory insole is built for a fitting-room shuffle, not a ten-hour shift on
+        concrete or tile. It looks fine, it feels fine for the first hour, and then somewhere around
+        hour six the cushioning has compressed flat and your feet are essentially standing on bare
+        midsole. Replacing that thin factory foam with a real insole is one of the few upgrades that
+        costs less than dinner out and noticeably changes how your feet feel on the drive home.
       </p>
       <p>
         The right insoles for shift work stay supportive late in the day, fit the shoes you
@@ -110,6 +109,26 @@ export default function Body() {
       <p>
         Getting the length and width right is often the difference between insoles that help and
         insoles that get removed after a few days.
+      </p>
+
+      <h2>Matching Insoles to Your Actual Foot Type</h2>
+      <p>
+        Most of the disappointment with insoles comes from buying the wrong support level for your
+        arch, not from a bad product. A rough, no-cost way to check: wet the bottom of your foot and
+        step once onto a paper bag or dark concrete, then look at the print. If you see almost the
+        entire sole with barely a curve on the inside edge, you likely have a flatter arch and
+        benefit from firmer, more structured support like Superfeet. If you see only the heel, the
+        ball, and a thin outside strip &mdash; almost no middle section touching &mdash; you likely
+        have a high arch and may prefer more cushioning under the arch rather than rigid structure.
+        Most people land somewhere in between, which is exactly the group a balanced option like
+        PowerStep is built for.
+      </p>
+      <p>
+        This isn&rsquo;t a substitute for a podiatrist if you have ongoing pain, but it&rsquo;s
+        enough to stop buying insoles at random and switching brands every few months without
+        knowing why the last pair didn&rsquo;t work. If pain persists, is sharp rather than dull, or
+        is concentrated in one specific spot rather than general end-of-shift fatigue, that&rsquo;s
+        a sign to see a professional rather than keep experimenting with insoles alone.
       </p>
 
       <h2>Practical Tips</h2>

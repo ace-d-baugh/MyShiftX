@@ -5,17 +5,17 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually wear on a long shift.
+          Disclosure: this post includes affiliate links, and MyShiftX may earn a small commission
+          on a purchase at no extra cost to you.
         </em>
       </p>
       <p>
-        Standing or walking for 10&ndash;12 hours on hard floors does a number on your legs. By the
-        end of a theme park day, a busy restaurant shift, a late theater close, or a merchandise
-        floor peak, many of us deal with swollen ankles, heavy calves, and that tired, achy feeling
-        that follows you home. Compression socks won&rsquo;t fix everything, but the right pair can
-        make a noticeable difference in how your legs feel during and after a long shift.
+        Legs don&rsquo;t announce that they&rsquo;re struggling until the damage is already done for
+        the day. You feel fine through the first six hours of a theme park shift, a busy restaurant
+        service, or a merchandise floor peak, and then somewhere around hour eight your ankles are
+        visibly swollen and your calves feel like they&rsquo;re carrying extra weight. Compression
+        socks won&rsquo;t fix everything, but the right pair can make a noticeable difference in how
+        your legs feel during and after a long shift.
       </p>
       <p>
         Graduated compression (tighter at the ankle, gradually less as it moves up the leg) helps
@@ -187,6 +187,24 @@ export default function Body() {
         checking recent reviews for the specific multi-pack rather than assuming all copper-infused
         options perform the same. For shift workers who go through socks fast and want a bulk
         option that still fits comfortably under sneakers, this category fills that gap.
+      </p>
+
+      <h2>When to Check With a Doctor First</h2>
+      <p>
+        Compression socks are safe and helpful for most healthy people on their feet all day, but
+        they&rsquo;re not universally risk-free. Anyone with diagnosed peripheral artery disease,
+        certain heart conditions, or nerve damage that affects sensation in the legs should get a
+        doctor&rsquo;s guidance before wearing firm graduated compression, since restricting blood
+        flow to an already-compromised leg can make things worse rather than better. If you notice
+        numbness, increased pain, or skin discoloration after putting a pair on, that&rsquo;s a
+        signal to take them off, not push through.
+      </p>
+      <p>
+        None of this is a reason for most shift workers to avoid compression socks &mdash; it&rsquo;s
+        a reason to start at the milder 15&ndash;20 mmHg range rather than jumping straight to
+        20&ndash;30 mmHg, and to mention it to a doctor if you have any existing circulation or
+        heart condition rather than assuming a sock sold without a prescription is automatically
+        fine for every leg.
       </p>
 
       <h2>Quick Buying Notes</h2>

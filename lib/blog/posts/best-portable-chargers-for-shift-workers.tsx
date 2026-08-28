@@ -5,17 +5,16 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually carry through a full shift.
+          Disclosure: this post contains affiliate links, and a purchase through one may earn
+          MyShiftX a small commission at no extra cost to you.
         </em>
       </p>
       <p>
-        Phones die at the worst times &mdash; halfway through a peak day at the park, during a late
-        close when you still need maps or a ride home, or when you&rsquo;re trying to check the
-        schedule or message a coworker. For theme park, restaurant, theater, events, and
-        merchandise staff, a reliable portable charger is less a luxury and more basic shift
-        insurance.
+        A dead phone at 2 p.m. on a double is a specific kind of stress that has nothing to do with
+        the actual work. Suddenly you can&rsquo;t check what time your ride is coming, can&rsquo;t
+        see if a coworker texted about covering the last hour, can&rsquo;t pull up the schedule to
+        settle an argument about who&rsquo;s closing. None of that is dramatic on its own, but it
+        adds friction to a day that already has enough of it.
       </p>
       <p>
         The best power banks for this kind of work are high-capacity enough to fully recharge a
@@ -156,6 +155,21 @@ export default function Body() {
         better as a top-up than a full recharge from empty. It also only works with MagSafe-compatible
         phones, and the magnetic hold can work loose if the bank is jostled around in a pocket or
         apron.
+      </p>
+
+      <h2>Why Your Phone Is Part of Your Shift, Not a Distraction From It</h2>
+      <p>
+        For most shift workers, the phone isn&rsquo;t a break-room luxury anymore &mdash; it&rsquo;s
+        how the schedule actually gets managed. Checking who&rsquo;s covering the next section,
+        confirming a shift swap went through, or seeing a message about a last-minute coverage
+        request on a board like MyShiftX all happen on that one device. A dead battery mid-shift
+        doesn&rsquo;t just cost you music or texting; it can mean missing the exact notification
+        that would have let you pick up an extra shift or confirm someone&rsquo;s covering yours.
+      </p>
+      <p>
+        That&rsquo;s the practical case for treating a charger as work equipment rather than an
+        optional gadget. The cost of carrying one is a few dollars and a few ounces. The cost of not
+        having one, on the one day it actually matters, is usually bigger than the charger itself.
       </p>
 
       <h2>Practical Buying and Use Tips</h2>

@@ -5,22 +5,23 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually wear on a long shift.
+          Disclosure: this post contains affiliate links, and MyShiftX may earn a small commission
+          if you make a purchase, at no cost to you.
         </em>
       </p>
       <p>
-        If you&rsquo;ve ever clocked out of a 10- or 12-hour shift with throbbing feet, swollen
-        ankles, or that deep ache climbing into your knees and lower back, you&rsquo;re not alone.
-        Theme park cast walking miles of concrete, restaurant servers and kitchen staff on hard
-        tile, theater ushers and merchandise associates standing through shows or peak hours &mdash;
-        all of us put our feet through more punishment in one day than most people do in a week.
+        Ten to twelve hours on hard concrete or tile does something to feet that most shoes were
+        never designed to handle. Theme park cast walk miles a day. Servers and line cooks stand
+        for hours on kitchen tile that offers zero give. Theater ushers, merchandise associates, and
+        event staff put in the same kind of standing-and-walking mileage most people never
+        experience outside of that job. By the end of it, throbbing arches and swollen ankles
+        aren&rsquo;t a sign something&rsquo;s wrong with you &mdash; they&rsquo;re a sign the shoe
+        gave up before your shift did.
       </p>
       <p>
         The right shoes won&rsquo;t erase every long day, but the wrong ones make every day worse.
-        Good footwear is one of the highest-ROI investments a shift worker can make. It affects how
-        you feel at hour 10 and how quickly you recover.
+        Good footwear is one of the highest-ROI investments a shift worker can make: it affects how
+        you feel at hour ten and how quickly you recover for the next shift.
       </p>
       <p>
         This guide focuses on shoes that hold up for long hours on hard surfaces, frequent
@@ -157,6 +158,24 @@ export default function Body() {
         They won&rsquo;t match a Bondi&rsquo;s cushioning for pure standing on dry concrete, but
         for messy environments they&rsquo;re hard to beat. Many cooks keep a pair as their
         dedicated work shoe because they wipe or rinse clean and go right back on.
+      </p>
+
+      <h2>Sizing and the Break-In Window</h2>
+      <p>
+        Feet swell over the course of a long shift &mdash; often by half a size or more &mdash; which
+        is why a shoe that fits perfectly at 9 a.m. can feel tight and painful by 6 p.m. The fix is
+        simple but easy to skip: try on or size work shoes later in the day, ideally after you&rsquo;ve
+        already been on your feet for a few hours, not first thing in the morning when your feet are
+        at their smallest.
+      </p>
+      <p>
+        Give any new pair a real trial before judging it. Max-cushion shoes like the Bondi can feel
+        unfamiliar for the first few wears as your calves and stabilizing muscles adjust to the
+        rocker geometry. Structured options like Dansko clogs often need a short physical break-in
+        period before the footbed molds to your foot. A shoe that feels merely okay on day one but
+        noticeably better by day five is normal. One that still hurts after two weeks of regular
+        wear probably isn&rsquo;t the right shoe for your foot shape, regardless of how many good
+        reviews it has.
       </p>
 
       <h2>Practical Tips</h2>

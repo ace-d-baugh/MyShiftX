@@ -5,17 +5,16 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually use on long or split shifts.
+          Disclosure: this post contains affiliate links, and MyShiftX may earn a small commission
+          on qualifying purchases at no cost to you.
         </em>
       </p>
       <p>
-        Bringing food to work only helps if it stays safe and still tastes good by the time you get
-        a break. Theme park, restaurant, theater, and event staff deal with long or split shifts,
-        limited fridge access, hot break rooms, and the constant risk of food going warm or soggy.
-        A good lunch bag and solid containers turn packed meals from a gamble into something
-        reliable.
+        Packing your own food is supposed to save money and beat whatever&rsquo;s in the vending
+        machine. It only works out that way if the food is still good by the time you actually get
+        to eat it. A ten-hour split shift with a break room that has no fridge, or one shared fridge
+        that&rsquo;s already packed with forty other people&rsquo;s lunches, turns a simple sandwich
+        into a small logistics problem.
       </p>
       <p>
         The goal is simple: food that stays cold (or hot) for hours, containers that don&rsquo;t
@@ -135,6 +134,29 @@ export default function Body() {
       <p>
         Keep a couple in the freezer so you always have a frozen one ready. For split shifts or
         outdoor work in summer, a reliable ice pack is cheap insurance against food safety issues.
+      </p>
+
+      <h2>The Food Safety Math Most People Skip</h2>
+      <p>
+        There&rsquo;s an actual rule behind &ldquo;is this still okay to eat,&rdquo; and it&rsquo;s
+        worth knowing rather than guessing. Perishable food sitting between 40&deg;F and 140&deg;F
+        &mdash; the &ldquo;danger zone&rdquo; &mdash; is generally considered safe for about two
+        hours, or one hour if the ambient temperature is above 90&deg;F, which describes a lot of
+        break rooms and outdoor staff areas in summer. Past that window, bacteria growth accelerates
+        regardless of how the food looks or smells.
+      </p>
+      <p>
+        That two-hour number is exactly why insulation matters more than convenience for shift work.
+        A lunch bag with a proper ice pack or frozen gel walls doesn&rsquo;t just keep food
+        appetizing &mdash; it keeps it inside a safe temperature range for the six, eight, or ten
+        hours between when you pack it and when you actually eat it. A bag that&rsquo;s &ldquo;just
+        for looks&rdquo; without real insulation is a food safety gap, not just a comfort issue.
+      </p>
+      <p>
+        Dairy, cooked meat, rice, and anything with mayonnaise are the items most worth being strict
+        about &mdash; they&rsquo;re the foods most commonly linked to real food-poisoning cases when
+        left too warm for too long. Dry snacks, whole fruit, and shelf-stable items are much more
+        forgiving if your ice pack loses its chill an hour early on an especially hot day.
       </p>
 
       <h2>Practical Tips for Shift Workers</h2>

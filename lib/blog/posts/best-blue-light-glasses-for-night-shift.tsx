@@ -5,23 +5,22 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually use after late shifts.
+          Affiliate disclosure: some links below are affiliate links, and MyShiftX may earn a small
+          commission on a purchase at no extra cost to you.
         </em>
       </p>
       <p>
-        After a late close, overnight event, or night shift at the park or theater, the drive home
-        (or the time spent on your phone before sleep) can keep your brain in daytime mode. Blue
-        light from headlights, streetlights, screens, and even some indoor lighting can interfere
-        with melatonin and make it harder to wind down for daytime sleep.
+        There is a specific kind of tired that comes from finishing a close, a night audit, or an
+        overnight event and then driving home under streetlights and headlights, wide awake in a
+        body that is supposed to be shutting down. Blue-toned light &mdash; from screens, from LED
+        headlights, from the fluorescent tubes in a break room &mdash; tells your brain it is still
+        daytime, at exactly the moment you need it to believe otherwise.
       </p>
       <p>
-        Blue-light blocking glasses won&rsquo;t fix an entire sleep schedule on their own, but many
-        night-shift and closing-crew workers find they help signal to the body that it&rsquo;s time
-        to start transitioning toward rest. The most useful pairs for this purpose block a
-        meaningful amount of blue light in the evening spectrum without making everything look
-        unnaturally orange or yellow for driving.
+        Blue-light glasses are not a cure for that. Nothing that costs $20 fixes a schedule that
+        fights your biology. What they can do is take one signal out of the equation during the
+        hour or two after your shift ends, which is often the difference between falling asleep in
+        twenty minutes and lying there for an hour with your mind still racing.
       </p>
 
       <h2>What Matters for Post-Shift Use</h2>
@@ -73,7 +72,8 @@ export default function Body() {
       </p>
       <p>
         For shift workers testing whether blue-light glasses make a difference, this is a low-cost
-        way to try a more aggressive filter without spending much.
+        way to try a more aggressive filter without spending much before deciding it&rsquo;s worth
+        a nicer pair.
       </p>
 
       <ProductCard
@@ -118,6 +118,31 @@ export default function Body() {
         during the commute and evening routine.
       </p>
 
+      <h2>Does the Science Actually Back This Up?</h2>
+      <p>
+        Worth saying plainly: the research on blue-light glasses and sleep is genuinely mixed. Some
+        studies find a measurable melatonin benefit from filtering evening blue light; others find
+        the effect is small compared to simply dimming screens and lights in general, or find no
+        significant difference at all once other habits are controlled for. Blue-light glasses are
+        not a substitute for a dark room, a cool temperature, and a consistent wind-down routine
+        &mdash; they&rsquo;re a small addition on top of those, not a replacement for them.
+      </p>
+      <p>
+        Where the evidence is clearer is the practical, non-biological benefit: for people driving
+        home after a night shift, a warmer, less harsh field of view from oncoming headlights is
+        genuinely less fatiguing on the eyes, independent of whatever it does or doesn&rsquo;t do to
+        melatonin. That alone is a reasonable justification for a $15&ndash;30 pair, even for
+        someone skeptical of the sleep-science claims on the packaging.
+      </p>
+      <p>
+        It also helps to separate two different jobs these glasses are sometimes asked to do.
+        &ldquo;Help me stop feeling wired after a night shift&rdquo; is a sleep-onset question, and
+        the evidence there is genuinely mixed. &ldquo;Make the drive home less harsh on tired
+        eyes&rdquo; is a comfort question, and that one has a much more obvious yes. Buying a pair
+        to solve the second problem and treating any sleep benefit as a bonus, rather than the other
+        way around, sets a more realistic bar for what a $20 pair of glasses can actually deliver.
+      </p>
+
       <h2>Practical Tips for Shift Workers</h2>
       <ul>
         <li>Put the glasses on in the last hour or two of your shift or as soon as you leave work if the goal is helping the body start winding down.</li>
@@ -132,8 +157,9 @@ export default function Body() {
         workers. The strongest filtering options (amber lenses) are most useful in the evening
         wind-down window, while clearer everyday styles are better if you want something wearable
         in more situations. Start with a well-reviewed option that matches how and where
-        you&rsquo;ll actually wear them, and give them a fair trial as part of your post-shift
-        routine.
+        you&rsquo;ll actually wear them, give them a fair two-week trial as part of your post-shift
+        routine, and drop them if they genuinely make no difference &mdash; not every shift-work fix
+        works for every shift worker.
       </p>
     </>
   )

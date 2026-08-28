@@ -5,26 +5,27 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually use for daytime sleep after late shifts.
+          This post contains affiliate links, and MyShiftX may earn a small commission if you buy
+          through one, at no extra cost to you. We only feature gear we&rsquo;d actually put in our
+          own bedrooms after a closing shift.
         </em>
       </p>
       <p>
-        If you work nights, closing shifts, or any schedule that has you trying to sleep while the
-        sun is up, light is the enemy. Morning sun, streetlights, or just the general brightness of
-        a daytime bedroom can keep you from getting the deep, restorative sleep your body needs
-        after a long shift at a theme park, restaurant, theater, or event.
+        The math is against anyone who sleeps during the day. A body clock built for millions of
+        years of daylight does not reset itself just because your schedule says otherwise, and
+        light through a window is the single strongest signal telling your brain it is time to be
+        awake. Work a close, a night audit, or an early-morning theme park shift, and you are
+        fighting that signal every single time you try to sleep.
       </p>
       <p>
-        Blackout curtains are one of the highest-impact, lowest-effort upgrades for shift workers.
-        The right pair can turn a bright room into something close to midnight, reduce heat gain in
-        summer, and cut some outside noise. The wrong pair looks dark but still lets enough light
-        through to wake you up.
+        Blackout curtains are the cheapest, least glamorous fix for that fight &mdash; and one of
+        the few upgrades that pays off every single day you own it. A properly blacked-out room
+        does not just make sleep possible; it changes how deep that sleep gets, because your body
+        stops half-waking every time a delivery truck&rsquo;s headlights sweep the ceiling.
       </p>
       <p>
-        This guide focuses on curtains that actually deliver useful light blocking for daytime
-        sleep, based on real feedback from night-shift workers and independent testing.
+        This guide is built around one question: which curtains actually get a room dark, not
+        which ones just look dark on a product page.
       </p>
 
       <h2>What Matters for Shift-Worker Sleep</h2>
@@ -58,7 +59,8 @@ export default function Body() {
         light-sensitive sleepers. Their triple-weave fabric (sometimes called Plylux or similar)
         blocks a high percentage of light &mdash; often cited in the 85&ndash;99% range depending
         on color and installation. Darker colors (black, navy, charcoal) perform best; lighter
-        colors let more light through the fabric itself.
+        colors let more light through the fabric itself, which is easy to forget when a soft gray
+        looks plenty dark on a screen but lets in a surprising amount of afternoon sun in person.
       </p>
       <p>
         Reviewers who sleep during the day consistently report that these curtains make a dramatic
@@ -83,7 +85,8 @@ export default function Body() {
         If your bedroom gets very hot in the afternoon or you deal with street noise as well as
         light, look for heavier thermal or multi-layer blackout curtains. These often add a foam or
         insulated backing that improves both light blocking and temperature control. Some also
-        reduce outside noise more effectively than basic triple-weave panels.
+        reduce outside noise more effectively than basic triple-weave panels &mdash; useful if your
+        window faces a street, a loading dock, or a neighbor who mows at 10 a.m.
       </p>
       <p>
         These cost more than entry-level NICETOWN-style curtains but can be worth it for rooms with
@@ -103,12 +106,31 @@ export default function Body() {
         If you already like your existing curtains or live in a rental where you can&rsquo;t (or
         don&rsquo;t want to) replace everything, blackout liners or clip-on blackout panels can
         help. Some people also add temporary blackout blinds or use Velcro/side tracks to seal the
-        edges of regular blackout curtains.
+        edges of regular blackout curtains without touching the wall or the window frame.
       </p>
       <p>
         These solutions are less elegant than a full dedicated pair but can close the remaining
         light gaps that prevent true darkness. For serious daytime sleepers, combining a good
         blackout curtain with side sealing or a secondary layer often produces the best results.
+      </p>
+
+      <h2>How Dark Is &ldquo;Dark Enough&rdquo;?</h2>
+      <p>
+        Blackout percentages on product listings are marketing claims, not lab measurements, and
+        two curtains both claiming &ldquo;99% blackout&rdquo; can perform very differently once
+        they&rsquo;re actually hung on your window. A simple way to judge a room without any special
+        equipment: close the curtains at midday, let your eyes adjust for a minute, and hold up your
+        phone. If you can still comfortably read the screen at low brightness without the room
+        feeling notably brighter than night, you have real darkness. If you can make out the outline
+        of furniture across the room, there is still enough ambient light getting in to interrupt
+        deep sleep for a light-sensitive sleeper.
+      </p>
+      <p>
+        Most of the &ldquo;this curtain didn&rsquo;t work&rdquo; complaints in reviews are not about
+        the fabric &mdash; they are about gaps. Light comes in around the sides where the panel
+        doesn&rsquo;t fully overlap the frame, over the top where the rod sits too far from the
+        ceiling, and through thin panels in a pale color that photographs dark but is not. Fixing
+        the gaps usually does more for actual darkness than upgrading to a more expensive fabric.
       </p>
 
       <h2>Installation Tips That Matter</h2>
@@ -144,7 +166,7 @@ export default function Body() {
         Once the room is reliably dark, many shift workers notice that the quality of daytime sleep
         improves enough to make the next shift feel more manageable. Blackout curtains are
         infrastructure rather than a daily gadget &mdash; install them well once and they keep
-        working.
+        working, long after the shift that made you buy them.
       </p>
     </>
   )

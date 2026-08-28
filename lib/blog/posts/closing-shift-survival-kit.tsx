@@ -5,17 +5,17 @@ export default function Body() {
     <>
       <p>
         <em>
-          Disclosure: This post contains affiliate links. If you click and buy, MyShiftX may earn
-          a small commission at no extra cost to you. We only recommend products we&rsquo;d
-          actually use after late closes and overnight shifts.
+          Heads up: this post contains affiliate links, and MyShiftX may earn a small commission on
+          a purchase, at no extra cost to you.
         </em>
       </p>
       <p>
-        Closing shifts and overnight work create a specific set of problems: feet that are done, a
-        body that still needs to wind down, a phone that&rsquo;s nearly dead, coffee that went cold
-        hours ago, and a bedroom that will be bright by the time you get home. Instead of solving
-        each issue separately every time, a small curated kit of high-ROI items makes the end of
-        the night and the transition to daytime sleep more manageable.
+        Closing shifts and overnight work stack up a specific set of problems all at once: feet
+        that are done, a body that still needs to wind down, a phone hovering near dead, coffee
+        that went cold two hours ago, and a bedroom that will be fully bright by the time you get
+        home. Solving each of those separately every single night is exhausting on its own. A
+        small, repeatable kit handles all of it without having to think through the same five
+        problems from scratch after every shift.
       </p>
       <p>
         This is not a giant packing list. It&rsquo;s a focused set of products that address the
@@ -187,7 +187,9 @@ export default function Body() {
       <p>
         This curated list pulls from the individual product posts in the series. For deeper
         comparisons and more options in any category, see the dedicated guides linked in each
-        section above.
+        section above. None of these seven categories require buying the specific named product
+        &mdash; the point of each one is the category and the reasoning behind it, so substitute
+        freely if you already own something that does the same job.
       </p>
 
       <h2>Building It Over Time</h2>
