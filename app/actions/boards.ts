@@ -6,7 +6,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getActionSession, requireAdminAction } from '@/lib/auth/session'
 import { notifyBoardApproved } from '@/app/actions/notifications'
-import { slugify } from '@/lib/slug'
+import { slugify, generateSlugSuffix } from '@/lib/slug'
 import { createBoardSchema } from '@/lib/validations/boards'
 import type { BoardRole } from '@/lib/database.types'
 
@@ -56,30 +56,34 @@ export async function createBoard(name: string): Promise<{ error?: string; board
     // handles 23505 — at 2^50 a collision is not a practical concern.
     const invite_code = generateInviteCode()
 
-    // Generate a unique slug from the board name — one query for all
-    // potentially-colliding slugs instead of a lookup per candidate
+    // Slug = slugified name + a random suffix, so it stays short and readable
+    // while being collision-proof without a pre-flight taken-slugs lookup.
     const baseSlug = slugify(name.trim())
-    const { data: takenRows } = await supabase.from('boards').select('slug').like('slug', `${baseSlug}%`)
-    const taken = new Set((takenRows ?? []).map(r => r.slug))
-    let slug = baseSlug
-    for (let i = 2; taken.has(slug) && i <= 10; i++) {
-      slug = `${baseSlug}-${i}`
-    }
 
-    const { data: board, error: boardErr } = await supabase
-      .from('boards')
-      .insert({ name: name.trim(), slug, invite_code, created_by: userId })
-      .select('id')
-      .single()
+    let board: { id: string } | null = null
+    let boardErr: { code?: string; message: string } | null = null
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const slug = `${baseSlug}-${generateSlugSuffix()}`
+      const result = await supabase
+        .from('boards')
+        .insert({ name: name.trim(), slug, invite_code, created_by: userId })
+        .select('id')
+        .single()
+      board = result.data
+      boardErr = result.error
+      // Only retry on a slug collision (astronomically rare); any other error
+      // (e.g. duplicate name, duplicate invite code) won't be fixed by retrying.
+      if (!boardErr || !(boardErr.code === '23505' && boardErr.message.includes('boards_slug_key'))) break
+    }
 
     if (boardErr) {
       if (boardErr.code === '23505') {
-        if (boardErr.message.includes('boards_name_key')) return { error: 'A board with that name already exists.' }
-        if (boardErr.message.includes('boards_slug_key')) return { error: 'A board with a very similar name already exists. Please try a slightly different name.' }
+        if (boardErr.message.includes('boards_slug_key')) return { error: 'Failed to generate a unique board URL. Please try again.' }
         if (boardErr.message.includes('boards_invite_code_key')) return { error: 'Failed to generate a unique invite code. Please try again.' }
       }
       return { error: boardErr.message }
     }
+    if (!board) return { error: 'Failed to create board.' }
 
     // Auto-assign creator as Leader. Upsert (not insert): if the creator is
     // themselves an Admin, the on_board_created_add_admins trigger already
@@ -305,13 +309,11 @@ export async function updateBoardName(boardId: string, name: string): Promise<{ 
     if (trimmed.length < 2) return { error: 'Board name must be at least 2 characters.' }
     if (trimmed.length > 32) return { error: 'Board name must be 32 characters or fewer.' }
     const { supabase } = await getActionSession()
-    const newSlug = slugify(trimmed)
-    const { error } = await supabase.from('boards').update({ name: trimmed, slug: newSlug }).eq('id', boardId)
+    // Slug is a permalink and stays fixed across renames — it already carries
+    // a random suffix, so it doesn't need to track the current name.
+    const { error } = await supabase.from('boards').update({ name: trimmed }).eq('id', boardId)
 
-    if (error) {
-      if (error.code === '23505') return { error: 'A board with that name already exists.' }
-      return { error: error.message }
-    }
+    if (error) return { error: error.message }
     revalidatePath('/profile')
     return {}
   } catch (e) {
