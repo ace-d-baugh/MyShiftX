@@ -87,13 +87,13 @@ function hoursAgo(hours: number): string {
 const FAR_FUTURE = () => at(90, 12)
 
 const SAMPLE_DETAILS =
-  'This is a sample shift and will become hidden once done with the tour, ' +
-  'but can show up when you do the tour again.'
+  'This is a sample shift. It disappears when the tour ends, and comes back ' +
+  'if you take the tour again.'
 
 /**
  * The three demo shifts, one per posting type, on today / tomorrow / the day
  * after, with times that match their names. Shared by the Wall and the
- * Calendar so the same shifts are recognisable across both chapters.
+ * Calendar so the same shifts are recognizable across both chapters.
  */
 const SAMPLE_SHIFT_SEEDS = [
   {
@@ -256,7 +256,7 @@ export function sampleCalendarShifts(): SampleCalendarShift[] {
   }))
 }
 
-/** Drives the coloured activity dots under the sample days. */
+/** Drives the colored activity dots under the sample days. */
 export function sampleBoardShifts(): SampleBoardShift[] {
   return SAMPLE_SHIFT_SEEDS.map(seed => ({
     id: `${seed.id}-board`,
@@ -309,7 +309,7 @@ export function sampleConversations(currentUserId: string): SampleConversation[]
       other_user_id: SAMPLE_OTHER_ID,
       other_display_name: SAMPLE_OTHER_NAME,
       other_avatar_url: null,
-      last_message_body: 'Thanks for covering Saturday — I owe you one.',
+      last_message_body: 'Thanks for covering Saturday. I owe you one.',
       last_message_at: hoursAgo(5),
       last_message_sender_id: currentUserId,
       unread_count: 0,

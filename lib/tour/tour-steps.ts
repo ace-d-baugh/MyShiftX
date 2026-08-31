@@ -32,8 +32,8 @@ export function findTarget(selector: string): HTMLElement | null {
  *
  * The cast is deliberate: driver.js types the resolver as `() => Element`, but
  * its implementation is `typeof el === 'function' ? el() : …` and it handles a
- * falsy return (skips the step, or centres the popover). Returning null is the
- * documented-by-behaviour way to say "not on screen".
+ * falsy return (skips the step, or centers the popover). Returning null is the
+ * documented-by-behavior way to say "not on screen".
  */
 function visible(selector: string): () => Element {
   return (() => findTarget(selector)) as () => Element
@@ -96,7 +96,7 @@ function sendSampleClaim(): void {
 
 // ── Copy helpers ──────────────────────────────────────────────────────────────
 
-/** Descriptions are injected as HTML, so a swatch can carry the same colour the
+/** Descriptions are injected as HTML, so a swatch can carry the same color the
  *  card title uses — including under Midnight, Cyberpunk and the rest. */
 const tint = (cssVar: string, label: string) =>
   `<strong style="color:hsl(var(${cssVar}))">${label}</strong>`
@@ -118,36 +118,36 @@ function readHsl(cssVar: string): [number, number, number] | null {
   return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null
 }
 
-/** What a person would call the colour this variable currently resolves to. */
-function colourName(cssVar: string, fallback: string): string {
+/** What a person would call the color this variable currently resolves to. */
+function colorName(cssVar: string, fallback: string): string {
   const hsl = readHsl(cssVar)
   if (!hsl) return fallback
   const [h, s, l] = hsl
-  if (s < 12) return l > 55 ? 'light grey' : 'grey'
+  if (s < 12) return l > 55 ? 'light gray' : 'gray'
   return HUE_NAMES.find(([upper]) => h < upper)?.[1] ?? fallback
 }
 
 /**
- * Names the three shift-type colours as they actually appear. The palette is
+ * Names the three shift-type colors as they actually appear. The palette is
  * per-theme — Nordic's "purple" is sage green, Halloween's is orange, and
- * Patriotic's Trade colour is gold — so hard-coding the default palette's names
+ * Patriotic's Trade color is gold — so hard-coding the default palette's names
  * would be wrong for most themes.
  *
  * Nordic is a case where naming genuinely can't work: its Give/Trade and
- * Giveaway colours are both greens. When any two names come out the same, the
+ * Giveaway colors are both greens. When any two names come out the same, the
  * sentence switches to naming the badges instead, which is true everywhere.
  */
-function shiftColourSentence(): string {
-  const trade = colourName('--color-info', 'blue')
-  const give = colourName('--color-success', 'green')
-  const both = colourName('--color-primary', 'purple')
+function shiftColorSentence(): string {
+  const trade = colorName('--color-info', 'blue')
+  const give = colorName('--color-success', 'green')
+  const both = colorName('--color-primary', 'purple')
 
   if (new Set([trade, give, both]).size < 3) {
-    return `The title's colour matches the badge — ${tint('--color-info', 'Trade')}, ` +
+    return `The title's color matches the badge: ${tint('--color-info', 'Trade')}, ` +
       `${tint('--color-success', 'Giveaway')}, or ${tint('--color-primary', 'Give/Trade')} ` +
       `when the owner will do either.`
   }
-  return `The title's colour is a shortcut: ${tint('--color-info', trade)} for trade, ` +
+  return `The title's color is a shortcut: ${tint('--color-info', trade)} for trade, ` +
     `${tint('--color-success', give)} for giveaway, ${tint('--color-primary', both)} ` +
     `when the owner will do either.`
 }
@@ -179,7 +179,7 @@ export interface TourChapterDef {
   prepare?: () => void
   /**
    * Built fresh each time the chapter runs, not once at module load — some
-   * copy depends on the theme in force (see `shiftColourSentence`), and the
+   * copy depends on the theme in force (see `shiftColorSentence`), and the
    * user can change that between tours.
    */
   steps: () => DriveStep[]
@@ -204,7 +204,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'Welcome to the Wall',
         description:
-          "This is where your boards trade shifts — everything posted by people you share a board with lands here. Ninety seconds and you'll know how to read it, and how to post one of your own.",
+          "This is where your boards trade shifts: everything posted by people you share a board with lands here. Ninety seconds and you'll know how to read it, and how to post one of your own.",
       },
     },
     {
@@ -232,7 +232,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'One shift, at a glance',
         description:
-          `Who posted it, what the shift is called, and start → end. ${shiftColourSentence()} Your calendar uses the same colours.`,
+          `Who posted it, what the shift is called, and when it starts and ends. Tap their name to see their public profile. ${shiftColorSentence()} Your calendar uses the same colors.`,
         side: 'top',
         align: 'center',
       },
@@ -242,7 +242,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'Giveaway, Trade, Give/Trade, OT',
         description:
-          '<strong>Giveaway</strong> — they’ll hand the shift over, nothing wanted back. <strong>Trade</strong> — they want one of yours in exchange. <strong>Give/Trade</strong> — they’ll do either, so offer a swap or just take it off their hands. <strong>OT</strong> — a Manager has already cleared it as approved overtime.',
+          '<strong>Giveaway</strong>: they’ll hand the shift over, nothing wanted back. <strong>Trade</strong>: they want one of yours in exchange. <strong>Give/Trade</strong>: they’ll do either, so offer a swap or just take it off their hands. <strong>OT</strong>: a manager has already cleared it as approved overtime.',
         side: 'top',
         align: 'end',
       },
@@ -253,7 +253,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'There’s more underneath',
         description:
-          'This chevron opens the poster’s notes and the board the shift came from — worth a look before you commit to anything. Here’s what it just revealed.',
+          'This arrow opens the poster’s notes and the board the shift came from. It’s worth a look before you commit to anything, and here’s what it just revealed.',
         // Above rather than beside: the step expands the card, and anything
         // level with the chevron sits right on top of the notes it just opened.
         side: 'top',
@@ -266,7 +266,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: '“I Can Help”',
         description:
-          'Tapping this doesn’t take the shift — it tells the owner you want it and notifies them straight away, which is what’s just happened here. The post stays on the Wall, everyone interested stacks up in that count, and the owner chooses. Tap it again to withdraw.',
+          'Tapping this doesn’t take the shift. It tells the owner you want it and notifies them right away, which is what just happened here. The post stays on the Wall, everyone who asks gets added to that count, and the owner picks who to accept. Tap it again to take back your request.',
         side: 'top',
         align: 'start',
       },
@@ -277,7 +277,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'Ask before you commit',
         description:
-          '<strong>Comments</strong> are visible to the whole board — good for “is this a closing shift?” — and they’re now open here. <strong>Message</strong>, up in the row above, opens a private chat with just the poster where you can work out the details of handing off the shift.',
+          '<strong>Comments</strong> are visible to the whole board (good for “is this a closing shift?”) and they’re now open here. <strong>Message</strong>, up in the row above, opens a private chat with just the poster where you can work out the details of handing off the shift.',
         side: 'top',
         align: 'start',
       },
@@ -287,7 +287,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'The ⋮ menu',
         description:
-          'Comment, message, or flag a post that shouldn’t be here. On your own posts you also get Edit, <strong>Remove from Wall</strong> — which takes it off the Wall but keeps it on your calendar — and Delete.',
+          'Comment, message, or flag a post that shouldn’t be here. On your own posts you also get <strong>Share</strong> (sends a picture of the card and a link to it through your phone’s regular share menu), plus Edit, <strong>Remove from Wall</strong> (takes it off the Wall but keeps it on your calendar), and Delete.',
         side: 'left',
         align: 'start',
       },
@@ -298,7 +298,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'Too much to scroll?',
         description:
-          'Opened up here: narrow the Wall by <strong>board</strong>, by <strong>type</strong> (Trade or Giveaway), by <strong>day of the week</strong>, or by a specific <strong>date</strong> — search by <strong>keyword</strong>, and flip on <strong>My Posts</strong> to see only your own.',
+          'Opened up here: narrow the Wall by <strong>board</strong>, by <strong>type</strong> (Trade or Giveaway), by <strong>day of the week</strong>, or by a specific <strong>date</strong>. Search by <strong>keyword</strong>, and flip on <strong>My Posts</strong> to see only your own.',
         side: 'bottom',
         align: 'start',
       },
@@ -315,7 +315,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'The rest of the app',
         description:
-          '<strong>My Calendar</strong> holds every shift you own, posted or not. <strong>Messages</strong> is where your private chats live. The <strong>?</strong> in the header has the full guide — and a button to replay this tour.',
+          '<strong>My Calendar</strong> holds every shift you own, posted or not. <strong>Messages</strong> is where your private chats live. Tap your name for your account menu: <strong>Notifications</strong> keeps a history of everything you’ve been notified about, and <strong>Profile</strong> is where you set up the public profile others see when they tap your name. The <strong>?</strong> in the header has the full guide, plus a button to replay this tour.',
         align: 'center',
         doneBtnText: 'Next: your calendar →',
       },
@@ -339,7 +339,7 @@ const postShiftChapter: TourChapterDef = {
   id: 'post-shift',
   path: '/wall/new-shift',
   label: 'Posting a shift',
-  blurb: 'Get a shift onto your calendar — and onto the Wall when you want it seen.',
+  blurb: 'Get a shift onto your calendar, and onto the Wall when you want it seen.',
   readySelector: '[data-tour="post-title"]',
   settleSelector: '[data-tour="post-submit"]',
   // The Post to Wall section is an accordion. Open it up front so its steps
@@ -371,7 +371,7 @@ const postShiftChapter: TourChapterDef = {
       popover: {
         title: 'Name it the way your schedule does',
         description:
-          'Use the exact title from your posted schedule — “Morning Opening”, “PM Attractions”. It’s the first thing anyone scans, and it makes the shift recognisable to people who work it.',
+          'Use the exact title from your posted schedule, like “Morning Opening” or “PM Attractions”. It’s the first thing anyone scans, and it makes the shift recognizable to people who work it.',
         side: 'bottom',
         align: 'start',
       },
@@ -381,7 +381,7 @@ const postShiftChapter: TourChapterDef = {
       popover: {
         title: 'Start and end',
         description:
-          'Pick a date and time for both — end has to come after start. If the shift overlaps something already on your calendar, the form says so before you can post it.',
+          'Pick a date and time for both. End has to come after start, and if the shift overlaps something already on your calendar, the form says so before you can post it.',
         side: 'bottom',
         align: 'start',
       },
@@ -391,7 +391,7 @@ const postShiftChapter: TourChapterDef = {
       popover: {
         title: 'This is the switch',
         description:
-          'Leave this section alone and the shift is <strong>calendar-only</strong> — nobody else sees it. Open it to put the shift in front of your board.',
+          'Leave this section alone and the shift is <strong>calendar-only</strong>: nobody else sees it. Open it to put the shift in front of your board.',
         side: 'top',
         align: 'start',
       },
@@ -401,7 +401,7 @@ const postShiftChapter: TourChapterDef = {
       popover: {
         title: 'How do you want to move it?',
         description:
-          '<strong>Giveaway</strong> — you’ll hand it over. <strong>Trade</strong> — you want a shift back. Tick both if either works, and the card shows a single Give/Trade badge. <strong>OT Approved</strong> only if a Manager has cleared it as overtime. Tick nothing and it stays off the Wall.',
+          '<strong>Giveaway</strong>: you’ll hand it over. <strong>Trade</strong>: you want a shift back. Check both if either works, and the card shows a single Give/Trade badge. <strong>OT Approved</strong> only if a manager has cleared it as overtime. Check nothing and it stays off the Wall.',
         side: 'bottom',
         align: 'start',
       },
@@ -411,7 +411,7 @@ const postShiftChapter: TourChapterDef = {
       popover: {
         title: 'The line that saves you a conversation',
         description:
-          'One bit of context does a lot of work here — “leaving early for a flight”, “will trade for any Tuesday”. Optional, but it heads off the obvious questions.',
+          'One bit of context does a lot of work here, like “leaving early for a flight” or “will trade for any Tuesday”. Optional, but it heads off the obvious questions.',
         side: 'bottom',
         align: 'start',
       },
@@ -421,7 +421,7 @@ const postShiftChapter: TourChapterDef = {
       popover: {
         title: 'Shifts that travel together',
         description:
-          'Got a three-day block that can only be given as a set? Bundle them, and whoever takes it takes all of them — not just a single one.',
+          'Got a three-day block that can only be given as a set? Bundle them, and whoever takes it takes all of them, not just a single one.',
         side: 'top',
         align: 'start',
       },
@@ -431,7 +431,7 @@ const postShiftChapter: TourChapterDef = {
       popover: {
         title: 'More than one?',
         description:
-          'Add another shift and post the lot in one go. Each one still gets its own spot on your calendar or a card on the Wall. Or, next you’ll learn about the calendar where you can import your entire schedule from a single photo or screenshot.',
+          'Add another shift and post them all at once. Each one still gets its own spot on your calendar or a card on the Wall. Or, next you’ll learn about the calendar, where you can import your entire schedule from a single photo or screenshot.',
         side: 'top',
         align: 'start',
       },
@@ -442,7 +442,7 @@ const postShiftChapter: TourChapterDef = {
       popover: {
         title: 'That’s the whole thing',
         description:
-          'Post it and it’s live for your board immediately — and anyone whose open request matches the date and time is notified automatically. You can edit it or pull it back any time from the ⋮ menu on your card.',
+          'Post it and it’s live for your board immediately. Anyone whose open request matches the date and time is notified automatically, and you can edit it or pull it back any time from the ⋮ menu on your card.',
         side: 'top',
         align: 'end',
         doneBtnText: 'Next: your calendar →',
@@ -463,7 +463,7 @@ const calendarChapter: TourChapterDef = {
       popover: {
         title: 'My Calendar',
         description:
-          'Every shift you own lives here — the ones you’ve posted and the ones you’re just keeping track of. The sample shifts on it right now are part of this tour and disappear when it ends.',
+          'Every shift you own lives here: the ones you’ve posted and the ones you’re just keeping track of. The sample shifts on it right now are part of this tour and disappear when it ends.',
       },
     },
     {
@@ -471,7 +471,7 @@ const calendarChapter: TourChapterDef = {
       popover: {
         title: 'Your shifts',
         description:
-          'Each block is one of your shifts, colour-coded the same way the Wall is. Tap one to edit it; tap any empty day to add a shift on that date.',
+          'Each block is one of your shifts, color-coded the same way the Wall is. Tap one to edit it; tap any empty day to add a shift on that date.',
         side: 'right',
         align: 'start',
       },
@@ -481,7 +481,7 @@ const calendarChapter: TourChapterDef = {
       popover: {
         title: 'What your board is up to',
         description:
-          'These dots are shifts or requests from other users from your boards for that day. Tap a dot to jump to the Wall filtered to that date to see what’s available.',
+          'These dots are shifts and requests that other people on your boards posted for that day. Tap a dot to jump to the Wall, filtered to that date, to see what’s available.',
         side: 'top',
         align: 'center',
       },
@@ -491,7 +491,7 @@ const calendarChapter: TourChapterDef = {
       popover: {
         title: 'Reading the dots',
         description:
-          'Purple is trade + giveaway, blue is trade, green is giveaway, orange is somebody’s open request.',
+          'Purple means trade and giveaway, blue means trade, green means giveaway, and orange means somebody’s open request.',
         side: 'bottom',
         align: 'start',
       },
@@ -511,7 +511,7 @@ const calendarChapter: TourChapterDef = {
       popover: {
         title: 'Skip the typing',
         description:
-          'Snap a photo of the posted schedule — paper or a screenshot — and your shifts are read from it in seconds. You can make sure it’s correct and edit everything before any of it is saved.',
+          'Snap a photo of the posted schedule, paper or a screenshot, and your shifts are read from it in seconds. You can make sure it’s correct and edit everything before any of it is saved.',
         side: 'bottom',
         align: 'end',
       },
@@ -543,7 +543,7 @@ const messagesChapter: TourChapterDef = {
       popover: {
         title: 'Messages',
         description:
-          'Working out a handoff usually takes a couple of back-and-forths. That happens here, privately — board moderators can’t read your chats.',
+          'Working out a handoff usually takes a couple of back-and-forths. That happens here, privately, and board moderators can’t read your chats.',
       },
     },
     {
@@ -551,7 +551,7 @@ const messagesChapter: TourChapterDef = {
       popover: {
         title: 'Your conversations',
         description:
-          'Newest first, with the last thing either of you said. A preview starting with <strong>You:</strong> means the ball is in their court. (These two are samples — they go away with the tour.)',
+          'Newest first, with the last thing either of you said. A preview starting with <strong>You:</strong> means the ball is in their court. (These two are samples, and they go away with the tour.)',
         side: 'top',
         align: 'center',
       },
@@ -571,7 +571,7 @@ const messagesChapter: TourChapterDef = {
       popover: {
         title: 'Clearing a chat',
         description:
-          'This removes the conversation from <em>your</em> list only — the other person keeps their copy. If either of you writes again, it comes back without the old history.',
+          'This removes the conversation from <em>your</em> list only. The other person keeps their copy, and if either of you writes again, it comes back without the old history.',
         side: 'left',
         align: 'start',
       },
@@ -581,7 +581,7 @@ const messagesChapter: TourChapterDef = {
       popover: {
         title: 'Starting one',
         description:
-          'You can message anyone who shares a board with you — this opens a searchable directory of them. You can also start a chat straight from a post, using <strong>Message</strong> on the card.',
+          'You can message anyone who shares a board with you. This opens a searchable directory of them, and you can also start a chat straight from a post, using <strong>Message</strong> on the card.',
         side: 'bottom',
         align: 'end',
         doneBtnText: 'Finish tour',
