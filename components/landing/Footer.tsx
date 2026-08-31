@@ -2,18 +2,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 
-// Serving personalised ads counts as "sharing" for cross-context behavioural
-// advertising under CPRA and the state laws that follow it, which carries an
-// opt-out right. This is the quiet, permanent version of that disclosure —
-// deliberately a footer link rather than an interstitial banner, and worded
-// "Your Privacy Choices" rather than "Do Not Sell…", which misdescribes what
-// actually happens here (we don't sell anything). Gated on the same env var as
-// the ads themselves so it disappears if AdSense is ever removed.
-const ADS_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID)
-
 // Log In is dropped in showcase mode — the route still works, it's just not
 // advertised, so nothing a crawler follows dead-ends at an auth wall. Blog and
 // FAQ stay in both modes; they're permanent content, not part of the demo.
+//
+// No footer link to /privacy#your-privacy-choices (the CPRA opt-out section
+// for personalised-ad "sharing") by design — Privacy still covers it, section
+// 12a, for anyone who reads the policy.
 const LINKS = [
   { href: '/about', label: 'About' },
   { href: '/for', label: 'Industries' },
@@ -22,9 +17,6 @@ const LINKS = [
   { href: '/contact', label: 'Contact' },
   { href: '/terms', label: 'Terms' },
   { href: '/privacy', label: 'Privacy' },
-  ...(ADS_CONFIGURED
-    ? [{ href: '/privacy#your-privacy-choices', label: 'Your Privacy Choices' }]
-    : []),
   { href: '/data-deletion', label: 'Data Deletion' },
   ...(SHOWCASE_MODE ? [] : [{ href: '/login', label: 'Log In' }]),
 ]

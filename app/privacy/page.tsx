@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { getPublicShowAds } from '@/lib/auth/session'
 import { AdRail } from '@/components/features/AdRail'
+import { ScrollToHash } from '@/components/features/ScrollToHash'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
 
@@ -13,6 +14,7 @@ export default async function PrivacyPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <ScrollToHash />
       <LandingHeader displayName={null} />
       <main className="flex-1">
         <AdRail showAds={showAds} hasBottomNav={false}>
