@@ -21,8 +21,8 @@ export default async function DashboardLayout({
 
   const { supabase, user } = await requireUser()
 
-  // Profile, moderator check, ad eligibility, and unread messages are independent — fetch together
-  const [profileRes, { data: isMod }, showAds, { data: unreadMessages }] = await Promise.all([
+  // Profile, moderator check, ad eligibility, and unread counts are independent — fetch together
+  const [profileRes, { data: isMod }, showAds, { data: unreadMessages }, { data: unreadNotifications }] = await Promise.all([
     supabase
       .from('users')
       .select('id, display_name, role, is_active')
@@ -31,6 +31,7 @@ export default async function DashboardLayout({
     supabase.rpc('is_any_board_moderator'),
     getShowAds(supabase),
     supabase.rpc('get_unread_message_count'),
+    supabase.rpc('get_unread_notification_count'),
   ])
   const userProfile = profileRes.data
 
@@ -91,6 +92,7 @@ export default async function DashboardLayout({
         pendingApprovalsCount={pendingApprovalsCount}
         pendingFlagsCount={pendingFlagsCount}
         unreadMessagesCount={unreadMessages ?? 0}
+        unreadNotificationsCount={unreadNotifications ?? 0}
         showUpgrade={showAds /* showAds === Basic tier, same signal */}
       />
       <main className="flex-1 pb-20 md:pb-0">

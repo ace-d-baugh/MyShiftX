@@ -140,13 +140,15 @@ export default async function HomePage() {
   let pendingApprovalsCount = 0
   let pendingFlagsCount = 0
   let unreadMessagesCount = 0
+  let unreadNotificationsCount = 0
   let showUpgrade = false
 
   if (user) {
-    const [{ data: profile }, { data: isModRpc }, { data: unreadMessages }, showAds] = await Promise.all([
+    const [{ data: profile }, { data: isModRpc }, { data: unreadMessages }, { data: unreadNotifications }, showAds] = await Promise.all([
       supabase.from('users').select('display_name, role').eq('id', user.id).single(),
       supabase.rpc('is_any_board_moderator'),
       supabase.rpc('get_unread_message_count'),
+      supabase.rpc('get_unread_notification_count'),
       // Same Basic-tier signal the dashboard layout passes to Navbar, so the
       // landing dropdown and the app dropdown show the same entries.
       getShowAds(supabase),
@@ -154,6 +156,7 @@ export default async function HomePage() {
     displayName = profile?.display_name ?? user.email ?? 'Account'
     userRole = (profile?.role as GlobalRole | undefined) ?? 'User'
     unreadMessagesCount = unreadMessages ?? 0
+    unreadNotificationsCount = unreadNotifications ?? 0
     showUpgrade = showAds
 
     const isAdmin = userRole === 'Admin'
@@ -191,6 +194,7 @@ export default async function HomePage() {
         pendingApprovalsCount={pendingApprovalsCount}
         pendingFlagsCount={pendingFlagsCount}
         unreadMessagesCount={unreadMessagesCount}
+        unreadNotificationsCount={unreadNotificationsCount}
         showUpgrade={showUpgrade}
       />
 

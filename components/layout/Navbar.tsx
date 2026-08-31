@@ -26,6 +26,7 @@ interface NavbarProps {
   pendingApprovalsCount?: number
   pendingFlagsCount?: number
   unreadMessagesCount?: number
+  unreadNotificationsCount?: number
   /** Basic tier only — shows the "Upgrade to Pro" entry in the account menu. */
   showUpgrade?: boolean
 }
@@ -38,6 +39,7 @@ export function Navbar({
   pendingApprovalsCount = 0,
   pendingFlagsCount = 0,
   unreadMessagesCount = 0,
+  unreadNotificationsCount = 0,
   showUpgrade = false,
 }: NavbarProps) {
   const pathname = usePathname()
@@ -48,7 +50,7 @@ export function Navbar({
 
   const isAdmin = userRole === 'Admin'
   const showModItems = isBoardModerator || isAdmin
-  const hasUnresolved = pendingApprovalsCount > 0 || pendingFlagsCount > 0
+  const hasUnresolved = pendingApprovalsCount > 0 || pendingFlagsCount > 0 || unreadNotificationsCount > 0
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -79,7 +81,7 @@ export function Navbar({
   // ── Dropdown menu items (role-scoped) ──────────────────────────────────────
   const dropdownItems = buildRoleDropdownItems({
     isAdmin, showModItems, isLeader, showUpgrade,
-    pendingApprovalsCount, pendingFlagsCount,
+    pendingApprovalsCount, pendingFlagsCount, unreadNotificationsCount,
   })
 
   return (

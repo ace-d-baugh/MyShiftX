@@ -14,6 +14,10 @@ export type RemovedReason   = 'expired' | 'leader_removed' | 'user_removed' | 'c
 export type ClaimStatus     = 'pending' | 'accepted' | 'declined' | 'withdrawn' | 'completed' | 'fell_through'
 export type MessageReaction = 'thumbs_up' | 'laugh' | 'surprise' | 'sad' | 'mad' | 'star'
 export type BillingCycle    = 'monthly' | 'quarterly' | 'semi_annual' | 'yearly'
+export type NotificationType =
+  | 'shift_match' | 'interest' | 'comment'
+  | 'claim_created' | 'claim_resolved' | 'claim_finalized'
+  | 'board_approved' | 'board_announcement'
 
 export interface Database {
   public: {
@@ -822,6 +826,102 @@ export interface Database {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          id: string
+          type: NotificationType
+          title: string
+          body: string
+          link_url: string
+          actor_user_id: string | null
+          pinned_until: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          type: NotificationType
+          title: string
+          body: string
+          link_url: string
+          actor_user_id?: string | null
+          pinned_until?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          type?: NotificationType
+          title?: string
+          body?: string
+          link_url?: string
+          actor_user_id?: string | null
+          pinned_until?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      notification_recipients: {
+        Row: {
+          id: string
+          notification_id: string
+          user_id: string
+          board_id: string | null
+          read_at: string | null
+          dismissed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          notification_id: string
+          user_id: string
+          board_id?: string | null
+          read_at?: string | null
+          dismissed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          notification_id?: string
+          user_id?: string
+          board_id?: string | null
+          read_at?: string | null
+          dismissed_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_recipients_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_recipients_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_recipients_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "boards"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -887,6 +987,8 @@ export interface Database {
       is_conversation_participant: { Args: { p_conversation_id: string }; Returns: boolean }
       shares_board_with: { Args: { p_other_user_id: string }; Returns: boolean }
       is_any_board_moderator: { Args: Record<string, never>; Returns: boolean }
+      get_unread_notification_count: { Args: Record<string, never>; Returns: number }
+      purge_expired_notifications: { Args: Record<string, never>; Returns: undefined }
       is_board_member:     { Args: { p_board_id: string }; Returns: boolean }
       is_board_moderator:  { Args: { p_board_id: string }; Returns: boolean }
       is_board_leader:     { Args: { p_board_id: string }; Returns: boolean }

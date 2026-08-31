@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import {
   User,
+  Bell,
   ShieldCheck,
   Flag,
   Archive,
@@ -27,7 +28,7 @@ export function fmtBadge(n: number): string | null {
 /** Profile/Help + role-gated items (mod: Approvals/Flags/Archive, admin: Overlord Panel/Roadmap). */
 export function buildRoleDropdownItems({
   isAdmin, showModItems, isLeader, showUpgrade = false,
-  pendingApprovalsCount, pendingFlagsCount,
+  pendingApprovalsCount, pendingFlagsCount, unreadNotificationsCount,
 }: {
   isAdmin: boolean
   showModItems: boolean
@@ -38,9 +39,17 @@ export function buildRoleDropdownItems({
   showUpgrade?: boolean
   pendingApprovalsCount: number
   pendingFlagsCount: number
+  unreadNotificationsCount: number
 }): DropdownItemDef[] {
   const items: DropdownItemDef[] = [
     { type: 'link', href: '/profile', label: 'Profile', icon: User },
+    {
+      type: 'link',
+      href: '/notifications',
+      label: 'Notifications',
+      icon: Bell,
+      badge: fmtBadge(unreadNotificationsCount),
+    },
     { type: 'link', href: '/help',    label: 'Help & Support', icon: HelpCircle },
   ]
 

@@ -34,6 +34,7 @@ interface LandingHeaderProps {
   pendingApprovalsCount?: number
   pendingFlagsCount?: number
   unreadMessagesCount?: number
+  unreadNotificationsCount?: number
   showUpgrade?: boolean
   /**
    * Current section, e.g. '/wall'. Highlights the matching nav item and sets
@@ -55,6 +56,7 @@ export function LandingHeader({
   pendingApprovalsCount = 0,
   pendingFlagsCount = 0,
   unreadMessagesCount = 0,
+  unreadNotificationsCount = 0,
   showUpgrade = false,
   active,
 }: LandingHeaderProps) {
@@ -70,7 +72,7 @@ export function LandingHeader({
 
   const isAdmin = userRole === 'Admin'
   const showModItems = isBoardModerator || isAdmin
-  const hasNotifications = pendingApprovalsCount > 0 || pendingFlagsCount > 0 || unreadMessagesCount > 0
+  const hasNotifications = pendingApprovalsCount > 0 || pendingFlagsCount > 0 || unreadMessagesCount > 0 || unreadNotificationsCount > 0
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -90,7 +92,7 @@ export function LandingHeader({
   ]
   const dropdownItems = [
     ...primaryItems,
-    ...buildRoleDropdownItems({ isAdmin, showModItems, isLeader, showUpgrade, pendingApprovalsCount, pendingFlagsCount }),
+    ...buildRoleDropdownItems({ isAdmin, showModItems, isLeader, showUpgrade, pendingApprovalsCount, pendingFlagsCount, unreadNotificationsCount }),
   ]
 
   return (
