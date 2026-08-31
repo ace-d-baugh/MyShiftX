@@ -1398,6 +1398,16 @@ Type-check and lint clean. Not exercised live in-browser — no admin test crede
 | User acceptance testing with a pilot group | 👤 You | Pick 5–10 coworkers to test before wider rollout |
 | Dependency vulnerabilities (`npm audit`, 2026-07-22) | 🤖 Claude | 20 findings, none in shipped runtime code. Safe now via `npm audit fix` (non-breaking): `picomatch` (high, ReDoS in glob matching — jest/chokidar dev-time only), `yaml` (moderate, stack overflow on deep nesting). Needs a breaking bump + regression testing later: Next.js 14→16 (fixes a `postcss` XSS chain), Supabase CLI bump (fixes a critical `tar` path-traversal chain, dev-tooling only, not shipped). Same lockfile as WDWShiftX — fix once, apply to both. |
 
+### Port #5: resend-verification, account security, sender fix (2026-08-30)
+
+Three small items from WDWShiftX's `PORTABLE_FEATURES_2.md` items 30, 31, 33 — the two big new items added since (29 Notifications page, 32 Public profiles) were left out as clearly out of scope for "simple" per their own portability notes ("largest lift after 11/17" and "real lift" respectively) and are not yet even verified end-to-end on WDWShiftX itself.
+
+- **#31 Resend-verification-email:** `app/(auth)/register/page.tsx` now passes `?email=` through to `/verify-email` alongside `?redirect=`. `app/(auth)/verify-email/page.tsx` shows the address, adds a "Resend Verification Email" button (60s client-side cooldown) calling `supabase.auth.resend({type: 'signup', ...})`. `app/(auth)/login/page.tsx` now catches `error.code === 'email_not_confirmed'` (with a message-text regex fallback) on a failed sign-in and shows an inline unverified banner with the same resend action, using the email already typed into the form. Confirmed `@supabase/supabase-js` is on the same `^2.108.1` as WDWShiftX, so the `.code` field is present.
+- **#33 Sender address:** `lib/email-constants.ts`'s `EMAIL_FROM` changed from `noreply@myshiftx.com` to `support@myshiftx.com` (which already exists as `SUPPORT_EMAIL`), matching the Resend deliverability fix. The separate Supabase Auth confirmation-email domain gap noted in the source item is dashboard config, not code — not addressed here.
+- **#30 Account Security section:** new `components/features/AccountSecuritySection.tsx`, wired into `ProfileClient.tsx` just above Danger Zone. Add/update password (reuses the existing `PasswordStrengthMeter`/`passwordMeetsRequirements`), plus Connect/Disconnect for Google and LinkedIn (matches `OAuthButtons.tsx`'s `ENABLED` map — Facebook omitted, no Meta app configured here either). Disconnect is disabled when it's the only identity, per Supabase's `unlinkIdentity()` requirement.
+
+**Open item, not verified by me:** #30 requires **Manual Linking** enabled in MyShiftX's own Supabase Dashboard → Authentication → Settings, or `linkIdentity()` will fail outright. I have no dashboard access to confirm this from the coding environment — check it before relying on the Connect button. All three items are type-checked, linted, and build clean; not exercised live in-browser (no test credentials in this environment).
+
 ---
 
 ## Deferred / Dropped

@@ -6,6 +6,7 @@ import { Bell, LayoutDashboard, Trash2, Save, CheckCircle, Plus, Settings, Check
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AvatarUpload } from '@/components/features/AvatarUpload'
+import { AccountSecuritySection } from '@/components/features/AccountSecuritySection'
 import { Avatar } from '@/components/ui/Avatar'
 import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { PushNotificationsToggle } from '@/components/features/PushNotificationsToggle'
@@ -502,6 +503,8 @@ export function ProfileClient({ user, sessionUserId, isPro, membershipTier = 'Ba
           </div>
         </div>
       </div>
+
+      <AccountSecuritySection />
 
       {/* Danger Zone */}
       <div className="card shadow-sm border border-warning/20">
