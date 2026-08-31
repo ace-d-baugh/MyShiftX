@@ -9,19 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 import type { GlobalRole } from '@/lib/database.types'
-import { buildRoleDropdownItems, DropdownContent, fmtBadge, type DropdownItemDef } from '@/components/layout/AccountDropdown'
-
-/** Public nav shown to signed-out visitors while the site is in showcase mode. */
-const PUBLIC_NAV = [
-  { href: '/wall', label: 'The Wall' },
-  { href: '/calendar', label: 'Calendar' },
-  { href: '/messages', label: 'Messages' },
-  { href: '/for', label: 'Industries' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/faq', label: 'FAQ' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
-] as const
+import { buildRoleDropdownItems, buildMarketingNavLinks, DropdownContent, fmtBadge, type DropdownItemDef } from '@/components/layout/AccountDropdown'
 
 /** The demo sections — where the "Live Demo" CTA would just point at itself. */
 const DEMO_ROUTES = ['/wall', '/calendar', '/messages']
@@ -95,6 +83,11 @@ export function LandingHeader({
     ...buildRoleDropdownItems({ isAdmin, showModItems, isLeader, showUpgrade, pendingApprovalsCount, pendingFlagsCount, unreadNotificationsCount }),
   ]
 
+  // About/Blog/Contact/FAQ, plus Upgrade for non-paying users — always
+  // visible, ahead of the auth buttons / account menu, regardless of
+  // showcase mode or login state.
+  const navLinks = buildMarketingNavLinks(showUpgrade)
+
   return (
     <header className="sticky top-0 z-50 bg-background/90 backdrop-blur border-b border-border animate-slide-down">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -104,6 +97,36 @@ export function LandingHeader({
         </Link>
 
         <nav className="flex items-center gap-3">
+          {/* About/Blog/Contact/FAQ/Upgrade — desktop pills */}
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={activeHref === item.href ? 'page' : undefined}
+                className={cn(
+                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  activeHref === item.href
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-text/70 hover:text-primary hover:bg-primary-light/50'
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Same links, plus the Live Demo CTA in showcase mode, behind a hamburger on mobile */}
+          <button
+            onClick={() => setMobileNavOpen(o => !o)}
+            className="md:hidden p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
+            aria-label="Toggle menu"
+            aria-haspopup="menu"
+            aria-expanded={mobileNavOpen}
+          >
+            {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
           {isLoggedIn ? (
             <div className="relative">
               <button
@@ -138,50 +161,15 @@ export function LandingHeader({
               )}
             </div>
           ) : SHOWCASE_MODE ? (
-            /* Showcase mode: a real topic-organised nav instead of auth CTAs.
-             * AdSense asks for "an accessible, easy-to-use navigation bar
-             * organized by topic", and there is nothing to sign into anyway.
-             * Eight items wrapped into pills on mobile, which is why this
-             * collapses into a hamburger below md — the wrapped version read
-             * as several uneven rows rather than a menu. */
-            <>
-              <div className="hidden md:flex items-center gap-1">
-                {PUBLIC_NAV.map(item => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={activeHref === item.href ? 'page' : undefined}
-                    className={cn(
-                      'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                      activeHref === item.href
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-text/70 hover:text-primary hover:bg-primary-light/50'
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                {/* Redundant once you're already inside the demo. */}
-                {!DEMO_ROUTES.includes(activeHref ?? '') && (
-                  <Link
-                    href="/wall"
-                    className="btn btn-primary text-sm px-4 py-2 min-h-0 h-10 ml-1"
-                  >
-                    Live Demo
-                  </Link>
-                )}
-              </div>
-
-              <button
-                onClick={() => setMobileNavOpen(o => !o)}
-                className="md:hidden p-2 rounded-md text-text/60 hover:text-text hover:bg-primary-light transition-colors min-h-0 min-w-0"
-                aria-label="Toggle menu"
-                aria-haspopup="menu"
-                aria-expanded={mobileNavOpen}
+            /* Redundant once you're already inside the demo. */
+            !DEMO_ROUTES.includes(activeHref ?? '') && (
+              <Link
+                href="/wall"
+                className="hidden md:inline-flex btn btn-primary text-sm px-4 py-2 min-h-0 h-10"
               >
-                {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </>
+                Live Demo
+              </Link>
+            )
           ) : (
             <>
               <Link href="/login" className="btn btn-outline text-sm px-4 py-2 min-h-0 h-10">
@@ -195,15 +183,14 @@ export function LandingHeader({
         </nav>
       </div>
 
-      {/* Mobile nav panel — showcase mode only; the other two states (logged
-          in, or the plain Log In/Get Started pair) are already one row. */}
-      {SHOWCASE_MODE && !isLoggedIn && mobileNavOpen && (
+      {/* Mobile nav panel — About/Blog/Contact/FAQ/Upgrade, always available. */}
+      {mobileNavOpen && (
         <div
           className="md:hidden bg-background border-t border-border shadow-lg"
           style={{ animation: 'navMenuOpen 0.38s ease-out both' }}
         >
           <nav className="px-4 py-2 flex flex-col">
-            {PUBLIC_NAV.map(item => (
+            {navLinks.map(item => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -219,7 +206,7 @@ export function LandingHeader({
                 {item.label}
               </Link>
             ))}
-            {!DEMO_ROUTES.includes(activeHref ?? '') && (
+            {SHOWCASE_MODE && !isLoggedIn && !DEMO_ROUTES.includes(activeHref ?? '') && (
               <Link
                 href="/wall"
                 onClick={() => setMobileNavOpen(false)}
@@ -233,7 +220,7 @@ export function LandingHeader({
       )}
 
       {/* Backdrop — closes the mobile panel when tapping outside it. */}
-      {SHOWCASE_MODE && !isLoggedIn && mobileNavOpen && (
+      {mobileNavOpen && (
         <div
           className="fixed inset-0 z-[49] md:hidden"
           onClick={() => setMobileNavOpen(false)}

@@ -16,7 +16,7 @@ import { ThemedLogo } from '@/components/ui/ThemedLogo'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { GlobalRole } from '@/lib/database.types'
-import { buildRoleDropdownItems, DropdownContent, fmtBadge } from '@/components/layout/AccountDropdown'
+import { buildRoleDropdownItems, buildMarketingNavLinks, DropdownContent, fmtBadge } from '@/components/layout/AccountDropdown'
 
 interface NavbarProps {
   userRole: GlobalRole
@@ -84,6 +84,10 @@ export function Navbar({
     pendingApprovalsCount, pendingFlagsCount, unreadNotificationsCount,
   })
 
+  // About/Blog/Contact/FAQ, plus Upgrade for Basic-tier (non-paying) users —
+  // shown ahead of the Help icon / account menu, same set as LandingHeader.
+  const navLinks = buildMarketingNavLinks(showUpgrade)
+
   return (
     <>
       {/* ── Desktop header ────────────────────────────────────────────────── */}
@@ -95,8 +99,24 @@ export function Navbar({
             <ThemedLogo priority className="h-12 w-auto" />
           </Link>
 
-          {/* Help + Account */}
+          {/* Nav links + Help + Account */}
           <div className="flex items-center gap-0.5">
+            {/* About/Blog/Contact/FAQ/Upgrade — ahead of Help & the account menu */}
+            <div className="flex items-center gap-0.5 mr-2 pr-2 border-r border-border">
+              {navLinks.map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors min-h-0 min-w-0',
+                    isActive(item.href) ? 'text-primary bg-primary-light' : 'text-text/60 hover:text-primary hover:bg-primary-light/50'
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
             <Link
               href="/help"
               className={cn(
@@ -254,6 +274,21 @@ export function Navbar({
               <p className="text-xs text-text/40 font-medium uppercase tracking-wide">Signed in as</p>
               <p className="text-sm font-medium text-text">{displayName}</p>
             </div>
+            <nav className="px-2.5 py-1.5 flex flex-col border-b border-border">
+              {navLinks.map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMobileMenu}
+                  className={cn(
+                    'px-3 py-2.5 rounded-md text-sm font-medium transition-colors',
+                    isActive(item.href) ? 'text-primary bg-primary-light' : 'text-text/70 hover:text-primary hover:bg-primary-light/50'
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
             <nav className="py-1.5">
               <DropdownContent
                 items={dropdownItems}

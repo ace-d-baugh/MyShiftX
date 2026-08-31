@@ -21,6 +21,28 @@ export interface DropdownItemDef {
   badge?: string | null
 }
 
+export interface NavLinkDef {
+  href: string
+  label: string
+}
+
+const STATIC_MARKETING_LINKS: NavLinkDef[] = [
+  { href: '/about', label: 'About' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/faq', label: 'FAQ' },
+]
+
+/** About/Blog/Contact/FAQ, plus Upgrade for Basic-tier (non-paying) users.
+ *  Rendered as top-level nav links — ahead of the auth buttons / account
+ *  menu — in both the landing header and the dashboard navbar, so signed-out
+ *  and signed-in visitors see the same set. */
+export function buildMarketingNavLinks(showUpgrade: boolean): NavLinkDef[] {
+  return showUpgrade
+    ? [...STATIC_MARKETING_LINKS, { href: '/upgrade', label: 'Upgrade' }]
+    : STATIC_MARKETING_LINKS
+}
+
 export function fmtBadge(n: number): string | null {
   return n > 99 ? '99+' : n > 0 ? String(n) : null
 }
