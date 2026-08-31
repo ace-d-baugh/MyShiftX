@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs/config'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Let verification builds run alongside `next dev` without the two fighting
@@ -22,6 +24,9 @@ const nextConfig = {
     staleTimes: {
       dynamic: 0,
     },
+    // Next 14 doesn't enable instrumentation.ts by default (stable without the
+    // flag since Next 15) — required for Sentry's server/edge init.
+    instrumentationHook: true,
     serverComponentsExternalPackages: [
       '@supabase/ssr',
       '@supabase/supabase-js',
@@ -34,4 +39,14 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Upload a wider set of client source files so stack traces resolve to real
+  // filenames/lines rather than bundle chunk names.
+  widenClientFileUpload: true,
+  // No-op (skips source map upload, no console noise) until org/project/token are set.
+  silent: true,
+  webpack: { treeshake: { removeDebugLogging: true } },
+})
