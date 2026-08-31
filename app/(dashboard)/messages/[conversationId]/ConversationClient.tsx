@@ -8,6 +8,7 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
 import { ArrowLeft, Eye, EyeOff, Flag, MoreVertical, Send, Star, Trash2 } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
+import { UserLink } from '@/components/ui/UserLink'
 import { Button } from '@/components/ui/Button'
 import { FlagModal } from '@/components/features/FlagModal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -340,8 +341,10 @@ export function ConversationClient({
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <Avatar avatarUrl={otherAvatarUrl} displayName={otherName} size={32} />
-        <h1 className="font-accent text-lg font-bold text-text truncate">{otherName}</h1>
+        <UserLink userId={otherUserId} displayName={otherName} currentUserId={currentUserId} className="flex items-center gap-3 min-w-0">
+          <Avatar avatarUrl={otherAvatarUrl} displayName={otherName} size={32} />
+          <h1 className="font-accent text-lg font-bold text-text truncate">{otherName}</h1>
+        </UserLink>
 
         {/* ⋮ menu: flag the other user / delete this chat */}
         <div className="ml-auto relative shrink-0">

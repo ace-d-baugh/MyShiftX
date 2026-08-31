@@ -18,6 +18,9 @@ export type NotificationType =
   | 'shift_match' | 'interest' | 'comment'
   | 'claim_created' | 'claim_resolved' | 'claim_finalized'
   | 'board_approved' | 'board_announcement'
+export type ContactMethodType =
+  | 'phone' | 'email' | 'instagram' | 'facebook' | 'twitter' | 'tiktok'
+  | 'discord' | 'snapchat' | 'linkedin' | 'other'
 
 export interface Database {
   public: {
@@ -48,6 +51,10 @@ export interface Database {
           ical_token: string | null
           is_active: boolean
           last_login_at: string | null
+          bio: string | null
+          birthday_month: number | null
+          birthday_day: number | null
+          birthday_year: number | null
           created_at: string
           updated_at: string
         }
@@ -76,6 +83,10 @@ export interface Database {
           ical_token?: string | null
           is_active?: boolean
           last_login_at?: string | null
+          bio?: string | null
+          birthday_month?: number | null
+          birthday_day?: number | null
+          birthday_year?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -104,6 +115,10 @@ export interface Database {
           ical_token?: string | null
           is_active?: boolean
           last_login_at?: string | null
+          bio?: string | null
+          birthday_month?: number | null
+          birthday_day?: number | null
+          birthday_year?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -918,6 +933,41 @@ export interface Database {
             columns: ["board_id"]
             isOneToOne: false
             referencedRelation: "boards"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_contact_methods: {
+        Row: {
+          id: string
+          user_id: string
+          type: ContactMethodType
+          value: string
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: ContactMethodType
+          value: string
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: ContactMethodType
+          value?: string
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_contact_methods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]

@@ -12,14 +12,19 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: userProfile }, { data: membershipRow }] = await Promise.all([
+  const [{ data: userProfile }, { data: membershipRow }, { data: contactMethods }] = await Promise.all([
     supabase
       .from('users')
-      .select('id, display_name, email, phone_number, notify_via_email, notify_via_sms, avatar_url, role, is_active, created_at')
+      .select('id, display_name, email, phone_number, notify_via_email, notify_via_sms, avatar_url, role, is_active, created_at, bio, birthday_month, birthday_day, birthday_year')
       .eq('id', user.id)
       .single(),
     // membership columns are locked from direct SELECT — owner-only RPC
     supabase.rpc('get_own_membership').single(),
+    supabase
+      .from('user_contact_methods')
+      .select('id, type, value, sort_order')
+      .eq('user_id', user.id)
+      .order('sort_order'),
   ])
 
   const tier = membershipRow?.membership === 'Pro' || membershipRow?.membership === 'Trial'
@@ -31,6 +36,7 @@ export default async function ProfilePage() {
     <ProfileClient
       user={userProfile}
       sessionUserId={user.id}
+      contactMethods={contactMethods ?? []}
       isPro={isPro}
       membershipTier={tier}
       trialEndsAt={membershipRow?.trial_ends_at ?? null}
