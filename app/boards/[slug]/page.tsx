@@ -92,6 +92,7 @@ export default async function BoardSlugPage({ params, searchParams }: Props) {
     <Navbar
       userRole={userRole}
       displayName={displayName}
+      userId={user.id}
       isBoardModerator={isBoardModerator}
       isLeader={isLeader}
       pendingApprovalsCount={pendingApprovalsCount}

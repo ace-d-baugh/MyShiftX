@@ -87,6 +87,7 @@ export default async function DashboardLayout({
       <Navbar
         userRole={userRole}
         displayName={displayName}
+        userId={user.id}
         isBoardModerator={isBoardModerator}
         isLeader={isLeader}
         pendingApprovalsCount={pendingApprovalsCount}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -21,6 +21,9 @@ import { buildRoleDropdownItems, buildMarketingNavLinks, DropdownContent, fmtBad
 interface NavbarProps {
   userRole: GlobalRole
   displayName: string
+  /** Enables the live unread-notifications subscription below; omit only for
+   *  callers that don't have the current user's id in scope. */
+  userId?: string
   isBoardModerator?: boolean
   isLeader?: boolean
   pendingApprovalsCount?: number
@@ -34,6 +37,7 @@ interface NavbarProps {
 export function Navbar({
   userRole,
   displayName,
+  userId,
   isBoardModerator = false,
   isLeader = false,
   pendingApprovalsCount = 0,
@@ -48,9 +52,32 @@ export function Navbar({
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false)
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
 
+  // The server-rendered count only reflects the moment this layout last
+  // rendered — a soft navigation (e.g. after marking a notification read on
+  // /notifications) reuses that render, so the dot/badge would otherwise
+  // never clear until a hard reload. Reconcile it whenever this user's
+  // notification_recipients rows change.
+  const [liveUnreadNotifications, setLiveUnreadNotifications] = useState(unreadNotificationsCount)
+  useEffect(() => { setLiveUnreadNotifications(unreadNotificationsCount) }, [unreadNotificationsCount])
+  useEffect(() => {
+    if (!userId) return
+    const refetch = () => {
+      supabase.rpc('get_unread_notification_count').then(({ data, error }) => {
+        if (!error) setLiveUnreadNotifications(data ?? 0)
+      })
+    }
+    const channel = supabase
+      .channel(`realtime:navbar:notification_recipients:${userId}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'notification_recipients', filter: `user_id=eq.${userId}`,
+      }, refetch)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [supabase, userId])
+
   const isAdmin = userRole === 'Admin'
   const showModItems = isBoardModerator || isAdmin
-  const hasUnresolved = pendingApprovalsCount > 0 || pendingFlagsCount > 0 || unreadNotificationsCount > 0
+  const hasUnresolved = pendingApprovalsCount > 0 || pendingFlagsCount > 0 || liveUnreadNotifications > 0
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -81,7 +108,7 @@ export function Navbar({
   // ── Dropdown menu items (role-scoped) ──────────────────────────────────────
   const dropdownItems = buildRoleDropdownItems({
     isAdmin, showModItems, isLeader, showUpgrade,
-    pendingApprovalsCount, pendingFlagsCount, unreadNotificationsCount,
+    pendingApprovalsCount, pendingFlagsCount, unreadNotificationsCount: liveUnreadNotifications,
   })
 
   // About/Blog/Contact/FAQ, plus Upgrade for Basic-tier (non-paying) users —
