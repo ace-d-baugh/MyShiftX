@@ -12,7 +12,10 @@ export async function claimShift(shiftId: string): Promise<{ error?: string; cla
     const { data, error } = await supabase.rpc('claim_shift', { p_shift_id: shiftId })
     if (error) return { error: error.message }
 
-    void notifyClaimCreated(data)
+    // Awaited, not fire-and-forget: on serverless, the function can be torn
+    // down the moment this action's response is sent, killing an unawaited
+    // push/DB-insert/email chain before it ever runs.
+    await notifyClaimCreated(data)
     return { claimId: data }
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
@@ -30,7 +33,7 @@ export async function claimBundle(bundleId: string): Promise<{ error?: string; c
     const { data, error } = await supabase.rpc('claim_bundle', { p_bundle_id: bundleId })
     if (error) return { error: error.message }
 
-    void notifyClaimCreated(data)
+    await notifyClaimCreated(data)
     return { claimId: data }
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
@@ -54,7 +57,7 @@ export async function respondToClaim(claimId: string, accept: boolean): Promise<
     })
     if (error) return { error: error.message }
 
-    void notifyClaimResolved(claimId, accept)
+    await notifyClaimResolved(claimId, accept)
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
@@ -91,7 +94,7 @@ export async function finalizeClaim(claimId: string, completed: boolean): Promis
     if (error) return { error: error.message }
     if (!data) return { error: 'Claim not found or not awaiting confirmation.' }
 
-    void notifyClaimFinalized(claimId)
+    await notifyClaimFinalized(claimId)
     if (!completed) revalidatePath('/calendar')
     return {}
   } catch (e) {

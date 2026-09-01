@@ -374,8 +374,10 @@ export async function approveUserBoard(userBoardId: string): Promise<{ error?: s
       .eq('id', userBoardId)
     if (error) return { error: error.message }
     revalidatePath('/leader/approvals')
-    // Fire-and-forget — never blocks the approval action
-    notifyBoardApproved(userBoardId)
+    // Awaited, not fire-and-forget — on serverless the function can be torn
+    // down right after this action's response is sent, killing an unawaited
+    // push/DB-insert/email chain before it runs (same bug fixed in claims.ts).
+    await notifyBoardApproved(userBoardId)
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
