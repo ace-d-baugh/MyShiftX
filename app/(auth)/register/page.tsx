@@ -96,9 +96,14 @@ function RegisterForm() {
     setLoading(true)
     try {
       // The public.users profile row is created automatically by a DB trigger on auth.users.
+      // The confirmation email's link goes through Supabase's own domain before
+      // landing back here, so localStorage (set on this origin) can't be relied
+      // on alone — an invite code with no board `redirect` still needs to ride
+      // along in the URL itself, or it's lost when confirmed on another device.
+      const effectiveRedirect = redirect || (inviteCode ? `/welcome?code=${inviteCode}` : '')
       const verifyBase = `${window.location.origin}/verify-email`
-      const emailRedirectTo = redirect
-        ? `${verifyBase}?redirect=${encodeURIComponent(redirect)}`
+      const emailRedirectTo = effectiveRedirect
+        ? `${verifyBase}?redirect=${encodeURIComponent(effectiveRedirect)}`
         : verifyBase
 
       // given_name/family_name use the same metadata keys Google OAuth sends,
@@ -135,13 +140,13 @@ function RegisterForm() {
       }
 
       const verifyParams = new URLSearchParams({ email: form.email })
-      if (redirect) verifyParams.set('redirect', redirect)
+      if (effectiveRedirect) verifyParams.set('redirect', effectiveRedirect)
       const verifyPath = `/verify-email?${verifyParams.toString()}`
 
       if (data.user && !data.session) {
         router.push(verifyPath)
       } else {
-        router.push(redirect || '/wall')
+        router.push(effectiveRedirect || '/wall')
       }
     } catch {
       setServerError('An unexpected error occurred. Please try again.')
