@@ -64,6 +64,18 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
   const [createLoading, setCreateLoading] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
 
+  // Onboarding variant: the cards themselves have no inputs — each button
+  // opens its own modal instead. Kept separate from the default variant's
+  // externally-controlled createOpen/onCreateOpenChange (used by Profile's
+  // plus button), since onboarding owns both of its modals internally.
+  const [obJoinOpen, setObJoinOpen] = useState(false)
+  const [obCreateOpen, setObCreateOpen] = useState(false)
+  const isCreateOpen = variant === 'onboarding' ? obCreateOpen : (createOpen ?? false)
+  const closeCreateModal = useCallback(() => {
+    if (variant === 'onboarding') setObCreateOpen(false)
+    else onCreateOpenChange?.(false)
+  }, [variant, onCreateOpenChange])
+
   // Inline edit
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
@@ -129,8 +141,12 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
   useEffect(() => { loadBoards() }, [loadBoards])
 
   useEffect(() => {
-    if (createOpen) { setCreateName(''); setCreateError(null) }
-  }, [createOpen])
+    if (isCreateOpen) { setCreateName(''); setCreateError(null) }
+  }, [isCreateOpen])
+
+  useEffect(() => {
+    if (obJoinOpen) { setJoinCode(''); setJoinError(null) }
+  }, [obJoinOpen])
 
   // ── Join ──────────────────────────────────────────────────────────────────
 
@@ -155,12 +171,18 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
     setConfirmLoading(false)
     setPendingJoin(null)
     setJoinCode('')
+    // Only dismiss the onboarding entry modal on success/decline — on error,
+    // pendingJoin clearing makes it reappear (now behind !pendingJoin) so the
+    // message is still visible and the user can retry.
     if (result.error) {
       setJoinError(result.error)
     } else if (confirmed) {
+      setObJoinOpen(false)
       setJoinSuccess(`Your request to join "${pendingJoin.name}" has been sent. A moderator will review it shortly.`)
       setTimeout(() => setJoinSuccess(null), 8000)
       await loadBoards()
+    } else {
+      setObJoinOpen(false)
     }
   }
 
@@ -173,7 +195,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
     const result = await createBoard(createName)
     setCreateLoading(false)
     if (result.error) { setCreateError(result.error); return }
-    onCreateOpenChange?.(false)
+    closeCreateModal()
     setCreateName('')
     await loadBoards()
   }
@@ -374,50 +396,32 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
 
       {/* Join with invite code / create a board */}
       {variant === 'onboarding' ? (
-        <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-3 items-start">
-          <div className="rounded-lg border border-border p-3">
-            <p className="text-sm font-semibold text-text mb-1">Join A Board</p>
-            <p className="text-xs text-text/60 mb-2">Got an invite code? Enter it below!</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9 min-w-0"
-                placeholder="XXXXX-XXXXX"
-                maxLength={11}
-                value={formatInviteCodeDisplay(joinCode)}
-                onChange={e => { setJoinCode(normalizeInviteCodeInput(e.target.value)); setJoinError(null) }}
-                onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
-              />
-              <Button size="sm" loading={joinLoading} onClick={handleLookup} className="h-9 min-w-[56px] shrink-0">
-                Join
+        <>
+          <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-3 items-stretch">
+            <div className="rounded-lg border border-border p-3 flex flex-col items-center text-center gap-3">
+              <div>
+                <p className="text-sm font-semibold text-text mb-1">Got an invite code?</p>
+                <p className="text-xs text-text/60">Enter it here.</p>
+              </div>
+              <Button size="sm" onClick={() => setObJoinOpen(true)} className="w-full mt-auto">
+                Join A Board
               </Button>
             </div>
-            {joinError && <p className="mt-2 text-xs text-warning">{joinError}</p>}
-            {joinSuccess && <p className="mt-2 text-xs text-success">{joinSuccess}</p>}
-          </div>
 
-          <div className="flex items-center justify-center sm:self-stretch text-xs font-bold text-text">-OR-</div>
+            <div className="flex items-center justify-center sm:self-stretch text-xs font-bold text-text">-OR-</div>
 
-          <div className="rounded-lg border border-border p-3">
-            <p className="text-sm font-semibold text-text mb-1">Create A Board</p>
-            <p className="text-xs text-text/60 mb-2">Create a board and invite your coworkers.</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                className="input placeholder:text-text/50 text-sm flex-1 h-9 min-w-0"
-                placeholder="e.g., Night Crew"
-                maxLength={32}
-                value={createName}
-                onChange={e => { setCreateName(e.target.value); setCreateError(null) }}
-                onKeyDown={e => { if (e.key === 'Enter') handleCreate() }}
-              />
-              <Button size="sm" loading={createLoading} onClick={handleCreate} className="h-9 min-w-[56px] shrink-0">
-                Create
+            <div className="rounded-lg border border-border p-3 flex flex-col items-center text-center gap-3">
+              <div>
+                <p className="text-sm font-semibold text-text mb-1">First one here?</p>
+                <p className="text-xs text-text/60">Blaze the trail.</p>
+              </div>
+              <Button size="sm" onClick={() => setObCreateOpen(true)} className="w-full mt-auto">
+                Create A Board
               </Button>
             </div>
-            {createError && <p className="mt-2 text-xs text-warning">{createError}</p>}
           </div>
-        </div>
+          {joinSuccess && <p className="text-xs text-success">{joinSuccess}</p>}
+        </>
       ) : (
         <div className="pt-2 border-t border-border">
           <p className="text-xs font-medium text-text/50 mb-2 uppercase tracking-wide">Join a Board</p>
@@ -496,6 +500,35 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
         </>
       )}
 
+      {/* ── Join By Code Modal (onboarding) ─────────────────────────────── */}
+      {variant === 'onboarding' && obJoinOpen && !pendingJoin && (
+        <Modal open onClose={() => setObJoinOpen(false)} size="sm">
+          <h3 className="font-accent font-bold text-text text-lg mb-4">Join A Board</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-text mb-1">Invite Code</label>
+              <input
+                type="text"
+                className="input placeholder-text/50 text-sm uppercase tracking-widest"
+                placeholder="XXXXX-XXXXX"
+                maxLength={11}
+                value={formatInviteCodeDisplay(joinCode)}
+                onChange={e => { setJoinCode(normalizeInviteCodeInput(e.target.value)); setJoinError(null) }}
+                onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
+                autoFocus
+              />
+              {joinError && <p className="mt-1 text-xs text-warning">{joinError}</p>}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setObJoinOpen(false)}>Cancel</Button>
+              <Button size="sm" loading={joinLoading} onClick={handleLookup}>
+                Join
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {/* ── Join Confirmation Modal ──────────────────────────────────────── */}
       {pendingJoin && (
         <Modal open onClose={() => handleConfirmJoin(false)} size="sm">
@@ -516,8 +549,8 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
       )}
 
       {/* ── Create Board Modal ───────────────────────────────────────────── */}
-      {createOpen && (
-        <Modal open onClose={() => onCreateOpenChange?.(false)} size="sm">
+      {isCreateOpen && (
+        <Modal open onClose={closeCreateModal} size="sm">
           <h3 className="font-accent font-bold text-text text-lg mb-4">Create a Board</h3>
           <div className="space-y-3">
             <div>
@@ -535,7 +568,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
               {createError && <p className="mt-1 text-xs text-warning">{createError}</p>}
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => onCreateOpenChange?.(false)}>Cancel</Button>
+              <Button variant="outline" size="sm" onClick={closeCreateModal}>Cancel</Button>
               <Button size="sm" loading={createLoading} onClick={handleCreate} className="gap-1.5">
                 <Plus className="w-4 h-4" /> Create
               </Button>
