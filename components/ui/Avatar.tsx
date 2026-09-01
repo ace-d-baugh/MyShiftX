@@ -71,7 +71,7 @@ export function Avatar({
     <span
       style={dimension}
       className={cn(
-        'rounded-full bg-primary-light flex items-center justify-center shrink-0 font-semibold',
+        'rounded-full bg-primary-light flex items-center justify-center shrink-0 font-semibold no-underline',
         tintClassName,
         className
       )}
