@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Camera, CalendarDays, LayoutDashboard, Bell, ArrowRight, Plus, Ticket, Star } from 'lucide-react'
+import { Camera, CalendarDays, LayoutDashboard, Bell, ArrowRight, Ticket, Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { dismissOnboarding } from '@/app/actions/onboarding'
 import { lookupBoardByCode, confirmJoinBoard } from '@/app/actions/boards'
@@ -55,9 +55,7 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
   const router = useRouter()
 
   const [shiftCount, setShiftCount] = useState(initialShiftCount)
-  const [boardCount, setBoardCount] = useState(initialBoardCount)
   const [importOpen, setImportOpen] = useState(false)
-  const [createBoardOpen, setCreateBoardOpen] = useState(false)
   const [leaving, setLeaving] = useState(false)
 
   // Invite code redeemed from registration (QR / share link)
@@ -65,12 +63,8 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
   const inviteAttempted = useRef(false)
 
   const refreshCounts = useCallback(async () => {
-    const [{ count: sc }, { count: bc }] = await Promise.all([
-      supabase.from('shifts').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('is_active', true),
-      supabase.from('user_boards').select('id', { count: 'exact', head: true }).eq('user_id', userId),
-    ])
+    const { count: sc } = await supabase.from('shifts').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('is_active', true)
     if (sc !== null) setShiftCount(sc)
-    if (bc !== null) setBoardCount(bc)
   }, [supabase, userId])
 
   // Counts change from inside the embedded import modal / boards section, so
@@ -118,7 +112,6 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
   }
 
   const scheduleDone = shiftCount > 0
-  const boardsDone = boardCount > 0
   const firstName = displayName.replace(/ [A-Z]\.$/, '')
 
   return (
@@ -133,38 +126,25 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
       </div>
 
       <div className="space-y-4">
-        {/* Step 1 — join the crew (invite code input or create a board) */}
+        {/* Step 1 — get a board (join with a code or create one) */}
         <div className="card shadow-sm">
           <div className="flex items-start gap-3">
-            <StepBadge n={1} done={boardsDone} />
+            <StepBadge n={1} done={false} />
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="font-accent font-bold text-text flex-1">Join your board</h2>
-                <button
-                  onClick={() => setCreateBoardOpen(true)}
-                  className="p-1.5 rounded-md border border-border text-text/40 hover:text-primary hover:border-primary hover:bg-primary-light transition-colors min-h-0 min-w-0"
-                  title="Create a board"
-                  aria-label="Create a board"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
+              <h2 className="font-accent font-bold text-text">Get Board</h2>
+              <p className="text-sm text-text/60 mt-1 mb-3">
+                Boards are private groups where your coworkers trade shifts.
+              </p>
               {inviteNotice && (
-                <div className="mt-2 mb-1 p-2.5 rounded-md bg-success/10 border border-success/20 text-sm flex items-center gap-2">
+                <div className="mt-2 mb-3 p-2.5 rounded-md bg-success/10 border border-success/20 text-sm flex items-center gap-2">
                   <Ticket className="w-4 h-4 text-success shrink-0" />
                   <span className="text-text/80">{inviteNotice}</span>
                 </div>
               )}
-              <p className="text-sm text-text/60 mt-1 mb-3">
-                Boards are private groups where your coworkers trade shifts. Got an
-                invite code? Enter it below — or tap <strong>+</strong> to create a board and
-                invite your coworkers.
-              </p>
               <MyBoardsSection
                 key={inviteNotice ? 'invite-joined' : 'initial'}
                 userId={userId}
-                createOpen={createBoardOpen}
-                onCreateOpenChange={setCreateBoardOpen}
+                variant="onboarding"
               />
             </div>
           </div>
@@ -185,8 +165,8 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
                 <>
                   <p className="text-sm text-text/60 mt-1 mb-3">
                     {importEnabled
-                      ? 'Snap a photo of your work schedule — paper or screen — and watch it land on your calendar in seconds. Works even while your join request is pending.'
-                      : 'Add your shifts so your schedule is always in your pocket — even while your join request is pending.'}
+                      ? 'Snap a photo of your work schedule — paper or screen — and watch it land on your calendar in seconds.'
+                      : 'Add your shifts so your schedule is always in your pocket.'}
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
                     {importEnabled && (
@@ -214,8 +194,8 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
               </h2>
               <p className="text-sm text-text/60 mt-1 mb-3">
                 Shifts go fast — the first person to hear about one usually gets it. Turn on push
-                notifications so claims and matches reach you instantly. Email updates are already on;
-                manage both anytime in your <Link href="/profile" className="text-primary hover:underline">profile</Link>.
+                notifications so claims and matches reach you instantly. You may also receive email
+                notifications; manage both anytime in your <Link href="/profile" className="text-primary hover:underline">profile</Link>.
               </p>
               <PushNotificationsToggle />
               {/* iOS browser tab: the toggle above hides itself — show the

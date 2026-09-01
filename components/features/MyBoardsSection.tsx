@@ -33,15 +33,18 @@ interface BoardEntry {
 
 interface MyBoardsSectionProps {
   userId: string
-  createOpen: boolean
-  onCreateOpenChange: (open: boolean) => void
+  createOpen?: boolean
+  onCreateOpenChange?: (open: boolean) => void
+  /** 'onboarding' renders the compact Join/Create side-by-side cards used on
+   * the Welcome page instead of the single-line join bar + modal. */
+  variant?: 'default' | 'onboarding'
 }
 
 const roleVariant: Record<BoardRole, 'user' | 'mod' | 'leader'> = {
   User: 'user', Mod: 'mod', Leader: 'leader',
 }
 
-export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBoardsSectionProps) {
+export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, variant = 'default' }: MyBoardsSectionProps) {
   const supabase = createClient()
   const [boards, setBoards] = useState<BoardEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -83,6 +86,8 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBo
   const menuRef = useRef<HTMLDivElement>(null)
 
   const loadBoards = useCallback(async () => {
+    // Onboarding only needs the join/create cards — skip the boards lookup entirely.
+    if (variant === 'onboarding') { setLoading(false); return }
     setLoading(true)
     const { data } = await supabase
       .from('user_boards')
@@ -118,7 +123,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBo
     }))
     setBoards(list)
     setLoading(false)
-  }, [supabase, userId])
+  }, [supabase, userId, variant])
 
   useEffect(() => { loadBoards() }, [loadBoards])
 
@@ -167,7 +172,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBo
     const result = await createBoard(createName)
     setCreateLoading(false)
     if (result.error) { setCreateError(result.error); return }
-    onCreateOpenChange(false)
+    onCreateOpenChange?.(false)
     setCreateName('')
     await loadBoards()
   }
@@ -281,8 +286,8 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBo
         </div>
       )}
 
-      {/* Approved board list */}
-      {loading ? (
+      {/* Approved board list — onboarding only shows the join/create cards below */}
+      {variant === 'onboarding' ? null : loading ? (
         <p className="text-sm text-text/50">Loading boards...</p>
       ) : approvedBoards.length === 0 ? (
         <p className="text-sm text-text/50">You haven&apos;t joined any boards yet.</p>
@@ -343,7 +348,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBo
       )}
 
       {/* Pending requests */}
-      {pendingBoards.length > 0 && (
+      {variant !== 'onboarding' && pendingBoards.length > 0 && (
         <div className="mt-2">
           <p className="text-xs font-medium text-text/50 mb-1.5 uppercase tracking-wide">Pending Requests</p>
           <ul className="space-y-1.5">
@@ -366,33 +371,80 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBo
         </div>
       )}
 
-      {/* Join with invite code */}
-      <div className="pt-2 border-t border-border">
-        <p className="text-xs font-medium text-text/50 mb-2 uppercase tracking-wide">Join a Board</p>
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9"
-              placeholder="XXXXXXX"
-              maxLength={10}
-              value={joinCode}
-              onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null) }}
-              onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
-            />
-            <Button
-              size="sm"
-              loading={joinLoading}
-              onClick={handleLookup}
-              className="h-9 min-w-[56px]"
-            >
-              Join
-            </Button>
+      {/* Join with invite code / create a board */}
+      {variant === 'onboarding' ? (
+        <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-3 items-start">
+          <div className="rounded-lg border border-border p-3">
+            <p className="text-sm font-semibold text-text mb-1">Join A Board</p>
+            <p className="text-xs text-text/60 mb-2">Got an invite code? Enter it below!</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9 min-w-0"
+                placeholder="XXXXXXXXXX"
+                maxLength={10}
+                value={joinCode}
+                onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null) }}
+                onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
+              />
+              <Button size="sm" loading={joinLoading} onClick={handleLookup} className="h-9 min-w-[56px] shrink-0">
+                Join
+              </Button>
+            </div>
+            {joinError && <p className="mt-2 text-xs text-warning">{joinError}</p>}
+            {joinSuccess && <p className="mt-2 text-xs text-success">{joinSuccess}</p>}
           </div>
-          {joinError && <p className="text-xs text-warning">{joinError}</p>}
-          {joinSuccess && <p className="text-xs text-success">{joinSuccess}</p>}
+
+          <div className="flex items-center justify-center sm:self-stretch text-xs font-bold text-text/40">-OR-</div>
+
+          <div className="rounded-lg border border-border p-3">
+            <p className="text-sm font-semibold text-text mb-1">Create Your Board</p>
+            <p className="text-xs text-text/60 mb-2">Create a board and invite your coworkers.</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="input placeholder:text-text/50 text-sm flex-1 h-9 min-w-0"
+                placeholder="e.g., Night Crew"
+                maxLength={32}
+                value={createName}
+                onChange={e => { setCreateName(e.target.value); setCreateError(null) }}
+                onKeyDown={e => { if (e.key === 'Enter') handleCreate() }}
+              />
+              <Button size="sm" loading={createLoading} onClick={handleCreate} className="h-9 min-w-[56px] shrink-0">
+                Create
+              </Button>
+            </div>
+            {createError && <p className="mt-2 text-xs text-warning">{createError}</p>}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="pt-2 border-t border-border">
+          <p className="text-xs font-medium text-text/50 mb-2 uppercase tracking-wide">Join a Board</p>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9"
+                placeholder="XXXXXXXXXX"
+                maxLength={10}
+                value={joinCode}
+                onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null) }}
+                onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
+              />
+              <Button
+                size="sm"
+                loading={joinLoading}
+                onClick={handleLookup}
+                className="h-9 min-w-[56px]"
+              >
+                Join
+              </Button>
+            </div>
+            {joinError && <p className="text-xs text-warning">{joinError}</p>}
+            {joinSuccess && <p className="text-xs text-success">{joinSuccess}</p>}
+          </div>
+        </div>
+      )}
 
       {/* ── Board Actions Dropdown ───────────────────────────────────────── */}
       {menuBoard && menuPos && (
@@ -464,7 +516,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBo
 
       {/* ── Create Board Modal ───────────────────────────────────────────── */}
       {createOpen && (
-        <Modal open onClose={() => onCreateOpenChange(false)} size="sm">
+        <Modal open onClose={() => onCreateOpenChange?.(false)} size="sm">
           <h3 className="font-accent font-bold text-text text-lg mb-4">Create a Board</h3>
           <div className="space-y-3">
             <div>
@@ -482,7 +534,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange }: MyBo
               {createError && <p className="mt-1 text-xs text-warning">{createError}</p>}
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => onCreateOpenChange(false)}>Cancel</Button>
+              <Button variant="outline" size="sm" onClick={() => onCreateOpenChange?.(false)}>Cancel</Button>
               <Button size="sm" loading={createLoading} onClick={handleCreate} className="gap-1.5">
                 <Plus className="w-4 h-4" /> Create
               </Button>
