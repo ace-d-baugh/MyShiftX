@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
-import { getPublicShowAds } from '@/lib/auth/session'
+import { getPublicShowAds, getLandingHeaderData } from '@/lib/auth/session'
 import { AdRail } from '@/components/features/AdRail'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
@@ -10,11 +10,15 @@ import { PRO_PLANS } from '@/lib/pricing'
 export const metadata = { title: 'Terms & Conditions – MyShiftX' }
 
 export default async function TermsPage() {
-  const showAds = await getPublicShowAds(createServerClient())
+  const supabase = createServerClient()
+  const [showAds, headerData] = await Promise.all([
+    getPublicShowAds(supabase),
+    getLandingHeaderData(supabase),
+  ])
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <LandingHeader displayName={null} />
+      <LandingHeader {...headerData} />
       <main className="flex-1">
         <AdRail showAds={showAds} hasBottomNav={false}>
       <div className="max-w-3xl mx-auto px-4 py-12">
