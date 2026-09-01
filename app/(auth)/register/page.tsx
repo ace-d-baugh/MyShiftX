@@ -114,6 +114,14 @@ function RegisterForm() {
         return
       }
 
+      // Supabase returns a fake success response (no error) for an email that's
+      // already registered, to avoid leaking which emails exist. The tell is an
+      // empty identities array — a genuinely new signup always has one identity.
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setServerError('An account with this email already exists. Try logging in instead.')
+        return
+      }
+
       const verifyParams = new URLSearchParams({ email: form.email })
       if (redirect) verifyParams.set('redirect', redirect)
       const verifyPath = `/verify-email?${verifyParams.toString()}`
