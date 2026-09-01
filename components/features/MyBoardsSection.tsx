@@ -8,6 +8,7 @@ import {
   updateBoardName, toggleInviteCode, regenerateInviteCode,
   deleteBoard, leaveBoard,
 } from '@/app/actions/boards'
+import { formatInviteCodeDisplay, normalizeInviteCodeInput } from '@/lib/boards'
 import { Badge } from '@/components/ui/Badge'
 import { BOARD_ROLE_LABEL } from '@/lib/roles'
 import { Button } from '@/components/ui/Button'
@@ -381,10 +382,10 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
               <input
                 type="text"
                 className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9 min-w-0"
-                placeholder="XXXXXXXXXX"
-                maxLength={10}
-                value={joinCode}
-                onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null) }}
+                placeholder="XXXXX-XXXXX"
+                maxLength={11}
+                value={formatInviteCodeDisplay(joinCode)}
+                onChange={e => { setJoinCode(normalizeInviteCodeInput(e.target.value)); setJoinError(null) }}
                 onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
               />
               <Button size="sm" loading={joinLoading} onClick={handleLookup} className="h-9 min-w-[56px] shrink-0">
@@ -395,10 +396,10 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
             {joinSuccess && <p className="mt-2 text-xs text-success">{joinSuccess}</p>}
           </div>
 
-          <div className="flex items-center justify-center sm:self-stretch text-xs font-bold text-text/40">-OR-</div>
+          <div className="flex items-center justify-center sm:self-stretch text-xs font-bold text-text">-OR-</div>
 
           <div className="rounded-lg border border-border p-3">
-            <p className="text-sm font-semibold text-text mb-1">Create Your Board</p>
+            <p className="text-sm font-semibold text-text mb-1">Create A Board</p>
             <p className="text-xs text-text/60 mb-2">Create a board and invite your coworkers.</p>
             <div className="flex gap-2">
               <input
@@ -425,10 +426,10 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
               <input
                 type="text"
                 className="input placeholder-text/50 text-sm uppercase tracking-widest flex-1 h-9"
-                placeholder="XXXXXXXXXX"
-                maxLength={10}
-                value={joinCode}
-                onChange={e => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null) }}
+                placeholder="XXXXX-XXXXX"
+                maxLength={11}
+                value={formatInviteCodeDisplay(joinCode)}
+                onChange={e => { setJoinCode(normalizeInviteCodeInput(e.target.value)); setJoinError(null) }}
                 onKeyDown={e => { if (e.key === 'Enter') handleLookup() }}
               />
               <Button

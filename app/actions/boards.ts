@@ -124,7 +124,9 @@ export async function lookupBoardByCode(code: string): Promise<{
 }> {
   try {
     const { supabase, userId } = await getActionSession()
-    const upperCode = code.toUpperCase()
+    // Strip any formatting (e.g. the "XXXXX-XXXXX" display grouping) so a
+    // pasted or hand-typed dashed code still resolves to the raw stored value.
+    const upperCode = code.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
 
     // Count failures in the last minute
     const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_SECONDS * 1000).toISOString()

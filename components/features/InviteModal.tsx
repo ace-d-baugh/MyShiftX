@@ -6,6 +6,7 @@ import { QRCodeCanvas } from 'qrcode.react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { formatInviteCodeDisplay } from '@/lib/boards'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://myshiftx.com'
 
@@ -109,8 +110,8 @@ export function InviteModal({
 
       {/* Big code + copy */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="font-mono text-3xl font-bold tracking-[0.3em] text-primary select-all">
-          {inviteCode}
+        <span className="font-mono text-3xl font-bold tracking-[0.15em] text-primary select-all">
+          {formatInviteCodeDisplay(inviteCode)}
         </span>
         <button
           onClick={copyCode}

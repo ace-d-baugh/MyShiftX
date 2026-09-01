@@ -30,12 +30,13 @@ function RegisterForm() {
   const [errors, setErrors] = useState<FieldErrors>({})
 
   // Invite code carried in from a QR scan / share link — either directly
-  // (?code=XXXXXXX) or embedded in the board-page redirect (?redirect=/boards/slug?c=XXXXXXX).
+  // (?code=XXXXXXXXXX) or embedded in the board-page redirect (?redirect=/boards/slug?c=XXXXXXXXXX).
   // Stored in signup metadata AND localStorage so /welcome can auto-send the
   // join request even if the redirect chain breaks (e.g. verified on another device).
+  // {7,10}: 7 = legacy codes, 10 = current — both remain valid.
   const inviteCode = useMemo(() => {
     const direct = searchParams.get('code') ?? ''
-    const fromRedirect = /[?&]c=([A-Za-z0-9]{7})/.exec(redirect)?.[1] ?? ''
+    const fromRedirect = /[?&]c=([A-Za-z0-9]{7,10})/.exec(redirect)?.[1] ?? ''
     return (direct || fromRedirect).toUpperCase()
   }, [searchParams, redirect])
 

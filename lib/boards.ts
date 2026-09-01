@@ -2,6 +2,20 @@ import type { createClient } from '@/lib/supabase/client'
 
 type Supabase = ReturnType<typeof createClient>
 
+/**
+ * Invite codes are stored and transmitted (URLs, clipboard, QR) as a plain
+ * alphanumeric string — the "XXXXX-XXXXX" grouping is a display-only
+ * aesthetic, never the value that gets copied, linked, or looked up.
+ */
+export function formatInviteCodeDisplay(code: string): string {
+  return code.length > 5 ? `${code.slice(0, 5)}-${code.slice(5)}` : code
+}
+
+/** Strips the display dash (or any other stray punctuation from a paste). */
+export function normalizeInviteCodeInput(raw: string, maxLength = 10): string {
+  return raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, maxLength)
+}
+
 export interface MyBoard {
   id: string
   name: string
