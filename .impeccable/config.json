@@ -11,6 +11,15 @@
         ],
         "createdAt": "2026-08-19T16:52:05.501Z",
         "reason": "blockquote left-rule, not a card accent border — standard quote-indicator convention (GitHub/Medium style), not the card side-tab AI-slop pattern the rule targets"
+      },
+      {
+        "rule": "side-tab",
+        "value": "border-l-4",
+        "files": [
+          "components/features/ShiftCard.tsx"
+        ],
+        "createdAt": "2026-09-01T14:57:27.460Z",
+        "reason": "Pre-existing, intentional shift-type color legend (documented in the tour and Help page's Legend) — not new AI-generated styling, wasn't touched this session"
       }
     ]
   }

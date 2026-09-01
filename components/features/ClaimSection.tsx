@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { HeartHandshake as Handshake, Check, X, Layers, Send, ChevronDown } from 'lucide-react'
 import { claimShift, claimBundle, respondToClaim, withdrawClaim } from '@/app/actions/claims'
@@ -185,6 +185,11 @@ interface ClaimPillProps {
    * the owner (a bare count isn't sensitive; who claimed stays private). */
   claimCount: number
   onChanged?: () => void
+  /** Reports the pill's status line (e.g. "Sent — waiting…") up to the
+   * caller, which renders it on its own row below the whole pill row —
+   * inline here it would squeeze or wrap the Comments/Message pills next
+   * to it. Called with `null` when there's nothing to show. */
+  onStatusMessage?: (message: React.ReactNode) => void
 }
 
 /**
@@ -193,7 +198,7 @@ interface ClaimPillProps {
  * when you haven't claimed, filled once you have. Clicking the filled state
  * withdraws the claim. A declined claim shows as a plain muted label.
  */
-export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCount, onChanged }: ClaimPillProps) {
+export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCount, onChanged, onStatusMessage }: ClaimPillProps) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmBundle, setConfirmBundle] = useState(false)
@@ -213,6 +218,26 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
     else onChanged?.()
   }
 
+  const pending = isSample ? demoClaimed : myClaim?.status === 'pending'
+
+  // Reports the status line up to the caller instead of rendering it inline
+  // — inline it would sit inside the pill row and squeeze the Comments /
+  // Message pills next to it.
+  useEffect(() => {
+    if (error) {
+      onStatusMessage?.(<p className="text-xs text-warning mt-1.5">{error}</p>)
+    } else if (pending) {
+      onStatusMessage?.(
+        <p className="text-[11px] text-text/50 mt-1.5">
+          Sent — waiting on the owner to accept. Message them to coordinate the handoff.
+        </p>
+      )
+    } else {
+      onStatusMessage?.(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, pending])
+
   if (myClaim?.status === 'declined') {
     return (
       <span className="badge bg-text/10 text-text/40 inline-flex items-center gap-1 shrink-0">
@@ -222,7 +247,6 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
     )
   }
 
-  const pending = isSample ? demoClaimed : myClaim?.status === 'pending'
   const shownCount = claimCount + (isSample && demoClaimed ? 1 : 0)
   const siblings = bundleSiblings ?? []
 
@@ -262,12 +286,6 @@ export function ClaimPill({ shiftId, bundleId, bundleSiblings, myClaim, claimCou
         <span className="hidden sm:inline">I Can Help</span>
         <CountPill count={shownCount} tone={pending ? 'solid' : 'default'} />
       </button>
-      {pending && (
-        <p className="text-[11px] text-text/50 w-full mt-1">
-          Sent — waiting on the owner to accept. Message them to coordinate the handoff.
-        </p>
-      )}
-      {error && <p className="text-xs text-warning w-full mt-1">{error}</p>}
 
       <Modal open={confirmBundle} onClose={() => setConfirmBundle(false)} size="sm"
         title={siblings.length ? `Take all ${siblings.length} bundled shifts?` : 'Take all bundled shifts?'}>

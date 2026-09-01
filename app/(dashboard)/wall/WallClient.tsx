@@ -112,7 +112,7 @@ const FilterDateInput = forwardRef<HTMLInputElement, {
       value={value ?? ''}
       onClick={onClick}
       placeholder={placeholder ?? 'Any Date'}
-      className={`input text-sm h-9 pl-9 ${value ? 'pr-8' : ''} cursor-pointer`}
+      className={`input text-sm h-9 pl-9 flex items-center ${value ? 'pr-8' : ''} cursor-pointer`}
     />
     {value && onClear && (
       <button
@@ -973,34 +973,68 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                 </div>
               )}
 
-              {/* My Posts + (offers only) Trade/Giveaway, one row */}
-              <div className="flex items-center justify-around gap-y-2 flex-wrap">
-                <label className="flex items-center gap-2 cursor-pointer min-h-0">
-                  <Checkbox
-                    checked={myPostsOnly}
-                    onChange={e => setMyPostsOnly(e.target.checked)}
-                  />
-                  <span className="text-sm text-text whitespace-nowrap">My posts only</span>
-                </label>
+              {/* Days + My Posts/Trade/Giveaway share one row on larger
+                  screens (each half space-around within its own section).
+                  On mobile they stack — order-* puts My Posts/Trade/Giveaway
+                  above Days there, per the requested mobile row order. */}
+              <div className="flex items-start gap-x-4 gap-y-2 flex-wrap">
+                {/* Days — always-visible pills, ordered from the user's
+                    week-start preference. Colored (primary) when included,
+                    gray when clicked off. All colored by default. Mobile
+                    shows just the first letter to save space. */}
+                <div
+                  className="order-2 sm:order-1 flex-1 min-w-[180px] flex flex-wrap justify-around gap-1.5"
+                  role="group"
+                  aria-label="Filter by day of week"
+                >
+                  {orderedDayIndices.map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => toggleDay(d)}
+                      aria-pressed={dayFilters.has(d)}
+                      title={DAY_NAMES[d]}
+                      className={cn(
+                        'text-xs font-semibold px-2.5 py-1.5 rounded-full transition-colors min-h-0 min-w-0',
+                        dayFilters.has(d)
+                          ? 'bg-primary text-white hover:bg-primary/90'
+                          : 'bg-text/10 text-text/40 hover:bg-text/15'
+                      )}
+                    >
+                      <span className="sm:hidden">{DAY_ABBR[d][0]}</span>
+                      <span className="hidden sm:inline">{DAY_ABBR[d]}</span>
+                    </button>
+                  ))}
+                </div>
 
-                {tab === 'offers' && (
-                  <>
-                    <label className="flex items-center gap-2 cursor-pointer min-h-0">
-                      <Checkbox
-                        checked={typeFilters.trade}
-                        onChange={e => setTypeFilters(t => ({ ...t, trade: e.target.checked }))}
-                      />
-                      <span className="text-sm font-bold text-info">Trade</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer min-h-0">
-                      <Checkbox
-                        checked={typeFilters.giveaway}
-                        onChange={e => setTypeFilters(t => ({ ...t, giveaway: e.target.checked }))}
-                      />
-                      <span className="text-sm font-bold text-success">Giveaway</span>
-                    </label>
-                  </>
-                )}
+                <div className="order-1 sm:order-2 flex-1 min-w-[180px] flex items-center justify-around flex-wrap gap-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                    <Checkbox
+                      checked={myPostsOnly}
+                      onChange={e => setMyPostsOnly(e.target.checked)}
+                    />
+                    <span className="text-sm text-text whitespace-nowrap">My posts</span>
+                  </label>
+
+                  {tab === 'offers' && (
+                    <>
+                      <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                        <Checkbox
+                          checked={typeFilters.trade}
+                          onChange={e => setTypeFilters(t => ({ ...t, trade: e.target.checked }))}
+                        />
+                        <span className="text-sm font-bold text-info">Trade</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer min-h-0">
+                        <Checkbox
+                          checked={typeFilters.giveaway}
+                          onChange={e => setTypeFilters(t => ({ ...t, giveaway: e.target.checked }))}
+                        />
+                        <span className="text-sm font-bold text-success">Giveaway</span>
+                      </label>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Bundle chip (Clear Filters now lives on the Filters header) */}
@@ -1013,43 +1047,12 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                 </div>
               )}
 
-              {/* Days + Date + Search share one row on large screens, Days
-                  first so it stays the leftmost (and therefore topmost once
-                  the grid collapses to one column) of the three — Board, My
-                  Posts row, [bundle chip], Days, Date, Search top to bottom
-                  on every screen size. */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Days — always-visible pills, ordered from the user's
-                    week-start preference. Colored (primary) when included,
-                    gray when clicked off. All colored by default. */}
-                <div>
-                  <label className="block text-xs font-medium text-text/60 mb-1">Days</label>
-                  <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by day of week">
-                    {orderedDayIndices.map(d => (
-                      <button
-                        key={d}
-                        type="button"
-                        onClick={() => toggleDay(d)}
-                        aria-pressed={dayFilters.has(d)}
-                        title={DAY_NAMES[d]}
-                        className={cn(
-                          'text-xs font-semibold px-2.5 py-1.5 rounded-full transition-colors min-h-0 min-w-0',
-                          dayFilters.has(d)
-                            ? 'bg-primary text-white hover:bg-primary/90'
-                            : 'bg-text/10 text-text/40 hover:bg-text/15'
-                        )}
-                      >
-                        {DAY_ABBR[d]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
+              {/* Date + Search share one row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Date — react-datepicker so it's a real calendar popup on
                     every browser, matching the post/edit forms (the native
                     input[type=date] renders as a bare text field in some). */}
                 <div>
-                  <label className="block text-xs font-medium text-text/60 mb-1">Date</label>
                   <DatePicker
                     open={datePickerOpen}
                     onInputClick={() => setDatePickerOpen(o => !o)}
@@ -1071,7 +1074,7 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
                   <input
-                    className="input pl-9 pr-8 text-sm"
+                    className="input h-9 pl-9 pr-8 text-sm flex items-center"
                     placeholder={tab === 'offers' ? 'Search shifts...' : 'Search requests...'}
                     value={search}
                     onChange={e => setSearch(e.target.value)}
@@ -1256,10 +1259,8 @@ function DayGroup({
         isCollapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
       )}>
         <div className="overflow-hidden">
-          <div className="max-h-[68rem] overflow-y-auto scrollbar-thin">
-            <div className="p-4 space-y-4">
-              {children}
-            </div>
+          <div className="p-4 space-y-4">
+            {children}
           </div>
         </div>
       </div>

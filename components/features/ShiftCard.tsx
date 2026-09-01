@@ -90,6 +90,7 @@ export function ShiftCard({
   const [messageTick, setMessageTick] = useState(0)
   const [shareTick, setShareTick] = useState(0)
   const [claimsOpen, setClaimsOpen] = useState(false)
+  const [claimStatusMessage, setClaimStatusMessage] = useState<React.ReactNode>(null)
 
   const isOwner = currentUserId && shift.user_id === currentUserId
   const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>('12h')
@@ -309,6 +310,7 @@ export function ShiftCard({
           messageTick={messageTick}
           onShare={() => setShareTick(t => t + 1)}
           showInterest={false}
+          belowRowMessage={claimStatusMessage}
           leadingAction={
             isOwner ? (
               <InterestedPill
@@ -324,6 +326,7 @@ export function ShiftCard({
                 myClaim={myClaim}
                 claimCount={claimCount ?? 0}
                 onChanged={onClaimChanged}
+                onStatusMessage={setClaimStatusMessage}
               />
             ) : undefined
           }

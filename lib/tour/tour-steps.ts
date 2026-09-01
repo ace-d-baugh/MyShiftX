@@ -143,13 +143,13 @@ function shiftColorSentence(): string {
   const both = colorName('--color-primary', 'purple')
 
   if (new Set([trade, give, both]).size < 3) {
-    return `The title's color matches the badge: ${tint('--color-info', 'Trade')}, ` +
+    return `Titles are color-coded to shift type: matches the badge — ${tint('--color-info', 'Trade')}, ` +
       `${tint('--color-success', 'Giveaway')}, or ${tint('--color-primary', 'Give/Trade')} ` +
-      `when the owner will do either.`
+      `for when the owner will do either.`
   }
-  return `The title's color is a shortcut: ${tint('--color-info', trade)} for trade, ` +
+  return `Titles are color-coded to shift type: ${tint('--color-info', trade)} for trade, ` +
     `${tint('--color-success', give)} for giveaway, ${tint('--color-primary', both)} ` +
-    `when the owner will do either.`
+    `for when the owner will do either.`
 }
 
 // ── Chapter definitions ───────────────────────────────────────────────────────
@@ -204,7 +204,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'Welcome to the Wall',
         description:
-          "This is where your boards trade shifts: everything posted by people you share a board with lands here. Ninety seconds and you'll know how to read it, and how to post one of your own.",
+          "This is where you trade shifts: everything posted by people you share a board with, will land here. Ninety seconds and you'll know how to read it, and how to post one of your own.",
       },
     },
     {
@@ -232,7 +232,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'One shift, at a glance',
         description:
-          `Who posted it, what the shift is called, and when it starts and ends. Tap their name to see their public profile. ${shiftColorSentence()} Your calendar uses the same colors.`,
+          `Who posted it, what the shift is called, and when it starts and ends. Tap their name to see their public profile. ${shiftColorSentence()}`,
         side: 'top',
         align: 'center',
       },
@@ -253,7 +253,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'There’s more underneath',
         description:
-          'This arrow opens the poster’s notes and the board the shift came from. It’s worth a look before you commit to anything, and here’s what it just revealed.',
+          'This arrow opens the poster’s notes and more details about the shift. It’s worth a look before you commit to anything.',
         // Above rather than beside: the step expands the card, and anything
         // level with the chevron sits right on top of the notes it just opened.
         side: 'top',
@@ -266,7 +266,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: '“I Can Help”',
         description:
-          'Tapping this doesn’t take the shift. It tells the owner you want it and notifies them right away, which is what just happened here. The post stays on the Wall, everyone who asks gets added to that count, and the owner picks who to accept. Tap it again to take back your request.',
+          'Tapping this doesn’t take the shift. It tells the owner you want it and notifies them right away. The post stays on the Wall, everyone who asks gets added to that count, and the owner picks who to accept. Tap it again to take back your request.',
         side: 'top',
         align: 'start',
       },
@@ -277,7 +277,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'Ask before you commit',
         description:
-          '<strong>Comments</strong> are visible to the whole board (good for “is this a closing shift?”) and they’re now open here. <strong>Message</strong>, up in the row above, opens a private chat with just the poster where you can work out the details of handing off the shift.',
+          '<strong>Comments</strong> are visible to the whole board (good for “is this a closing shift?”). Use <strong>Message</strong>, in the row above or the Messages tab, to open a private chat with just the poster where you can work out the details of handing off the shift.',
         side: 'top',
         align: 'start',
       },
@@ -298,7 +298,7 @@ const wallChapter: TourChapterDef = {
       popover: {
         title: 'Too much to scroll?',
         description:
-          'Opened up here: narrow the Wall by <strong>board</strong>, by <strong>type</strong> (Trade or Giveaway), by <strong>day of the week</strong>, or by a specific <strong>date</strong>. Search by <strong>keyword</strong>, and flip on <strong>My Posts</strong> to see only your own.',
+          'Here you can narrow the Wall by <strong>board</strong>, by <strong>type</strong> (Trade or Giveaway), by <strong>day of the week</strong>, or by a specific <strong>date</strong>. Search by <strong>keyword</strong>, and flip on <strong>My Posts</strong> to see only your own.',
         side: 'bottom',
         align: 'start',
       },

@@ -56,6 +56,10 @@ interface CommentSectionProps {
    * styled the same as ClaimPill and rendered in the same leading position.
    * Default true. */
   showInterest?: boolean
+  /** Status text (e.g. ClaimPill's "Sent — waiting…") rendered on its own
+   * full-width row below the whole pill row, so it never squeezes or wraps
+   * the pills themselves. */
+  belowRowMessage?: React.ReactNode
   /** Post owner's user id — enables the "Message" pill for non-owners */
   ownerUserId?: string | null
   openCommentsTick?: number
@@ -83,6 +87,7 @@ export function CommentSection({
   interestTick,
   messageTick,
   onShare,
+  belowRowMessage,
 }: CommentSectionProps) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
@@ -423,6 +428,7 @@ export function CommentSection({
         )}
       </div>
 
+      {belowRowMessage}
       {error && <p className="text-xs text-warning mt-1.5">{error}</p>}
 
       {expandedPanel}
