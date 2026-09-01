@@ -51,6 +51,8 @@ function isAdEnabledPath(pathname: string): boolean {
 }
 
 const STICKY_DESKTOP_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT_STICKY_DESKTOP
+const STICKY_DESKTOP_SLOT_2 = process.env.NEXT_PUBLIC_ADSENSE_SLOT_STICKY_DESKTOP_2
+const STICKY_DESKTOP_SLOT_3 = process.env.NEXT_PUBLIC_ADSENSE_SLOT_STICKY_DESKTOP_3
 const STICKY_MOBILE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT_STICKY_MOBILE
 
 interface AdRailProps {
@@ -92,7 +94,22 @@ export function AdRail({ showAds, children, hasBottomNav = true }: AdRailProps) 
               <Crown className="w-3.5 h-3.5 text-secondary-accent" fill="#ffea80" strokeWidth={0} aria-hidden="true" />
               Remove Ads
             </Link>
-            <AdSlot slotId={STICKY_DESKTOP_SLOT} className="w-full min-h-[250px]" />
+            <div className="flex flex-col gap-4">
+              <AdSlot slotId={STICKY_DESKTOP_SLOT} offset={0} className="w-full min-h-[250px]" />
+              {/* Two more slots stack in on wider screens only — three
+               * 250px+ units plus gaps is too tall to be worth it at the
+               * narrow end of the lg breakpoint. The visibility toggle has
+               * to live on a wrapper, not AdSlot's own className: a real ad
+               * unit's <ins> forces inline style="display:block" (required
+               * by AdSense for auto-sized units), which would beat a
+               * `hidden` class applied to that same element. */}
+              <div className="hidden xl:block">
+                <AdSlot slotId={STICKY_DESKTOP_SLOT_2} offset={1} className="w-full min-h-[250px]" />
+              </div>
+              <div className="hidden xl:block">
+                <AdSlot slotId={STICKY_DESKTOP_SLOT_3} offset={2} className="w-full min-h-[250px]" />
+              </div>
+            </div>
           </div>
         </aside>
       )}

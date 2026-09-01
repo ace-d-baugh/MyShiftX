@@ -11,11 +11,18 @@ import type { BlogPost } from '@/lib/blog/types'
  * the server and the client, and a random pick would disagree between the
  * two and throw a hydration-mismatch error. Rotating daily still gives the
  * rail some variety without that risk.
+ *
+ * `offset` selects a different post than offset 0 for the same day, so a
+ * column of several house ads shows several different posts rather than
+ * the same one repeated. Callers just pass 0/1/2/... per slot — as long as
+ * the offset spread is smaller than the eligible-post count (it is: three
+ * slots against fifteen eligible posts), each offset lands on a distinct
+ * post for any given day.
  */
-export function pickHouseAdPost(): BlogPost | undefined {
+export function pickHouseAdPost(offset = 0): BlogPost | undefined {
   const eligible = BLOG_POSTS.filter(p => (p.images?.length ?? 0) > 0)
   if (eligible.length === 0) return undefined
 
   const dayIndex = Math.floor(Date.now() / 86_400_000) // days since epoch, UTC-stable
-  return eligible[dayIndex % eligible.length]
+  return eligible[(dayIndex + offset) % eligible.length]
 }

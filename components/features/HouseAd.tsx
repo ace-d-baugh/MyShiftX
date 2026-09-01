@@ -8,6 +8,8 @@ interface HouseAdProps {
   width?: number
   height?: number
   className?: string
+  /** Distinguishes stacked house ads on the same page — see pickHouseAdPost. */
+  offset?: number
 }
 
 /**
@@ -20,8 +22,8 @@ interface HouseAdProps {
  * chrome) — it's the site's own content, and looking like a Google ad would
  * just confuse users once real ads are swapped in here.
  */
-export function HouseAd({ width, height, className }: HouseAdProps) {
-  const post = pickHouseAdPost()
+export function HouseAd({ width, height, className, offset = 0 }: HouseAdProps) {
+  const post = pickHouseAdPost(offset)
   if (!post || !post.images?.[0]) return null
 
   const isBanner = width !== undefined && height !== undefined

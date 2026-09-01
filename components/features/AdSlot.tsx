@@ -21,6 +21,10 @@ interface AdSlotProps {
   width?: number
   height?: number
   className?: string
+  /** Distinguishes stacked slots on the same page when falling back to a
+   * house ad, so e.g. a 3-slot rail shows 3 different posts. Ignored once a
+   * real ad renders — Google already varies real ad content per unit. */
+  offset?: number
 }
 
 declare global {
@@ -40,7 +44,7 @@ declare global {
  * auto/responsive) rather than forcing one format, since ad units are
  * configured per-slot in the AdSense dashboard.
  */
-export function AdSlot({ slotId, width, height, className }: AdSlotProps) {
+export function AdSlot({ slotId, width, height, className, offset }: AdSlotProps) {
   const configured = Boolean(PUBLISHER_ID && slotId && ADSENSE_APPROVED)
   const fixedSize = width !== undefined && height !== undefined
 
@@ -54,7 +58,7 @@ export function AdSlot({ slotId, width, height, className }: AdSlotProps) {
   }, [configured])
 
   if (!configured) {
-    return <HouseAd width={width} height={height} className={className} />
+    return <HouseAd width={width} height={height} className={className} offset={offset} />
   }
 
   return (
