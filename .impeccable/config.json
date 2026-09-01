@@ -20,6 +20,24 @@
         ],
         "createdAt": "2026-09-01T14:57:27.460Z",
         "reason": "Pre-existing, intentional shift-type color legend (documented in the tour and Help page's Legend) — not new AI-generated styling, wasn't touched this session"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "components/features/ShiftCard.tsx"
+        ],
+        "createdAt": "2026-09-01T19:01:40.895Z",
+        "reason": "pre-existing border-l-4 type-color accent, used consistently across every shift/request card site-wide; not introduced by this session's board-slug-link change, out of scope to alter without a design request"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "components/features/RequestCard.tsx"
+        ],
+        "createdAt": "2026-09-01T19:01:44.991Z",
+        "reason": "pre-existing border-l-4 type-color accent, used consistently across every shift/request card site-wide; not introduced by this session's board-slug-link change, out of scope to alter without a design request"
       }
     ]
   }
