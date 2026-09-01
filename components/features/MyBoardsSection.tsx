@@ -40,13 +40,16 @@ interface MyBoardsSectionProps {
   /** 'onboarding' renders the compact Join/Create side-by-side cards used on
    * the Welcome page instead of the single-line join bar + modal. */
   variant?: 'default' | 'onboarding'
+  /** Fires whenever the board list reloads, so a parent (Welcome's Step 1
+   * star) can react without duplicating the boards query itself. */
+  onBoardsChange?: (hasAnyBoard: boolean) => void
 }
 
 const roleVariant: Record<BoardRole, 'user' | 'mod' | 'leader'> = {
   User: 'user', Mod: 'mod', Leader: 'leader',
 }
 
-export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, variant = 'default' }: MyBoardsSectionProps) {
+export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, variant = 'default', onBoardsChange }: MyBoardsSectionProps) {
   const supabase = createClient()
   const [boards, setBoards] = useState<BoardEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -100,8 +103,6 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
   const menuRef = useRef<HTMLDivElement>(null)
 
   const loadBoards = useCallback(async () => {
-    // Onboarding only needs the join/create cards — skip the boards lookup entirely.
-    if (variant === 'onboarding') { setLoading(false); return }
     setLoading(true)
     const { data } = await supabase
       .from('user_boards')
@@ -137,7 +138,8 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
     }))
     setBoards(list)
     setLoading(false)
-  }, [supabase, userId, variant])
+    onBoardsChange?.(list.length > 0)
+  }, [supabase, userId, onBoardsChange])
 
   useEffect(() => { loadBoards() }, [loadBoards])
 
@@ -313,11 +315,13 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
         </div>
       )}
 
-      {/* Approved board list — onboarding only shows the join/create cards below */}
-      {variant === 'onboarding' ? null : loading ? (
-        <p className="text-sm text-text/50">Loading boards...</p>
+      {/* Approved board list — onboarding suppresses the loading/empty text
+          (no boards yet is the default, unremarkable state) but still shows
+          the table itself once there's something to show. */}
+      {loading ? (
+        variant === 'onboarding' ? null : <p className="text-sm text-text/50">Loading boards...</p>
       ) : approvedBoards.length === 0 ? (
-        <p className="text-sm text-text/50">You haven&apos;t joined any boards yet.</p>
+        variant === 'onboarding' ? null : <p className="text-sm text-text/50">You haven&apos;t joined any boards yet.</p>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden">
           <table className="w-full text-sm">
@@ -375,7 +379,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
       )}
 
       {/* Pending requests */}
-      {variant !== 'onboarding' && pendingBoards.length > 0 && (
+      {pendingBoards.length > 0 && (
         <div className="mt-2">
           <p className="text-xs font-medium text-text/50 mb-1.5 uppercase tracking-wide">Pending Requests</p>
           <ul className="space-y-1.5">
@@ -401,7 +405,10 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
       {/* Join with invite code / create a board */}
       {variant === 'onboarding' ? (
         <>
-          <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-3 items-stretch">
+          <div className={(approvedBoards.length > 0 || pendingBoards.length > 0)
+            ? 'grid sm:grid-cols-[1fr_auto_1fr] gap-3 items-stretch pt-2 border-t border-border'
+            : 'grid sm:grid-cols-[1fr_auto_1fr] gap-3 items-stretch'}
+          >
             <div className="rounded-lg border border-border p-3 flex flex-col items-center text-center gap-3">
               <div>
                 <p className="text-sm font-semibold text-text mb-1">Got an invite code?</p>

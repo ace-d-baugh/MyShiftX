@@ -55,6 +55,7 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
   const searchParams = useSearchParams()
 
   const [shiftCount, setShiftCount] = useState(initialShiftCount)
+  const [hasBoard, setHasBoard] = useState(initialBoardCount > 0)
   const [importOpen, setImportOpen] = useState(false)
   const [leaving, setLeaving] = useState(false)
 
@@ -136,7 +137,7 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
         {/* Step 1 — get a board (join with a code or create one) */}
         <div className="card shadow-sm">
           <div className="flex items-start gap-3">
-            <StepBadge n={1} done={false} />
+            <StepBadge n={1} done={hasBoard} />
             <div className="flex-1 min-w-0">
               <h2 className="font-accent font-bold text-text">Get Board</h2>
               <p className="text-sm text-text/60 mt-1 mb-3">
@@ -152,6 +153,7 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
                 key={inviteNotice ? 'invite-joined' : 'initial'}
                 userId={userId}
                 variant="onboarding"
+                onBoardsChange={setHasBoard}
               />
             </div>
           </div>
