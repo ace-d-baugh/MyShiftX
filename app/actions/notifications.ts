@@ -156,9 +156,10 @@ export async function notifyInterest(opts: {
     if (ownerId) {
       const title = `${commenterName} is interested`
       const body = `${commenterName} marked interest in "${postTitle}"`
-      await sendPushNotification(ownerId, title, body, '/wall')
+      const linkUrl = `/wall?post=${opts.postId}`
+      await sendPushNotification(ownerId, title, body, linkUrl)
       await createNotification(db, {
-        type: 'interest', userId: ownerId, title, body, linkUrl: '/wall', actorUserId: uid,
+        type: 'interest', userId: ownerId, title, body, linkUrl, actorUserId: uid,
       })
     }
 
@@ -264,14 +265,15 @@ export async function notifyComment(opts: {
 
     const title = `${commenterName} commented`
     const body = `${commenterName} commented on "${postTitle}"`
+    const linkUrl = `/wall?post=${opts.postId}`
     const results = await Promise.allSettled(
       [...recipients].flatMap(rid => [
-        sendPushNotification(rid, title, body, '/wall'),
+        sendPushNotification(rid, title, body, linkUrl),
         // Message always points at the post owner, not the commenter who
         // triggered this — so a recipient who *is* the owner gets no actor
         // (they can't message themselves).
         createNotification(db, {
-          type: 'comment', userId: rid, title, body, linkUrl: '/wall',
+          type: 'comment', userId: rid, title, body, linkUrl,
           actorUserId: rid === ownerId ? null : ownerId,
         }),
       ])
@@ -386,22 +388,25 @@ async function sendMatchNotifications(opts: MatchPayload) {
       if (error && error.code !== '23505') console.error('[sendMatchNotifications] match_events insert failed:', error.message)
     })
 
-  // Web push to both parties — independent of the notify_via_email pref
+  // Web push to both parties — independent of the notify_via_email pref.
+  // Each side links to the post that's actually theirs to act on.
   if (opts.requesterUserId) {
     const title = 'Possible shift match'
     const body = `${opts.shiftPosterName}'s shift "${opts.shiftTitle}" on ${displayDate} may match your request`
-    sends.push(sendPushNotification(opts.requesterUserId, title, body, '/wall'))
+    const linkUrl = `/wall?post=${opts.shiftId}`
+    sends.push(sendPushNotification(opts.requesterUserId, title, body, linkUrl))
     sends.push(createNotification(createAdminClient(), {
-      type: 'shift_match', userId: opts.requesterUserId, title, body, linkUrl: '/wall',
+      type: 'shift_match', userId: opts.requesterUserId, title, body, linkUrl,
       actorUserId: opts.shiftPosterUserId,
     }))
   }
   if (opts.shiftPosterUserId) {
     const title = 'Possible shift match'
     const body = `${opts.requesterName} is looking for a shift on ${displayDate} — yours may match`
-    sends.push(sendPushNotification(opts.shiftPosterUserId, title, body, '/wall'))
+    const linkUrl = `/wall?post=${opts.requestId}`
+    sends.push(sendPushNotification(opts.shiftPosterUserId, title, body, linkUrl))
     sends.push(createNotification(createAdminClient(), {
-      type: 'shift_match', userId: opts.shiftPosterUserId, title, body, linkUrl: '/wall',
+      type: 'shift_match', userId: opts.shiftPosterUserId, title, body, linkUrl,
       actorUserId: opts.requesterUserId,
     }))
   }
@@ -674,7 +679,7 @@ export async function notifyClaimCreated(claimId: string): Promise<void> {
     const db = createAdminClient()
     const { data: claim, error } = await db
       .from('shift_claims')
-      .select('owner_id, claimant_id, bundle_id, shifts!shift_id(shift_title), claimant:users!claimant_id(display_name)')
+      .select('owner_id, claimant_id, bundle_id, shift_id, shifts!shift_id(shift_title), claimant:users!claimant_id(display_name)')
       .eq('id', claimId)
       .single()
 
@@ -710,9 +715,10 @@ export async function notifyClaimCreated(claimId: string): Promise<void> {
     const ccBody = bundleSize > 1
       ? `${claimantName} tapped "I Can Help" on your ${bundleSize}-shift bundle — accept or decline on the Wall`
       : `${claimantName} tapped "I Can Help" on "${anchorTitle}" — accept or decline on the Wall`
-    await sendPushNotification(ownerId, ccTitle, ccBody, '/wall')
+    const ccLinkUrl = `/wall?post=${claim.shift_id as string}`
+    await sendPushNotification(ownerId, ccTitle, ccBody, ccLinkUrl)
     await createNotification(db, {
-      type: 'claim_created', userId: ownerId, title: ccTitle, body: ccBody, linkUrl: '/wall',
+      type: 'claim_created', userId: ownerId, title: ccTitle, body: ccBody, linkUrl: ccLinkUrl,
       actorUserId: claim.claimant_id as string,
     })
 
@@ -796,9 +802,12 @@ export async function notifyClaimResolved(
     const claimantBody = accepted
       ? `${ownerName} accepted your claim on "${shiftTitle}" — complete the trade in your company system`
       : `${ownerName} declined your claim on "${shiftTitle}"`
-    const claimantLink = accepted ? '/profile' : '/wall'
+    // Accepted → the trade record on /profile (the shift is no longer up for
+    // grabs). Declined → back to the shift on the Wall, since it's still there.
+    const claimantLink = accepted ? '/profile' : `/wall?post=${claim.shift_id as string}`
     const rivalTitle = 'Shift covered'
     const rivalBody = `"${shiftTitle}" was covered by someone else — more shifts are on the Wall`
+    const rivalLink = '/wall'
 
     const sends: Promise<unknown>[] = [
       sendPushNotification(claimantId, claimantTitle, claimantBody, claimantLink),
@@ -807,10 +816,10 @@ export async function notifyClaimResolved(
         linkUrl: claimantLink, actorUserId: claim.owner_id as string,
       }),
       ...rivalClaimantIds.flatMap(rid => [
-        sendPushNotification(rid, rivalTitle, rivalBody, '/wall'),
+        sendPushNotification(rid, rivalTitle, rivalBody, rivalLink),
         createNotification(db, {
           type: 'claim_resolved', userId: rid, title: rivalTitle, body: rivalBody,
-          linkUrl: '/wall', actorUserId: null,
+          linkUrl: rivalLink, actorUserId: null,
         }),
       ]),
     ]
@@ -934,10 +943,11 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
     if (memberUserId) {
       const baTitle = `You've been accepted to ${boardName}!`
       const baBody = 'Your join request was approved. Head to the Wall to see posts.'
-      await sendPushNotification(memberUserId, baTitle, baBody, '/wall')
+      const baLinkUrl = `/wall?board=${ub.board_id as string}`
+      await sendPushNotification(memberUserId, baTitle, baBody, baLinkUrl)
       await createNotification(db, {
         type: 'board_approved', userId: memberUserId, title: baTitle, body: baBody,
-        linkUrl: '/wall', actorUserId: uid,
+        linkUrl: baLinkUrl, actorUserId: uid,
       })
     }
 

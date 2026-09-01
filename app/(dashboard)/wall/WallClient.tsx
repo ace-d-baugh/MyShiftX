@@ -137,13 +137,15 @@ interface WallClientProps {
   /** From a shared post link (?post=<id>) — jumps to and highlights that
    *  post once the lists have loaded. */
   initialPostId?: string
+  /** From a board deep link (?board=<id>) — pre-applies the board filter. */
+  initialBoardId?: string
   /** Pro/Trial perk: apply realtime updates live. Basic gets a refresh banner. */
   liveWall?: boolean
 }
 
 type Tab = 'offers' | 'requests'
 
-export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', initialDate = '', initialPostId = '', liveWall = false }: WallClientProps) {
+export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', initialDate = '', initialPostId = '', initialBoardId = '', liveWall = false }: WallClientProps) {
   const supabase = useMemo(() => createClient(), [])
   const settings = getSettings()
   const [tab, setTab] = useState<Tab>(initialTab)
@@ -162,7 +164,11 @@ export function WallClient({ userId, boards, hasBoards, initialTab = 'offers', i
   const [highlightPostId, setHighlightPostId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [dateFilter, setDateFilter] = useState(initialDate)
-  const [boardFilters, setBoardFilters] = useState<Set<string>>(new Set())
+  // Seeded from a board deep link (?board=<id>) when that board is one the
+  // viewer actually belongs to; otherwise no filter (all boards shown).
+  const [boardFilters, setBoardFilters] = useState<Set<string>>(() =>
+    initialBoardId && boards.some(b => b.id === initialBoardId) ? new Set([initialBoardId]) : new Set()
+  )
   const [boardDropdownOpen, setBoardDropdownOpen] = useState(false)
   const boardDropdownRef = useRef<HTMLDivElement>(null)
   // Controlled so a second click on the field closes the calendar (toggle).
