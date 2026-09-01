@@ -2,8 +2,17 @@
 
 import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
+import { HouseAd } from './HouseAd'
 
 const PUBLISHER_ID = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID
+// Ad units (client ID + slot IDs) are already fully configured in AdSense —
+// they were created before the account was approved, and they don't need to
+// change once it is. So "the slot ID exists" can't be the signal for "show
+// a real ad here"; an empty <ins> just silently renders nothing while
+// unapproved. This is the explicit, manually-flipped switch instead — same
+// one-env-var-revert pattern as NEXT_PUBLIC_SHOWCASE_MODE. Flip it to '1'
+// once the account clears review.
+const ADSENSE_APPROVED = process.env.NEXT_PUBLIC_ADSENSE_APPROVED === '1'
 
 interface AdSlotProps {
   /** data-ad-slot ID from the AdSense dashboard. Shows a placeholder until one exists. */
@@ -21,17 +30,18 @@ declare global {
 }
 
 /**
- * A single ad unit. Renders a styled placeholder when AdSense isn't fully
- * configured yet (no publisher ID or no slotId for this placement); swaps to
- * a real AdSense unit once both exist — no code change needed, just add the
- * slot ID here and set NEXT_PUBLIC_ADSENSE_PUBLISHER_ID.
+ * A single ad unit. Renders a house ad (see HouseAd.tsx) until the site is
+ * both fully wired up (publisher ID + slotId for this placement) AND the
+ * AdSense account itself is approved; swaps to the real unit once all three
+ * are true — no code change needed at approval time, just flip
+ * NEXT_PUBLIC_ADSENSE_APPROVED to '1'.
  *
  * Mirrors whatever AdSense actually generated for the unit (fixed size vs.
  * auto/responsive) rather than forcing one format, since ad units are
  * configured per-slot in the AdSense dashboard.
  */
 export function AdSlot({ slotId, width, height, className }: AdSlotProps) {
-  const configured = Boolean(PUBLISHER_ID && slotId)
+  const configured = Boolean(PUBLISHER_ID && slotId && ADSENSE_APPROVED)
   const fixedSize = width !== undefined && height !== undefined
 
   useEffect(() => {
@@ -44,17 +54,7 @@ export function AdSlot({ slotId, width, height, className }: AdSlotProps) {
   }, [configured])
 
   if (!configured) {
-    return (
-      <div
-        className={cn(
-          'flex items-center justify-center border-2 border-dashed border-border rounded-lg bg-card/50 text-text/30 text-xs font-medium',
-          className
-        )}
-        style={fixedSize ? { width, height } : undefined}
-      >
-        Advertisement
-      </div>
-    )
+    return <HouseAd width={width} height={height} className={className} />
   }
 
   return (
