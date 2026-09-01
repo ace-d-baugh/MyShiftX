@@ -25,6 +25,16 @@ interface AdSlotProps {
    * house ad, so e.g. a 3-slot rail shows 3 different posts. Ignored once a
    * real ad renders — Google already varies real ad content per unit. */
   offset?: number
+  /**
+   * 'in-article': the native-blending unit AdSense generates for placement
+   * inside body text (data-ad-layout="in-article", data-ad-format="fluid"),
+   * as opposed to the default fixed/auto display unit. Mutually exclusive
+   * with width/height — in-article units are always fluid-width.
+   */
+  layout?: 'in-article'
+  /** In-article only: the post this ad is embedded in, so a house-ad
+   * fallback never suggests the article the reader is already on. */
+  excludeSlug?: string
 }
 
 declare global {
@@ -44,9 +54,10 @@ declare global {
  * auto/responsive) rather than forcing one format, since ad units are
  * configured per-slot in the AdSense dashboard.
  */
-export function AdSlot({ slotId, width, height, className, offset }: AdSlotProps) {
+export function AdSlot({ slotId, width, height, className, offset, layout, excludeSlug }: AdSlotProps) {
   const configured = Boolean(PUBLISHER_ID && slotId && ADSENSE_APPROVED)
   const fixedSize = width !== undefined && height !== undefined
+  const inArticle = layout === 'in-article'
 
   useEffect(() => {
     if (!configured) return
@@ -58,7 +69,29 @@ export function AdSlot({ slotId, width, height, className, offset }: AdSlotProps
   }, [configured])
 
   if (!configured) {
-    return <HouseAd width={width} height={height} className={className} offset={offset} />
+    return (
+      <HouseAd
+        width={width}
+        height={height}
+        className={className}
+        offset={offset}
+        layout={layout}
+        excludeSlug={excludeSlug}
+      />
+    )
+  }
+
+  if (inArticle) {
+    return (
+      <ins
+        className={cn('adsbygoogle', className)}
+        style={{ display: 'block', textAlign: 'center' }}
+        data-ad-client={PUBLISHER_ID}
+        data-ad-slot={slotId}
+        data-ad-layout="in-article"
+        data-ad-format="fluid"
+      />
+    )
   }
 
   return (

@@ -10,6 +10,12 @@ interface HouseAdProps {
   className?: string
   /** Distinguishes stacked house ads on the same page — see pickHouseAdPost. */
   offset?: number
+  /** 'in-article': a wide horizontal card sized for body-text width, matching
+   * AdSlot's in-article layout. Takes priority over the width/height banner
+   * check. */
+  layout?: 'in-article'
+  /** The post the reader is already on, so it's never suggested to itself. */
+  excludeSlug?: string
 }
 
 /**
@@ -22,11 +28,35 @@ interface HouseAdProps {
  * chrome) — it's the site's own content, and looking like a Google ad would
  * just confuse users once real ads are swapped in here.
  */
-export function HouseAd({ width, height, className, offset = 0 }: HouseAdProps) {
-  const post = pickHouseAdPost(offset)
+export function HouseAd({ width, height, className, offset = 0, layout, excludeSlug }: HouseAdProps) {
+  const post = pickHouseAdPost(offset, excludeSlug)
   if (!post || !post.images?.[0]) return null
 
   const isBanner = width !== undefined && height !== undefined
+
+  if (layout === 'in-article') {
+    return (
+      <Link
+        href={`/blog/${post.slug}`}
+        className={cn(
+          'flex items-center gap-4 rounded-lg border border-border bg-card overflow-hidden hover:shadow-md transition-shadow',
+          className
+        )}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={post.images[0]} alt="" className="w-28 sm:w-36 h-full min-h-[96px] object-cover shrink-0" />
+        <div className="py-3 pr-4 min-w-0">
+          <p className="text-[10px] font-medium uppercase tracking-wide text-text/40 mb-1">
+            From the blog
+          </p>
+          <p className="text-sm font-accent font-bold text-text leading-snug mb-1 line-clamp-2">
+            {post.title}
+          </p>
+          <p className="text-xs text-text/60 leading-snug line-clamp-2">{post.description}</p>
+        </div>
+      </Link>
+    )
+  }
 
   if (isBanner) {
     return (

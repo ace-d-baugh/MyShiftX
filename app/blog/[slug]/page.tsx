@@ -1,12 +1,39 @@
 import Link from 'next/link'
+import { Children, isValidElement, type ComponentType, type ReactElement } from 'react'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ArrowLeft, ArrowRight, Clock } from 'lucide-react'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
 import { AdRail } from '@/components/features/AdRail'
+import { InArticleAd } from '@/components/blog/InArticleAd'
 import { Prose } from '@/components/ui/Prose'
 import { BLOG_POSTS, getPost, adjacentPosts, formatPostDate } from '@/lib/blog'
+
+// Where the in-article ad lands, in top-level body blocks (paragraphs,
+// headings, lists) counted from the start. Google's own placement guidance
+// for the in-article format is "2 paragraphs below the start of the
+// article" — most posts open with 1-2 intro paragraphs (some affiliate
+// posts add a disclosure paragraph first), so 3 blocks in lands just past
+// that regardless of which shape a given post's opening takes.
+const AD_AFTER_BLOCK = 3
+
+/**
+ * Splits a post Body's rendered output into (blocksBeforeAd, blocksAfterAd)
+ * so the ad can be spliced in between as a sibling, not touching the post's
+ * own JSX. Body is always a plain, hookless `<>[...]</>` of block elements
+ * (see any file in lib/blog/posts) — calling it directly as a function
+ * rather than through JSX is what makes that Fragment's children
+ * inspectable at all; there's no createElement path that exposes them.
+ */
+function splitBodyForAd(BodyComponent: ComponentType) {
+  const fragment = (BodyComponent as () => ReactElement<{ children?: React.ReactNode }>)()
+  const blocks = isValidElement(fragment) ? Children.toArray(fragment.props.children) : []
+  return {
+    before: blocks.slice(0, AD_AFTER_BLOCK),
+    after: blocks.slice(AD_AFTER_BLOCK),
+  }
+}
 
 const SITE = 'https://myshiftx.com'
 
@@ -39,7 +66,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   if (!post) notFound()
 
   const { newer, older } = adjacentPosts(post.slug)
-  const { Body } = post
+  const { before, after } = splitBodyForAd(post.Body)
 
   // Article structured data. Google reads this to understand authorship and
   // freshness, both of which the AdSense content review cares about.
@@ -116,7 +143,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             )}
 
             <Prose>
-              <Body />
+              {before}
+              {after.length > 0 && <InArticleAd postSlug={post.slug} />}
+              {after}
             </Prose>
 
             {/* Prev / next */}

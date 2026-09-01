@@ -47,6 +47,7 @@ const AD_ENABLED_PATHS = new Set([
 function isAdEnabledPath(pathname: string): boolean {
   if (AD_ENABLED_PATHS.has(pathname)) return true
   if (/^\/boards\/[^/]+$/.test(pathname)) return true // individual board (members) page, not the /boards list
+  if (/^\/blog\/[^/]+$/.test(pathname)) return true // individual post — was missing entirely; only the /blog index matched
   return false
 }
 
