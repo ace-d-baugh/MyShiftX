@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Children, isValidElement, type ComponentType, type ReactElement } from 'react'
+import { Children, Fragment, isValidElement, type ComponentType, type ReactElement, type ReactNode } from 'react'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ArrowLeft, ArrowRight, Clock } from 'lucide-react'
@@ -10,29 +10,56 @@ import { InArticleAd } from '@/components/blog/InArticleAd'
 import { Prose } from '@/components/ui/Prose'
 import { BLOG_POSTS, getPost, adjacentPosts, formatPostDate } from '@/lib/blog'
 
-// Where the in-article ad lands, in top-level body blocks (paragraphs,
-// headings, lists) counted from the start. Google's own placement guidance
-// for the in-article format is "2 paragraphs below the start of the
-// article" — most posts open with 1-2 intro paragraphs (some affiliate
-// posts add a disclosure paragraph first), so 3 blocks in lands just past
-// that regardless of which shape a given post's opening takes.
-const AD_AFTER_BLOCK = 3
+// Up to 3 in-article ads per post, spread across the body rather than
+// stacked near the top — Google's own tip for multiple in-article units is
+// "allow for sufficient content in between ads to minimize disruption".
+// The first sits close to the start (their guidance: "2 paragraphs below
+// the start"); the second and third are fractions of the post's total
+// length rather than fixed block counts, so spacing scales with how long
+// the post actually is instead of bunching up on longer posts or, worse,
+// landing past the end on shorter ones.
+const FIRST_AD_BLOCK = 3
+const LATER_AD_FRACTIONS = [0.42, 0.74]
+const MIN_BLOCKS_BETWEEN_ADS = 4
 
 /**
- * Splits a post Body's rendered output into (blocksBeforeAd, blocksAfterAd)
- * so the ad can be spliced in between as a sibling, not touching the post's
- * own JSX. Body is always a plain, hookless `<>[...]</>` of block elements
- * (see any file in lib/blog/posts) — calling it directly as a function
- * rather than through JSX is what makes that Fragment's children
+ * Picks up to 3 ad-insertion points in a post's top-level body blocks
+ * (paragraphs, headings, lists), each one skipped if the post isn't long
+ * enough to fit it with real spacing before the end — a short post gets 1
+ * or 2 ads, never 3 crammed in or one glued to the closing paragraph.
+ */
+function computeAdPositions(totalBlocks: number): number[] {
+  const positions = [Math.min(FIRST_AD_BLOCK, Math.max(0, totalBlocks - 1))]
+  for (const fraction of LATER_AD_FRACTIONS) {
+    const prev = positions[positions.length - 1]
+    const next = Math.max(prev + MIN_BLOCKS_BETWEEN_ADS, Math.round(totalBlocks * fraction))
+    if (next >= totalBlocks - 1) break // not enough content left to justify another ad
+    positions.push(next)
+  }
+  return positions
+}
+
+/**
+ * Splits a post Body's rendered output into the segments between ad
+ * positions, so ads can be spliced in as siblings without touching the
+ * post's own JSX. Body is always a plain, hookless `<>[...]</>` of block
+ * elements (see any file in lib/blog/posts) — calling it directly as a
+ * function rather than through JSX is what makes that Fragment's children
  * inspectable at all; there's no createElement path that exposes them.
  */
-function splitBodyForAd(BodyComponent: ComponentType) {
+function splitBodyForAds(BodyComponent: ComponentType): ReactNode[][] {
   const fragment = (BodyComponent as () => ReactElement<{ children?: React.ReactNode }>)()
   const blocks = isValidElement(fragment) ? Children.toArray(fragment.props.children) : []
-  return {
-    before: blocks.slice(0, AD_AFTER_BLOCK),
-    after: blocks.slice(AD_AFTER_BLOCK),
+  const positions = computeAdPositions(blocks.length)
+
+  const segments: ReactNode[][] = []
+  let start = 0
+  for (const pos of positions) {
+    segments.push(blocks.slice(start, pos))
+    start = pos
   }
+  segments.push(blocks.slice(start))
+  return segments
 }
 
 const SITE = 'https://myshiftx.com'
@@ -66,7 +93,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   if (!post) notFound()
 
   const { newer, older } = adjacentPosts(post.slug)
-  const { before, after } = splitBodyForAd(post.Body)
+  const bodySegments = splitBodyForAds(post.Body)
+  const adCount = bodySegments.length - 1
 
   // Article structured data. Google reads this to understand authorship and
   // freshness, both of which the AdSense content review cares about.
@@ -143,9 +171,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             )}
 
             <Prose>
-              {before}
-              {after.length > 0 && <InArticleAd postSlug={post.slug} />}
-              {after}
+              {bodySegments.map((segment, i) => (
+                <Fragment key={i}>
+                  {segment}
+                  {i < adCount && <InArticleAd postSlug={post.slug} position={i} />}
+                </Fragment>
+              ))}
             </Prose>
 
             {/* Prev / next */}
