@@ -39,14 +39,14 @@ const SHIFT_SELECT = `
   id, shift_title, created_by, user_id, board_id,
   start_time, end_time, is_trade, is_giveaway, is_overtime_approved,
   details, is_active, expires_at, created_at, bundle_id,
-  boards(name),
+  boards(name, slug),
   users!user_id(notify_via_email, notify_via_sms, phone_number, avatar_url)
 `
 
 const REQUEST_SELECT = `
   id, created_by, user_id, board_id, request_title, preferred_times, requested_date,
   details, is_active, expires_at, created_at,
-  boards(name),
+  boards(name, slug),
   users!user_id(notify_via_email, notify_via_sms, phone_number, avatar_url)
 `
 
@@ -64,7 +64,8 @@ function mapShiftRow(s: Record<string, unknown>) {
     created_by: s.created_by as string,
     user_id: s.user_id as string | null,
     board_id: s.board_id as string | null,
-    board_name: (s.boards as { name: string } | null)?.name ?? '',
+    board_name: (s.boards as { name: string; slug: string } | null)?.name ?? '',
+    board_slug: (s.boards as { name: string; slug: string } | null)?.slug ?? null,
     start_time: s.start_time as string,
     end_time: s.end_time as string,
     is_trade: s.is_trade as boolean,
@@ -86,7 +87,8 @@ function mapRequestRow(r: Record<string, unknown>) {
     created_by: r.created_by as string,
     user_id: r.user_id as string | null,
     board_id: r.board_id as string | null,
-    board_name: (r.boards as { name: string } | null)?.name ?? '',
+    board_name: (r.boards as { name: string; slug: string } | null)?.name ?? '',
+    board_slug: (r.boards as { name: string; slug: string } | null)?.slug ?? null,
     request_title: (r.request_title as string | null) ?? 'Shift Wanted',
     preferred_times: r.preferred_times as import('@/lib/database.types').PreferredTime[],
     requested_date: r.requested_date as string,

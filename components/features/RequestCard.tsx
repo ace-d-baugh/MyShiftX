@@ -10,7 +10,6 @@ import {
   HeartHandshake as Handshake, Share2,
 } from 'lucide-react'
 import { FlagModal } from '@/components/features/FlagModal'
-import { slugify } from '@/lib/slug'
 import { CommentSection } from '@/components/features/CommentSection'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Avatar } from '@/components/ui/Avatar'
@@ -40,6 +39,7 @@ export interface RequestData {
   user_id: string | null
   board_id: string | null
   board_name: string
+  board_slug?: string | null
   request_title: string
   preferred_times: PreferredTime[]
   requested_date: string
@@ -190,8 +190,8 @@ export function RequestCard({ request, currentUserId, onDeactivate, onFulfilled 
           )}
           <div className="flex items-center gap-1.5 text-xs text-text/50 mb-3 min-w-0">
             <LayoutGrid className="w-3.5 h-3.5 text-accent/70 shrink-0" />
-            {request.board_id
-              ? <Link href={`/boards/${slugify(request.board_name)}`} className="truncate hover:text-primary hover:underline transition-colors">{request.board_name}</Link>
+            {request.board_id && request.board_slug
+              ? <Link href={`/boards/${request.board_slug}`} className="truncate hover:text-primary hover:underline transition-colors">{request.board_name}</Link>
               : <span className="truncate">{request.board_name}</span>
             }
           </div>

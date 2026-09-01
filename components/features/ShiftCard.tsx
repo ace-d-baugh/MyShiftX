@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
 import { getSettings } from '@/lib/settings'
-import { slugify } from '@/lib/slug'
 import {
   Clock, LayoutGrid, Flag, Pencil, Trash2, EyeOff,
   MoreVertical, MessageSquare, Send, ChevronDown, Layers, Share2,
@@ -33,6 +32,7 @@ export interface ShiftData {
   user_id: string | null
   board_id: string | null
   board_name: string
+  board_slug?: string | null
   start_time: string
   end_time: string
   is_trade: boolean
@@ -288,8 +288,8 @@ export function ShiftCard({
             )}
             <div className="flex items-center gap-1.5 text-xs text-text/50 mb-3 min-w-0">
               <LayoutGrid className={cn('w-3.5 h-3.5 shrink-0 opacity-70', typeColor)} />
-              {shift.board_id
-                ? <Link href={`/boards/${slugify(shift.board_name)}`} className="truncate hover:text-primary hover:underline transition-colors">{shift.board_name}</Link>
+              {shift.board_id && shift.board_slug
+                ? <Link href={`/boards/${shift.board_slug}`} className="truncate hover:text-primary hover:underline transition-colors">{shift.board_name}</Link>
                 : <span className="truncate">{shift.board_name}</span>
               }
             </div>
