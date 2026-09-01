@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import {
-  Bell, BellOff, BellRing, MoreVertical, Send, Trash2, Pencil, X, Pin, Plus,
+  Bell, BellOff, BellRing, MoreVertical, Send, Trash2, Pencil, X, Pin, Plus, ArrowRight,
 } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Modal } from '@/components/ui/Modal'
@@ -164,11 +164,12 @@ export function NotificationsClient({
     .filter(n => !(n.type === 'board_announcement' && n.pinnedUntil && new Date(n.pinnedUntil).getTime() > now))
 
   // Marks read via a direct Supabase call rather than the markNotificationRead
-  // server action: the click also navigates (this is a Link), and a server
-  // action's POST goes to the *current* route — racing that against the
-  // Link's own transition to linkUrl let Next's router see the action's
-  // response land after the route had already changed and abort the
-  // navigation, so the click appeared to do nothing but flip read state.
+  // server action. Most cards just call this with no navigation at all, but
+  // the "Go to Post/Board" CTA Link also fires it on click: a server action's
+  // POST goes to the *current* route, so racing that against the Link's own
+  // transition to linkUrl let Next's router see the action's response land
+  // after the route had already changed and abort the navigation, making the
+  // click appear to do nothing but flip read state.
   const handleCardClick = (card: NotificationCard) => {
     if (card.readAt) return
     setNotifications(prev => prev.map(n =>
@@ -279,19 +280,35 @@ export function NotificationsClient({
     },
   }
 
+  // Clicking a card always just marks it read — it does not navigate. Only
+  // these types get an explicit action to actually leave the page, since
+  // they're the ones with a single unambiguous destination worth jumping to.
+  const ctaLabel = (type: NotificationType): string | null => {
+    if (type === 'comment' || type === 'claim_created') return 'Go to Post'
+    if (type === 'board_approved') return 'Go to Board'
+    return null
+  }
+
   const renderCard = (card: NotificationCard) => {
     const unread = !card.readAt
     const isBoard = card.type === 'board_announcement'
     const mayManage = isBoard && canManage(card)
     const showMessage = !!card.actorUserId && card.actorUserId !== currentUserId
+    const cta = ctaLabel(card.type)
 
     return (
       <li key={card.recipientId} className="relative">
-        <Link
-          href={card.linkUrl}
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => handleCardClick(card)}
+          onKeyDown={e => {
+            if (e.key !== 'Enter' && e.key !== ' ') return
+            e.preventDefault()
+            handleCardClick(card)
+          }}
           className={cn(
-            'flex items-start gap-3 pl-4 pr-12 py-3.5 transition-colors',
+            'flex items-start gap-3 pl-4 pr-12 py-3.5 transition-colors cursor-pointer',
             isBoard ? 'bg-secondary-accent/20 hover:bg-secondary-accent/30' : 'hover:bg-primary-light/40'
           )}
         >
@@ -319,9 +336,18 @@ export function NotificationsClient({
                 {card.boardName}
               </span>
             )}
+            {cta && (
+              <Link
+                href={card.linkUrl}
+                onClick={e => { e.stopPropagation(); handleCardClick(card) }}
+                className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-primary hover:underline"
+              >
+                {cta} <ArrowRight className="w-3 h-3" />
+              </Link>
+            )}
           </span>
           {unread && <span className="mt-1.5 w-2 h-2 rounded-full bg-warning shrink-0" />}
-        </Link>
+        </div>
 
         <button
           type="button"
