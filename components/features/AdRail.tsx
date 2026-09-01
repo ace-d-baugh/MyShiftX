@@ -95,21 +95,14 @@ export function AdRail({ showAds, children, hasBottomNav = true }: AdRailProps) 
               <Crown className="w-3.5 h-3.5 text-secondary-accent" fill="#ffea80" strokeWidth={0} aria-hidden="true" />
               Remove Ads
             </Link>
+            {/* All three show from lg up, same breakpoint as the rail
+             * itself — was xl-only, but that put the 3-column layout out of
+             * reach on a lot of real laptop screens once OS display scaling
+             * is factored in, not just narrow windows. */}
             <div className="flex flex-col gap-4">
               <AdSlot slotId={STICKY_DESKTOP_SLOT} offset={0} className="w-full min-h-[250px]" />
-              {/* Two more slots stack in on wider screens only — three
-               * 250px+ units plus gaps is too tall to be worth it at the
-               * narrow end of the lg breakpoint. The visibility toggle has
-               * to live on a wrapper, not AdSlot's own className: a real ad
-               * unit's <ins> forces inline style="display:block" (required
-               * by AdSense for auto-sized units), which would beat a
-               * `hidden` class applied to that same element. */}
-              <div className="hidden xl:block">
-                <AdSlot slotId={STICKY_DESKTOP_SLOT_2} offset={1} className="w-full min-h-[250px]" />
-              </div>
-              <div className="hidden xl:block">
-                <AdSlot slotId={STICKY_DESKTOP_SLOT_3} offset={2} className="w-full min-h-[250px]" />
-              </div>
+              <AdSlot slotId={STICKY_DESKTOP_SLOT_2} offset={1} className="w-full min-h-[250px]" />
+              <AdSlot slotId={STICKY_DESKTOP_SLOT_3} offset={2} className="w-full min-h-[250px]" />
             </div>
           </div>
         </aside>
