@@ -5,12 +5,11 @@ import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
 import { PhotoImportHighlight } from '@/components/landing/PhotoImportHighlight'
 import { createServerClient } from '@/lib/supabase/server'
-import { getShowAds } from '@/lib/auth/session'
+import { getLandingHeaderData } from '@/lib/auth/session'
 import { optionalServerEnv } from '@/lib/env'
 import { SHOWCASE_MODE } from '@/lib/showcase/mode'
 import { INDUSTRIES } from '@/lib/landing/industries'
 import { BLOG_POSTS, formatPostDate } from '@/lib/blog'
-import type { GlobalRole } from '@/lib/database.types'
 
 export const metadata = {
   title: 'MyShiftX – Shift Trading for Shift Workers',
@@ -131,52 +130,7 @@ const placeholderReviews = [
 
 export default async function HomePage() {
   const supabase = createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  let displayName: string | null = null
-  let userRole: GlobalRole = 'Guest'
-  let isBoardModerator = false
-  let isLeader = false
-  let pendingApprovalsCount = 0
-  let pendingFlagsCount = 0
-  let unreadMessagesCount = 0
-  let unreadNotificationsCount = 0
-  let showUpgrade = false
-
-  if (user) {
-    const [{ data: profile }, { data: isModRpc }, { data: unreadMessages }, { data: unreadNotifications }, showAds] = await Promise.all([
-      supabase.from('users').select('display_name, role').eq('id', user.id).single(),
-      supabase.rpc('is_any_board_moderator'),
-      supabase.rpc('get_unread_message_count'),
-      supabase.rpc('get_unread_notification_count'),
-      // Same Basic-tier signal the dashboard layout passes to Navbar, so the
-      // landing dropdown and the app dropdown show the same entries.
-      getShowAds(supabase),
-    ])
-    displayName = profile?.display_name ?? user.email ?? 'Account'
-    userRole = (profile?.role as GlobalRole | undefined) ?? 'User'
-    unreadMessagesCount = unreadMessages ?? 0
-    unreadNotificationsCount = unreadNotifications ?? 0
-    showUpgrade = showAds
-
-    const isAdmin = userRole === 'Admin'
-    isBoardModerator = Boolean(isModRpc)
-    isLeader = isAdmin
-
-    if (isBoardModerator || isAdmin) {
-      const [approvalsRes, flagsRes, leaderRes] = await Promise.all([
-        supabase.from('user_boards').select('id', { count: 'exact', head: true }).eq('is_approved', false),
-        supabase.from('flags').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-        isAdmin
-          ? Promise.resolve({ count: 1 })
-          : supabase.from('user_boards').select('id', { count: 'exact', head: true })
-              .eq('user_id', user.id).eq('role', 'Leader').eq('is_approved', true),
-      ])
-      pendingApprovalsCount = approvalsRes.count ?? 0
-      pendingFlagsCount = flagsRes.count ?? 0
-      if (!isAdmin) isLeader = (leaderRes.count ?? 0) > 0
-    }
-  }
+  const headerData = await getLandingHeaderData(supabase)
 
   // Photo Schedule Import marketing appears only where the feature itself is
   // live — same env-var flip that gates the Calendar's Import button.
@@ -186,17 +140,7 @@ export default async function HomePage() {
     <div className="min-h-screen bg-background flex flex-col">
 
       {/* ── Header ── */}
-      <LandingHeader
-        displayName={displayName}
-        userRole={userRole}
-        isBoardModerator={isBoardModerator}
-        isLeader={isLeader}
-        pendingApprovalsCount={pendingApprovalsCount}
-        pendingFlagsCount={pendingFlagsCount}
-        unreadMessagesCount={unreadMessagesCount}
-        unreadNotificationsCount={unreadNotificationsCount}
-        showUpgrade={showUpgrade}
-      />
+      <LandingHeader {...headerData} />
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary-light via-background to-background pt-20 pb-24 px-4">

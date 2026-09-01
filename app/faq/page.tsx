@@ -3,6 +3,8 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
 import { AdRail } from '@/components/features/AdRail'
+import { createServerClient } from '@/lib/supabase/server'
+import { getLandingHeaderData } from '@/lib/auth/session'
 
 export const metadata = {
   title: 'Frequently Asked Questions',
@@ -238,7 +240,9 @@ const SECTIONS: { heading: string; items: QA[] }[] = [
   },
 ]
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const headerData = await getLandingHeaderData(createServerClient())
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -257,7 +261,7 @@ export default function FaqPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <LandingHeader displayName={null} />
+      <LandingHeader {...headerData} />
 
       <main className="flex-1">
         <AdRail showAds hasBottomNav={false}>

@@ -116,3 +116,73 @@ export async function getPublicShowAds(supabase: Supabase): Promise<boolean> {
   if (!user) return true
   return getShowAds(supabase)
 }
+
+export interface LandingHeaderData {
+  displayName: string | null
+  userRole: GlobalRole
+  isBoardModerator: boolean
+  isLeader: boolean
+  pendingApprovalsCount: number
+  pendingFlagsCount: number
+  unreadMessagesCount: number
+  unreadNotificationsCount: number
+  showUpgrade: boolean
+}
+
+/**
+ * Full <LandingHeader> props for the current session, on any public page
+ * that visitor can reach signed in or out — display name, notification
+ * badges, mod/admin dropdown items, and the Upgrade prompt for Basic-tier
+ * users. Without this, a public page passing `displayName={null}` unconditionally
+ * shows the signed-out Log In / Get Started header even to a logged-in user.
+ * Signed-out visitors get the all-false/null defaults with no extra queries.
+ */
+export async function getLandingHeaderData(supabase: Supabase): Promise<LandingHeaderData> {
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const data: LandingHeaderData = {
+    displayName: null,
+    userRole: 'Guest',
+    isBoardModerator: false,
+    isLeader: false,
+    pendingApprovalsCount: 0,
+    pendingFlagsCount: 0,
+    unreadMessagesCount: 0,
+    unreadNotificationsCount: 0,
+    showUpgrade: false,
+  }
+  if (!user) return data
+
+  const [{ data: profile }, { data: isModRpc }, { data: unreadMessages }, { data: unreadNotifications }, showAds] = await Promise.all([
+    supabase.from('users').select('display_name, role').eq('id', user.id).single(),
+    supabase.rpc('is_any_board_moderator'),
+    supabase.rpc('get_unread_message_count'),
+    supabase.rpc('get_unread_notification_count'),
+    getShowAds(supabase),
+  ])
+  data.displayName = profile?.display_name ?? user.email ?? 'Account'
+  data.userRole = (profile?.role as GlobalRole | undefined) ?? 'User'
+  data.unreadMessagesCount = unreadMessages ?? 0
+  data.unreadNotificationsCount = unreadNotifications ?? 0
+  data.showUpgrade = showAds
+
+  const isAdmin = data.userRole === 'Admin'
+  data.isBoardModerator = Boolean(isModRpc)
+  data.isLeader = isAdmin
+
+  if (data.isBoardModerator || isAdmin) {
+    const [approvalsRes, flagsRes, leaderRes] = await Promise.all([
+      supabase.from('user_boards').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+      supabase.from('flags').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      isAdmin
+        ? Promise.resolve({ count: 1 })
+        : supabase.from('user_boards').select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id).eq('role', 'Leader').eq('is_approved', true),
+    ])
+    data.pendingApprovalsCount = approvalsRes.count ?? 0
+    data.pendingFlagsCount = flagsRes.count ?? 0
+    if (!isAdmin) data.isLeader = (leaderRes.count ?? 0) > 0
+  }
+
+  return data
+}

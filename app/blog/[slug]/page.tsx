@@ -9,6 +9,8 @@ import { AdRail } from '@/components/features/AdRail'
 import { InArticleAd } from '@/components/blog/InArticleAd'
 import { Prose } from '@/components/ui/Prose'
 import { BLOG_POSTS, getPost, adjacentPosts, formatPostDate } from '@/lib/blog'
+import { createServerClient } from '@/lib/supabase/server'
+import { getLandingHeaderData } from '@/lib/auth/session'
 
 // Up to 3 in-article ads per post, spread across the body rather than
 // stacked near the top — Google's own tip for multiple in-article units is
@@ -88,10 +90,11 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   }
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = getPost(params.slug)
   if (!post) notFound()
 
+  const headerData = await getLandingHeaderData(createServerClient())
   const { newer, older } = adjacentPosts(post.slug)
   const bodySegments = splitBodyForAds(post.Body)
   const adCount = bodySegments.length - 1
@@ -126,7 +129,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <LandingHeader displayName={null} />
+      <LandingHeader {...headerData} />
 
       <main className="flex-1">
         <AdRail showAds hasBottomNav={false}>

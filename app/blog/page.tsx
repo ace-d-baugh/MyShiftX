@@ -4,6 +4,8 @@ import { LandingHeader } from '@/components/landing/LandingHeader'
 import { Footer } from '@/components/landing/Footer'
 import { AdRail } from '@/components/features/AdRail'
 import { BLOG_POSTS, formatPostDate } from '@/lib/blog'
+import { createServerClient } from '@/lib/supabase/server'
+import { getLandingHeaderData } from '@/lib/auth/session'
 
 export const metadata = {
   title: 'The MyShiftX Blog — Writing for Shift Workers',
@@ -12,12 +14,13 @@ export const metadata = {
   alternates: { canonical: '/blog' },
 }
 
-export default function BlogIndexPage() {
+export default async function BlogIndexPage() {
   const [lead, ...rest] = BLOG_POSTS
+  const headerData = await getLandingHeaderData(createServerClient())
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <LandingHeader displayName={null} />
+      <LandingHeader {...headerData} />
 
       <main className="flex-1">
         <AdRail showAds hasBottomNav={false}>
