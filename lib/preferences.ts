@@ -4,7 +4,16 @@ import type { UserSettings } from '@/lib/settings'
 
 export type DBPreferences = UserSettings & { theme: Theme }
 
+// upsertPreferences is fired-and-forgotten by callers (e.g. ProfileClient's
+// selectTheme, so a theme pick applies instantly). If the user navigates
+// away before that write lands, PreferencesSyncer's fetch on the new route
+// can otherwise read the pre-write row and clobber the just-picked value
+// back to the old one. Tracking the in-flight write here lets fetchPreferences
+// wait for it first, so a read always sees its own prior write.
+let pendingWrite: Promise<void> | null = null
+
 export async function fetchPreferences(userId: string): Promise<DBPreferences | null> {
+  if (pendingWrite) await pendingWrite.catch(() => {})
   const supabase = createClient()
   // maybeSingle, not single: a user who has never saved preferences has no
   // row yet, and .single() turns that into a 406 (plus client retries).
@@ -26,18 +35,24 @@ export async function fetchPreferences(userId: string): Promise<DBPreferences | 
   }
 }
 
-export async function upsertPreferences(userId: string, prefs: DBPreferences): Promise<void> {
-  const supabase = createClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any).from('user_preferences').upsert({
-    user_id:     userId,
-    theme:       prefs.theme,
-    time_format: prefs.timeFormat,
-    date_format: prefs.dateFormat,
-    week_start:  prefs.weekStart,
-    timezone:    prefs.timezone,
-    updated_at:  new Date().toISOString(),
-  }, { onConflict: 'user_id' })
+export function upsertPreferences(userId: string, prefs: DBPreferences): Promise<void> {
+  const write = (async () => {
+    const supabase = createClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).from('user_preferences').upsert({
+      user_id:     userId,
+      theme:       prefs.theme,
+      time_format: prefs.timeFormat,
+      date_format: prefs.dateFormat,
+      week_start:  prefs.weekStart,
+      timezone:    prefs.timezone,
+      updated_at:  new Date().toISOString(),
+    }, { onConflict: 'user_id' })
 
-  if (error) console.error('[preferences] upsert failed:', error)
+    if (error) console.error('[preferences] upsert failed:', error)
+  })()
+
+  pendingWrite = write
+  write.finally(() => { if (pendingWrite === write) pendingWrite = null })
+  return write
 }
