@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, LogIn, Clock, AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { loginSchema } from '@/lib/validations/auth'
 import { OAuthButtons } from '@/components/ui/OAuthButtons'
 import { SHOWCASE_MODE } from '@/lib/showcase/mode'
+import { extractInviteCode, savePendingInviteCode } from '@/lib/inviteCode'
 
 const REASON_MESSAGES: Record<string, { icon: typeof Clock; text: string; style: string }> = {
   session_expired: {
@@ -23,16 +24,39 @@ const REASON_MESSAGES: Record<string, { icon: typeof Clock; text: string; style:
 }
 
 export default function LoginPage() {
+  return <Suspense><LoginForm /></Suspense>
+}
+
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [reason, setReason] = useState<string | null>(null)
 
+  // Invite code carried in from a QR scan / share link that dead-ended here —
+  // e.g. an unauthenticated visit to /boards/[slug]?c=CODE gets bounced to
+  // /login?c=CODE by middleware. Persisted immediately so it survives even if
+  // the user reloads or takes a detour through /register first.
+  const inviteCode = extractInviteCode(searchParams)
+  const redirectParam = searchParams.get('redirect') ?? ''
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setReason(params.get('reason'))
   }, [])
+
+  useEffect(() => {
+    if (inviteCode) savePendingInviteCode(inviteCode)
+  }, [inviteCode])
+
+  const registerHref = redirectParam
+    ? `/register?redirect=${encodeURIComponent(redirectParam)}`
+    : inviteCode
+      ? `/register?code=${inviteCode}`
+      : '/register'
+
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [form, setForm] = useState({ email: '', password: '' })
@@ -86,7 +110,14 @@ export default function LoginPage() {
         }
         return
       }
-      router.push('/wall')
+      if (redirectParam) {
+        router.push(redirectParam)
+      } else if (inviteCode) {
+        // /welcome auto-redeems any pending invite code from localStorage.
+        router.push('/welcome')
+      } else {
+        router.push('/wall')
+      }
     } catch {
       setServerError('An unexpected error occurred. Please try again.')
     } finally {
@@ -253,7 +284,7 @@ export default function LoginPage() {
       {!SHOWCASE_MODE && (
         <p className="text-center text-sm text-text/60 mt-6">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-primary font-medium hover:underline min-h-0 min-w-0">
+          <Link href={registerHref} className="text-primary font-medium hover:underline min-h-0 min-w-0">
             Register here
           </Link>
         </p>

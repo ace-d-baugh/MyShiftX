@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Camera, CalendarDays, LayoutDashboard, Bell, ArrowRight, Ticket, Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { dismissOnboarding } from '@/app/actions/onboarding'
@@ -12,8 +12,7 @@ import { MyBoardsSection } from '@/components/features/MyBoardsSection'
 import { PushNotificationsToggle } from '@/components/features/PushNotificationsToggle'
 import { IosInstallPrompt } from '@/components/features/IosInstallPrompt'
 import { cn } from '@/lib/utils'
-
-const PENDING_INVITE_KEY = 'myshiftx-pending-invite'
+import { readPendingInviteCode, savePendingInviteCode, clearPendingInviteCode } from '@/lib/inviteCode'
 
 interface WelcomeClientProps {
   userId: string
@@ -53,6 +52,7 @@ function StepBadge({ n, done }: { n: number; done: boolean }) {
 export function WelcomeClient({ userId, displayName, importEnabled, initialShiftCount, initialBoardCount }: WelcomeClientProps) {
   const supabase = createClient()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const [shiftCount, setShiftCount] = useState(initialShiftCount)
   const [importOpen, setImportOpen] = useState(false)
@@ -75,35 +75,42 @@ export function WelcomeClient({ userId, displayName, importEnabled, initialShift
     return () => window.removeEventListener('focus', onFocus)
   }, [refreshCounts])
 
-  // Redeem a pending invite code once: localStorage first (same-device
-  // registration), signup metadata as the cross-device fallback.
+  // Redeem a pending invite code once: a `code`/`c` URL param first (e.g. an
+  // already-logged-in user opened an invite link and landed here directly),
+  // then localStorage (same-device registration), then signup metadata as
+  // the cross-device fallback.
   useEffect(() => {
     if (inviteAttempted.current || initialBoardCount > 0) return
     inviteAttempted.current = true
 
     const attempt = async () => {
-      let code: string | null = null
-      try { code = localStorage.getItem(PENDING_INVITE_KEY) } catch {}
+      const fromUrl = searchParams.get('code') ?? searchParams.get('c')
+      if (fromUrl) savePendingInviteCode(fromUrl)
+      let code: string | null = fromUrl ?? readPendingInviteCode()
       if (!code) {
         const { data } = await supabase.auth.getUser()
         code = (data.user?.user_metadata?.invite_code as string | undefined) ?? null
       }
       if (!code) return
+      code = code.toUpperCase()
 
       const res = await lookupBoardByCode(code)
+      let joined = false
       if (res.board) {
         const join = await confirmJoinBoard(res.board.id, true)
         if (!join.error) {
+          joined = true
           setInviteNotice(`Your request to join ${res.board.name} was sent — a board admin will approve you shortly.`)
           await refreshCounts().catch(() => {})
         }
       }
-      // One shot either way — clear so a stale/used code never loops.
-      try { localStorage.removeItem(PENDING_INVITE_KEY) } catch {}
+      // Clear on success so it never re-fires; on failure (bad/disabled code)
+      // leave it so the "Join A Board" modal can prefill it for a retry.
+      if (joined) clearPendingInviteCode()
       supabase.auth.updateUser({ data: { invite_code: null } }).catch(() => {})
     }
     attempt().catch(() => {})
-  }, [initialBoardCount, supabase, refreshCounts])
+  }, [initialBoardCount, supabase, refreshCounts, searchParams])
 
   const finish = async () => {
     setLeaving(true)

@@ -16,6 +16,9 @@ function VerifyEmailContent() {
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/wall'
   const email = searchParams.get('email') || ''
+  const loginHref = searchParams.get('redirect')
+    ? `/login?redirect=${encodeURIComponent(searchParams.get('redirect')!)}`
+    : '/login'
   const supabase = useMemo(() => createClient(), [])
   const hasNavigated = useRef(false)
 
@@ -125,7 +128,7 @@ function VerifyEmailContent() {
                 : 'Resend Verification Email'}
           </button>
         )}
-        <Link href="/login" className="btn btn-outline w-full">
+        <Link href={loginHref} className="btn btn-outline w-full">
           Back to Login
         </Link>
       </div>

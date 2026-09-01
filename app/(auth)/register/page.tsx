@@ -10,6 +10,7 @@ import { registerSchema, type RegisterInput } from '@/lib/validations/auth'
 import { OAuthButtons } from '@/components/ui/OAuthButtons'
 import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter'
 import { REGISTRATION_PAUSED } from '@/lib/registration'
+import { savePendingInviteCode } from '@/lib/inviteCode'
 
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>
 
@@ -26,6 +27,7 @@ function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [duplicateEmail, setDuplicateEmail] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
 
@@ -42,8 +44,16 @@ function RegisterForm() {
 
   useEffect(() => {
     if (!inviteCode) return
-    try { localStorage.setItem('myshiftx-pending-invite', inviteCode) } catch {}
+    savePendingInviteCode(inviteCode)
   }, [inviteCode])
+
+  // Carried through to the "Log in" link so a returning user who already has
+  // an account doesn't lose the code/redirect when bouncing to /login.
+  const loginHref = useMemo(() => {
+    if (redirect) return `/login?redirect=${encodeURIComponent(redirect)}`
+    if (inviteCode) return `/login?code=${inviteCode}`
+    return '/login'
+  }, [redirect, inviteCode])
 
   const [form, setForm] = useState({
     first_name: '',
@@ -66,6 +76,7 @@ function RegisterForm() {
     e.preventDefault()
     if (REGISTRATION_PAUSED) return
     setServerError(null)
+    setDuplicateEmail(false)
 
     const parseResult = registerSchema.safeParse({
       ...form,
@@ -119,7 +130,7 @@ function RegisterForm() {
       // already registered, to avoid leaking which emails exist. The tell is an
       // empty identities array — a genuinely new signup always has one identity.
       if (data.user && data.user.identities && data.user.identities.length === 0) {
-        setServerError('An account with this email already exists. Try logging in instead.')
+        setDuplicateEmail(true)
         return
       }
 
@@ -150,13 +161,22 @@ function RegisterForm() {
             ? "We couldn't create your account — new registrations (including sign-in with Google/Facebook/LinkedIn) are temporarily paused while we get ready for launch. Check back soon!"
             : 'New registrations are temporarily paused while we get ready for launch — check back soon!'}{' '}
           Existing members can still{' '}
-          <Link href="/login" className="font-medium underline min-h-0 min-w-0">log in</Link>.
+          <Link href={loginHref} className="font-medium underline min-h-0 min-w-0">log in</Link>.
         </div>
       )}
 
       {serverError && (
         <div key={serverError} className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm animate-shake">
           {serverError}
+        </div>
+      )}
+
+      {duplicateEmail && (
+        <div className="mb-4 p-3 rounded-md bg-warning/10 border border-warning/20 text-warning text-sm animate-shake">
+          An account with this email already exists.{' '}
+          <Link href={loginHref} className="underline font-medium min-h-0 min-w-0">
+            Try logging in instead.
+          </Link>
         </div>
       )}
 
@@ -345,7 +365,7 @@ function RegisterForm() {
 
       <p className="text-center text-sm text-text/60 mt-6">
         Already have an account?{' '}
-        <Link href="/login" className="text-primary font-medium hover:underline min-h-0 min-w-0">
+        <Link href={loginHref} className="text-primary font-medium hover:underline min-h-0 min-w-0">
           Log in
         </Link>
       </p>

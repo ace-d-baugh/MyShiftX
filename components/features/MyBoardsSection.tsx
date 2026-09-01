@@ -9,6 +9,7 @@ import {
   deleteBoard, leaveBoard,
 } from '@/app/actions/boards'
 import { formatInviteCodeDisplay, normalizeInviteCodeInput } from '@/lib/boards'
+import { readPendingInviteCode, clearPendingInviteCode } from '@/lib/inviteCode'
 import { Badge } from '@/components/ui/Badge'
 import { BOARD_ROLE_LABEL } from '@/lib/roles'
 import { Button } from '@/components/ui/Button'
@@ -145,7 +146,9 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
   }, [isCreateOpen])
 
   useEffect(() => {
-    if (obJoinOpen) { setJoinCode(''); setJoinError(null) }
+    // Prefill with a pending invite code (e.g. left over from a QR/link join
+    // that couldn't auto-redeem) so the user doesn't have to re-enter it.
+    if (obJoinOpen) { setJoinCode(readPendingInviteCode() ?? ''); setJoinError(null) }
   }, [obJoinOpen])
 
   // ── Join ──────────────────────────────────────────────────────────────────
@@ -177,6 +180,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
     if (result.error) {
       setJoinError(result.error)
     } else if (confirmed) {
+      clearPendingInviteCode()
       setObJoinOpen(false)
       setJoinSuccess(`Your request to join "${pendingJoin.name}" has been sent. A moderator will review it shortly.`)
       setTimeout(() => setJoinSuccess(null), 8000)

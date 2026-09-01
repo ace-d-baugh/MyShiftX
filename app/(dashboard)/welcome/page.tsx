@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { unstable_noStore as noStore } from 'next/cache'
 import { requireUser } from '@/lib/auth/session'
 import { optionalServerEnv } from '@/lib/env'
@@ -21,12 +22,14 @@ export default async function WelcomePage() {
   ])
 
   return (
-    <WelcomeClient
-      userId={user.id}
-      displayName={profile?.display_name ?? ''}
-      importEnabled={Boolean(optionalServerEnv.GEMINI_API_KEY)}
-      initialShiftCount={shiftCount ?? 0}
-      initialBoardCount={boardCount ?? 0}
-    />
+    <Suspense>
+      <WelcomeClient
+        userId={user.id}
+        displayName={profile?.display_name ?? ''}
+        importEnabled={Boolean(optionalServerEnv.GEMINI_API_KEY)}
+        initialShiftCount={shiftCount ?? 0}
+        initialBoardCount={boardCount ?? 0}
+      />
+    </Suspense>
   )
 }

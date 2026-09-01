@@ -144,8 +144,15 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/wall'
-    url.search = ''
+    // An already-signed-in user opening an invite link (e.g. a stale session
+    // in this browser) still deserves the join flow — send them to /welcome
+    // with the code intact instead of wiping it and dropping them on /wall.
+    const code = url.searchParams.get('code') ?? url.searchParams.get('c') ?? ''
+    const redirectParam = url.searchParams.get('redirect') ?? ''
+    const codeFromRedirect = /[?&]c=([A-Za-z0-9]{7,10})/.exec(redirectParam)?.[1] ?? ''
+    const inviteCode = code || codeFromRedirect
+    url.pathname = inviteCode ? '/welcome' : '/wall'
+    url.search = inviteCode ? `?code=${inviteCode}` : ''
     return NextResponse.redirect(url)
   }
 
