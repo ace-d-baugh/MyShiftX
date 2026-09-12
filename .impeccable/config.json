@@ -38,6 +38,27 @@
         ],
         "createdAt": "2026-09-01T19:01:44.991Z",
         "reason": "pre-existing border-l-4 type-color accent, used consistently across every shift/request card site-wide; not introduced by this session's board-slug-link change, out of scope to alter without a design request"
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-09-12T09:43:50.921Z",
+        "reason": "Agent: pre-existing shell()/h1()/p()/muted() email helpers (line predates this session) — Arial chosen deliberately for HTML-email client compatibility per the file's own comment (Outlook/Gmail strip web fonts); used unchanged across all 8 transactional templates in this file"
+      },
+      {
+        "rule": "overused-font",
+        "value": "lato",
+        "createdAt": "2026-09-12T09:43:52.686Z",
+        "reason": "Agent: pre-existing btn()/shell() email helpers (line predates this session) — Lato is the Google-Fonts fallback pair used site-wide in emails for iOS/Apple Mail only, Arial covers everyone else; used unchanged across all templates in this file"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "components/email-template.tsx"
+        ],
+        "createdAt": "2026-09-12T09:43:54.410Z",
+        "reason": "Agent: pre-existing highlight() helper (line predates this session), reused unchanged by all 8 email templates; project already ignores side-tab as an established pattern elsewhere (ShiftCard.tsx, RequestCard.tsx, Prose.tsx)"
       }
     ]
   }
