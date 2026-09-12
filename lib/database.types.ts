@@ -18,6 +18,7 @@ export type NotificationType =
   | 'shift_match' | 'interest' | 'comment'
   | 'claim_created' | 'claim_resolved' | 'claim_finalized'
   | 'board_approved' | 'board_announcement'
+  | 'mod_promoted' | 'leader_promoted' | 'join_request'
 export type ContactMethodType =
   | 'phone' | 'email' | 'instagram' | 'facebook' | 'twitter' | 'tiktok'
   | 'discord' | 'snapchat' | 'linkedin' | 'other'

@@ -21,6 +21,7 @@ import { displayNameRegex } from '@/lib/validations/auth'
 import { getSettings, saveSettings, type UserSettings, type WeekStart, type DateFormat, type TimeFormat, DEFAULT_SETTINGS } from '@/lib/settings'
 import { getStoredTheme, applyTheme, freeThemeFallback, THEMES, isProTheme, type Theme, type ThemeInfo } from '@/lib/theme'
 import { upsertPreferences } from '@/lib/preferences'
+import { SUPPORT_EMAIL } from '@/lib/email-constants'
 import type { GlobalRole, ContactMethodType } from '@/lib/database.types'
 
 interface UserProfile {
@@ -96,6 +97,7 @@ export function ProfileClient({ user, sessionUserId, contactMethods, isPro, memb
   const [nameError, setNameError] = useState<string | null>(null)
   const [deactivateConfirm, setDeactivateConfirm] = useState(false)
   const [createBoardOpen, setCreateBoardOpen] = useState(false)
+  const [isBoardLeader, setIsBoardLeader] = useState(false)
 
   // Site settings (localStorage)
   const [siteSettings, setSiteSettings] = useState<UserSettings | null>(null)
@@ -398,6 +400,13 @@ export function ProfileClient({ user, sessionUserId, contactMethods, isPro, memb
               onChange={e => setNotifyEmail(e.target.checked)}
             />
           </label>
+          {isBoardLeader && (
+            <p className="text-xs text-text/50">
+              As a board Admin, you&apos;ll get email alerts for join requests and other board
+              activity — add <strong>{SUPPORT_EMAIL}</strong> to your contacts so they don&apos;t
+              land in spam.
+            </p>
+          )}
           {/* SMS toggle — hidden until SMS provider is configured */}
           {/* Applies instantly per device — not part of the Save button below */}
           <PushNotificationsToggle />
@@ -436,6 +445,7 @@ export function ProfileClient({ user, sessionUserId, contactMethods, isPro, memb
           userId={sessionUserId}
           createOpen={createBoardOpen}
           onCreateOpenChange={setCreateBoardOpen}
+          onLeaderChange={setIsBoardLeader}
         />
       </div>
 

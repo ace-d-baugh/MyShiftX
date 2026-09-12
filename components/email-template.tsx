@@ -286,6 +286,59 @@ export const shiftMatchHtml = (opts: {
   `)
 }
 
+/** Sent when a board Mod/Leader promotes a member to Mod */
+export const modPromotedHtml = (opts: {
+  displayName?: string
+  boardName: string
+  /** True when this promotion also flipped the recipient's email-notification
+   * preference on (it was off before) — branches the copy accordingly. */
+  emailWasJustEnabled: boolean
+  notificationsUrl: string
+}) =>
+  shell(`
+    ${h1('You\'re now a Mod! 🛡️')}
+    ${p(`${opts.displayName ? `Hi ${esc(opts.displayName)},` : 'Hi,'} you've been promoted to Moderator on:`)}
+    ${highlight(esc(opts.boardName))}
+    ${p('As a Mod, you can approve join requests, manage members, and post board-wide announcements.')}
+    ${p(
+      opts.emailWasJustEnabled
+        ? 'We\'ve turned on email notifications for your account, since Mods rely on them for join requests and other board activity. Please add <strong>support@myshiftx.com</strong> to your contacts or safe-senders list so these don\'t get filtered into spam.'
+        : 'You\'ll keep getting email notifications for join requests and other board activity, since that\'s already on for your account.'
+    )}
+    ${btn(opts.notificationsUrl, 'View Notifications')}
+    ${muted('You can turn off email notifications in your profile settings.')}
+  `)
+
+/** Sent when a board's ownership is transferred to a new Admin (Leader) */
+export const leaderPromotedHtml = (opts: {
+  displayName?: string
+  boardName: string
+  notificationsUrl: string
+}) =>
+  shell(`
+    ${h1('You\'re now the Admin! 👑')}
+    ${p(`${opts.displayName ? `Hi ${esc(opts.displayName)},` : 'Hi,'} congratulations — you've been promoted to Admin of:`)}
+    ${highlight(esc(opts.boardName))}
+    ${p('You now have full control over this board, including inviting members, managing roles, and board settings.')}
+    ${btn(opts.notificationsUrl, 'View Notifications')}
+    ${muted('You can turn off email notifications in your profile settings.')}
+  `)
+
+/** Sent to a board's Mods/Leaders when a new member requests to join */
+export const joinRequestPendingHtml = (opts: {
+  requesterName: string
+  boardName: string
+  approvalsUrl: string
+}) =>
+  shell(`
+    ${h1('New join request')}
+    ${p(`<strong>${esc(opts.requesterName)}</strong> has requested to join:`)}
+    ${highlight(esc(opts.boardName))}
+    ${p('Review the request to approve or decline it.')}
+    ${btn(opts.approvalsUrl, 'Review Request')}
+    ${muted('You received this because you moderate this board. You can turn off email notifications in your profile settings.')}
+  `)
+
 // (betaClosingHtml and a generic notificationHtml used to live here — both
 // had no callers and were removed in the 2026-07-18 code-scan cleanup. Git
 // history has them if a one-off send is ever needed again.)

@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getActionSession, requireAdminAction } from '@/lib/auth/session'
-import { notifyBoardApproved } from '@/app/actions/notifications'
+import { notifyBoardApproved, notifyModPromoted, notifyLeaderPromoted, notifyJoinRequestPending } from '@/app/actions/notifications'
 import { slugify, generateSlugSuffix } from '@/lib/slug'
 import { createBoardSchema } from '@/lib/validations/boards'
 import type { BoardRole } from '@/lib/database.types'
@@ -35,7 +35,7 @@ function generateInviteCode(): string {
 
 // ── Create a board ────────────────────────────────────────────────────────────
 
-export async function createBoard(name: string): Promise<{ error?: string; boardId?: string }> {
+export async function createBoard(name: string): Promise<{ error?: string; boardId?: string; emailWasJustEnabled?: boolean }> {
   try {
     const parsed = createBoardSchema.safeParse({ name })
     if (!parsed.success) return { error: parsed.error.issues[0].message }
@@ -104,8 +104,18 @@ export async function createBoard(name: string): Promise<{ error?: string; board
 
     if (memberErr) return { error: memberErr.message }
 
+    // The creator becomes this board's Admin, so they'll start depending on
+    // email for join requests and other activity — make sure the channel is
+    // actually on, same as notifyModPromoted does for a later promotion.
+    let emailWasJustEnabled = false
+    const { data: prefRow } = await supabase.from('users').select('notify_via_email').eq('id', userId).single()
+    if (prefRow && !prefRow.notify_via_email) {
+      const { error: prefErr } = await supabase.from('users').update({ notify_via_email: true }).eq('id', userId)
+      if (!prefErr) emailWasJustEnabled = true
+    }
+
     revalidatePath('/profile')
-    return { boardId: board.id }
+    return { boardId: board.id, emailWasJustEnabled }
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
   }
@@ -193,17 +203,20 @@ export async function confirmJoinBoard(boardId: string, confirmed: boolean): Pro
       return {}
     }
 
-    const { error } = await supabase.from('user_boards').insert({
+    const { data: inserted, error } = await supabase.from('user_boards').insert({
       user_id: userId,
       board_id: boardId,
       role: 'User',
       is_approved: false,
-    })
+    }).select('id').single()
 
     if (error) return { error: error.message }
 
     await recordAttempt(supabase, userId, code, 'success')
     revalidatePath('/profile')
+    // Awaited, not fire-and-forget — see approveUserBoard's note on
+    // serverless teardown killing an unawaited push/DB-insert/email chain.
+    await notifyJoinRequestPending(inserted.id as string)
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
@@ -405,11 +418,16 @@ export async function updateUserBoardRole(
   try {
     if (!['User', 'Mod'].includes(newRole)) return { error: 'Invalid role.' }
     const { supabase } = await getActionSession()
-    const { data: existing } = await supabase.from('user_boards').select('is_hidden').eq('id', userBoardId).single()
+    const { data: existing } = await supabase.from('user_boards').select('is_hidden, role').eq('id', userBoardId).single()
     if (existing?.is_hidden) return { error: 'Cannot modify a hidden membership.' }
     const { error } = await supabase.from('user_boards').update({ role: newRole }).eq('id', userBoardId)
     if (error) return { error: error.message }
     revalidatePath('/leader/approvals')
+    // Only a genuine User -> Mod transition is a promotion worth announcing —
+    // a no-op re-save or a demotion (Mod -> User) shouldn't fire it.
+    if (existing?.role === 'User' && newRole === 'Mod') {
+      await notifyModPromoted(userBoardId)
+    }
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
@@ -462,6 +480,10 @@ export async function transferBoardOwnership(
     if (demoteErr) return { error: demoteErr.message }
 
     revalidatePath('/profile')
+    // Caller is mid-demotion here (their own row just flipped Leader -> Mod),
+    // but callerCanManageBoard's check still passes since Mod is also an
+    // authorized manager.
+    await notifyLeaderPromoted(boardId, newLeaderUserId)
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unknown error' }
@@ -614,6 +636,7 @@ export async function adminTransferBoardOwnership(
     if (promoteErr) return { error: promoteErr.message }
 
     revalidatePath(`/admin/users/${newLeaderUserId}`)
+    await notifyLeaderPromoted(boardId, newLeaderUserId)
     return {}
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Not authorized.' }

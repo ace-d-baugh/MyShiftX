@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getActionSession } from '@/lib/auth/session'
 import { EMAIL_FROM } from '@/lib/email-constants'
 import { sendPushNotification } from '@/lib/push-server'
-import { boardApprovedHtml, claimReceivedHtml, claimResultHtml, interestedHtml, shiftMatchHtml } from '@/components/email-template'
+import { boardApprovedHtml, claimReceivedHtml, claimResultHtml, interestedHtml, shiftMatchHtml, modPromotedHtml, leaderPromotedHtml, joinRequestPendingHtml } from '@/components/email-template'
 import { formatInTimeZone } from 'date-fns-tz'
 import { parseISO } from 'date-fns'
 import type { PreferredTime, NotificationType } from '@/lib/database.types'
@@ -79,6 +79,26 @@ async function callerId(tag: string): Promise<string | null> {
     console.error(`[${tag}] rejected: unauthenticated caller`)
     return null
   }
+}
+
+/**
+ * Whether uid may manage boardId — a Mod/Leader of that specific board, or a
+ * global Admin. Shared by every notifier below that announces a moderator
+ * action, so the authorization rule lives in exactly one place.
+ */
+async function callerCanManageBoard(
+  db: ReturnType<typeof createAdminClient>,
+  boardId: string,
+  uid: string
+): Promise<boolean> {
+  const [{ data: membership }, { data: profile }] = await Promise.all([
+    db.from('user_boards').select('role')
+      .eq('board_id', boardId).eq('user_id', uid)
+      .eq('is_approved', true).maybeSingle(),
+    db.from('users').select('role').eq('id', uid).single(),
+  ])
+  const isMod = membership?.role === 'Mod' || membership?.role === 'Leader'
+  return isMod || profile?.role === 'Admin'
 }
 
 /**
@@ -922,14 +942,7 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
 
     // Approving is a moderator action, so only a Mod/Leader of that board (or
     // a global Admin) may announce it.
-    const [{ data: approver }, { data: approverRole }] = await Promise.all([
-      db.from('user_boards').select('role')
-        .eq('board_id', ub.board_id as string).eq('user_id', uid)
-        .eq('is_approved', true).maybeSingle(),
-      db.from('users').select('role').eq('id', uid).single(),
-    ])
-    const isMod = approver?.role === 'Mod' || approver?.role === 'Leader'
-    if (!isMod && approverRole?.role !== 'Admin') {
+    if (!(await callerCanManageBoard(db, ub.board_id as string, uid))) {
       console.error(`[notifyBoardApproved] rejected: ${uid} cannot approve on board ${ub.board_id}`)
       return
     }
@@ -968,5 +981,204 @@ export async function notifyBoardApproved(userBoardId: string): Promise<void> {
     })
   } catch (err) {
     console.error('[notifyBoardApproved] failed:', err)
+  }
+}
+
+/**
+ * Fire-and-forget: tell a member they've been promoted from User to Mod on a
+ * board. Caller must be a Mod/Leader of that board or a global Admin.
+ *
+ * Mods are the first tier that actually depends on board-activity email (join
+ * requests land in their queue), so this is the one place a promotion also
+ * auto-enables the recipient's notify_via_email if it was off — mirrors the
+ * same auto-enable createBoard does for a brand-new board's Admin.
+ */
+export async function notifyModPromoted(userBoardId: string): Promise<void> {
+  try {
+    const uid = await callerId('notifyModPromoted')
+    if (!uid) return
+
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[notifyModPromoted] SUPABASE_SERVICE_ROLE_KEY is not set — skipping')
+      return
+    }
+
+    const db = createAdminClient()
+    const { data: ub } = await db
+      .from('user_boards')
+      .select('user_id, board_id, boards(name), users!user_id(email, display_name, notify_via_email)')
+      .eq('id', userBoardId)
+      .single()
+    if (!ub) return
+
+    if (!(await callerCanManageBoard(db, ub.board_id as string, uid))) {
+      console.error(`[notifyModPromoted] rejected: ${uid} cannot manage board ${ub.board_id}`)
+      return
+    }
+
+    const boardName = (ub.boards as unknown as { name: string } | null)?.name
+    const member = (ub.users as unknown) as { email: string; display_name: string | null; notify_via_email: boolean } | null
+    const memberUserId = ub.user_id as string | null
+    if (!boardName || !member || !memberUserId) return
+
+    const mpTitle = `You're now a Mod on ${boardName}`
+    const mpBody = `You've been promoted to Moderator on ${boardName}.`
+    const mpLinkUrl = '/notifications'
+    await sendPushNotification(memberUserId, mpTitle, mpBody, mpLinkUrl)
+    await createNotification(db, {
+      type: 'mod_promoted', userId: memberUserId, title: mpTitle, body: mpBody, linkUrl: mpLinkUrl, actorUserId: uid,
+    })
+
+    const emailWasJustEnabled = !member.notify_via_email
+    if (emailWasJustEnabled) {
+      await db.from('users').update({ notify_via_email: true }).eq('id', memberUserId)
+    }
+
+    if (!member.email || !optionalServerEnv.RESEND_API_KEY) return
+    const { error: sendError } = await resend.emails.send({
+      from: EMAIL_FROM,
+      to: member.email,
+      subject: `You've been promoted to Mod on ${boardName}`,
+      html: modPromotedHtml({
+        displayName: member.display_name ?? undefined,
+        boardName,
+        emailWasJustEnabled,
+        notificationsUrl: `${BASE_URL}/notifications`,
+      }),
+    })
+    if (sendError) console.error('[notifyModPromoted] Resend error:', sendError)
+  } catch (err) {
+    console.error('[notifyModPromoted] unexpected error:', err)
+  }
+}
+
+/**
+ * Fire-and-forget: tell a member they've been promoted to a board's Admin
+ * (Leader). Caller must be a Mod/Leader of that board or a global Admin.
+ * No email-preference nudge — by the time someone reaches Leader they were
+ * already a Mod and got that message once already. Respects whatever their
+ * current notify_via_email preference already is.
+ */
+export async function notifyLeaderPromoted(boardId: string, targetUserId: string): Promise<void> {
+  try {
+    const uid = await callerId('notifyLeaderPromoted')
+    if (!uid) return
+
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[notifyLeaderPromoted] SUPABASE_SERVICE_ROLE_KEY is not set — skipping')
+      return
+    }
+
+    const db = createAdminClient()
+    if (!(await callerCanManageBoard(db, boardId, uid))) {
+      console.error(`[notifyLeaderPromoted] rejected: ${uid} cannot manage board ${boardId}`)
+      return
+    }
+
+    const [{ data: board }, { data: member }] = await Promise.all([
+      db.from('boards').select('name').eq('id', boardId).single(),
+      db.from('users').select('email, display_name, notify_via_email').eq('id', targetUserId).single(),
+    ])
+    if (!board?.name || !member) return
+
+    const lpTitle = `You're now the Admin of ${board.name}`
+    const lpBody = `You've been promoted to Admin of ${board.name}.`
+    const lpLinkUrl = '/notifications'
+    await sendPushNotification(targetUserId, lpTitle, lpBody, lpLinkUrl)
+    await createNotification(db, {
+      type: 'leader_promoted', userId: targetUserId, title: lpTitle, body: lpBody, linkUrl: lpLinkUrl, actorUserId: uid,
+    })
+
+    if (!member.notify_via_email || !member.email || !optionalServerEnv.RESEND_API_KEY) return
+    const { error: sendError } = await resend.emails.send({
+      from: EMAIL_FROM,
+      to: member.email,
+      subject: `You've been promoted to Admin of ${board.name}`,
+      html: leaderPromotedHtml({
+        displayName: member.display_name ?? undefined,
+        boardName: board.name,
+        notificationsUrl: `${BASE_URL}/notifications`,
+      }),
+    })
+    if (sendError) console.error('[notifyLeaderPromoted] Resend error:', sendError)
+  } catch (err) {
+    console.error('[notifyLeaderPromoted] unexpected error:', err)
+  }
+}
+
+/**
+ * Fire-and-forget: alert a board's Mods/Leaders that a new member is
+ * requesting to join. Caller must be the requester themselves — this fires
+ * right after their own confirmJoinBoard insert, not a moderator action.
+ * Excludes hidden Overlord seats so a global Admin's auto-membership doesn't
+ * get spammed on every join request site-wide; this is for that board's own
+ * leadership, not the global Overlord.
+ */
+export async function notifyJoinRequestPending(userBoardId: string): Promise<void> {
+  try {
+    const uid = await callerId('notifyJoinRequestPending')
+    if (!uid) return
+
+    if (!optionalServerEnv.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[notifyJoinRequestPending] SUPABASE_SERVICE_ROLE_KEY is not set — skipping')
+      return
+    }
+
+    const db = createAdminClient()
+    const { data: ub } = await db
+      .from('user_boards')
+      .select('user_id, board_id, boards(name), users!user_id(display_name)')
+      .eq('id', userBoardId)
+      .single()
+    if (!ub) return
+
+    if (ub.user_id !== uid) {
+      console.error(`[notifyJoinRequestPending] rejected: ${uid} did not create user_board ${userBoardId}`)
+      return
+    }
+
+    const boardName = (ub.boards as unknown as { name: string } | null)?.name
+    const requesterName = (ub.users as unknown as { display_name: string | null } | null)?.display_name ?? 'Someone'
+    if (!boardName) return
+
+    const { data: leaders } = await db
+      .from('user_boards')
+      .select('user_id, users!user_id(email, notify_via_email)')
+      .eq('board_id', ub.board_id as string)
+      .eq('is_approved', true)
+      .eq('is_hidden', false)
+      .in('role', ['Mod', 'Leader'])
+
+    const jrTitle = 'New join request'
+    const jrBody = `${requesterName} wants to join ${boardName}`
+    const jrLinkUrl = '/leader/approvals'
+
+    const sends: Promise<unknown>[] = []
+    for (const row of (leaders ?? [])) {
+      const leaderId = row.user_id as string
+      const leader = (row.users as unknown) as { email: string; notify_via_email: boolean } | null
+      sends.push(sendPushNotification(leaderId, jrTitle, jrBody, jrLinkUrl))
+      sends.push(createNotification(db, {
+        type: 'join_request', userId: leaderId, title: jrTitle, body: jrBody, linkUrl: jrLinkUrl, actorUserId: uid,
+      }))
+      if (leader?.notify_via_email && leader.email && optionalServerEnv.RESEND_API_KEY) {
+        sends.push(resend.emails.send({
+          from: EMAIL_FROM,
+          to: leader.email,
+          subject: `New join request for ${boardName}`,
+          html: joinRequestPendingHtml({
+            requesterName,
+            boardName,
+            approvalsUrl: `${BASE_URL}/leader/approvals`,
+          }),
+        }).then(({ error: e }) => { if (e) console.error('[notifyJoinRequestPending] Resend error:', e) }))
+      }
+    }
+    const results = await Promise.allSettled(sends)
+    for (const r of results) {
+      if (r.status === 'rejected') console.error('[notifyJoinRequestPending] send failed:', r.reason)
+    }
+  } catch (err) {
+    console.error('[notifyJoinRequestPending] unexpected error:', err)
   }
 }

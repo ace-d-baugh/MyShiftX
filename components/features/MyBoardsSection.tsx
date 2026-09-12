@@ -15,6 +15,7 @@ import { BOARD_ROLE_LABEL } from '@/lib/roles'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { InviteModal } from '@/components/features/InviteModal'
+import { SUPPORT_EMAIL } from '@/lib/email-constants'
 import {
   LayoutGrid, Plus, X, Pencil, UserPlus, Trash2, Check,
   Users, MoreVertical,
@@ -43,13 +44,16 @@ interface MyBoardsSectionProps {
   /** Fires whenever the board list reloads, so a parent (Welcome's Step 1
    * star) can react without duplicating the boards query itself. */
   onBoardsChange?: (hasAnyBoard: boolean) => void
+  /** Fires whenever the board list reloads, so a parent (Profile's email
+   * notification hint) knows whether this user leads any board. */
+  onLeaderChange?: (isLeader: boolean) => void
 }
 
 const roleVariant: Record<BoardRole, 'user' | 'mod' | 'leader'> = {
   User: 'user', Mod: 'mod', Leader: 'leader',
 }
 
-export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, variant = 'default', onBoardsChange }: MyBoardsSectionProps) {
+export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, variant = 'default', onBoardsChange, onLeaderChange }: MyBoardsSectionProps) {
   const supabase = createClient()
   const [boards, setBoards] = useState<BoardEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -67,6 +71,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
   const [createName, setCreateName] = useState('')
   const [createLoading, setCreateLoading] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
+  const [emailEnabledNotice, setEmailEnabledNotice] = useState(false)
 
   // Onboarding variant: the cards themselves have no inputs — each button
   // opens its own modal instead. Kept separate from the default variant's
@@ -139,7 +144,8 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
     setBoards(list)
     setLoading(false)
     onBoardsChange?.(list.length > 0)
-  }, [supabase, userId, onBoardsChange])
+    onLeaderChange?.(list.some(b => b.is_approved && b.role === 'Leader'))
+  }, [supabase, userId, onBoardsChange, onLeaderChange])
 
   useEffect(() => { loadBoards() }, [loadBoards])
 
@@ -203,6 +209,7 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
     if (result.error) { setCreateError(result.error); return }
     closeCreateModal()
     setCreateName('')
+    if (result.emailWasJustEnabled) setEmailEnabledNotice(true)
     await loadBoards()
   }
 
@@ -584,6 +591,24 @@ export function MyBoardsSection({ userId, createOpen, onCreateOpenChange, varian
                 <Plus className="w-4 h-4" /> Create
               </Button>
             </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* ── Email-Enabled Notice (one-time, after board creation) ────────── */}
+      {emailEnabledNotice && (
+        <Modal open onClose={() => setEmailEnabledNotice(false)} size="sm">
+          <h3 className="font-accent font-bold text-text text-lg mb-2">You&apos;re the Admin now!</h3>
+          <p className="text-sm text-text/70 mb-4">
+            As the Admin of this board, you&apos;ll receive email notifications about join requests
+            and other board activity. We&apos;ve turned on email notifications for your account.
+          </p>
+          <p className="text-xs text-text/50 mb-4">
+            Please add <strong>{SUPPORT_EMAIL}</strong> to your contacts or safe-senders list so
+            these don&apos;t get filtered into spam.
+          </p>
+          <div className="flex justify-end">
+            <Button size="sm" onClick={() => setEmailEnabledNotice(false)}>Got it</Button>
           </div>
         </Modal>
       )}
