@@ -1,7 +1,12 @@
 # PRD: Employer Boards & Open Shifts
 
 **Status:** Draft · **Owner:** TBD · **Date:** 2026-10-04
-**Decision:** Build inside MyShiftX (same site, same backend). Employer experience lives in its own route group; extract later only if needed.
+**Decisions (2026-10-04):**
+- Build inside MyShiftX (same site, same backend). Employer experience lives in its own route group; extract later only if needed.
+- **Monetization:** opening and running an employer board is free. Employers pay for extras (stats, branding). Workers stay free with paid extras (existing Pro).
+- **Member-to-member trades/giveaways are allowed on employer boards** so workers don't need to join a separate peer board.
+- **Scope this week: MyShiftX only. WDWShiftX is not touched.**
+- Employment-type label (W-2 / 1099 / per-diem) is optional and nice-to-have; ship as an optional field.
 
 ---
 
@@ -22,6 +27,7 @@ MyShiftX today is **worker-to-worker**: employees repost shifts *they were sched
 - Credential/license verification (v1: self-reported fields, employer vets manually).
 - Public job marketplace / discovery of employer boards.
 - Native app, SMS.
+- Any change to WDWShiftX (sister app). Out of scope for this effort.
 - Replacing the employer's scheduling software.
 
 ## 4. Users
@@ -103,7 +109,7 @@ On accept: insert a `shifts` row (`user_id = claimant`, `board_id`, not trade/gi
 ### 6.2 Permissions (RLS + RPC)
 
 - `board_type='employer'`: only `Mod`/`Leader` may insert `open_shifts`. Members SELECT only; claim via RPC.
-- Peer-style trade/giveaway posting on employer boards: **off by default**, board-level toggle (`allow_member_posts`).
+- Peer-style trade/giveaway posting on employer boards: **allowed by default** (existing `shifts` flow, unchanged). Board-level toggle `allow_member_posts` lets the employer turn it off. Open shifts and member trades share the same Wall, distinguished by card type.
 - `claim_open_shift(id)`: member of board, approved, role tag matches `role_required` (if set), shift open and not expired, slot available, no overlapping accepted shift (warn only in v1).
 - `instant` mode → auto-accept and fill; `review` mode → pending, employer picks.
 - All writes via `SECURITY DEFINER` RPCs, `REVOKE` direct writes, same pattern as `20260717150000_trade_loop_shift_claims.sql`.
@@ -144,18 +150,31 @@ Default comes from board setting; overridable per shift.
 - Claim/apply → employer. Accept/decline → worker. Fell-through → employer. Filled → rival applicants.
 - Phase 2: quiet hours, per-role/location filters, preferred-pool-first window.
 
-### 6.7 Monetization (proposal, decide before build)
+### 6.7 Monetization
 
-Free for workers. Employer value-based tier, e.g. free up to N open shifts/month or M members; paid above. Reuse Stripe checkout, add `org_membership` or board-level plan flag. Do not gate claiming for workers.
+| | Free | Paid |
+|---|---|---|
+| **Employer board** | Create board, invite/approve members, post open shifts, claim modes, notifications, member trades | **Employer Pro (per board):** stats/analytics, custom branding, plus later extras (priority-pool tiers, credentials tracking, multi-location, exports) |
+| **Worker** | Full claim/trade loop | Existing Pro (ad-free, live Wall, match emails, calendar sync, unlimited imports) |
+
+Principles: core posting and filling is never paywalled; claiming is never paywalled for workers; paid features are insight and polish.
+
+Implementation: board-level plan (`boards.plan` `free|pro`, Stripe customer/subscription on the board owner or board), new Stripe price IDs in `lib/pricing.ts`/`lib/stripe.ts`, webhook extended to set board plan. Gate UI with a `boardIsPro` check, mirroring `isProTier`. Branding: logo, accent color, org display on the join page and employer-board cards (stored on `boards`; assets in Supabase Storage like avatars).
+
+**Stats (paid):** fill rate, time-to-fill, fell-through rate, shifts by role/day, member activity and reliability, claims per shift.
 
 ## 7. Phasing
 
 **MVP (v1)**
-- `board_type`, employer board creation, owner/mod-only posting
+- `board_type`, employer board creation (free), owner/mod-only open-shift posting, member trades enabled
 - `open_shifts` + claims, instant and review modes, role tag matching
 - Worker Open Shifts tab + card, employer dashboard, notifications
 - Accept → personal calendar shift; fell-through re-opens
 - Employer onboarding path + landing page
+- Optional employment-type label on open shifts
+
+**v1.2 (paid)**
+- Employer Pro: board plan + Stripe, stats dashboard, branding
 
 **v1.1**
 - Batch/recurring posts, multi-slot shifts, pay fields polish, cancel/edit with notifications
@@ -187,14 +206,16 @@ Free for workers. Employer value-based tier, e.g. free up to N open shifts/month
 
 ## 10. Open Questions
 
-1. Per-diem 1099 vs W-2 shifts: do we need a label field in v1?
+1. ~~Per-diem 1099 vs W-2 label~~ Decided: optional field, not required.
 2. Should employers see worker contact info / phone after acceptance? (Privacy defaults)
 3. Instant-claim conflicts: block overlapping shifts or warn only?
 4. Can a worker be on an employer board without a MyShiftX Pro plan? (Assumed yes.)
-5. Pricing model: per employer, per seat, or per posted shift?
-6. Does an employer board allow member-to-member trades (toggle default)?
+5. Employer Pro price point and billing unit (per board vs. per owner account); free-tier limits, if any.
+6. ~~Member trades on employer boards~~ Decided: allowed, with an employer off-toggle.
 7. Should open shifts appear in the iCal feed before acceptance? (Assumed no.)
-8. Port to sister app (WDWShiftX) or MyShiftX only?
+8. ~~Sister app~~ Decided: MyShiftX only this week; WDWShiftX untouched.
+9. Should employers be able to see/hide member trades (moderation, visibility) beyond the on/off toggle?
+10. Which branding elements ship first (logo, accent color, banner)?
 
 ## 11. Implementation Notes
 
